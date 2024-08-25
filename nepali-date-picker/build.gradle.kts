@@ -1,0 +1,105 @@
+import com.vanniktech.maven.publish.SonatypeHost
+import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import org.jetbrains.kotlin.gradle.plugin.mpp.apple.XCFramework
+
+plugins {
+    alias(libs.plugins.kotlinMultiplatform)
+    alias(libs.plugins.androidLibrary)
+    alias(libs.plugins.jetbrainsCompose)
+    alias(libs.plugins.composeCompiler)
+    id("kotlinx-serialization")
+    id("com.vanniktech.maven.publish") version "0.29.0"
+}
+
+kotlin {
+    androidTarget {
+        publishLibraryVariants("release")
+        @OptIn(ExperimentalKotlinGradlePluginApi::class)
+        compilerOptions {
+            jvmTarget.set(JvmTarget.JVM_1_8)
+        }
+
+        publishLibraryVariants("release", "debug")
+    }
+
+    val xcf = XCFramework()
+    listOf(
+        iosX64(), iosArm64(), iosSimulatorArm64()
+    ).forEach {
+        it.binaries.framework {
+            baseName = "nepali-date-picker"
+            xcf.add(this)
+            isStatic = true
+        }
+    }
+
+    sourceSets {
+        val commonMain by getting {
+            dependencies {
+                implementation(compose.runtime)
+                implementation(compose.foundation)
+                implementation(compose.ui)
+                implementation(compose.material3)
+                implementation(libs.kotlinx.serialization.json)
+                implementation(libs.kotlinx.datetime)
+            }
+        }
+        val commonTest by getting {
+            dependencies {
+                implementation(libs.kotlin.test)
+            }
+        }
+    }
+}
+
+android {
+    namespace = "io.github.shivathapaa"
+    compileSdk = libs.versions.android.compileSdk.get().toInt()
+    defaultConfig {
+        minSdk = libs.versions.android.minSdk.get().toInt()
+    }
+}
+
+
+mavenPublishing {
+    // Define coordinates for the published artifact
+    coordinates(
+        groupId = "io.github.shivathapaa", artifactId = "nepali-date-picker", version = "1.0.0"
+    )
+
+    // Configure POM metadata for the published artifact
+    pom {
+        name.set("Nepali Date Picker KMP")
+        description.set("Nepali Date Picker for both Android and/or iOS which aligns with the Material3 Date Picker. This library give various utilities to work with Nepali Dates and acts as a bridge between Nepali Calendar and Gregorian Calendar.")
+        inceptionYear.set("2024")
+        url.set("https://github.com/shivathapaa/Nepali-Date-Picker")
+
+        licenses {
+            license {
+                name.set("GNU GPLv3")
+                url.set("https://github.com/shivathapaa/Nepali-Date-Picker/blob/main/LICENSE")
+            }
+        }
+
+        // Specify developer information
+        developers {
+            developer {
+                id.set("shivathapaa")
+                name.set("Shiva Thapa")
+                email.set("shivathapaa.dev@gmail.com")
+            }
+        }
+
+        // Specify SCM information
+        scm {
+            url.set("https://github.com/shivathapaa/Nepali-Date-Picker")
+        }
+    }
+
+    // Configure publishing to Maven Central
+    publishToMavenCentral(SonatypeHost.CENTRAL_PORTAL)
+
+    // Enable GPG signing for all publications
+    signAllPublications()
+}

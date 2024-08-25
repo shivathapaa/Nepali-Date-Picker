@@ -1,0 +1,110 @@
+package dev.shivathapaa.nepalidatepickerkmp.data
+
+import androidx.compose.runtime.Immutable
+
+@Immutable
+data class NepaliDateLocale(
+    val language: NepaliDatePickerLang = NepaliDatePickerLang.ENGLISH,
+    val dateFormat: NepaliDateFormatStyle = NepaliDateFormatStyle.MEDIUM,
+    val weekDayName: NameFormat = NameFormat.FULL,
+    val monthName: NameFormat = NameFormat.FULL
+)
+
+enum class NameFormat {
+    FULL, MEDIUM, SHORT
+}
+
+enum class NepaliDateFormatStyle {
+    FULL, LONG, MEDIUM, SHORT
+}
+
+@Immutable
+data class NepaliWeekdayName(val short: String, val medium: String, val full: String)
+
+@Immutable
+data class NepaliMonthName(val short: String, val full: String)
+
+enum class NepaliDatePickerLang {
+    ENGLISH {
+        override val weekdays: List<NepaliWeekdayName> = englishWeekdays
+        override val months: List<NepaliMonthName> = nepaliMonthsInEnglish
+        override val selectDateText: String = "Select Date"
+        override val datePickerTitle: String = "Select Nepali Date"
+    },
+    NEPALI {
+        override val weekdays: List<NepaliWeekdayName> = nepaliWeekdays
+        override val months: List<NepaliMonthName> = nepaliMonths
+        override val selectDateText: String = "मिति चयन गर्नुहोस्"
+        override val datePickerTitle: String = "नेपाली मिति चयन गर्नुहोस्"
+    };
+
+    abstract val weekdays: List<NepaliWeekdayName>
+    abstract val months: List<NepaliMonthName>
+    abstract val selectDateText: String
+    abstract val datePickerTitle: String
+}
+
+private val nepaliMonths = listOf(
+    NepaliMonthName("बै", "बैशाख"),
+    NepaliMonthName("जे", "जेठ"),
+    NepaliMonthName("अ", "असार"),
+    NepaliMonthName("सा", "साउन"),
+    NepaliMonthName("भ", "भदौ"),
+    NepaliMonthName("अ", "असोज"),
+    NepaliMonthName("का", "कार्तिक"),
+    NepaliMonthName("मं", "मंसिर"),
+    NepaliMonthName("पु", "पौष"),
+    NepaliMonthName("मा", "माघ"),
+    NepaliMonthName("फा", "फाल्गुन"),
+    NepaliMonthName("चै", "चैत")
+)
+
+private val nepaliMonthsInEnglish = listOf(
+    NepaliMonthName("Bai", "Baisakh"),
+    NepaliMonthName("Jes", "Jestha"),
+    NepaliMonthName("Asa", "Asar"),
+    NepaliMonthName("Shr", "Shrawn"),
+    NepaliMonthName("Bha", "Bhadra"),
+    NepaliMonthName("Aso", "Asoj"),
+    NepaliMonthName("Kar", "Kartik"),
+    NepaliMonthName("Man", "Mangsir"),
+    NepaliMonthName("Pou", "Poush"),
+    NepaliMonthName("Mag", "Magh"),
+    NepaliMonthName("Pha", "Falgun"),
+    NepaliMonthName("Chai", "Chaitra")
+)
+
+private val nepaliWeekdays = listOf(
+    NepaliWeekdayName("आ", "आईत", "आईतबार"),
+    NepaliWeekdayName("सो", "सोम", "सोमबार"),
+    NepaliWeekdayName("मं", "मंगल", "मंगलबार"),
+    NepaliWeekdayName("बु", "बुध", "बुधबार"),
+    NepaliWeekdayName("बि", "बिहि", "बिहिबार"),
+    NepaliWeekdayName("शु", "शुक्र", "शुक्रबार"),
+    NepaliWeekdayName("श", "शनि", "शनिबार")
+)
+
+private val englishWeekdays = listOf(
+    NepaliWeekdayName("S", "Sun", "Sunday"),
+    NepaliWeekdayName("M", "Mon", "Monday"),
+    NepaliWeekdayName("T", "Tue", "Tuesday"),
+    NepaliWeekdayName("W", "Wed", "Wednesday"),
+    NepaliWeekdayName("T", "Thu", "Thursday"),
+    NepaliWeekdayName("F", "Fri", "Friday"),
+    NepaliWeekdayName("S", "Sat", "Saturday")
+)
+
+internal val englishMonths = listOf(
+    NepaliMonthName("Jan", "January"),
+    NepaliMonthName("Feb", "February"),
+    NepaliMonthName("Mar", "March"),
+    NepaliMonthName("Apr", "April"),
+    NepaliMonthName("May", "May"),
+    NepaliMonthName("Jun", "June"),
+    NepaliMonthName("Jul", "July"),
+    NepaliMonthName("Aug", "August"),
+    NepaliMonthName("Sep", "September"),
+    NepaliMonthName("Oct", "October"),
+    NepaliMonthName("Nov", "November"),
+    NepaliMonthName("Dec", "December")
+)
