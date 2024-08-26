@@ -2,7 +2,7 @@ package dev.shivathapaa.nepalidatepickerkmp.calendar_model
 
 import androidx.compose.runtime.Immutable
 import dev.shivathapaa.nepalidatepickerkmp.data.NameFormat
-import dev.shivathapaa.nepalidatepickerkmp.data.NepaliCalendar
+import dev.shivathapaa.nepalidatepickerkmp.data.CustomCalendar
 import dev.shivathapaa.nepalidatepickerkmp.data.NepaliDatePickerLang
 import dev.shivathapaa.nepalidatepickerkmp.data.NepaliMonthCalendar
 import dev.shivathapaa.nepalidatepickerkmp.data.englishMonths
@@ -12,7 +12,7 @@ object NepaliDateConverter {
     private val calendarModel = NepaliCalendarModel()
 
     /**
-     * @return [NepaliCalendar] with today's date in Nepali calendar
+     * @return [CustomCalendar] with today's date in Nepali calendar
      */
     val todayNepaliDate
         get() = calendarModel.today
@@ -24,7 +24,7 @@ object NepaliDateConverter {
      * @param englishMM month in english calendar which takes value between 1 to 12
      * @param englishDD day in english calendar which takes value between 1 to 31
      */
-    fun convertEnglishToNepali(englishYYYY: Int, englishMM: Int, englishDD: Int): NepaliCalendar {
+    fun convertEnglishToNepali(englishYYYY: Int, englishMM: Int, englishDD: Int): CustomCalendar {
         return calendarModel.convertToNepaliCalendar(
             englishYYYY = englishYYYY, englishMM = englishMM, englishDD = englishDD
         )
@@ -37,7 +37,7 @@ object NepaliDateConverter {
      * @param nepaliMM month in nepali calendar which takes value between 1 to 12
      * @param nepaliDD day in nepali calendar which takes value between 1 to 32
      */
-    fun convertNepaliToEnglish(nepaliYYYY: Int, nepaliMM: Int, nepaliDD: Int): NepaliCalendar {
+    fun convertNepaliToEnglish(nepaliYYYY: Int, nepaliMM: Int, nepaliDD: Int): CustomCalendar {
         return calendarModel.convertToEnglishDate(
             nepaliYYYY = nepaliYYYY, nepaliMM = nepaliMM, nepaliDD = nepaliDD
         )

@@ -2,7 +2,7 @@ package dev.shivathapaa.nepalidatepickerkmp.calendar_model
 
 import androidx.annotation.IntRange
 import androidx.compose.runtime.Immutable
-import dev.shivathapaa.nepalidatepickerkmp.data.NepaliCalendar
+import dev.shivathapaa.nepalidatepickerkmp.data.CustomCalendar
 import dev.shivathapaa.nepalidatepickerkmp.data.NepaliMonthCalendar
 import dev.shivathapaa.nepalidatepickerkmp.data.SimpleDate
 import dev.shivathapaa.nepalidatepickerkmp.data.daysInMonthMap
@@ -28,7 +28,7 @@ internal object DateConverters {
         englishYYYY: Int,
         @IntRange(from = 1, to = 12) englishMM: Int,
         @IntRange(from = 1, to = 31) englishDD: Int
-    ): NepaliCalendar {
+    ): CustomCalendar {
         // Check if the input date is within the conversion range
         require(isEnglishDateInConversionRange(englishYYYY, englishMM, englishDD)) {
             throw IllegalArgumentException("Out of Range: English year $englishYYYY is out of range to convert.")
@@ -40,11 +40,9 @@ internal object DateConverters {
         val newEnglishDate = LocalDate(englishYYYY, englishMM, englishDD)
 
         // Calculate the total number of days between the base date and the target date
-        val totalDaysDifference =
-            calculateEnglishDaysDifference(
-                startingEnglishDate,
-                newEnglishDate
-            )
+        val totalDaysDifference = calculateEnglishDaysDifference(
+            startingEnglishDate, newEnglishDate
+        )
 
         // Initialize the Nepali date with the starting values
         var (nepaliYYYY, nepaliMM, nepaliDD) = Triple(
@@ -101,7 +99,7 @@ internal object DateConverters {
             if (lastDayOfMonth == 0) lastDayOfMonth = 7
         }
 
-        return NepaliCalendar(
+        return CustomCalendar(
             year = nepaliYYYY,
             month = nepaliMM,
             dayOfMonth = nepaliDD,
@@ -121,7 +119,7 @@ internal object DateConverters {
         nepaliYYYY: Int,
         @IntRange(from = 1, to = 12) nepaliMM: Int,
         @IntRange(from = 1, to = 32) nepaliDD: Int
-    ): NepaliCalendar {
+    ): CustomCalendar {
         // Check if the input Nepali date is within the conversion range
         require(isNepaliCalendarInConversionRange(nepaliYYYY, nepaliMM, nepaliDD)) {
             throw IllegalArgumentException("Out of Range: Nepali year $nepaliYYYY is out of range to convert.")
@@ -192,7 +190,7 @@ internal object DateConverters {
             if (lastDayOfMonth == 0) lastDayOfMonth = 7
         }
 
-        return NepaliCalendar(
+        return CustomCalendar(
             year = englishYYYY,
             month = englishMM,
             dayOfMonth = englishDD,
@@ -208,7 +206,7 @@ internal object DateConverters {
         )
     }
 
-    private fun initializeStartingDates(): Triple<LocalDate, NepaliCalendar, Int> {
+    private fun initializeStartingDates(): Triple<LocalDate, CustomCalendar, Int> {
         val startingEnglishDate = LocalDate(
             startingEnglishCalendar.year,
             startingEnglishCalendar.month,
@@ -221,14 +219,13 @@ internal object DateConverters {
     }
 
     private fun calculateEnglishDaysDifference(
-        startingDate: LocalDate,
-        targetDate: LocalDate
+        startingDate: LocalDate, targetDate: LocalDate
     ): Int {
         return (startingDate.daysUntil(targetDate))
     }
 
     private fun calculateTotalNepaliDaysCount(
-        startingNepaliCalendar: NepaliCalendar, nepaliYYYY: Int, nepaliMM: Int, nepaliDD: Int
+        startingNepaliCalendar: CustomCalendar, nepaliYYYY: Int, nepaliMM: Int, nepaliDD: Int
     ): Int {
         var totalNepDaysCount = 0
 
@@ -271,7 +268,7 @@ internal object DateConverters {
         return calculateNepaliMonthDetails(newYear, newMonth)
     }
 
-    fun getNepaliMonth(simpleNepaliDate: SimpleDate): NepaliCalendar {
+    fun getNepaliMonth(simpleNepaliDate: SimpleDate): CustomCalendar {
         return getCustomCalendarUsingDayMonthYear(
             dayOfMonth = simpleNepaliDate.dayOfMonth,
             month = simpleNepaliDate.month,
@@ -283,7 +280,7 @@ internal object DateConverters {
         year: Int,
         @IntRange(from = 1, to = 12) month: Int,
         @IntRange(from = 1, to = 32) dayOfMonth: Int
-    ): NepaliCalendar {
+    ): CustomCalendar {
         // Normalize the month and adjust the year accordingly
 //        val (newYear, newMonth) = adjustYearAndMonth(year, month)
 
@@ -303,7 +300,7 @@ internal object DateConverters {
         val totalDayInYear = calculateDayOfYear(year, month, newDayOfMonth)
 
         // Return the updated CustomCalendar
-        return NepaliCalendar(
+        return CustomCalendar(
             year = year,
             month = month,
             dayOfMonth = newDayOfMonth,

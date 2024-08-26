@@ -19,8 +19,8 @@ import androidx.compose.ui.graphics.takeOrElse
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import dev.shivathapaa.nepalidatepickerkmp.NepaliSelectableDates
+import dev.shivathapaa.nepalidatepickerkmp.data.CustomCalendar
 import dev.shivathapaa.nepalidatepickerkmp.data.NameFormat
-import dev.shivathapaa.nepalidatepickerkmp.data.NepaliCalendar
 import dev.shivathapaa.nepalidatepickerkmp.data.NepaliDateFormatStyle
 import dev.shivathapaa.nepalidatepickerkmp.data.NepaliDateLocale
 import dev.shivathapaa.nepalidatepickerkmp.data.NepaliDatePickerLang
@@ -192,7 +192,7 @@ object NepaliDatePickerDefaults {
     val NepaliYearRange: IntRange = IntRange(1970, 2090)
 
     /** Starting Nepali date */
-    internal val startingNepaliCalendar = NepaliCalendar(
+    internal val startingNepaliCalendar = CustomCalendar(
         year = NepaliYearRange.first,
         month = 1,
         dayOfMonth = 1,
@@ -208,7 +208,7 @@ object NepaliDatePickerDefaults {
     )
 
     /** Starting English date */
-    internal val startingEnglishCalendar = NepaliCalendar(
+    internal val startingEnglishCalendar = CustomCalendar(
         year = EnglishYearRange.first,
         month = 4,
         dayOfMonth = 13,

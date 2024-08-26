@@ -70,7 +70,7 @@ import androidx.compose.ui.util.fastForEach
 import dev.shivathapaa.nepalidatepickerkmp.calendar_model.NepaliCalendarModel
 import dev.shivathapaa.nepalidatepickerkmp.calendar_model.NepaliDatePickerColors
 import dev.shivathapaa.nepalidatepickerkmp.calendar_model.NepaliDatePickerDefaults
-import dev.shivathapaa.nepalidatepickerkmp.data.NepaliCalendar
+import dev.shivathapaa.nepalidatepickerkmp.data.CustomCalendar
 import dev.shivathapaa.nepalidatepickerkmp.data.NepaliDateLocale
 import dev.shivathapaa.nepalidatepickerkmp.data.NepaliDatePickerLang
 import dev.shivathapaa.nepalidatepickerkmp.data.NepaliMonthCalendar
@@ -206,7 +206,7 @@ private fun NepaliDatePickerHeader(
 private fun NepaliDatePicker(
     selectedDate: SimpleDate?,
     displayedMonth: NepaliMonthCalendar,
-    onDateSelectionChange: (NepaliCalendar) -> Unit,
+    onDateSelectionChange: (CustomCalendar) -> Unit,
     onDisplayedMonthChange: (NepaliMonthCalendar) -> Unit,
     calendarModel: NepaliCalendarModel,
     yearRange: IntRange,
@@ -320,9 +320,9 @@ private fun NepaliDatePicker(
 
 @Stable
 interface NepaliDatePickerState {
-    var selectedDate: NepaliCalendar?
+    var selectedDate: CustomCalendar?
     var displayedMonth: NepaliMonthCalendar
-    val selectedEnglishDate: NepaliCalendar?
+    val selectedEnglishDate: CustomCalendar?
     val yearRange: IntRange
     val nepaliSelectableDates: NepaliSelectableDates
     val locale: NepaliDateLocale
@@ -332,10 +332,10 @@ interface NepaliDatePickerState {
 interface NepaliSelectableDates {
 
     /**
-     * Returns true if the date item representing the [nepaliCalendar] should be enabled for
+     * Returns true if the date item representing the [customCalendar] should be enabled for
      * selection in the UI.
      */
-    fun isSelectableDate(nepaliCalendar: NepaliCalendar) = true
+    fun isSelectableDate(customCalendar: CustomCalendar) = true
 
     /**
      * Returns true if a given [year] should be enabled for selection in the UI. When a year is
@@ -454,7 +454,7 @@ private class NepaliDatePickerStateImpl(
 ), NepaliDatePickerState {
 
     /**
-     * A mutable state of [NepaliCalendar] that represents a selected date.
+     * A mutable state of [CustomCalendar] that represents a selected date.
      */
     private var _selectedDate = mutableStateOf(if (initialSelectedDate != null) {
         val date = calendarModel.getNepaliMonth(simpleNepaliDate = initialSelectedDate)
@@ -466,7 +466,7 @@ private class NepaliDatePickerStateImpl(
         null
     })
 
-    override var selectedDate: NepaliCalendar?
+    override var selectedDate: CustomCalendar?
         get() = _selectedDate.value
         set(customCalendar) {
             if (customCalendar != null) {
@@ -480,7 +480,7 @@ private class NepaliDatePickerStateImpl(
             }
         }
 
-    override val selectedEnglishDate: NepaliCalendar?
+    override val selectedEnglishDate: CustomCalendar?
         get() = if (selectedDate != null) {
             calendarModel.convertToEnglishDate(
                 nepaliYYYY = selectedDate!!.year,
@@ -651,7 +651,7 @@ private fun NepaliHorizontalMonthList(
     today: SimpleDate,
     lazyListState: LazyListState,
     yearRange: IntRange,
-    onDateSelectionChange: (NepaliCalendar) -> Unit,
+    onDateSelectionChange: (CustomCalendar) -> Unit,
     onDisplayedMonthChange: (NepaliMonthCalendar) -> Unit,
     selectedDate: SimpleDate?,
     calendarModel: NepaliCalendarModel,
@@ -734,7 +734,7 @@ private fun NepaliMonth(
     calendarModel: NepaliCalendarModel,
     chosenLanguage: NepaliDatePickerLang,
     nepaliSelectableDates: NepaliSelectableDates,
-    onDateSelectionChange: (NepaliCalendar) -> Unit,
+    onDateSelectionChange: (CustomCalendar) -> Unit,
     colors: NepaliDatePickerColors
 ) {
     var cellIndex = 0

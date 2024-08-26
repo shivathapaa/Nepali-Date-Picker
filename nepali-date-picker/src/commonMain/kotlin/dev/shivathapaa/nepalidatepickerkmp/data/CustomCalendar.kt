@@ -13,7 +13,7 @@ data class SimpleDate(
 
 @Immutable
 @Serializable
-data class NepaliCalendar(
+data class CustomCalendar(
     val year: Int,
     val month: Int,
     val dayOfMonth: Int,
@@ -39,14 +39,14 @@ data class NepaliMonthCalendar(
     val daysFromStartOfWeekToFirstOfMonth: Int = firstDayOfMonth - 1
 ) {
     /**
-     * Returns the position of a [NepaliCalendar] within given years range.
+     * Returns the position of a [CustomCalendar] within given years range.
      */
     fun indexIn(years: IntRange): Int {
         return (year - years.first) * 12 + month - 1
     }
 }
 
-fun NepaliCalendar.toSimpleDate(): SimpleDate {
+fun CustomCalendar.toSimpleDate(): SimpleDate {
     return SimpleDate(
         year = year,
         month = month,
@@ -54,7 +54,7 @@ fun NepaliCalendar.toSimpleDate(): SimpleDate {
     )
 }
 
-fun NepaliCalendar.toNepaliMonthCalendar(): NepaliMonthCalendar {
+fun CustomCalendar.toNepaliMonthCalendar(): NepaliMonthCalendar {
     return NepaliMonthCalendar(
         year = year,
         month = month,

@@ -3,7 +3,7 @@ package dev.shivathapaa.nepalidatepickerkmp
 import dev.shivathapaa.nepalidatepickerkmp.calendar_model.NepaliCalendarModel
 import dev.shivathapaa.nepalidatepickerkmp.calendar_model.NepaliDateConverter
 import dev.shivathapaa.nepalidatepickerkmp.calendar_model.NepaliDateConverter.getNepaliMonthCalendar
-import dev.shivathapaa.nepalidatepickerkmp.data.NepaliCalendar
+import dev.shivathapaa.nepalidatepickerkmp.data.CustomCalendar
 import dev.shivathapaa.nepalidatepickerkmp.data.toNepaliMonthCalendar
 import dev.shivathapaa.nepalidatepickerkmp.data.toSimpleDate
 import kotlin.test.Test
@@ -19,7 +19,7 @@ class NepaliDateConverterTest {
             nepaliYYYY = 2079, nepaliMM = 1, nepaliDD = 1
         )
 
-        val correctEnglishNepaliCalendar = NepaliCalendar(
+        val correctEnglishCustomCalendar = CustomCalendar(
             year = 2022,
             month = 4,
             dayOfMonth = 14,
@@ -34,7 +34,7 @@ class NepaliDateConverterTest {
             weekOfYear = 16
         )
 
-        assertEquals(correctEnglishNepaliCalendar, toTestEnglishCalendar)
+        assertEquals(correctEnglishCustomCalendar, toTestEnglishCalendar)
     }
 
     @Test
@@ -43,7 +43,7 @@ class NepaliDateConverterTest {
             nepaliYYYY = 2082, nepaliMM = 1, nepaliDD = 1
         )
 
-        val correctEnglishNepaliCalendar = NepaliCalendar(
+        val correctEnglishCustomCalendar = CustomCalendar(
             year = 2025,
             month = 4,
             dayOfMonth = 14,
@@ -58,7 +58,7 @@ class NepaliDateConverterTest {
             weekOfYear = 16
         )
 
-        assertEquals(correctEnglishNepaliCalendar, toTestEnglishCalendar)
+        assertEquals(correctEnglishCustomCalendar, toTestEnglishCalendar)
     }
 
     @Test
@@ -67,7 +67,7 @@ class NepaliDateConverterTest {
             nepaliYYYY = 2034, nepaliMM = 6, nepaliDD = 29
         )
 
-        val correctEnglishNepaliCalendar = NepaliCalendar(
+        val correctEnglishCustomCalendar = CustomCalendar(
             year = 1977,
             month = 10,
             dayOfMonth = 15,
@@ -82,7 +82,7 @@ class NepaliDateConverterTest {
             weekOfYear = 42
         )
 
-        assertEquals(correctEnglishNepaliCalendar, toTestEnglishCalendar)
+        assertEquals(correctEnglishCustomCalendar, toTestEnglishCalendar)
     }
 
     @Test
@@ -91,7 +91,7 @@ class NepaliDateConverterTest {
             englishYYYY = 2000, englishMM = 6, englishDD = 24
         )
 
-        val correctNepaliNepaliCalendar = NepaliCalendar(
+        val correctNepaliCustomCalendar = CustomCalendar(
             year = 2057,
             month = 3,
             dayOfMonth = 10,
@@ -106,7 +106,7 @@ class NepaliDateConverterTest {
             weekOfYear = 11
         )
 
-        assertEquals(correctNepaliNepaliCalendar, toTestNepaliCalendar)
+        assertEquals(correctNepaliCustomCalendar, toTestNepaliCalendar)
     }
 
     @Test
@@ -115,7 +115,7 @@ class NepaliDateConverterTest {
             englishYYYY = 1997, englishMM = 5, englishDD = 13
         )
 
-        val correctNepaliNepaliCalendar = NepaliCalendar(
+        val correctNepaliCustomCalendar = CustomCalendar(
             year = 2054,
             month = 1,
             dayOfMonth = 31,
@@ -130,7 +130,7 @@ class NepaliDateConverterTest {
             weekOfYear = 5
         )
 
-        assertEquals(correctNepaliNepaliCalendar, toTestNepaliCalendar)
+        assertEquals(correctNepaliCustomCalendar, toTestNepaliCalendar)
     }
 
     @Test
@@ -139,7 +139,7 @@ class NepaliDateConverterTest {
             englishYYYY = 1914, englishMM = 8, englishDD = 8
         )
 
-        val correctNepaliNepaliCalendar = NepaliCalendar(
+        val correctNepaliCustomCalendar = CustomCalendar(
             year = 1971,
             month = 4,
             dayOfMonth = 24,
@@ -154,7 +154,7 @@ class NepaliDateConverterTest {
             weekOfYear = 17
         )
 
-        assertEquals(correctNepaliNepaliCalendar, toTestNepaliCalendar)
+        assertEquals(correctNepaliCustomCalendar, toTestNepaliCalendar)
     }
 
     @Test
@@ -163,7 +163,7 @@ class NepaliDateConverterTest {
             englishYYYY = 2025, englishMM = 6, englishDD = 15
         )
 
-        val correctNepaliNepaliCalendar = NepaliCalendar(
+        val correctNepaliCustomCalendar = CustomCalendar(
             year = 2082,
             month = 3,
             dayOfMonth = 1,
@@ -178,7 +178,7 @@ class NepaliDateConverterTest {
             weekOfYear = 10
         )
 
-        assertEquals(correctNepaliNepaliCalendar, toTestNepaliCalendar)
+        assertEquals(correctNepaliCustomCalendar, toTestNepaliCalendar)
     }
 
     @Test
@@ -187,7 +187,7 @@ class NepaliDateConverterTest {
             englishYYYY = 2024, englishMM = 2, englishDD = 29
         )
 
-        val correctNepaliNepaliCalendar = NepaliCalendar(
+        val correctNepaliCustomCalendar = CustomCalendar(
             year = 2080,
             month = 11,
             dayOfMonth = 17,
@@ -202,7 +202,7 @@ class NepaliDateConverterTest {
             weekOfYear = 47
         )
 
-        assertEquals(correctNepaliNepaliCalendar, toTestNepaliCalendar)
+        assertEquals(correctNepaliCustomCalendar, toTestNepaliCalendar)
     }
 
     @Test
@@ -211,7 +211,7 @@ class NepaliDateConverterTest {
             englishYYYY = 2024, englishMM = 3, englishDD = 2
         )
 
-        val correctNepaliNepaliCalendar = NepaliCalendar(
+        val correctNepaliCustomCalendar = CustomCalendar(
             year = 2080,
             month = 11,
             dayOfMonth = 19,
@@ -226,7 +226,7 @@ class NepaliDateConverterTest {
             weekOfYear = 47
         )
 
-        assertEquals(correctNepaliNepaliCalendar, toTestNepaliCalendar)
+        assertEquals(correctNepaliCustomCalendar, toTestNepaliCalendar)
     }
 
     @Test
@@ -235,7 +235,7 @@ class NepaliDateConverterTest {
             englishYYYY = 2024, englishMM = 3, englishDD = 3
         )
 
-        val correctNepaliNepaliCalendar = NepaliCalendar(
+        val correctNepaliCustomCalendar = CustomCalendar(
             year = 2080,
             month = 11,
             dayOfMonth = 20,
@@ -250,7 +250,7 @@ class NepaliDateConverterTest {
             weekOfYear = 48
         )
 
-        assertEquals(correctNepaliNepaliCalendar, toTestNepaliCalendar)
+        assertEquals(correctNepaliCustomCalendar, toTestNepaliCalendar)
     }
 
     @Test
@@ -300,7 +300,7 @@ class NepaliDateConverterTest {
 
     @Test
     fun getNepaliMonth_addOneMonthTo208203_GetNepaliCalendarOfDate208104() {
-        val nepaliNepaliCalendar = NepaliCalendar(
+        val nepaliCustomCalendar = CustomCalendar(
             year = 2082,
             month = 3,
             dayOfMonth = 1,
@@ -316,10 +316,10 @@ class NepaliDateConverterTest {
         )
 
         val customCalenderAfterOneMonthAdded = calendarModel.plusNepaliMonths(
-            fromNepaliCalendar = nepaliNepaliCalendar.toNepaliMonthCalendar(), addedMonthsCount = 1
+            fromNepaliCalendar = nepaliCustomCalendar.toNepaliMonthCalendar(), addedMonthsCount = 1
         )
 
-        val correctNepaliCalendarAfterAddition = NepaliCalendar(
+        val correctCustomCalendarAfterAddition = CustomCalendar(
             year = 2082,
             month = 4,
             dayOfMonth = 1,
@@ -334,27 +334,27 @@ class NepaliDateConverterTest {
             weekOfYear = 14
         )
 
-        assertEquals(correctNepaliCalendarAfterAddition.year, customCalenderAfterOneMonthAdded.year)
+        assertEquals(correctCustomCalendarAfterAddition.year, customCalenderAfterOneMonthAdded.year)
         assertEquals(
-            correctNepaliCalendarAfterAddition.month, customCalenderAfterOneMonthAdded.month
+            correctCustomCalendarAfterAddition.month, customCalenderAfterOneMonthAdded.month
         )
         assertEquals(
-            correctNepaliCalendarAfterAddition.firstDayOfMonth,
+            correctCustomCalendarAfterAddition.firstDayOfMonth,
             customCalenderAfterOneMonthAdded.firstDayOfMonth
         )
         assertEquals(
-            correctNepaliCalendarAfterAddition.lastDayOfMonth,
+            correctCustomCalendarAfterAddition.lastDayOfMonth,
             customCalenderAfterOneMonthAdded.lastDayOfMonth
         )
         assertEquals(
-            correctNepaliCalendarAfterAddition.totalDaysInMonth,
+            correctCustomCalendarAfterAddition.totalDaysInMonth,
             customCalenderAfterOneMonthAdded.totalDaysInMonth
         )
     }
 
     @Test
     fun getNepaliMonth_addTwentyFourMonthTo207904_GetNepaliCalendarOfDate208104() {
-        val nepaliNepaliCalendar = NepaliCalendar(
+        val nepaliCustomCalendar = CustomCalendar(
             year = 2079,
             month = 4,
             dayOfMonth = 1,
@@ -370,10 +370,10 @@ class NepaliDateConverterTest {
         )
 
         val customCalenderAfterOneMonthAdded = calendarModel.plusNepaliMonths(
-            fromNepaliCalendar = nepaliNepaliCalendar.toNepaliMonthCalendar(), addedMonthsCount = 24
+            fromNepaliCalendar = nepaliCustomCalendar.toNepaliMonthCalendar(), addedMonthsCount = 24
         )
 
-        val correctNepaliCalendarAfterAddition = NepaliCalendar(
+        val correctCustomCalendarAfterAddition = CustomCalendar(
             year = 2081,
             month = 4,
             dayOfMonth = 1,
@@ -388,27 +388,27 @@ class NepaliDateConverterTest {
             weekOfYear = 15
         )
 
-        assertEquals(correctNepaliCalendarAfterAddition.year, customCalenderAfterOneMonthAdded.year)
+        assertEquals(correctCustomCalendarAfterAddition.year, customCalenderAfterOneMonthAdded.year)
         assertEquals(
-            correctNepaliCalendarAfterAddition.month, customCalenderAfterOneMonthAdded.month
+            correctCustomCalendarAfterAddition.month, customCalenderAfterOneMonthAdded.month
         )
         assertEquals(
-            correctNepaliCalendarAfterAddition.firstDayOfMonth,
+            correctCustomCalendarAfterAddition.firstDayOfMonth,
             customCalenderAfterOneMonthAdded.firstDayOfMonth
         )
         assertEquals(
-            correctNepaliCalendarAfterAddition.lastDayOfMonth,
+            correctCustomCalendarAfterAddition.lastDayOfMonth,
             customCalenderAfterOneMonthAdded.lastDayOfMonth
         )
         assertEquals(
-            correctNepaliCalendarAfterAddition.totalDaysInMonth,
+            correctCustomCalendarAfterAddition.totalDaysInMonth,
             customCalenderAfterOneMonthAdded.totalDaysInMonth
         )
     }
 
     @Test
     fun getNepaliMonth_subtractFourMonthTo208204_GetNepaliCalendarOfDate208112() {
-        val nepaliNepaliCalendar = NepaliCalendar(
+        val nepaliCustomCalendar = CustomCalendar(
             year = 2082,
             month = 4,
             dayOfMonth = 1,
@@ -424,10 +424,10 @@ class NepaliDateConverterTest {
         )
 
         val customCalenderAfterFourMonthSubtraction = calendarModel.minusNepaliMonths(
-            fromNepaliCalendar = nepaliNepaliCalendar, subtractedMonthsCount = 4
+            fromNepaliCalendar = nepaliCustomCalendar.toNepaliMonthCalendar(), subtractedMonthsCount = 4
         )
 
-        val correctNepaliCalendarAfterSubtraction = NepaliCalendar(
+        val correctCustomCalendarAfterSubtraction = CustomCalendar(
             year = 2081,
             month = 12,
             dayOfMonth = 1,
@@ -443,29 +443,29 @@ class NepaliDateConverterTest {
         )
 
         assertEquals(
-            correctNepaliCalendarAfterSubtraction.year, customCalenderAfterFourMonthSubtraction.year
+            correctCustomCalendarAfterSubtraction.year, customCalenderAfterFourMonthSubtraction.year
         )
         assertEquals(
-            correctNepaliCalendarAfterSubtraction.month,
+            correctCustomCalendarAfterSubtraction.month,
             customCalenderAfterFourMonthSubtraction.month
         )
         assertEquals(
-            correctNepaliCalendarAfterSubtraction.firstDayOfMonth,
+            correctCustomCalendarAfterSubtraction.firstDayOfMonth,
             customCalenderAfterFourMonthSubtraction.firstDayOfMonth
         )
         assertEquals(
-            correctNepaliCalendarAfterSubtraction.lastDayOfMonth,
+            correctCustomCalendarAfterSubtraction.lastDayOfMonth,
             customCalenderAfterFourMonthSubtraction.lastDayOfMonth
         )
         assertEquals(
-            correctNepaliCalendarAfterSubtraction.totalDaysInMonth,
+            correctCustomCalendarAfterSubtraction.totalDaysInMonth,
             customCalenderAfterFourMonthSubtraction.totalDaysInMonth
         )
     }
 
     @Test
     fun calculateFirstAndLastDayOfMonth_fromNepaliCalendar_getFirstLast() {
-        val nepaliCalendarOf2079 = NepaliCalendar(
+        val customCalendarOf2079 = CustomCalendar(
             year = 2079,
             month = 4,
             dayOfMonth = 1,
@@ -480,7 +480,7 @@ class NepaliDateConverterTest {
             weekOfYear = 15
         )
 
-        val nepaliCalendarOf2082 = NepaliCalendar(
+        val customCalendarOf2082 = CustomCalendar(
             year = 2082,
             month = 4,
             dayOfMonth = 1,
@@ -496,42 +496,42 @@ class NepaliDateConverterTest {
         )
 
         val calculatedFirstAndLastDayOf2079 = getNepaliMonthCalendar(
-            nepaliYear = nepaliCalendarOf2079.year, nepaliMonth = nepaliCalendarOf2079.month
+            nepaliYear = customCalendarOf2079.year, nepaliMonth = customCalendarOf2079.month
         )
 
         val calculatedFirstAndLastDayOf2082 = getNepaliMonthCalendar(
-            nepaliYear = nepaliCalendarOf2082.year, nepaliMonth = nepaliCalendarOf2082.month
+            nepaliYear = customCalendarOf2082.year, nepaliMonth = customCalendarOf2082.month
         )
 
-        assertEquals(nepaliCalendarOf2079.year, calculatedFirstAndLastDayOf2079.year)
-        assertEquals(nepaliCalendarOf2079.month, calculatedFirstAndLastDayOf2079.month)
+        assertEquals(customCalendarOf2079.year, calculatedFirstAndLastDayOf2079.year)
+        assertEquals(customCalendarOf2079.month, calculatedFirstAndLastDayOf2079.month)
         assertEquals(
-            nepaliCalendarOf2079.firstDayOfMonth, calculatedFirstAndLastDayOf2079.firstDayOfMonth
+            customCalendarOf2079.firstDayOfMonth, calculatedFirstAndLastDayOf2079.firstDayOfMonth
         )
         assertEquals(
-            nepaliCalendarOf2079.lastDayOfMonth, calculatedFirstAndLastDayOf2079.lastDayOfMonth
+            customCalendarOf2079.lastDayOfMonth, calculatedFirstAndLastDayOf2079.lastDayOfMonth
         )
         assertEquals(
-            nepaliCalendarOf2079.totalDaysInMonth, calculatedFirstAndLastDayOf2079.totalDaysInMonth
+            customCalendarOf2079.totalDaysInMonth, calculatedFirstAndLastDayOf2079.totalDaysInMonth
         )
         assertEquals(
-            (nepaliCalendarOf2079.firstDayOfMonth - 1),
+            (customCalendarOf2079.firstDayOfMonth - 1),
             calculatedFirstAndLastDayOf2079.daysFromStartOfWeekToFirstOfMonth
         )
 
-        assertEquals(nepaliCalendarOf2082.year, calculatedFirstAndLastDayOf2082.year)
-        assertEquals(nepaliCalendarOf2082.month, calculatedFirstAndLastDayOf2082.month)
+        assertEquals(customCalendarOf2082.year, calculatedFirstAndLastDayOf2082.year)
+        assertEquals(customCalendarOf2082.month, calculatedFirstAndLastDayOf2082.month)
         assertEquals(
-            nepaliCalendarOf2082.firstDayOfMonth, calculatedFirstAndLastDayOf2082.firstDayOfMonth
+            customCalendarOf2082.firstDayOfMonth, calculatedFirstAndLastDayOf2082.firstDayOfMonth
         )
         assertEquals(
-            nepaliCalendarOf2082.lastDayOfMonth, calculatedFirstAndLastDayOf2082.lastDayOfMonth
+            customCalendarOf2082.lastDayOfMonth, calculatedFirstAndLastDayOf2082.lastDayOfMonth
         )
         assertEquals(
-            nepaliCalendarOf2082.totalDaysInMonth, calculatedFirstAndLastDayOf2082.totalDaysInMonth
+            customCalendarOf2082.totalDaysInMonth, calculatedFirstAndLastDayOf2082.totalDaysInMonth
         )
         assertEquals(
-            (nepaliCalendarOf2082.firstDayOfMonth - 1),
+            (customCalendarOf2082.firstDayOfMonth - 1),
             calculatedFirstAndLastDayOf2082.daysFromStartOfWeekToFirstOfMonth
         )
     }

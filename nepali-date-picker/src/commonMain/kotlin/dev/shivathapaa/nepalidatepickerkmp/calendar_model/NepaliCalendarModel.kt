@@ -1,8 +1,8 @@
 package dev.shivathapaa.nepalidatepickerkmp.calendar_model
 
 import androidx.compose.runtime.Immutable
+import dev.shivathapaa.nepalidatepickerkmp.data.CustomCalendar
 import dev.shivathapaa.nepalidatepickerkmp.data.NameFormat
-import dev.shivathapaa.nepalidatepickerkmp.data.NepaliCalendar
 import dev.shivathapaa.nepalidatepickerkmp.data.NepaliDateLocale
 import dev.shivathapaa.nepalidatepickerkmp.data.NepaliDatePickerLang
 import dev.shivathapaa.nepalidatepickerkmp.data.NepaliMonthCalendar
@@ -14,29 +14,25 @@ import kotlinx.datetime.todayIn
 @Immutable
 internal class NepaliCalendarModel(val locale: NepaliDateLocale = NepaliDateLocale()) {
 
-    private val dateConverter = DateConverters
-
     val today
-        get(): NepaliCalendar {
+        get(): CustomCalendar {
             return getNepaliDateInstance()
         }
 
-    private fun getNepaliDateInstance(): NepaliCalendar {
+    private fun getNepaliDateInstance(): CustomCalendar {
         val now = Clock.System.todayIn(TimeZone.of("Asia/Kathmandu"))
         return DateConverters.convertToNepaliCalendar(
-            englishYYYY = now.year,
-            englishMM = now.monthNumber,
-            englishDD = now.dayOfMonth
+            englishYYYY = now.year, englishMM = now.monthNumber, englishDD = now.dayOfMonth
         )
     }
 
-    fun convertToNepaliCalendar(englishYYYY: Int, englishMM: Int, englishDD: Int): NepaliCalendar {
+    fun convertToNepaliCalendar(englishYYYY: Int, englishMM: Int, englishDD: Int): CustomCalendar {
         return DateConverters.convertToNepaliCalendar(
             englishYYYY = englishYYYY, englishMM = englishMM, englishDD = englishDD
         )
     }
 
-    fun convertToEnglishDate(nepaliYYYY: Int, nepaliMM: Int, nepaliDD: Int): NepaliCalendar {
+    fun convertToEnglishDate(nepaliYYYY: Int, nepaliMM: Int, nepaliDD: Int): CustomCalendar {
         return DateConverters.convertToEnglishDate(
             nepaliYYYY = nepaliYYYY, nepaliMM = nepaliMM, nepaliDD = nepaliDD
         )
@@ -58,7 +54,7 @@ internal class NepaliCalendarModel(val locale: NepaliDateLocale = NepaliDateLoca
         )
     }
 
-    fun getNepaliMonth(simpleNepaliDate: SimpleDate): NepaliCalendar {
+    fun getNepaliMonth(simpleNepaliDate: SimpleDate): CustomCalendar {
         return DateConverters.getNepaliMonth(simpleNepaliDate = simpleNepaliDate)
     }
 
@@ -75,7 +71,7 @@ internal class NepaliCalendarModel(val locale: NepaliDateLocale = NepaliDateLoca
 
     // Function to subtract months from a CustomCalendar
     fun minusNepaliMonths(
-        fromNepaliCalendar: NepaliCalendar, subtractedMonthsCount: Int
+        fromNepaliCalendar: NepaliMonthCalendar, subtractedMonthsCount: Int
     ): NepaliMonthCalendar {
         return DateConverters.getNepaliMonth(
             nepaliYear = fromNepaliCalendar.year,
