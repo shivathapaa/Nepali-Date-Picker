@@ -8,10 +8,9 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredWidth
+import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.layout.wrapContentHeight
-import androidx.compose.material3.BasicAlertDialog
 import androidx.compose.material3.ColorScheme
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
@@ -24,6 +23,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.fastForEach
 import androidx.compose.ui.util.fastForEachIndexed
+import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import dev.shivathapaa.nepalidatepickerkmp.calendar_model.NepaliDatePickerColors
 import dev.shivathapaa.nepalidatepickerkmp.calendar_model.NepaliDatePickerDefaults
@@ -48,7 +48,6 @@ import kotlin.math.max
  * @param properties typically platform specific properties to further configure the dialog
  * @param content the content of the dialog (i.e. a [NepaliDatePicker], for example)
  */
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NepaliDatePickerDialog(
     onDismissRequest: () -> Unit,
@@ -61,7 +60,7 @@ fun NepaliDatePickerDialog(
     properties: DialogProperties = DialogProperties(usePlatformDefaultWidth = false),
     content: @Composable ColumnScope.() -> Unit
 ) {
-    BasicAlertDialog(
+    NepaliDatePickerBasicDialog(
         onDismissRequest = onDismissRequest,
         modifier = modifier.wrapContentHeight(),
         properties = properties
@@ -93,6 +92,27 @@ fun NepaliDatePickerDialog(
                     }
                 }
             }
+        }
+    }
+}
+
+@Composable
+private fun NepaliDatePickerBasicDialog(
+    onDismissRequest: () -> Unit,
+    modifier: Modifier = Modifier,
+    properties: DialogProperties = DialogProperties(),
+    content: @Composable () -> Unit
+) {
+    Dialog(
+        onDismissRequest = onDismissRequest,
+        properties = properties,
+    ) {
+        Box(
+            modifier = modifier
+                .sizeIn(minWidth = DialogMinWidth, maxWidth = DialogMaxWidth),
+            propagateMinConstraints = true
+        ) {
+            content()
         }
     }
 }
@@ -189,6 +209,8 @@ private fun NepaliDatePickerDialogFlowRow(
     }
 }
 
+internal val DialogMinWidth = 280.dp
+internal val DialogMaxWidth = 560.dp
 private val NepaliDialogButtonsPadding = PaddingValues(bottom = 8.dp, end = 6.dp)
 private val NepaliDialogButtonsMainAxisSpacing = 8.dp
 private val NepaliDialogButtonsCrossAxisSpacing = 12.dp

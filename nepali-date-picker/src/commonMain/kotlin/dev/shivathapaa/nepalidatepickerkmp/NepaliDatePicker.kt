@@ -5,9 +5,7 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
-import androidx.compose.foundation.gestures.snapping.rememberSnapFlingBehavior
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -34,7 +32,6 @@ import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -85,7 +82,6 @@ import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import kotlin.math.max
 
-@ExperimentalMaterial3Api
 @Composable
 fun NepaliDatePicker(
     state: NepaliDatePickerState,
@@ -188,9 +184,8 @@ private fun NepaliDatePickerHeader(
         Modifier
     }
     Column(
-        modifier
-            .fillMaxWidth()
-            .then(heightModifier), verticalArrangement = Arrangement.SpaceBetween
+        modifier = modifier.fillMaxWidth().then(heightModifier),
+        verticalArrangement = Arrangement.SpaceBetween
     ) {
         if (title != null) {
             ProvideContentColorTextStyle(
@@ -294,11 +289,9 @@ private fun NepaliDatePicker(
                         // Keep the height the same as the monthly calendar + weekdays height, and
                         // take into account the thickness of the divider that will be composed
                         // below it.
-                        modifier = Modifier
-                            .requiredHeight(
-                                RecommendedSizeForAccessibility * (NepaliMaxCalendarRows + 1) - 1.dp
-                            )
-                            .padding(horizontal = DatePickerHorizontalPadding),
+                        modifier = Modifier.requiredHeight(
+                            RecommendedSizeForAccessibility * (NepaliMaxCalendarRows + 1) - 1.dp
+                        ).padding(horizontal = DatePickerHorizontalPadding),
                         currentYear = today.year,
                         displayedYear = displayedMonth.year,
                         onYearSelected = { year ->
@@ -372,7 +365,6 @@ fun rememberNepaliDatePickerState(
     }
 }
 
-@ExperimentalMaterial3Api
 fun NepaliDatePickerState(
     initialSelectedDate: SimpleDate? = null,
     initialDisplayedMonth: SimpleDate? = initialSelectedDate,
@@ -548,9 +540,7 @@ private fun NepaliMonthsNavigation(
     colors: NepaliDatePickerColors
 ) {
     Row(
-        modifier = modifier
-            .fillMaxWidth()
-            .requiredHeight(MonthYearHeight),
+        modifier = modifier.fillMaxWidth().requiredHeight(MonthYearHeight),
         horizontalArrangement = if (yearPickerVisible) {
             Arrangement.Start
         } else {
@@ -631,11 +621,9 @@ private fun NepaliWeekDays(
     val textStyle = MaterialTheme.typography.bodyLarge
 
     Row(
-        modifier = Modifier
-            .defaultMinSize(
-                minHeight = RecommendedSizeForAccessibility
-            )
-            .fillMaxWidth(),
+        modifier = Modifier.defaultMinSize(
+            minHeight = RecommendedSizeForAccessibility
+        ).fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceEvenly,
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -658,7 +646,6 @@ private fun NepaliWeekDays(
     }
 }
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun NepaliHorizontalMonthList(
     today: SimpleDate,
@@ -679,10 +666,8 @@ private fun NepaliHorizontalMonthList(
         }
     }
 
-    val snapFlingBehavior = rememberSnapFlingBehavior(lazyListState = lazyListState)
-
     LazyRow(
-        modifier = Modifier, state = lazyListState, flingBehavior = snapFlingBehavior
+        modifier = Modifier, state = lazyListState
     ) {
         items(
             count = numberOfMonthsInRange(yearRange = yearRange),
@@ -803,8 +788,9 @@ private fun NepaliMonth(
                                 // date itself is specifically not allowed by the state's
                                 // SelectableDates.
                                 with(nepaliSelectableDates) {
-                                    isSelectableYear(monthCalendar.year) &&
-                                            isSelectableDate(currentMonthDate)
+                                    isSelectableYear(monthCalendar.year) && isSelectableDate(
+                                        currentMonthDate
+                                    )
                                 }
                             },
                             today = isToday,
