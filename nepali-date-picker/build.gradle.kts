@@ -65,7 +65,7 @@ android {
 mavenPublishing {
     // Define coordinates for the published artifact
     coordinates(
-        groupId = "io.github.shivathapaa", artifactId = "nepali-date-picker", version = "1.1.2"
+        groupId = "io.github.shivathapaa", artifactId = "nepali-date-picker", version = "1.1.3"
     )
 
     // Configure POM metadata for the published artifact

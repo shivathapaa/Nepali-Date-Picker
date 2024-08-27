@@ -117,8 +117,14 @@ internal class NepaliCalendarModel(val locale: NepaliDateLocale = NepaliDateLoca
     fun formatNepaliDate(customCalendar: CustomCalendar, locale: NepaliDateLocale): String {
         validateNepaliDate(customCalendar.year, customCalendar.month, customCalendar.dayOfMonth)
 
-        val weekday = locale.language.weekdays[customCalendar.dayOfWeek]
-        val month = locale.language.months[customCalendar.month]
+        val showMonthName = locale.dateFormat in listOf(
+            NepaliDateFormatStyle.FULL,
+            NepaliDateFormatStyle.LONG,
+            NepaliDateFormatStyle.MEDIUM
+        )
+
+        val weekday = locale.language.weekdays[customCalendar.dayOfWeek - 1]
+        val month = locale.language.months[customCalendar.month - 1]
 
         val weekdayName = when (locale.weekDayName) {
             NameFormat.FULL -> weekday.full
@@ -131,8 +137,14 @@ internal class NepaliCalendarModel(val locale: NepaliDateLocale = NepaliDateLoca
             NameFormat.SHORT -> month.short
         }
 
-        val day = localizeNumber(customCalendar.dayOfMonth.toString(), locale.language)
-        val monthNum = localizeNumber(customCalendar.month.toString(), locale.language)
+        val day = localizeNumber(
+            if (showMonthName) customCalendar.dayOfMonth.toString()
+            else customCalendar.dayOfMonth.toString().padStart(2, '0'),
+            locale.language
+        )
+
+        val monthNum =
+            localizeNumber(customCalendar.month.toString().padStart(2, '0'), locale.language)
         val year = localizeNumber(customCalendar.year.toString(), locale.language)
         val shortYear = year.takeLast(2)
 
