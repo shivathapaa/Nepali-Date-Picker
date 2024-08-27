@@ -3,6 +3,7 @@ package dev.shivathapaa.nepalidatepickerkmp.calendar_model
 import androidx.compose.runtime.Immutable
 import dev.shivathapaa.nepalidatepickerkmp.data.CustomCalendar
 import dev.shivathapaa.nepalidatepickerkmp.data.NameFormat
+import dev.shivathapaa.nepalidatepickerkmp.data.NepaliDateFormatStyle
 import dev.shivathapaa.nepalidatepickerkmp.data.NepaliDateLocale
 import dev.shivathapaa.nepalidatepickerkmp.data.NepaliDatePickerLang
 import dev.shivathapaa.nepalidatepickerkmp.data.NepaliMonthCalendar
@@ -78,6 +79,83 @@ internal class NepaliCalendarModel(val locale: NepaliDateLocale = NepaliDateLoca
             nepaliMonth = fromNepaliCalendar.month,
             addedMonthsCount = -subtractedMonthsCount
         )
+    }
+
+    /**
+     * Formats a Nepali date based on the specified user preferences.
+     *
+     * @param customCalendar The [CustomCalendar] containing the year, month, day, and weekday.
+     * @param locale The [NepaliDateLocale] specifying the user's preferred language,date format,
+     * weekday name format, and month name format.
+     * @return A string representing the formatted date according to the user's preferences.
+     *
+     * The function supports the following date format styles:
+     * - FULL: Monday, Asar 21, 2024
+     * - LONG: Asar 21, 2024
+     * - MEDIUM: 2024 Asar 21
+     * - SHORT_MDY: 06/21/2024
+     * - SHORT_YMD: 2024/06/21
+     * - COMPACT_MDY: 06/21/24
+     * - COMPACT_YMD: 24/06/21
+     *
+     * The function uses the specified weekday and month name formats to match the user's
+     * preferred language and format style.
+     *
+     * Example usage:
+     * ```
+     * val nepaliDate = CustomCalendar(year = 2080, month = 3, day = 15, weekday = 2, ....)
+     * val locale = NepaliDateLocale(
+     *     language = NepaliDatePickerLang.ENGLISH,
+     *     dateFormat = NepaliDateFormatStyle.FULL,
+     *     weekDayName = NameFormat.FULL,
+     *     monthName = NameFormat.FULL
+     * )
+     * val formattedDate = formatNepaliDate(nepaliDate, locale)
+     * // formattedDate: "Tuesday, Asar 15, 2080"
+     * ```
+     */
+    fun formatNepaliDate(customCalendar: CustomCalendar, locale: NepaliDateLocale): String {
+        validateNepaliDate(customCalendar.year, customCalendar.month, customCalendar.dayOfMonth)
+
+        val weekday = locale.language.weekdays[customCalendar.dayOfWeek]
+        val month = locale.language.months[customCalendar.month]
+
+        val weekdayName = when (locale.weekDayName) {
+            NameFormat.FULL -> weekday.full
+            NameFormat.MEDIUM -> weekday.medium
+            NameFormat.SHORT -> weekday.short
+        }
+
+        val monthName = when (locale.monthName) {
+            NameFormat.FULL, NameFormat.MEDIUM -> month.full
+            NameFormat.SHORT -> month.short
+        }
+
+        val day = localizeNumber(customCalendar.dayOfMonth.toString(), locale.language)
+        val monthNum = localizeNumber(customCalendar.month.toString(), locale.language)
+        val year = localizeNumber(customCalendar.year.toString(), locale.language)
+        val shortYear = year.takeLast(2)
+
+        return when (locale.dateFormat) {
+            NepaliDateFormatStyle.FULL -> "$weekdayName, $monthName $day, $year"
+            NepaliDateFormatStyle.LONG -> "$monthName $day, $year"
+            NepaliDateFormatStyle.MEDIUM -> "$year $monthName $day"
+            NepaliDateFormatStyle.SHORT_MDY -> "$monthNum/$day/$year"
+            NepaliDateFormatStyle.SHORT_YMD -> "$year/$monthNum/$day"
+            NepaliDateFormatStyle.COMPACT_MDY -> "$monthNum/$day/$shortYear"
+            NepaliDateFormatStyle.COMPACT_YMD -> "$shortYear/$monthNum/$day"
+        }
+    }
+
+    private fun validateNepaliDate(year: Int, month: Int, day: Int) {
+        if (month !in 1..12) {
+            throw IllegalArgumentException("Invalid month value: $month. Must be between 1 and 12.")
+        }
+
+        val maxDaysInMonth = getTotalDaysInNepaliMonth(year, month)
+        if (day !in 1..maxDaysInMonth) {
+            throw IllegalArgumentException("Invalid day value: $day. Must be between 1 and $maxDaysInMonth for month $month.")
+        }
     }
 
     fun getNepaliMonthName(

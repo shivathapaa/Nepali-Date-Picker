@@ -15,7 +15,13 @@ enum class NameFormat {
 }
 
 enum class NepaliDateFormatStyle {
-    FULL, LONG, MEDIUM, SHORT
+    FULL,         // Monday, Asar 21, 2024 or सोमबार, असार २१, २०२४
+    LONG,         // Asar 21, 2024 or असार २१, २०२४
+    MEDIUM,       // 2024 Asar 21 or २०२४ असार २१
+    SHORT_MDY,    // 06/21/2024 or ०६/२१/२०२४
+    SHORT_YMD,    // 2024/06/21 or २०२४/०६/२१
+    COMPACT_MDY,  // 06/21/24 or ०६/२१/२४
+    COMPACT_YMD   // 24/06/21 or २४/०६/२१
 }
 
 @Immutable

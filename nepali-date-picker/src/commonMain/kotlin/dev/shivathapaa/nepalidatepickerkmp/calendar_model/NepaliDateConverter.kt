@@ -1,8 +1,9 @@
 package dev.shivathapaa.nepalidatepickerkmp.calendar_model
 
 import androidx.compose.runtime.Immutable
-import dev.shivathapaa.nepalidatepickerkmp.data.NameFormat
 import dev.shivathapaa.nepalidatepickerkmp.data.CustomCalendar
+import dev.shivathapaa.nepalidatepickerkmp.data.NameFormat
+import dev.shivathapaa.nepalidatepickerkmp.data.NepaliDateLocale
 import dev.shivathapaa.nepalidatepickerkmp.data.NepaliDatePickerLang
 import dev.shivathapaa.nepalidatepickerkmp.data.NepaliMonthCalendar
 import dev.shivathapaa.nepalidatepickerkmp.data.englishMonths
@@ -89,6 +90,43 @@ object NepaliDateConverter {
             NameFormat.MEDIUM -> weekdays.medium
             NameFormat.FULL -> weekdays.full
         }
+    }
+
+    /**
+     * Formats a Nepali date based on the specified user preferences.
+     *
+     * @param customCalendar The [CustomCalendar] containing the year, month, day, and weekday.
+     * @param locale The [NepaliDateLocale] specifying the user's preferred language,date format,
+     * weekday name format, and month name format.
+     * @return A string representing the formatted date according to the user's preferences.
+     *
+     * The function supports the following date format styles:
+     * - FULL: Monday, Asar 21, 2024  or,  सोमबार, असार २१, २०२४
+     * - LONG: Asar 21, 2024  or,  असार २१, २०२४
+     * - MEDIUM: 2024 Asar 21  or,  २०२४ असार २१
+     * - SHORT_MDY: 06/21/2024  or,  ०६/२१/२०२४
+     * - SHORT_YMD: 2024/06/21  or,  २०२४/०६/२१
+     * - COMPACT_MDY: 06/21/24  or,  ०६/२१/२४
+     * - COMPACT_YMD: 24/06/21  or,  २४/०६/२१
+     *
+     * The function uses the specified weekday and month name formats to match the preferred
+     * language and format style.
+     *
+     * Example usage:
+     * ```
+     * val customCalendar = CustomCalendar(year = 2080, month = 3, day = 15, weekday = 2, ....)
+     * val locale = NepaliDateLocale(
+     *     language = NepaliDatePickerLang.ENGLISH,
+     *     dateFormat = NepaliDateFormatStyle.FULL,
+     *     weekDayName = NameFormat.FULL,
+     *     monthName = NameFormat.FULL
+     * )
+     * val formattedDate = formatNepaliDate(customCalendar, locale)
+     * // formattedDate: "Tuesday, Asar 15, 2080"
+     * ```
+     */
+    fun formatNepaliDate(customCalendar: CustomCalendar, locale: NepaliDateLocale): String {
+        return calendarModel.formatNepaliDate(customCalendar, locale)
     }
 
     /**
