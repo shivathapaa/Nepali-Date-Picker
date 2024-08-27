@@ -84,6 +84,19 @@ import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import kotlin.math.max
 
+/**
+ * Nepali Date pickers let people select a date and preferably should be embedded into Dialogs.
+ * See [NepaliDatePickerDialog].
+ *
+ * Nepali date picker lets you pick a date via a calendar UI.
+ *
+ * @param state state of the date picker. See [rememberNepaliDatePickerState].
+ * @param modifier the [Modifier] to be applied to this date picker
+ * @param title the title to be displayed in the date picker
+ * @param headline the headline to be displayed in the date picker
+ * @param colors [NepaliDatePickerColors] that will be used to resolve the colors used for this date
+ * picker in different states. See [NepaliDatePickerDefaults.colors].
+ */
 @Composable
 fun NepaliDatePicker(
     state: NepaliDatePickerState,
@@ -346,6 +359,23 @@ interface NepaliSelectableDates {
     fun isSelectableYear(year: Int) = true
 }
 
+/**
+ * Creates a [NepaliDatePickerState] for a [NepaliDatePicker] that is remembered across compositions.
+ *
+ * To create a date picker state outside composition, see the `DatePickerState` function.
+ *
+ * @param initialSelectedDate [SimpleDate] that represents an initial selection of a date.
+ * Provide a `null` to indicate no selection.
+ * @param initialDisplayedMonth [SimpleDate] that represents an initial selection of a month
+ * to be displayed to the user. By default, in case an `initialSelectedDate` is provided, the
+ * initial displayed month would be the month of the selected date. Otherwise, in case `null`
+ * is provided, the displayed month would be the current one.
+ * @param yearRange an [IntRange] that holds the year range that the date picker will be limited to
+ * @param nepaliSelectableDates a [NepaliSelectableDates] that is consulted to check if a date is
+ * allowed. In case a date is not allowed to be selected, it will appear disabled in the UI.
+ * @param locale an instance of [NepaliDateLocale] that is used to localize the date picker. It holds
+ * the preference for the date picker formatted date and the language of the date picker.
+ */
 @Composable
 fun rememberNepaliDatePickerState(
     initialSelectedDate: SimpleDate? = null,
@@ -367,7 +397,7 @@ fun rememberNepaliDatePickerState(
     }
 }
 
-fun NepaliDatePickerState(
+internal fun NepaliDatePickerState(
     initialSelectedDate: SimpleDate? = null,
     initialDisplayedMonth: SimpleDate? = initialSelectedDate,
     yearRange: IntRange = NepaliDatePickerDefaults.NepaliYearRange,
