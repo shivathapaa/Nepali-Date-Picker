@@ -5,7 +5,9 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.snapping.rememberSnapFlingBehavior
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -646,6 +648,7 @@ private fun NepaliWeekDays(
     }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun NepaliHorizontalMonthList(
     today: SimpleDate,
@@ -665,9 +668,10 @@ private fun NepaliHorizontalMonthList(
             )
         }
     }
+    val snapFlingBehavior = rememberSnapFlingBehavior(lazyListState = lazyListState)
 
     LazyRow(
-        modifier = Modifier, state = lazyListState
+        modifier = Modifier, state = lazyListState, flingBehavior = snapFlingBehavior
     ) {
         items(
             count = numberOfMonthsInRange(yearRange = yearRange),
@@ -788,9 +792,8 @@ private fun NepaliMonth(
                                 // date itself is specifically not allowed by the state's
                                 // SelectableDates.
                                 with(nepaliSelectableDates) {
-                                    isSelectableYear(monthCalendar.year) && isSelectableDate(
-                                        currentMonthDate
-                                    )
+                                    isSelectableYear(monthCalendar.year)
+                                            && isSelectableDate(currentMonthDate)
                                 }
                             },
                             today = isToday,
