@@ -47,6 +47,31 @@ import kotlin.math.max
  * picker in different states. See [NepaliDatePickerDefaults.colors].
  * @param properties typically platform specific properties to further configure the dialog
  * @param content the content of the dialog (i.e. a [NepaliDatePicker], for example)
+ *
+ *
+ * Example usage:
+ * ```
+ * var showNepaliDatePickerDialog by remember { mutableStateOf(false) }
+ * val defaultNepaliDatePickerState = rememberNepaliDatePickerState()
+ *
+ * if (showNepaliDatePickerDialog) {
+ *     NepaliDatePickerDialog(
+ *         confirmButton = {
+ *             TextButton(onClick = { showNepaliDatePickerDialog = false }) {
+ *                 Text(text = "OK")
+ *             }
+ *         },
+ *         dismissButton = {
+ *             TextButton(onClick = { showNepaliDatePickerDialog = false }) {
+ *                 Text(text = "Cancel")
+ *             }
+ *         },
+ *         onDismissRequest = { showNepaliDatePickerDialog = false }
+ *     ) {
+ *         NepaliDatePicker(state = defaultNepaliDatePickerState)
+ *     }
+ * }
+ * ```
  */
 @Composable
 fun NepaliDatePickerDialog(

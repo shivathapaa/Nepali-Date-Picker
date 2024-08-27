@@ -96,6 +96,14 @@ import kotlin.math.max
  * @param headline the headline to be displayed in the date picker
  * @param colors [NepaliDatePickerColors] that will be used to resolve the colors used for this date
  * picker in different states. See [NepaliDatePickerDefaults.colors].
+ *
+ *
+ * Example usage:
+ * ```
+ * val defaultNepaliDatePickerState = rememberNepaliDatePickerState()
+ *
+ * NepaliDatePicker(state = defaultNepaliDatePickerState)
+ * ```
  */
 @Composable
 fun NepaliDatePicker(
@@ -375,6 +383,35 @@ interface NepaliSelectableDates {
  * allowed. In case a date is not allowed to be selected, it will appear disabled in the UI.
  * @param locale an instance of [NepaliDateLocale] that is used to localize the date picker. It holds
  * the preference for the date picker formatted date and the language of the date picker.
+ *
+ * Example usage:
+ * ```
+ * val defaultNepaliDatePickerState = rememberNepaliDatePickerState()
+ * val customizedDatePickerState =
+ *     rememberNepaliDatePickerState(
+ *         locale = NepaliDateLocale(language = NepaliDatePickerLang.NEPALI),
+ *         nepaliSelectableDates = object : NepaliSelectableDates {
+ *             override fun isSelectableDate(customCalendar: CustomCalendar)
+ *                     : Boolean {
+ *                 return customCalendar.dayOfWeek != 7
+ *                         || customCalendar.dayOfMonth != 12
+ *             }
+ *
+ *             override fun isSelectableYear(year: Int): Boolean {
+ *                 return (year % 5 != 0)
+ *             }
+ *         }
+ *     )
+ *
+ * NepaliDatePicker(state = defaultNepaliDatePickerState)
+ *
+ * NepaliDatePicker(
+ *     state = customizedDatePickerState,
+ *     colors = NepaliDatePickerDefaults.colors().copy(
+ *         containerColor = MaterialTheme.colorScheme.surface
+ *     )
+ * )
+ * ```
  */
 @Composable
 fun rememberNepaliDatePickerState(
