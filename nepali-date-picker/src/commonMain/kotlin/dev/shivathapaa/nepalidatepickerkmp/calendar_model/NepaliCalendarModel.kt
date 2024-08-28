@@ -16,6 +16,7 @@
 
 package dev.shivathapaa.nepalidatepickerkmp.calendar_model
 
+import androidx.annotation.IntRange
 import androidx.compose.runtime.Immutable
 import dev.shivathapaa.nepalidatepickerkmp.data.CustomCalendar
 import dev.shivathapaa.nepalidatepickerkmp.data.NameFormat
@@ -119,7 +120,7 @@ internal class NepaliCalendarModel(val locale: NepaliDateLocale = NepaliDateLoca
      *
      * Example usage:
      * ```
-     * val nepaliDate = CustomCalendar(year = 2080, month = 3, day = 15, weekday = 2, ....)
+     * val nepaliDate = CustomCalendar(year = 2080, month = 3, day = 11, weekday = 2, ....)
      * val locale = NepaliDateLocale(
      *     language = NepaliDatePickerLang.ENGLISH,
      *     dateFormat = NepaliDateFormatStyle.FULL,
@@ -127,7 +128,7 @@ internal class NepaliCalendarModel(val locale: NepaliDateLocale = NepaliDateLoca
      *     monthName = NameFormat.FULL
      * )
      * val formattedDate = formatNepaliDate(nepaliDate, locale)
-     * // formattedDate: "Monday, Asar 15, 2080"
+     * // formattedDate: "Monday, Asar 11, 2080"
      * ```
      */
     fun formatNepaliDate(customCalendar: CustomCalendar, locale: NepaliDateLocale): String {
@@ -170,6 +171,68 @@ internal class NepaliCalendarModel(val locale: NepaliDateLocale = NepaliDateLoca
             NepaliDateFormatStyle.MEDIUM -> "$year $monthName $day"
             NepaliDateFormatStyle.SHORT_MDY -> "$monthNum/$day/$year"
             NepaliDateFormatStyle.SHORT_YMD -> "$year/$monthNum/$day"
+            NepaliDateFormatStyle.COMPACT_MDY -> "$monthNum/$day/$shortYear"
+            NepaliDateFormatStyle.COMPACT_YMD -> "$shortYear/$monthNum/$day"
+        }
+    }
+
+    /**
+     * Overload function of above [formatNepaliDate] function without date validation.
+     * Formats a Nepali date based on the specified user preferences. (Without validation)
+     *
+     * @param year takes an integer value of year.
+     * @param month takes an integer value of month.
+     * @param dayOfMonth takes an integer value of day.
+     * @param dayOfWeek takes an integer value of day of week.
+     * @param locale The [NepaliDateLocale] specifying the user's preferred language,date format,
+     * weekday name format, and month name format.
+     * @return A string representing the formatted date according to the user's preferences.
+     *
+     */
+    fun formatNepaliDate(
+        year: Int,
+        @IntRange(from = 1, to = 12) month: Int,
+        @IntRange(from = 1, to = 32) dayOfMonth: Int,
+        @IntRange(from = 1, to = 7) dayOfWeek: Int,
+        locale: NepaliDateLocale
+    ): String {
+        val showMonthName = locale.dateFormat in listOf(
+            NepaliDateFormatStyle.FULL,
+            NepaliDateFormatStyle.LONG,
+            NepaliDateFormatStyle.MEDIUM
+        )
+
+        val weekday = locale.language.weekdays[dayOfWeek - 1]
+        val localizedMonth = locale.language.months[month - 1]
+
+        val weekdayName = when (locale.weekDayName) {
+            NameFormat.FULL -> weekday.full
+            NameFormat.MEDIUM -> weekday.medium
+            NameFormat.SHORT -> weekday.short
+        }
+
+        val monthName = when (locale.monthName) {
+            NameFormat.FULL, NameFormat.MEDIUM -> localizedMonth.full
+            NameFormat.SHORT -> localizedMonth.short
+        }
+
+        val day = localizeNumber(
+            if (showMonthName) dayOfMonth.toString()
+            else dayOfMonth.toString().padStart(2, '0'),
+            locale.language
+        )
+
+        val monthNum =
+            localizeNumber(month.toString().padStart(2, '0'), locale.language)
+        val localizedYear = localizeNumber(year.toString(), locale.language)
+        val shortYear = localizedYear.takeLast(2)
+
+        return when (locale.dateFormat) {
+            NepaliDateFormatStyle.FULL -> "$weekdayName, $monthName $day, $localizedYear"
+            NepaliDateFormatStyle.LONG -> "$monthName $day, $localizedYear"
+            NepaliDateFormatStyle.MEDIUM -> "$localizedYear $monthName $day"
+            NepaliDateFormatStyle.SHORT_MDY -> "$monthNum/$day/$localizedYear"
+            NepaliDateFormatStyle.SHORT_YMD -> "$localizedYear/$monthNum/$day"
             NepaliDateFormatStyle.COMPACT_MDY -> "$monthNum/$day/$shortYear"
             NepaliDateFormatStyle.COMPACT_YMD -> "$shortYear/$monthNum/$day"
         }

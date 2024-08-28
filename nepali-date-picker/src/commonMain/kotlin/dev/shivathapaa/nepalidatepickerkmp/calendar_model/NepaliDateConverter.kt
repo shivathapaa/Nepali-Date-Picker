@@ -16,6 +16,7 @@
 
 package dev.shivathapaa.nepalidatepickerkmp.calendar_model
 
+import androidx.annotation.IntRange
 import androidx.compose.runtime.Immutable
 import dev.shivathapaa.nepalidatepickerkmp.data.CustomCalendar
 import dev.shivathapaa.nepalidatepickerkmp.data.NameFormat
@@ -109,7 +110,7 @@ object NepaliDateConverter {
     }
 
     /**
-     * Formats a Nepali date based on the specified user preferences.
+     * Formats a Nepali date based on the specified user preferences. (With date validation)
      *
      * @param customCalendar The [CustomCalendar] containing the year, month, day, and weekday.
      * @param locale The [NepaliDateLocale] specifying the user's preferred language,date format,
@@ -145,6 +146,28 @@ object NepaliDateConverter {
         return calendarModel.formatNepaliDate(customCalendar, locale)
     }
 
+    /**
+     * Overload function of above [formatNepaliDate] function without date validation.
+     * Formats a Nepali date based on the specified user preferences. (Without validation)
+     *
+     * @param year takes an integer value of year.
+     * @param month takes an integer value of month which takes value between 1 to 12.
+     * @param dayOfMonth takes an integer value of day of month which takes value between 1 to 32.
+     * @param dayOfWeek takes an integer value of day of week which takes value between 1 to 7.
+     * @param locale The [NepaliDateLocale] specifying the user's preferred language,date format,
+     * weekday name format, and month name format.
+     * @return A string representing the formatted date according to the user's preferences.
+     *
+     */
+    fun formatNepaliDate(
+        year: Int,
+        @IntRange(from = 1, to = 12) month: Int,
+        @IntRange(from = 1, to = 32) dayOfMonth: Int,
+        @IntRange(from = 1, to = 7) dayOfWeek: Int,
+        locale: NepaliDateLocale
+    ): String {
+        return calendarModel.formatNepaliDate(year, month, dayOfMonth, dayOfWeek, locale)
+    }
     /**
      * @param month takes value between 1 to 12.
      * @param format gives name of month either in short or full name.
