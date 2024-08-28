@@ -6,6 +6,8 @@
 
 KMP Nepali Date Picker for both Android and/or iOS which aligns with the Material3 Date Picker. This library provides UI and various utilities to work with Nepali Dates, and acts as a bridge between Nepali Calendar and Gregorian Calendar.
 
+[Using in your project.](#using-in-your-projects)
+
 ## Design overview
 
 This library strictly follows `Material` (Material3) design principles. Considering UI/UX, `nepali-date-picker` aligns with new `androidx.compose.material3.DatePicker`.
@@ -100,7 +102,7 @@ kotlin {
     sourceSets {
         commonMain {
              dependencies {
-                 implementation("io.github.shivathapaa:nepali-date-picker:1.1.3")
+                 implementation("io.github.shivathapaa:nepali-date-picker:1.1.4")
              }
         }
     }
@@ -113,7 +115,7 @@ To add the nepali-date-picker library to your Android project, include the follo
 
 ```kotlin
 dependencies {
-    implementation("io.github.shivathapaa:nepali-date-picker-android:1.1.3")
+    implementation("io.github.shivathapaa:nepali-date-picker-android:1.1.4")
 }
 ```
 
@@ -129,7 +131,7 @@ To integrate this library into your iOS project using CocoaPods:
 
 ```ruby
 ruby 
-pod 'nepali-date-picker' ,  '1.1.3'
+pod 'nepali-date-picker' ,  '1.1.4'
 ```
 CocoaPods will automatically select the appropriate architecture for your project.
 
