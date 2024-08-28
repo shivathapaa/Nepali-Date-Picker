@@ -81,7 +81,7 @@ android {
 mavenPublishing {
     // Define coordinates for the published artifact
     coordinates(
-        groupId = "io.github.shivathapaa", artifactId = "nepali-date-picker", version = "1.1.3"
+        groupId = "io.github.shivathapaa", artifactId = "nepali-date-picker", version = "1.1.4"
     )
 
     // Configure POM metadata for the published artifact
@@ -93,7 +93,7 @@ mavenPublishing {
 
         licenses {
             license {
-                name.set("GNU GPLv3")
+                name.set("MPL 2.0")
                 url.set("https://github.com/shivathapaa/Nepali-Date-Picker/blob/main/LICENSE")
             }
         }
