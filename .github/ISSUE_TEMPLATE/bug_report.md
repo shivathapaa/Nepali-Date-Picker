@@ -1,7 +1,7 @@
 ---
 name: Bug report
 about: Report a bug encountered while using the Nepali-Date-Picker library
-title: "[BUG]"
+title: "[BUG] - <Short description of the bug>"
 labels: bug, suggestion/feedback
 assignees: shivathapaa
 

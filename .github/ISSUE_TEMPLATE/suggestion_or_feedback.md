@@ -1,7 +1,7 @@
 ---
 name: Suggestion or Feedback
 about: Suggest an improvement or general feedback for the project
-title: "[SUGGESTION]"
+title: "[SUGGESTION/FEEDBACK] - <Short description of the suggestion or feedback>"
 labels: suggestion/feedback
 assignees: ''
 
