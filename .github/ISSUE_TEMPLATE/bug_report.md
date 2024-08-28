@@ -2,7 +2,7 @@
 name: Bug report
 about: Report a bug encountered while using the Nepali-Date-Picker library
 title: "[BUG]"
-labels: bug
+labels: bug, suggestion/feedback
 assignees: shivathapaa
 
 ---
