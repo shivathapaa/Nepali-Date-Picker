@@ -176,6 +176,12 @@ internal object DateConverters {
             dayOfWeek++
             dayOfYear++
 
+            if (dayOfWeek > 7) {
+                dayOfWeek = 1
+                weekOfYear++
+                weekOfMonth++
+            }
+
             if (englishDD > totalDaysInMonth) {
                 englishMM++
                 englishDD = 1
@@ -191,12 +197,6 @@ internal object DateConverters {
                 totalDaysInMonth =
                     if (isEnglishLeapYear(englishYYYY)) daysInMonthOfLeapYear[englishMM] else daysInMonth[englishMM]
                 firstDayOfMonth = dayOfWeek // The first day of the new month
-            }
-
-            if (dayOfWeek > 7) {
-                dayOfWeek = 1
-                weekOfYear++
-                weekOfMonth++
             }
 
             val remainingDaysOfTheMonth = totalDaysInMonth - englishDD
@@ -429,11 +429,8 @@ internal object DateConverters {
     }
 
     /**
-     * INCORRECT RESPONSE: Helper function to calculate the week of the year
-     *
-     * It requires a bit more complex logic to calculate. This is not implemented yet due to performance issues.
-     * This value is not required for the library in `getNepaliMonth()`.
-     * Todo: Correct this logic
+     * Questionable response: Rely less for English Date response
+     * Todo: It passes all the test, but still recheck logic (check added edge cases in UnitTests)
      */
     private fun calculateWeekOfYear(dayOfYear: Int, firstDayOfMonth: Int): Int {
         val firstDayOfYear = (firstDayOfMonth - (dayOfYear % 7) + 7) % 7
