@@ -12,7 +12,7 @@ KMP Nepali Date Picker for both Android and/or iOS which aligns with the Materia
 
 This library strictly follows `Material` (Material3) design principles. Considering UI/UX, `nepali-date-picker` aligns with new `androidx.compose.material3.DatePicker`.
 
-If you are familar with the Material3 Date Picker then you will find it very similar, and you can adapt it with little to no time.
+If you are familiar with the Material3 Date Picker then you will find it very similar, and you can adapt it with little to no time.
 
 This library puts Nepali Calendar in light as OpenSource for deveplors involved in both Android and/or iOS and/or KMP.
 
@@ -26,7 +26,7 @@ The library provides a basic set of types/features for working with date picker:
 - `NepaliMonthCalendar` - Nepali Month Calendar which consists of the month details.
 - `NepaliDateLocale` - To control language, dateFormat, weekDayName, and monthName.
 - `NepaliDatePickerLang` - Set of supported language (English & Nepali for now).
-- `NepaliDateConverter` - Provides utilies for date conversions (english to nepali and vice versa), get formatted date(6) and many more.
+- `NepaliDateConverter` - Provides utilities for date conversions (english to nepali and vice versa), get formatted date(6) and many more.
 - `rememberNepaliDatePickerState()` - To read, write, and manage state of the date picker.
 - `NepaliSelectableDates` - To control selectable dates i.e. enable/disable certain dates.
 
@@ -102,7 +102,7 @@ kotlin {
     sourceSets {
         commonMain {
              dependencies {
-                 implementation("io.github.shivathapaa:nepali-date-picker:1.1.4")
+                 implementation("io.github.shivathapaa:nepali-date-picker:1.2.0")
              }
         }
     }
@@ -115,7 +115,7 @@ To add the nepali-date-picker library to your Android project, include the follo
 
 ```kotlin
 dependencies {
-    implementation("io.github.shivathapaa:nepali-date-picker-android:1.1.4")
+    implementation("io.github.shivathapaa:nepali-date-picker-android:1.2.0")
 }
 ```
 
@@ -131,7 +131,7 @@ To integrate this library into your iOS project using CocoaPods:
 
 ```ruby
 ruby 
-pod 'nepali-date-picker' ,  '1.1.4'
+pod 'nepali-date-picker' ,  '1.2.0'
 ```
 CocoaPods will automatically select the appropriate architecture for your project.
 
@@ -159,8 +159,8 @@ You can check this inside library under `NepaliDatePickerDefaults.NepaliYearRang
 
 ```
 // This will be changed overtime to support wider dates.
-EnglishYearRange: IntRange = IntRange(1913, 2033)
-NepaliYearRange: IntRange = IntRange(1970, 2090) 
+EnglishYearRange: IntRange = IntRange(1913, 2043)
+NepaliYearRange: IntRange = IntRange(1970, 2100) 
 ```
 
 #### NepaliDatePicker

@@ -204,8 +204,8 @@ object NepaliDatePickerDefaults {
     }
 
     /** The range of years for the Nepali date picker */
-    val EnglishYearRange: IntRange = IntRange(1913, 2033)
-    val NepaliYearRange: IntRange = IntRange(1970, 2090)
+    val EnglishYearRange: IntRange = IntRange(1913, 2043)
+    val NepaliYearRange: IntRange = IntRange(1970, 2100)
 
     /** Starting Nepali date */
     internal val startingNepaliCalendar = CustomCalendar(
