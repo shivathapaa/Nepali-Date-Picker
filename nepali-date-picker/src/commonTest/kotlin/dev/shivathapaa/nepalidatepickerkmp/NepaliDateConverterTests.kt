@@ -25,7 +25,6 @@ import dev.shivathapaa.nepalidatepickerkmp.data.toSimpleDate
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-// Todo: Extend test to year 2082 above after data correction
 class NepaliDateConverterTest {
     private val calendarModel = NepaliCalendarModel()
 
@@ -72,6 +71,78 @@ class NepaliDateConverterTest {
             dayOfYear = 104,
             weekOfMonth = 3,
             weekOfYear = 16
+        )
+
+        assertEquals(correctEnglishCustomCalendar, toTestEnglishCalendar)
+    }
+
+    @Test
+    fun nepaliToEnglishDateConverter_NepaliYear21001112_GetEnglishYear20440224() {
+        val toTestEnglishCalendar = NepaliDateConverter.convertNepaliToEnglish(
+            nepaliYYYY = 2100, nepaliMM = 11, nepaliDD = 12
+        )
+
+        val correctEnglishCustomCalendar = CustomCalendar(
+            year = 2044,
+            month = 2,
+            dayOfMonth = 24,
+            era = 1,
+            firstDayOfMonth = 2,
+            lastDayOfMonth = 2,
+            totalDaysInMonth = 29,
+            dayOfWeekInMonth = 4,
+            dayOfWeek = 4,
+            dayOfYear = 55,
+            weekOfMonth = 4,
+            weekOfYear = 9
+        )
+
+        assertEquals(correctEnglishCustomCalendar, toTestEnglishCalendar)
+    }
+
+    @Test
+    fun nepaliToEnglishDateConverter_NepaliYear20870921_GetEnglishYear20310105() {
+        val toTestEnglishCalendar = NepaliDateConverter.convertNepaliToEnglish(
+            nepaliYYYY = 2087, nepaliMM = 9, nepaliDD = 21
+        )
+
+        val correctEnglishCustomCalendar = CustomCalendar(
+            year = 2031,
+            month = 1,
+            dayOfMonth = 5,
+            era = 1,
+            firstDayOfMonth = 4,
+            lastDayOfMonth = 6,
+            totalDaysInMonth = 31,
+            dayOfWeekInMonth = 1,
+            dayOfWeek = 1,
+            dayOfYear = 5,
+            weekOfMonth = 2,
+            weekOfYear = 2
+        )
+
+        assertEquals(correctEnglishCustomCalendar, toTestEnglishCalendar)
+    }
+
+    @Test
+    fun nepaliToEnglishDateConverter_NepaliYear20970317_GetEnglishYear20400701() {
+        val toTestEnglishCalendar = NepaliDateConverter.convertNepaliToEnglish(
+            nepaliYYYY = 2097, nepaliMM = 3, nepaliDD = 17
+        )
+
+        val correctEnglishCustomCalendar = CustomCalendar(
+            year = 2040,
+            month = 7,
+            dayOfMonth = 1,
+            era = 1,
+            firstDayOfMonth = 1,
+            lastDayOfMonth = 3,
+            totalDaysInMonth = 31,
+            dayOfWeekInMonth = 1,
+            dayOfWeek = 1,
+            dayOfYear = 183,
+            weekOfMonth = 1,
+            weekOfYear = 27
         )
 
         assertEquals(correctEnglishCustomCalendar, toTestEnglishCalendar)
@@ -220,6 +291,81 @@ class NepaliDateConverterTest {
 
         assertEquals(correctNepaliCustomCalendar, toTestNepaliCalendar)
     }
+
+    @Test
+    fun englishToNepaliDateConverter_EnglishYear20320605_GetNepaliYear20890223() {
+        val toTestNepaliCalendar = NepaliDateConverter.convertEnglishToNepali(
+            englishYYYY = 2032, englishMM = 6, englishDD = 5
+        )
+
+        val correctNepaliCustomCalendar = CustomCalendar(
+            year = 2089,
+            month = 2,
+            dayOfMonth = 23,
+            era = 2,
+            firstDayOfMonth = 6,
+            lastDayOfMonth = 2,
+            totalDaysInMonth = 32,
+            dayOfWeekInMonth = 4,
+            dayOfWeek = 7,
+            dayOfYear = 53,
+            weekOfMonth = 4,
+            weekOfYear = 8
+        )
+
+        assertEquals(correctNepaliCustomCalendar, toTestNepaliCalendar)
+    }
+
+    @Test
+    fun englishToNepaliDateConverter_EnglishYear20431014_GetNepaliYear20890223() {
+        val toTestNepaliCalendar = NepaliDateConverter.convertEnglishToNepali(
+            englishYYYY = 2043, englishMM = 10, englishDD = 14
+        )
+
+        val correctNepaliCustomCalendar = CustomCalendar(
+            year = 2100,
+            month = 6,
+            dayOfMonth = 27,
+            era = 2,
+            firstDayOfMonth = 6,
+            lastDayOfMonth = 7,
+            totalDaysInMonth = 30,
+            dayOfWeekInMonth = 4,
+            dayOfWeek = 4,
+            dayOfYear = 184,
+            weekOfMonth = 5,
+            weekOfYear = 27
+        )
+
+        assertEquals(correctNepaliCustomCalendar, toTestNepaliCalendar)
+    }
+
+    /*
+    // Limit english year up to 2043 only
+        @Test
+        fun englishToNepaliDateConverter_EnglishYear20440412_GetNepaliYear21001230() {
+            val toTestNepaliCalendar = NepaliDateConverter.convertEnglishToNepali(
+                englishYYYY = 2044, englishMM = 4, englishDD = 12
+            )
+
+            val correctNepaliCustomCalendar = CustomCalendar(
+                year = 2100,
+                month = 12,
+                dayOfMonth = 30,
+                era = 2,
+                firstDayOfMonth = 2,
+                lastDayOfMonth = 4,
+                totalDaysInMonth = 31,
+                dayOfWeekInMonth = 5,
+                dayOfWeek = 3,
+                dayOfYear = 365,
+                weekOfMonth = 5,
+                weekOfYear = 53
+            )
+
+            assertEquals(correctNepaliCustomCalendar, toTestNepaliCalendar)
+        }
+    */
 
     @Test
     fun englishToNepaliDateConverter_EnglishAfterLeapYear20240302_GetNepaliYear20801119() {
@@ -440,7 +586,8 @@ class NepaliDateConverterTest {
         )
 
         val customCalenderAfterFourMonthSubtraction = calendarModel.minusNepaliMonths(
-            fromNepaliCalendar = nepaliCustomCalendar.toNepaliMonthCalendar(), subtractedMonthsCount = 4
+            fromNepaliCalendar = nepaliCustomCalendar.toNepaliMonthCalendar(),
+            subtractedMonthsCount = 4
         )
 
         val correctCustomCalendarAfterSubtraction = CustomCalendar(
