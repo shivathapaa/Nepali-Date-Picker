@@ -147,7 +147,12 @@ This project is licensed under [Mozilla Public License 2.0 (MPL 2.0)](https://gi
 ```
 License
 
-This project is licensed under the Mozilla Public License 2.0 (MPL 2.0). MPL 2.0 is a permissive open-source license that allows you to use, modify, and distribute the code, provided that any modifications to the MPL-licensed files are also made available under the same license. This license is used to ensures that improvements to the code remain open and accessible to the community.
+This project is licensed under the Mozilla Public License 2.0 (MPL 2.0).
+MPL 2.0 is a permissive open-source license that allows you to use,
+modify, and distribute the code, provided that any modifications to
+the MPL-licensed files are also made available under the same license.
+This license is used to ensures that improvements to the code remain open
+and accessible to the community.
 ```
 For more details, see the [LICENSE](https://github.com/shivathapaa/Nepali-Date-Picker/blob/main/LICENSE) file.
 
@@ -229,7 +234,7 @@ NepaliDatePicker(
 
 You have something in mind to change or add? I am open to suggestions. You can support this project by [suggesting changes, requesting enhancement/features, or raising an issue here](https://github.com/shivathapaa/Nepali-Date-Picker/issues/new/choose).
 
-You are free to contribute to this project, do checkout [CONTRIBUTING.md](https://github.com/android/user-interface-samples/blob/main/CONTRIBUTING.md) before starting.
+You are free to contribute to this project, do checkout [CONTRIBUTING.md](https://github.com/shivathapaa/Nepali-Date-Picker/blob/main/CONTRIBUTING.md) before starting.
 
 Giving a Star⭐ to this repository is also a way to support this project. 😊
 
