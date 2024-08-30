@@ -14,7 +14,7 @@ This library strictly follows `Material` (Material3) design principles. Consider
 
 If you are familiar with the Material3 Date Picker then you will find it very similar, and you can adapt it with little to no time.
 
-This library puts Nepali Calendar in light as OpenSource for deveplors involved in both Android and/or iOS and/or KMP.
+This library puts Nepali Calendar in light as OpenSource for developers involved in both Android and/or iOS and/or KMP.
 
 You can use this library independent to any platform or in common Kotlin Multiplatform code.
 
