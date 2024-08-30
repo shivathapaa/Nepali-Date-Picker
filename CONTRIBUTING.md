@@ -10,7 +10,7 @@ This project adheres to a Code of Conduct. By participating, you are expected to
 
 ## Getting Started
 
-To get started with contributing to [Project Name]:
+To get started with contributing to Nepali-Date-Picker:
 
 1. Fork the repository: Click the "Fork" button at the top of this repository.
 2. Clone your fork:
