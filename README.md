@@ -29,6 +29,7 @@ The library provides a basic set of types/features for working with date picker:
 - `NepaliDateConverter` - Provides utilities for date conversions (english to nepali and vice versa), get formatted date(6) and many more.
 - `rememberNepaliDatePickerState()` - To read, write, and manage state of the date picker.
 - `NepaliSelectableDates` - To control selectable dates i.e. enable/disable certain dates.
+- `NepaliDatePickerColors` - Takes `Material3` ?: **Material** colors by **default**. All the colors it uses are taken from your app colors if you've defined Material colors in your project. Also, there's always `.copy()` to modify the color.  
 
 ## Operations Highlight
 
@@ -125,21 +126,7 @@ The library supports various iOS architectures, including `iosarm64`, `iossimula
 
 To integrate this library into your iOS project using CocoaPods:
 
-1. **Install CocoaPods:** If you haven't already, install CocoaPods by following the instructions on the [CocoaPods website](https://cocoapods.org/).
-
-2. **Add to Podfile:** Add the following line to your `Podfile`:
-
-```ruby
-ruby 
-pod 'nepali-date-picker' ,  '1.2.0'
-```
-CocoaPods will automatically select the appropriate architecture for your project.
-
-3. **Install Dependencies:** Run `pod install` in your terminal from your project directory.
-
-4. **Open Workspace:** Open the `.xcworkspace` file in Xcode.
-
-You can now use the `nepali-date-picker` library in your iOS project!
+> Will be updated very soon....
 
 ## License
 
@@ -245,3 +232,21 @@ Giving a Star⭐ to this repository is also a way to support this project. 😊
 
 ---
 Thank you for star! 😉
+
+---
+
+## Screenshots
+
+<p align="center">
+  <img src=".github/assets/screenshots/neoWhite.png" alt="Screenshot of Nepali Date Picker" width="20%">&nbsp;
+  <img src=".github/assets/screenshots/neoDark.png" alt="" width="20%">&nbsp;
+  <img src=".github/assets/screenshots/blueWhite.png" alt="" width="20%">&nbsp;
+  <img src=".github/assets/screenshots/orangeDark.png" alt="" width="20%">
+</p>
+<br>
+<p align="center">
+  <img src=".github/assets/screenshots/yearYellowSimulator.png" alt="Screenshot of Nepali Date Picker" width="20%">&nbsp;
+  <img src=".github/assets/screenshots/yellowLightSimulator.png" alt="" width="20%">&nbsp;
+  <img src=".github/assets/screenshots/redLightSimulator.png" alt="" width="20%">&nbsp;
+  <img src=".github/assets/screenshots/redDarkSimulator.png" alt="" width="20%">
+</p>
