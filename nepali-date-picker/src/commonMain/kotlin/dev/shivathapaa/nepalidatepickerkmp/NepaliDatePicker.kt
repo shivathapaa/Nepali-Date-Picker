@@ -397,7 +397,7 @@ interface NepaliSelectableDates {
  * @param yearRange an [IntRange] that holds the year range that the date picker will be limited to
  * @param nepaliSelectableDates a [NepaliSelectableDates] that is consulted to check if a date is
  * allowed. In case a date is not allowed to be selected, it will appear disabled in the UI. You can
- * checkout helper functions `BeforeDate` and `AfterDate` in `NepaliDateConverter`.
+ * checkout helper functions `BeforeDateSelectable`, `AfterDateSelectable`, and `DateRangeSelectable` in `NepaliDateConverter`.
  * @param locale an instance of [NepaliDateLocale] that is used to localize the date picker. It holds
  * the preference for the date picker formatted date and the language of the date picker.
  *
@@ -420,7 +420,7 @@ interface NepaliSelectableDates {
  *         }
  *     )
  *
- * // Or you can utilize helper function (BeforeDate or AfterDate) to disable and enable dates
+ * // Or you can utilize helper function (BeforeDateSelectable or AfterDateSelectable or DateRangeSelectable) to disable and enable dates
  *
  * val datePickerStateWithDateLimiter =
  *     rememberNepaliDatePickerState(
@@ -428,6 +428,14 @@ interface NepaliSelectableDates {
  *              SimpleDate(2081, 3, 21)
  *         )
  *     )
+ *
+ * // For Range, minDate and maxDate should make sense i.e., minDate should be less than or equal to maxDate
+ * val nepaliDatePickerStateWithRangeSelectable = rememberNepaliDatePickerState(
+ *     nepaliSelectableDates = DateRangeSelectableDates(
+ *         SimpleDate(2081, 2, 11),
+ *         SimpleDate(2082, 1, 29)
+ *     )
+ * )
  *
  * NepaliDatePicker(state = defaultNepaliDatePickerState)
  *
@@ -439,6 +447,8 @@ interface NepaliSelectableDates {
  * )
  *
  * NepaliDatePicker(state = datePickerStateWithDateLimiter)
+ *
+ * NepaliDatePicker(state = nepaliDatePickerStateWithRangeSelectable)
  *
  * ```
  */

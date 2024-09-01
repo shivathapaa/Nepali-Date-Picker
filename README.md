@@ -213,6 +213,14 @@ val datePickerStateWithDateLimiter =
         nepaliSelectableDates = NepaliDatePickerDefaults.BeforeDate(SimpleDate(2081, 3, 21))
     )
 
+// For Range, minDate and maxDate should make sense i.e., minDate should be less than or equal to maxDate
+val nepaliDatePickerStateWithRangeSelectable = rememberNepaliDatePickerState(
+    nepaliSelectableDates = DateRangeSelectableDates(
+        SimpleDate(2081, 2, 11),
+        SimpleDate(2082, 1, 29)
+    )
+)
+
 NepaliDatePicker(state = defaultNepaliDatePickerState)
 
 NepaliDatePicker(
@@ -223,6 +231,8 @@ NepaliDatePicker(
 )
 
 NepaliDatePicker(state = datePickerStateWithDateLimiter)
+
+NepaliDatePicker(state = nepaliDatePickerStateWithRangeSelectable)
 ```
 
 ## Support

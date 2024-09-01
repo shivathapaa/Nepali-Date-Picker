@@ -95,7 +95,10 @@ object NepaliDateConverter {
      * @param simpleDate The date before which selection is allowed.
      * @param includeDate Whether to include the given date in the selectable dates. (if [SimpleDate] is of Today then whether to include today or not)
      */
-    fun BeforeDate(simpleDate: SimpleDate, includeDate: Boolean = false): NepaliSelectableDates =
+    fun BeforeDateSelectable(
+        simpleDate: SimpleDate,
+        includeDate: Boolean = false
+    ): NepaliSelectableDates =
         object : NepaliSelectableDates {
             override fun isSelectableDate(customCalendar: CustomCalendar): Boolean {
                 return if (includeDate) {
@@ -116,11 +119,7 @@ object NepaliDateConverter {
             }
 
             override fun isSelectableYear(year: Int): Boolean {
-                return if (includeDate) {
-                    year <= simpleDate.year
-                } else {
-                    year < simpleDate.year
-                }
+                return year <= simpleDate.year
             }
         }
 
@@ -130,7 +129,10 @@ object NepaliDateConverter {
      * @param simpleDate The date after which selection is allowed.
      * @param includeDate Whether to include the given date in the selectable dates. (if [SimpleDate] is of Today then whether to include today or not)
      */
-    fun AfterDate(simpleDate: SimpleDate, includeDate: Boolean = false): NepaliSelectableDates =
+    fun AfterDateSelectable(
+        simpleDate: SimpleDate,
+        includeDate: Boolean = false
+    ): NepaliSelectableDates =
         object : NepaliSelectableDates {
             override fun isSelectableDate(customCalendar: CustomCalendar): Boolean {
                 return if (includeDate) {
@@ -151,11 +153,53 @@ object NepaliDateConverter {
             }
 
             override fun isSelectableYear(year: Int): Boolean {
-                return if (includeDate) {
-                    year >= simpleDate.year
-                } else {
-                    year > simpleDate.year
+                return year >= simpleDate.year
+            }
+        }
+
+    /**
+     * Creates a [NepaliSelectableDates] object that represents a selectable date range.
+     *
+     * Remember, [minDate] and [maxDate] should make sense i.e., [minDate] should be less than or equal to [maxDate]
+     *
+     * @param minDate The minimum selectable [SimpleDate] date.
+     * @param maxDate The maximum selectable [SimpleDate] date.
+     * @param includeMinDate Whether the `minDate` is included in the selectable range. (if [minDate] is of Today then whether to include today or not)
+     * @param includeMaxDate Whether the `maxDate` is included in the selectable range. (if [maxDate] is of Today then whether to include today or not)
+     *
+     * @return A [NepaliSelectableDates] object that allows selecting dates within the specified range.
+     */
+    fun DateRangeSelectable(
+        minDate: SimpleDate,
+        maxDate: SimpleDate,
+        includeMinDate: Boolean = false,
+        includeMaxDate: Boolean = false
+    ): NepaliSelectableDates =
+        object : NepaliSelectableDates {
+            override fun isSelectableDate(customCalendar: CustomCalendar): Boolean {
+                val compareMin = compareDates(
+                    customCalendar,
+                    minDate.year,
+                    minDate.month,
+                    minDate.dayOfMonth
+                )
+                val compareMax = compareDates(
+                    customCalendar,
+                    maxDate.year,
+                    maxDate.month,
+                    maxDate.dayOfMonth
+                )
+
+                return when {
+                    includeMinDate && includeMaxDate -> compareMin >= 0 && compareMax <= 0
+                    includeMinDate && !includeMaxDate -> compareMin >= 0 && compareMax < 0
+                    !includeMinDate && includeMaxDate -> compareMin > 0 && compareMax <= 0
+                    else -> compareMin > 0 && compareMax < 0
                 }
+            }
+
+            override fun isSelectableYear(year: Int): Boolean {
+                return year in minDate.year..maxDate.year
             }
         }
 
