@@ -101,7 +101,7 @@ import kotlinx.serialization.json.Json
 import kotlin.math.max
 
 /**
- * Nepali Date pickers let people select a date and preferably should be embedded into Dialogs.
+ * Nepali Date Picker lets user select a date and preferably should be embedded into Dialogs.
  * See [NepaliDatePickerDialog].
  *
  * Nepali date picker lets you pick a date via a calendar UI.
@@ -111,8 +111,8 @@ import kotlin.math.max
  * @param title the title to be displayed in the date picker
  * @param headline the headline to be displayed in the date picker
  * @param colors [NepaliDatePickerColors] that will be used to resolve the colors used for this date
- * picker in different states. See [NepaliDatePickerDefaults.colors].
- *
+ * picker in different states.
+ * See [NepaliDatePickerDefaults.colors].
  *
  * Example usage:
  * ```

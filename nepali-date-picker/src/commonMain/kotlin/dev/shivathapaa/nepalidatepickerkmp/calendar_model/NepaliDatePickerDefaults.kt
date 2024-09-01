@@ -19,10 +19,9 @@ package dev.shivathapaa.nepalidatepickerkmp.calendar_model
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.DatePickerDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.Stable
@@ -83,6 +82,7 @@ object NepaliDatePickerDefaults {
      * range selection (which will be implemented in future updates)
      * @param dayInSelectionRangeContainerColor the container color used for days that are within a
      * date range selection (which will be implemented in future updates)
+     * @d
      * @param dividerColor the color used for the dividers used at the date pickers
      */
     @Composable
@@ -110,6 +110,7 @@ object NepaliDatePickerDefaults {
         todayDateBorderColor: Color = Color.Unspecified,
         dayInSelectionRangeContentColor: Color = Color.Unspecified,
         dayInSelectionRangeContainerColor: Color = Color.Unspecified,
+        dialogButtonColor: Color = Color.Unspecified,
         dividerColor: Color = Color.Unspecified
     ): NepaliDatePickerColors = defaultDatePickerColors.copy(
         containerColor = containerColor,
@@ -135,6 +136,7 @@ object NepaliDatePickerDefaults {
         todayDateBorderColor = todayDateBorderColor,
         dayInSelectionRangeContentColor = dayInSelectionRangeContentColor,
         dayInSelectionRangeContainerColor = dayInSelectionRangeContainerColor,
+        dialogButtonColor = dialogButtonColor,
         dividerColor = dividerColor
     )
 
@@ -145,6 +147,13 @@ object NepaliDatePickerDefaults {
 
     /** The default first day of the week. */
     const val FIRST_DAY_OF_WEEK: Int = 1
+
+    /**
+     * A default [NepaliDateLocale].
+     */
+    val DefaultLocale: NepaliDateLocale = NepaliDateLocale()
+
+    val DateFormatStyle = NepaliDateFormatStyle.SHORT_YMD
 
     /** The default tonal elevation used for date picker dialog. */
     val TonalElevation: Dp = 6.0.dp
@@ -158,13 +167,84 @@ object NepaliDatePickerDefaults {
     val AllDates: NepaliSelectableDates = object : NepaliSelectableDates {}
 
     /**
-     * A default [NepaliDateLocale].
+     * Allows selection of dates before a given date.
+     *
+     * @param simpleDate The date before which selection is allowed.
+     * @param includeDate Whether to include the given date in the selectable dates. (if [SimpleDate] is of Today then whether to include today or not)
      */
-    val DefaultLocale: NepaliDateLocale = NepaliDateLocale()
+    fun BeforeDate(simpleDate: SimpleDate, includeDate: Boolean = false): NepaliSelectableDates =
+        object : NepaliSelectableDates {
+            override fun isSelectableDate(customCalendar: CustomCalendar): Boolean {
+                return if (includeDate) {
+                    compareDates(
+                        customCalendar,
+                        simpleDate.year,
+                        simpleDate.month,
+                        simpleDate.dayOfMonth
+                    ) <= 0
+                } else {
+                    compareDates(
+                        customCalendar,
+                        simpleDate.year,
+                        simpleDate.month,
+                        simpleDate.dayOfMonth
+                    ) < 0
+                }
+            }
+        }
 
-    val DateFormatStyle = NepaliDateFormatStyle.LONG
+    /**
+     * Allows selection of dates after a given date.
+     *
+     * @param simpleDate The date after which selection is allowed.
+     * @param includeDate Whether to include the given date in the selectable dates. (if [SimpleDate] is of Today then whether to include today or not)
+     */
+    fun AfterDate(simpleDate: SimpleDate, includeDate: Boolean = false): NepaliSelectableDates =
+        object : NepaliSelectableDates {
+            override fun isSelectableDate(customCalendar: CustomCalendar): Boolean {
+                return if (includeDate) {
+                    compareDates(
+                        customCalendar,
+                        simpleDate.year,
+                        simpleDate.month,
+                        simpleDate.dayOfMonth
+                    ) >= 0
+                } else {
+                    compareDates(
+                        customCalendar,
+                        simpleDate.year,
+                        simpleDate.month,
+                        simpleDate.dayOfMonth
+                    ) > 0
+                }
+            }
+        }
 
-    @OptIn(ExperimentalMaterial3Api::class)
+    /**
+     * Compares a [CustomCalendar] instance with a date represented by the given year, month, and dayOfMonth.
+     *
+     * Returns a negative integer if the [calendar] is before the given date, zero if they are equal,
+     * and a positive integer if the [calendar] is after the given date.
+     *
+     * @param calendar The [CustomCalendar] instance to compare.
+     * @param year The year of the date to compare with.
+     * @param month The month of the date to compare with.
+     * @param dayOfMonth The day of the month of the date to compare with.
+     * @return A negative integer, zero, or a positive integer as described above.
+     */
+    private fun compareDates(
+        calendar: CustomCalendar,
+        year: Int,
+        month: Int,
+        dayOfMonth: Int
+    ): Int {
+        return when {
+            calendar.year != year -> calendar.year - year
+            calendar.month != month -> calendar.month - month
+            else -> calendar.dayOfMonth - dayOfMonth
+        }
+    }
+
     @Composable
     internal fun NepaliDatePickerTitle(
         modifier: Modifier = Modifier, language: NepaliDatePickerLang
@@ -172,11 +252,10 @@ object NepaliDatePickerDefaults {
         Text(
             text = language.datePickerTitle,
             modifier = modifier,
-            color = DatePickerDefaults.colors().titleContentColor
+            color = colors().titleContentColor
         )
     }
 
-    @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     internal fun NepaliDatePickerHeadline(
         selectedDate: SimpleDate?, modifier: Modifier = Modifier, locale: NepaliDateLocale
@@ -199,8 +278,26 @@ object NepaliDatePickerDefaults {
             text = formattedDate,
             modifier = modifier,
             maxLines = 1,
-            color = DatePickerDefaults.colors().headlineContentColor
+            color = colors().headlineContentColor
         )
+    }
+
+    /**
+     * A default button to for Nepali date picker dialog. i.e., "Cancel", "OK"
+     */
+    @Composable
+    internal fun NepaliDatePickerDialogButton(
+        text: String,
+        onButtonClick: () -> Unit,
+        modifier: Modifier = Modifier
+    ) {
+        TextButton(onClick = onButtonClick, modifier = modifier) {
+            Text(
+                text = text,
+                style = MaterialTheme.typography.labelLarge,
+                color = colors().dialogButtonColor
+            )
+        }
     }
 
     /** The range of years for the Nepali date picker */
@@ -305,6 +402,7 @@ class NepaliDatePickerColors(
     val todayDateBorderColor: Color,
     val dayInSelectionRangeContainerColor: Color,
     val dayInSelectionRangeContentColor: Color,
+    val dialogButtonColor: Color,
     val dividerColor: Color
 ) {
     /**
@@ -336,6 +434,7 @@ class NepaliDatePickerColors(
         todayDateBorderColor: Color = this.todayDateBorderColor,
         dayInSelectionRangeContainerColor: Color = this.dayInSelectionRangeContainerColor,
         dayInSelectionRangeContentColor: Color = this.dayInSelectionRangeContentColor,
+        dialogButtonColor: Color = this.dialogButtonColor,
         dividerColor: Color = this.dividerColor
     ) = NepaliDatePickerColors(containerColor.takeOrElse { this.containerColor },
         titleContentColor.takeOrElse { this.titleContentColor },
@@ -360,6 +459,7 @@ class NepaliDatePickerColors(
         todayDateBorderColor.takeOrElse { this.todayDateBorderColor },
         dayInSelectionRangeContainerColor.takeOrElse { this.dayInSelectionRangeContainerColor },
         dayInSelectionRangeContentColor.takeOrElse { this.dayInSelectionRangeContentColor },
+        dialogButtonColor.takeOrElse { this.dialogButtonColor },
         dividerColor.takeOrElse { this.dividerColor })
 
     /**
@@ -553,6 +653,7 @@ internal fun getDefaultNepaliDatePickerColors(): NepaliDatePickerColors {
         todayDateBorderColor = MaterialTheme.colorScheme.primary,
         dayInSelectionRangeContainerColor = MaterialTheme.colorScheme.secondaryContainer,
         dayInSelectionRangeContentColor = MaterialTheme.colorScheme.onSecondaryContainer,
+        dialogButtonColor = MaterialTheme.colorScheme.primary,
         dividerColor = MaterialTheme.colorScheme.outlineVariant
     )
 }

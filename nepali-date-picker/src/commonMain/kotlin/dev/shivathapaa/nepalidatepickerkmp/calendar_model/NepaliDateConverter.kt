@@ -23,6 +23,7 @@ import dev.shivathapaa.nepalidatepickerkmp.data.NameFormat
 import dev.shivathapaa.nepalidatepickerkmp.data.NepaliDateLocale
 import dev.shivathapaa.nepalidatepickerkmp.data.NepaliDatePickerLang
 import dev.shivathapaa.nepalidatepickerkmp.data.NepaliMonthCalendar
+import dev.shivathapaa.nepalidatepickerkmp.data.SimpleDate
 import dev.shivathapaa.nepalidatepickerkmp.data.englishMonths
 
 @Immutable
@@ -85,6 +86,50 @@ object NepaliDateConverter {
         nepaliYear: Int, nepaliMonth: Int
     ): NepaliMonthCalendar {
         return calendarModel.calculateFirstAndLastDayOfNepaliMonth(nepaliYear, nepaliMonth)
+    }
+
+    /**
+     * Compares a [CustomCalendar] instance with a date represented by the given [SimpleDate].
+     *
+     * Returns a negative integer if the [dateToCompareFrom] is before the [dateToCompareTo], zero if they are equal,
+     * and a positive integer if the [dateToCompareFrom] is after the [dateToCompareTo].
+     *
+     * @param dateToCompareFrom The [CustomCalendar] instance to compare.
+     * @param dateToCompareTo The [SimpleDate] representing the date to compare to.
+     * @return A negative integer, zero, or a positive integer as described above.
+     */
+    fun compareDates(dateToCompareFrom: CustomCalendar, dateToCompareTo: SimpleDate): Int {
+        return when {
+            dateToCompareFrom.year != dateToCompareTo.year -> dateToCompareFrom.year - dateToCompareTo.year
+            dateToCompareFrom.month != dateToCompareTo.month -> dateToCompareFrom.month - dateToCompareTo.month
+            else -> dateToCompareFrom.dayOfMonth - dateToCompareTo.dayOfMonth
+        }
+    }
+
+    // Two overload functions [compareDates] can be simplified to one using an interface but,
+    // I don't want complexity in outer level. Also, these functions are unlikely to change overtime.
+
+    /**
+     * Overloaded function of above [compareDates] function.
+     *
+     * Compares two [CustomCalendar] instances to determine their chronological order.
+     *
+     * Returns a negative integer if [dateToCompareFrom] is before [dateToCompareTo], zero if they are equal,
+     * and a positive integer if [dateToCompareFrom] is after [dateToCompareTo].
+     *
+     * @param dateToCompareFrom The first date in the comparison.
+     * @param dateToCompareTo The second date, which [dateToCompareFrom] is compared to.
+     * @return A negative integer, zero, or a positive integer as described above.
+     */
+    private fun compareDates(
+        dateToCompareFrom: CustomCalendar,
+        dateToCompareTo: CustomCalendar
+    ): Int {
+        return when {
+            dateToCompareFrom.year != dateToCompareTo.year -> dateToCompareFrom.year - dateToCompareTo.year
+            dateToCompareFrom.month != dateToCompareTo.month -> dateToCompareFrom.month - dateToCompareTo.month
+            else -> dateToCompareFrom.dayOfMonth - dateToCompareTo.dayOfMonth
+        }
     }
 
     /**
@@ -168,6 +213,7 @@ object NepaliDateConverter {
     ): String {
         return calendarModel.formatNepaliDate(year, month, dayOfMonth, dayOfWeek, locale)
     }
+
     /**
      * @param month takes value between 1 to 12.
      * @param format gives name of month either in short or full name.
