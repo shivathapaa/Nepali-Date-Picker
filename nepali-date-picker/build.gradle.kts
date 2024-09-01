@@ -24,8 +24,8 @@ plugins {
     alias(libs.plugins.androidLibrary)
     alias(libs.plugins.jetbrainsCompose)
     alias(libs.plugins.composeCompiler)
-    id("kotlinx-serialization")
-    id("com.vanniktech.maven.publish") version "0.29.0"
+    alias(libs.plugins.kotlinxSerialization)
+    alias(libs.plugins.mavenPublish)
 }
 
 kotlin {
@@ -51,20 +51,17 @@ kotlin {
     }
 
     sourceSets {
-        val commonMain by getting {
-            dependencies {
-                implementation(compose.runtime)
-                implementation(compose.foundation)
-                implementation(compose.ui)
-                implementation(compose.material3)
-                implementation(libs.kotlinx.serialization.json)
-                implementation(libs.kotlinx.datetime)
-            }
+        commonMain.dependencies {
+            implementation(compose.runtime)
+            implementation(compose.foundation)
+            implementation(compose.ui)
+            implementation(compose.material3)
+            implementation(libs.kotlinx.serialization.json)
+            implementation(libs.kotlinx.datetime)
         }
-        val commonTest by getting {
-            dependencies {
-                implementation(libs.kotlin.test)
-            }
+
+        commonTest.dependencies {
+            implementation(libs.kotlin.test)
         }
     }
 }
@@ -75,13 +72,17 @@ android {
     defaultConfig {
         minSdk = libs.versions.android.minSdk.get().toInt()
     }
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_1_8
+        targetCompatibility = JavaVersion.VERSION_1_8
+    }
 }
 
 
 mavenPublishing {
     // Define coordinates for the published artifact
     coordinates(
-        groupId = "io.github.shivathapaa", artifactId = "nepali-date-picker", version = "1.2.0"
+        groupId = "io.github.shivathapaa", artifactId = "nepali-date-picker", version = "2.0.0-beta01"
     )
 
     // Configure POM metadata for the published artifact
