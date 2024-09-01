@@ -396,7 +396,8 @@ interface NepaliSelectableDates {
  * is provided, the displayed month would be the current one.
  * @param yearRange an [IntRange] that holds the year range that the date picker will be limited to
  * @param nepaliSelectableDates a [NepaliSelectableDates] that is consulted to check if a date is
- * allowed. In case a date is not allowed to be selected, it will appear disabled in the UI.
+ * allowed. In case a date is not allowed to be selected, it will appear disabled in the UI. You can
+ * checkout helper functions `BeforeDate` and `AfterDate` in `NepaliDateConverter`.
  * @param locale an instance of [NepaliDateLocale] that is used to localize the date picker. It holds
  * the preference for the date picker formatted date and the language of the date picker.
  *
@@ -419,6 +420,15 @@ interface NepaliSelectableDates {
  *         }
  *     )
  *
+ * // Or you can utilize helper function (BeforeDate or AfterDate) to disable and enable dates
+ *
+ * val datePickerStateWithDateLimiter =
+ *     rememberNepaliDatePickerState(
+ *         nepaliSelectableDates = NepaliDatePickerDefaults.BeforeDate(
+ *              SimpleDate(2081, 3, 21)
+ *         )
+ *     )
+ *
  * NepaliDatePicker(state = defaultNepaliDatePickerState)
  *
  * NepaliDatePicker(
@@ -427,6 +437,9 @@ interface NepaliSelectableDates {
  *         containerColor = MaterialTheme.colorScheme.surface
  *     )
  * )
+ *
+ * NepaliDatePicker(state = datePickerStateWithDateLimiter)
+ *
  * ```
  */
 @Composable

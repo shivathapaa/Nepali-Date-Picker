@@ -18,6 +18,7 @@ package dev.shivathapaa.nepalidatepickerkmp.calendar_model
 
 import androidx.annotation.IntRange
 import androidx.compose.runtime.Immutable
+import dev.shivathapaa.nepalidatepickerkmp.NepaliSelectableDates
 import dev.shivathapaa.nepalidatepickerkmp.data.CustomCalendar
 import dev.shivathapaa.nepalidatepickerkmp.data.NameFormat
 import dev.shivathapaa.nepalidatepickerkmp.data.NepaliDateLocale
@@ -89,6 +90,104 @@ object NepaliDateConverter {
     }
 
     /**
+     * Allows selection of dates before a given date.
+     *
+     * @param simpleDate The date before which selection is allowed.
+     * @param includeDate Whether to include the given date in the selectable dates. (if [SimpleDate] is of Today then whether to include today or not)
+     */
+    fun BeforeDate(simpleDate: SimpleDate, includeDate: Boolean = false): NepaliSelectableDates =
+        object : NepaliSelectableDates {
+            override fun isSelectableDate(customCalendar: CustomCalendar): Boolean {
+                return if (includeDate) {
+                    compareDates(
+                        customCalendar,
+                        simpleDate.year,
+                        simpleDate.month,
+                        simpleDate.dayOfMonth
+                    ) <= 0
+                } else {
+                    compareDates(
+                        customCalendar,
+                        simpleDate.year,
+                        simpleDate.month,
+                        simpleDate.dayOfMonth
+                    ) < 0
+                }
+            }
+
+            override fun isSelectableYear(year: Int): Boolean {
+                return if (includeDate) {
+                    year <= simpleDate.year
+                } else {
+                    year < simpleDate.year
+                }
+            }
+        }
+
+    /**
+     * Allows selection of dates after a given date.
+     *
+     * @param simpleDate The date after which selection is allowed.
+     * @param includeDate Whether to include the given date in the selectable dates. (if [SimpleDate] is of Today then whether to include today or not)
+     */
+    fun AfterDate(simpleDate: SimpleDate, includeDate: Boolean = false): NepaliSelectableDates =
+        object : NepaliSelectableDates {
+            override fun isSelectableDate(customCalendar: CustomCalendar): Boolean {
+                return if (includeDate) {
+                    compareDates(
+                        customCalendar,
+                        simpleDate.year,
+                        simpleDate.month,
+                        simpleDate.dayOfMonth
+                    ) >= 0
+                } else {
+                    compareDates(
+                        customCalendar,
+                        simpleDate.year,
+                        simpleDate.month,
+                        simpleDate.dayOfMonth
+                    ) > 0
+                }
+            }
+
+            override fun isSelectableYear(year: Int): Boolean {
+                return if (includeDate) {
+                    year >= simpleDate.year
+                } else {
+                    year > simpleDate.year
+                }
+            }
+        }
+
+    /**
+     * Compares a [CustomCalendar] instance with a date represented by the given year, month, and dayOfMonth.
+     *
+     * Returns a negative integer if the [calendar] is before the given date, zero if they are equal,
+     * and a positive integer if the [calendar] is after the given date.
+     *
+     * @param calendar The [CustomCalendar] instance to compare.
+     * @param year The year of the date to compare with.
+     * @param month The month of the date to compare with.
+     * @param dayOfMonth The day of the month of the date to compare with.
+     * @return A negative integer, zero, or a positive integer as described above.
+     */
+    private fun compareDates(
+        calendar: CustomCalendar,
+        year: Int,
+        month: Int,
+        dayOfMonth: Int
+    ): Int {
+        return when {
+            calendar.year != year -> calendar.year - year
+            calendar.month != month -> calendar.month - month
+            else -> calendar.dayOfMonth - dayOfMonth
+        }
+    }
+
+    // Two overload functions [compareDates] can be simplified to one using an interface but,
+    // I don't want complexity in outer level. Also, these functions are unlikely to change overtime.
+
+    /**
      * Compares a [CustomCalendar] instance with a date represented by the given [SimpleDate].
      *
      * Returns a negative integer if the [dateToCompareFrom] is before the [dateToCompareTo], zero if they are equal,
@@ -99,15 +198,13 @@ object NepaliDateConverter {
      * @return A negative integer, zero, or a positive integer as described above.
      */
     fun compareDates(dateToCompareFrom: CustomCalendar, dateToCompareTo: SimpleDate): Int {
-        return when {
-            dateToCompareFrom.year != dateToCompareTo.year -> dateToCompareFrom.year - dateToCompareTo.year
-            dateToCompareFrom.month != dateToCompareTo.month -> dateToCompareFrom.month - dateToCompareTo.month
-            else -> dateToCompareFrom.dayOfMonth - dateToCompareTo.dayOfMonth
-        }
+        return compareDates(
+            dateToCompareFrom,
+            dateToCompareTo.year,
+            dateToCompareFrom.month,
+            dateToCompareFrom.dayOfMonth
+        )
     }
-
-    // Two overload functions [compareDates] can be simplified to one using an interface but,
-    // I don't want complexity in outer level. Also, these functions are unlikely to change overtime.
 
     /**
      * Overloaded function of above [compareDates] function.
@@ -121,15 +218,16 @@ object NepaliDateConverter {
      * @param dateToCompareTo The second date, which [dateToCompareFrom] is compared to.
      * @return A negative integer, zero, or a positive integer as described above.
      */
-    private fun compareDates(
+    fun compareDates(
         dateToCompareFrom: CustomCalendar,
         dateToCompareTo: CustomCalendar
     ): Int {
-        return when {
-            dateToCompareFrom.year != dateToCompareTo.year -> dateToCompareFrom.year - dateToCompareTo.year
-            dateToCompareFrom.month != dateToCompareTo.month -> dateToCompareFrom.month - dateToCompareTo.month
-            else -> dateToCompareFrom.dayOfMonth - dateToCompareTo.dayOfMonth
-        }
+        return compareDates(
+            dateToCompareFrom,
+            dateToCompareTo.year,
+            dateToCompareFrom.month,
+            dateToCompareFrom.dayOfMonth
+        )
     }
 
     /**

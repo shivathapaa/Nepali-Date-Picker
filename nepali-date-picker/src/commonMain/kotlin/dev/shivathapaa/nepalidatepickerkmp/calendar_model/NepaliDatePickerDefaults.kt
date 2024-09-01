@@ -166,85 +166,6 @@ object NepaliDatePickerDefaults {
      */
     val AllDates: NepaliSelectableDates = object : NepaliSelectableDates {}
 
-    /**
-     * Allows selection of dates before a given date.
-     *
-     * @param simpleDate The date before which selection is allowed.
-     * @param includeDate Whether to include the given date in the selectable dates. (if [SimpleDate] is of Today then whether to include today or not)
-     */
-    fun BeforeDate(simpleDate: SimpleDate, includeDate: Boolean = false): NepaliSelectableDates =
-        object : NepaliSelectableDates {
-            override fun isSelectableDate(customCalendar: CustomCalendar): Boolean {
-                return if (includeDate) {
-                    compareDates(
-                        customCalendar,
-                        simpleDate.year,
-                        simpleDate.month,
-                        simpleDate.dayOfMonth
-                    ) <= 0
-                } else {
-                    compareDates(
-                        customCalendar,
-                        simpleDate.year,
-                        simpleDate.month,
-                        simpleDate.dayOfMonth
-                    ) < 0
-                }
-            }
-        }
-
-    /**
-     * Allows selection of dates after a given date.
-     *
-     * @param simpleDate The date after which selection is allowed.
-     * @param includeDate Whether to include the given date in the selectable dates. (if [SimpleDate] is of Today then whether to include today or not)
-     */
-    fun AfterDate(simpleDate: SimpleDate, includeDate: Boolean = false): NepaliSelectableDates =
-        object : NepaliSelectableDates {
-            override fun isSelectableDate(customCalendar: CustomCalendar): Boolean {
-                return if (includeDate) {
-                    compareDates(
-                        customCalendar,
-                        simpleDate.year,
-                        simpleDate.month,
-                        simpleDate.dayOfMonth
-                    ) >= 0
-                } else {
-                    compareDates(
-                        customCalendar,
-                        simpleDate.year,
-                        simpleDate.month,
-                        simpleDate.dayOfMonth
-                    ) > 0
-                }
-            }
-        }
-
-    /**
-     * Compares a [CustomCalendar] instance with a date represented by the given year, month, and dayOfMonth.
-     *
-     * Returns a negative integer if the [calendar] is before the given date, zero if they are equal,
-     * and a positive integer if the [calendar] is after the given date.
-     *
-     * @param calendar The [CustomCalendar] instance to compare.
-     * @param year The year of the date to compare with.
-     * @param month The month of the date to compare with.
-     * @param dayOfMonth The day of the month of the date to compare with.
-     * @return A negative integer, zero, or a positive integer as described above.
-     */
-    private fun compareDates(
-        calendar: CustomCalendar,
-        year: Int,
-        month: Int,
-        dayOfMonth: Int
-    ): Int {
-        return when {
-            calendar.year != year -> calendar.year - year
-            calendar.month != month -> calendar.month - month
-            else -> calendar.dayOfMonth - dayOfMonth
-        }
-    }
-
     @Composable
     internal fun NepaliDatePickerTitle(
         modifier: Modifier = Modifier, language: NepaliDatePickerLang
@@ -632,9 +553,9 @@ internal fun getDefaultNepaliDatePickerColors(): NepaliDatePickerColors {
     return NepaliDatePickerColors(
         containerColor = MaterialTheme.colorScheme.surface,
         titleContentColor = MaterialTheme.colorScheme.onSurfaceVariant,
-        headlineContentColor = MaterialTheme.typography.headlineLarge.color,
+        headlineContentColor = MaterialTheme.colorScheme.onSurfaceVariant,
         weekdayContentColor = MaterialTheme.colorScheme.onSurface,
-        subheadContentColor = MaterialTheme.typography.titleSmall.color,
+        subheadContentColor = MaterialTheme.colorScheme.onSurfaceVariant,
         navigationContentColor = MaterialTheme.colorScheme.onSurface,
         yearContentColor = MaterialTheme.colorScheme.onSurface,
         disabledYearContentColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = DisabledAlpha),

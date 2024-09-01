@@ -207,6 +207,12 @@ val customizedDatePickerState =
         }
     )
 
+// Or you can utilize helper function (BeforeDate or AfterDate) to disable and enable dates
+val datePickerStateWithDateLimiter =
+    rememberNepaliDatePickerState(
+        nepaliSelectableDates = NepaliDatePickerDefaults.BeforeDate(SimpleDate(2081, 3, 21))
+    )
+
 NepaliDatePicker(state = defaultNepaliDatePickerState)
 
 NepaliDatePicker(
@@ -215,6 +221,8 @@ NepaliDatePicker(
         containerColor = MaterialTheme.colorScheme.surface
     )
 )
+
+NepaliDatePicker(state = datePickerStateWithDateLimiter)
 ```
 
 ## Support
