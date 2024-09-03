@@ -54,6 +54,7 @@ enum class NepaliDatePickerLang {
         override val datePickerTitle: String = "Select Nepali Date"
         override val cancelText: String = "Cancel"
         override val okText: String = "OK"
+        override val today: String = "TODAY"
     },
     NEPALI {
         override val weekdays: List<NepaliWeekdayName> = nepaliWeekdays
@@ -62,6 +63,7 @@ enum class NepaliDatePickerLang {
         override val datePickerTitle: String = "नेपाली मिति चयन गर्नुहोस्"
         override val cancelText: String = "रद्द गर्नुहोस्"
         override val okText: String = "भयो"
+        override val today: String = "आज"
     };
 
     abstract val weekdays: List<NepaliWeekdayName>
@@ -70,6 +72,7 @@ enum class NepaliDatePickerLang {
     abstract val datePickerTitle: String
     abstract val cancelText: String
     abstract val okText: String
+    abstract val today: String
 }
 
 private val nepaliMonths = listOf(

@@ -133,7 +133,7 @@ fun NepaliDatePicker(
     },
     headline: (@Composable () -> Unit)? = {
         NepaliDatePickerDefaults.NepaliDatePickerHeadline(
-            selectedDate = state.selectedDate?.toSimpleDate(),
+            selectedDate = state.selectedDate,
             modifier = Modifier.padding(NepaliDatePickerHeadlinePadding),
             locale = state.locale
         )
@@ -256,6 +256,12 @@ private fun NepaliDatePicker(
     val displayedMonthIndex by remember(displayedMonth) {
         derivedStateOf { displayedMonth.indexIn(yearRange) }
     }
+    val initialIndex = today.indexIn(yearRange)
+
+    val isToday by remember(displayedMonthIndex) {
+        derivedStateOf { displayedMonthIndex == initialIndex }
+    }
+
     val monthsListState = rememberLazyListState(initialFirstVisibleItemIndex = displayedMonthIndex)
     val coroutineScope = rememberCoroutineScope()
     var yearPickerVisible by rememberSaveable { mutableStateOf(false) }
@@ -270,6 +276,8 @@ private fun NepaliDatePicker(
     Column {
         NepaliMonthsNavigation(
             modifier = Modifier.padding(horizontal = DatePickerHorizontalPadding),
+            isToday = isToday,
+            todayText = chosenLanguage.today,
             nextAvailable = monthsListState.canScrollForward,
             previousAvailable = monthsListState.canScrollBackward,
             yearPickerVisible = yearPickerVisible,
@@ -297,6 +305,9 @@ private fun NepaliDatePicker(
                         // while  the list was still animating to the previous item.
                     }
                 }
+            },
+            onRefreshClicked = {
+                coroutineScope.launch { monthsListState.scrollToItem(initialIndex) }
             },
             onYearPickerButtonClicked = { yearPickerVisible = !yearPickerVisible },
             colors = colors
@@ -639,11 +650,14 @@ private class NepaliDatePickerStateImpl(
 private fun NepaliMonthsNavigation(
     modifier: Modifier,
     nextAvailable: Boolean,
+    isToday: Boolean,
+    todayText: String,
     previousAvailable: Boolean,
     yearPickerVisible: Boolean,
     yearPickerText: String,
     onNextClicked: () -> Unit,
     onPreviousClicked: () -> Unit,
+    onRefreshClicked: () -> Unit,
     onYearPickerButtonClicked: () -> Unit,
     colors: NepaliDatePickerColors
 ) {
@@ -670,11 +684,16 @@ private fun NepaliMonthsNavigation(
             // Show arrows for traversing months (only visible when the year selection is off)
             if (!yearPickerVisible) {
                 Row {
+                    TextButton(onRefreshClicked, enabled = !isToday) {
+                        Text(text = todayText, style = MaterialTheme.typography.labelLarge)
+                    }
+
                     IconButton(onClick = onPreviousClicked, enabled = previousAvailable) {
                         Icon(
                             Icons.AutoMirrored.Filled.KeyboardArrowLeft, contentDescription = null
                         )
                     }
+
                     IconButton(onClick = onNextClicked, enabled = nextAvailable) {
                         Icon(
                             Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = null

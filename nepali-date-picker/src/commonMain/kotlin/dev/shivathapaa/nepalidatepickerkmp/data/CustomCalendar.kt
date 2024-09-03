@@ -25,7 +25,14 @@ data class SimpleDate(
     val year: Int,
     val month: Int,
     val dayOfMonth: Int = 1
-)
+) {
+    /**
+     * Returns the position of a [SimpleDate] within given years range.
+     */
+    fun indexIn(years: IntRange): Int {
+        return (year - years.first) * 12 + month - 1
+    }
+}
 
 @Immutable
 @Serializable
