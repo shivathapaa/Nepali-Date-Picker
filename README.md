@@ -6,7 +6,8 @@
 
 KMP Nepali Date Picker for both Android and/or iOS which aligns with the Material3 Date Picker. This library provides UI and various utilities to work with Nepali Dates, and acts as a bridge between Nepali Calendar and Gregorian Calendar.
 
-[Using in your project.](#using-in-your-projects) &nbsp;&nbsp;&nbsp;&nbsp; [See screenshot of Nepali Date Picker](#screenshots)
+[Using in your project.](#using-in-your-projects) &nbsp;&nbsp;&nbsp;&nbsp; [See screenshot of Nepali Date Picker](#screenshots) &nbsp;&nbsp;&nbsp;&nbsp;
+Read on Medium: [![Medium](https://img.shields.io/badge/Medium-12100E?style=social&logo=medium)](https://medium.com/@shivathapaa/nepali-date-picker-for-android-and-ios-kotlin-multiplatform-a739ea0caf47)
 
 ## Design overview
 
