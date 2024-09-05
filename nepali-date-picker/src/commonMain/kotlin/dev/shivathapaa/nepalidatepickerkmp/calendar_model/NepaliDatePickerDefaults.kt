@@ -199,7 +199,7 @@ object NepaliDatePickerDefaults {
      * A default button to for Nepali date picker dialog. i.e., "Cancel", "OK"
      */
     @Composable
-    fun NepaliDatePickerDialogButton(
+    fun DialogButton(
         text: String,
         onButtonClick: () -> Unit,
         modifier: Modifier = Modifier,
