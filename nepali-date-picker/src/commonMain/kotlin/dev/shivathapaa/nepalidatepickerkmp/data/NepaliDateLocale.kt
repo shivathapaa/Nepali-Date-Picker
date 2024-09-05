@@ -18,6 +18,17 @@ package dev.shivathapaa.nepalidatepickerkmp.data
 
 import androidx.compose.runtime.Immutable
 
+/**
+ * Represents locale settings for Nepali date display and formatting.
+ *
+ * This data class holds information about the language, date format, and name formats for weekdays and months
+ * used when displaying and formatting Nepali dates.
+ *
+ * @property language The language to use for date-related text (English or Nepali). Defaults to English.
+ * @property dateFormat The style of date formatting to use. Defaults to LONG.
+ * @property weekDayName The format for displaying weekday names (FULL, MEDIUM, or SHORT). Defaults to FULL.
+ * @property monthName The format for displaying month names (FULL, MEDIUM, or SHORT). Defaults to FULL.
+ */
 @Immutable
 data class NepaliDateLocale(
     val language: NepaliDatePickerLang = NepaliDatePickerLang.ENGLISH,
@@ -26,10 +37,16 @@ data class NepaliDateLocale(
     val monthName: NameFormat = NameFormat.FULL
 )
 
+/**
+ * Represents the format for displaying names (e.g., weekdays or months).
+ */
 enum class NameFormat {
     FULL, MEDIUM, SHORT
 }
 
+/**
+ * Represents different styles for formatting Nepali dates.
+ */
 enum class NepaliDateFormatStyle {
     FULL,         // Monday, Asar 21, 2024 or सोमबार, असार २१, २०२४
     LONG,         // Asar 21, 2024 or असार २१, २०२४
@@ -40,12 +57,34 @@ enum class NepaliDateFormatStyle {
     COMPACT_YMD   // 24/06/21 or २४/०६/२१
 }
 
+/**
+ * Represents the name of a weekday in the Nepali calendar.
+ *
+ * This data class provides the weekday name in different formats: short, medium, and full.
+ *
+ * @property short The short name of the weekday (e.g., "S").
+ * @property medium The medium name of the weekday (e.g., "Sun").
+ * @property full The full name of the weekday (e.g., "Sunday").
+ */
 @Immutable
 data class NepaliWeekdayName(val short: String, val medium: String, val full: String)
 
+/**
+ * Represents the name of a month in the Nepali calendar.
+ *
+ * This data class provides the month name in different formats: short and full.
+ *
+ * @property short The short name of the month (e.g., "बै").
+ * @property full The full name of the month (e.g., "बैशाख").
+ */
 @Immutable
 data class NepaliMonthName(val short: String, val full: String)
 
+/**
+ * Represents the language used for Nepali date pickers.
+ *
+ * This enum provides language-specific text and lists of weekday and month names for English and Nepali.
+ */
 enum class NepaliDatePickerLang {
     ENGLISH {
         override val weekdays: List<NepaliWeekdayName> = englishWeekdays
