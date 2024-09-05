@@ -16,7 +16,6 @@
 
 package dev.shivathapaa.nepalidatepickerkmp.calendar_model
 
-import androidx.annotation.IntRange
 import androidx.compose.runtime.Immutable
 import dev.shivathapaa.nepalidatepickerkmp.data.CustomCalendar
 import dev.shivathapaa.nepalidatepickerkmp.data.NepaliMonthCalendar
@@ -42,8 +41,8 @@ internal object DateConverters {
 
     fun convertToNepaliCalendar(
         englishYYYY: Int,
-        @IntRange(from = 1, to = 12) englishMM: Int,
-        @IntRange(from = 1, to = 31) englishDD: Int
+        englishMM: Int,
+        englishDD: Int
     ): CustomCalendar {
         // Check if the input date is within the conversion range
         require(isEnglishDateInConversionRange(englishYYYY, englishMM, englishDD)) {
@@ -133,8 +132,8 @@ internal object DateConverters {
 
     fun convertToEnglishDate(
         nepaliYYYY: Int,
-        @IntRange(from = 1, to = 12) nepaliMM: Int,
-        @IntRange(from = 1, to = 32) nepaliDD: Int
+        nepaliMM: Int,
+        nepaliDD: Int
     ): CustomCalendar {
         // Check if the input Nepali date is within the conversion range
         require(isNepaliCalendarInConversionRange(nepaliYYYY, nepaliMM, nepaliDD)) {
@@ -266,7 +265,7 @@ internal object DateConverters {
 
     // Three overload functions for month details
     fun getNepaliMonth(
-        nepaliYear: Int, @IntRange(from = 1, to = 12) nepaliMonth: Int
+        nepaliYear: Int, nepaliMonth: Int
     ): NepaliMonthCalendar {
         // Calculate and return the month details
         return calculateNepaliMonthDetails(
@@ -275,7 +274,7 @@ internal object DateConverters {
     }
 
     fun getNepaliMonth(
-        nepaliYear: Int, @IntRange(from = 1, to = 12) nepaliMonth: Int, addedMonthsCount: Int
+        nepaliYear: Int, nepaliMonth: Int, addedMonthsCount: Int
     ): NepaliMonthCalendar {
         // Normalize the month and adjust the year accordingly
         val (newYear, newMonth) = adjustYearAndMonth(nepaliYear, nepaliMonth + addedMonthsCount)
@@ -294,8 +293,8 @@ internal object DateConverters {
 
     private fun getCustomCalendarUsingDayMonthYear(
         year: Int,
-        @IntRange(from = 1, to = 12) month: Int,
-        @IntRange(from = 1, to = 32) dayOfMonth: Int
+        month: Int,
+        dayOfMonth: Int
     ): CustomCalendar {
         // Normalize the month and adjust the year accordingly
 //        val (newYear, newMonth) = adjustYearAndMonth(year, month)

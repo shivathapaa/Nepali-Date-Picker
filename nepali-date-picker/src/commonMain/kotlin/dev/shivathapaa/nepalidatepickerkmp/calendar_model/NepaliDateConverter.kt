@@ -16,7 +16,6 @@
 
 package dev.shivathapaa.nepalidatepickerkmp.calendar_model
 
-import androidx.annotation.IntRange
 import androidx.compose.runtime.Immutable
 import dev.shivathapaa.nepalidatepickerkmp.NepaliSelectableDates
 import dev.shivathapaa.nepalidatepickerkmp.data.CustomCalendar
@@ -348,9 +347,9 @@ object NepaliDateConverter {
      */
     fun formatNepaliDate(
         year: Int,
-        @IntRange(from = 1, to = 12) month: Int,
-        @IntRange(from = 1, to = 32) dayOfMonth: Int,
-        @IntRange(from = 1, to = 7) dayOfWeek: Int,
+        month: Int,
+        dayOfMonth: Int,
+        dayOfWeek: Int,
         locale: NepaliDateLocale
     ): String {
         return calendarModel.formatNepaliDate(year, month, dayOfMonth, dayOfWeek, locale)

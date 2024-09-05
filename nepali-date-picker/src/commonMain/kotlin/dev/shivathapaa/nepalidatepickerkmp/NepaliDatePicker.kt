@@ -21,7 +21,6 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.snapping.rememberSnapFlingBehavior
 import androidx.compose.foundation.layout.Arrangement
@@ -773,7 +772,6 @@ private fun NepaliWeekDays(
     }
 }
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun NepaliHorizontalMonthList(
     today: SimpleDate,

@@ -30,7 +30,6 @@ plugins {
 
 kotlin {
     androidTarget {
-        publishLibraryVariants("release")
         @OptIn(ExperimentalKotlinGradlePluginApi::class)
         compilerOptions {
             jvmTarget.set(JvmTarget.JVM_1_8)
@@ -51,17 +50,21 @@ kotlin {
     }
 
     sourceSets {
-        commonMain.dependencies {
-            implementation(compose.runtime)
-            implementation(compose.foundation)
-            implementation(compose.ui)
-            implementation(compose.material3)
-            implementation(libs.kotlinx.serialization.json)
-            implementation(libs.kotlinx.datetime)
+        val commonMain by getting {
+            dependencies {
+                implementation(compose.runtime)
+                implementation(compose.foundation)
+                implementation(compose.ui)
+                implementation(compose.material3)
+                implementation(libs.kotlinx.serialization.json)
+                implementation(libs.kotlinx.datetime)
+            }
         }
 
-        commonTest.dependencies {
-            implementation(libs.kotlin.test)
+        val commonTest by getting {
+            dependencies {
+                implementation(libs.kotlin.test)
+            }
         }
     }
 }
@@ -82,7 +85,9 @@ android {
 mavenPublishing {
     // Define coordinates for the published artifact
     coordinates(
-        groupId = "io.github.shivathapaa", artifactId = "nepali-date-picker", version = "2.0.0-beta03"
+        groupId = "io.github.shivathapaa",
+        artifactId = "nepali-date-picker",
+        version = "2.0.0-beta04"
     )
 
     // Configure POM metadata for the published artifact
