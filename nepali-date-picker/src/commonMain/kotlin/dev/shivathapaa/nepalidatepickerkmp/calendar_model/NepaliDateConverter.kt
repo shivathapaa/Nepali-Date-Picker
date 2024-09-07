@@ -366,8 +366,8 @@ object NepaliDateConverter {
      *
      * ```
      * val time = SimpleTime(16, 30, 0, 0)
-     * val nepaliTime12Hour = getFormattedTimeInNepali(time) // Output: "4:30 PM"
-     * val nepaliTime24Hour = getFormattedTimeInNepali(time, false) // Output: "16:30"
+     * val nepaliTime12Hour = getFormattedTimeInEnglish(time) // Output: "4:30 PM"
+     * val nepaliTime24Hour = getFormattedTimeInEnglish(time, false) // Output: "16:30"
      * ```
      */
     fun getFormattedTimeInEnglish(simpleTime: SimpleTime, use12HourFormat: Boolean = true): String {
