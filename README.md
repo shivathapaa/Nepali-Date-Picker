@@ -129,6 +129,9 @@ To integrate this library into your iOS project using CocoaPods:
 
 > Will be updated very soon....
 
+> ### Desktop/Web
+> Will work on it if it will be helpful to community. [Let me know](https://github.com/shivathapaa/Nepali-Date-Picker/issues/new/choose) if I should!
+
 ## License
 
 This project is licensed under [Mozilla Public License 2.0 (MPL 2.0)](https://github.com/shivathapaa/Nepali-Date-Picker/blob/main/LICENSE)
