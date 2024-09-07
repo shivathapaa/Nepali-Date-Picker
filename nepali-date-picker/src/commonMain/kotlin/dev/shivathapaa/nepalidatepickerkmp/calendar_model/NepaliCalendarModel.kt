@@ -24,22 +24,46 @@ import dev.shivathapaa.nepalidatepickerkmp.data.NepaliDateLocale
 import dev.shivathapaa.nepalidatepickerkmp.data.NepaliDatePickerLang
 import dev.shivathapaa.nepalidatepickerkmp.data.NepaliMonthCalendar
 import dev.shivathapaa.nepalidatepickerkmp.data.SimpleDate
+import dev.shivathapaa.nepalidatepickerkmp.data.SimpleTime
 import kotlinx.datetime.Clock
+import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
-import kotlinx.datetime.todayIn
+import kotlinx.datetime.toLocalDateTime
 
 @Immutable
 internal class NepaliCalendarModel(val locale: NepaliDateLocale = NepaliDateLocale()) {
+    private val timeZone = TimeZone.of(zoneId = "Asia/Kathmandu")
+    private val localEnglishDateTime: LocalDateTime = Clock.System.now().toLocalDateTime(timeZone)
 
     val today
         get(): CustomCalendar {
             return getNepaliDateInstance()
         }
 
+    val todayEnglish
+        get(): SimpleDate = SimpleDate(
+            year = localEnglishDateTime.year,
+            month = localEnglishDateTime.monthNumber,
+            dayOfMonth = localEnglishDateTime.dayOfMonth
+        )
+
+    val currentTime
+        get(): SimpleTime {
+            val nowTime: LocalDateTime = Clock.System.now().toLocalDateTime(timeZone)
+
+            return SimpleTime(
+                hour = nowTime.hour,
+                minute = nowTime.minute,
+                second = nowTime.second,
+                nanosecond = nowTime.nanosecond
+            )
+        }
+
     private fun getNepaliDateInstance(): CustomCalendar {
-        val now = Clock.System.todayIn(TimeZone.of("Asia/Kathmandu"))
         return DateConverters.convertToNepaliCalendar(
-            englishYYYY = now.year, englishMM = now.monthNumber, englishDD = now.dayOfMonth
+            englishYYYY = localEnglishDateTime.year,
+            englishMM = localEnglishDateTime.monthNumber,
+            englishDD = localEnglishDateTime.dayOfMonth
         )
     }
 

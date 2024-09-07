@@ -24,6 +24,7 @@ import dev.shivathapaa.nepalidatepickerkmp.data.NepaliDateLocale
 import dev.shivathapaa.nepalidatepickerkmp.data.NepaliDatePickerLang
 import dev.shivathapaa.nepalidatepickerkmp.data.NepaliMonthCalendar
 import dev.shivathapaa.nepalidatepickerkmp.data.SimpleDate
+import dev.shivathapaa.nepalidatepickerkmp.data.SimpleTime
 import dev.shivathapaa.nepalidatepickerkmp.data.englishMonths
 
 @Immutable
@@ -35,6 +36,28 @@ object NepaliDateConverter {
      */
     val todayNepaliDate
         get() = calendarModel.today
+
+    /**
+     * Strictly adjusted to `Asia/Kathmandu` TimeZone.
+     *
+     * @return the current date in the English calendar as a [SimpleDate].
+     */
+    val todayEnglishDate: SimpleDate
+        get() = calendarModel.todayEnglish
+
+    /**
+     * Gets the current time in Kathmandu.
+     *
+     * This property returns a [SimpleTime] object representing the current hour, minute, second,
+     * and nanosecond in the `Asia/Kathmandu` time zone. The time is calculated fresh each time
+     * this property is accessed, so you always get the most up-to-date time.
+     *
+     * Get formatted time string using [getFormattedTimeInNepali] and [getFormattedTimeInEnglish]
+     *
+     * @return A [SimpleTime] object representing the current time.
+     */
+    val currentTime: SimpleTime
+        get() = calendarModel.currentTime
 
     /**
      * This function converts english date to nepali date.
@@ -330,6 +353,78 @@ object NepaliDateConverter {
      */
     fun formatNepaliDate(customCalendar: CustomCalendar, locale: NepaliDateLocale): String {
         return calendarModel.formatNepaliDate(customCalendar, locale)
+    }
+
+    /**
+     * Formats a [SimpleTime] object into a time string in English.
+     *
+     * @param simpleTime The [SimpleTime] object to format.
+     * @param use12HourFormat If true, the time will be formatted in 12-hour format (e.g., "09:45 AM").
+     * If false, the time will be formatted in 24-hour format (e.g., "21:45").
+     *
+     * @return A formatted time string in English.
+     *
+     * ```
+     * val time = SimpleTime(16, 30, 0, 0)
+     * val nepaliTime12Hour = getFormattedTimeInNepali(time) // Output: "4:30 PM"
+     * val nepaliTime24Hour = getFormattedTimeInNepali(time, false) // Output: "16:30"
+     * ```
+     */
+    fun getFormattedTimeInEnglish(simpleTime: SimpleTime, use12HourFormat: Boolean = true): String {
+        return if (use12HourFormat) {
+            val amPm = if (simpleTime.hour < 12) "AM" else "PM"
+            val standardHour =
+                if (simpleTime.hour == 0) 12 else if (simpleTime.hour > 12) simpleTime.hour - 12 else simpleTime.hour
+
+            "$standardHour:${simpleTime.minute.toString().padStart(2, '0')} $amPm"
+        } else {
+            "${simpleTime.hour}:${simpleTime.minute.toString().padStart(2, '0')}"
+        }
+    }
+
+    /**
+     * Formats a [SimpleTime] object into a Nepali time string.
+     *
+     * This function generates a formatted time string in Nepali.
+     *
+     * The time of day is determined using hour values to Nepali names:
+     * * 4-10: "बिहान"
+     * * 11-15: "दिउँसो"
+     * * 16-19: "साँझ"
+     * * Other: "राति"
+     *
+     * The hour is displayed in 12-hour format if `use12HourFormat` is true, otherwise in 24-hour format.
+     * Minutes are always displayed with two digits (e.g., 05, 30).
+     * Digits are converted to Nepali using the [convertToNepaliNumber] function.
+     *
+     * @param simpleTime The [SimpleTime] object to format.
+     * @param use12HourFormat If true (default), the time will be formatted in 12-hour format including the time of day.
+     *                        If false, the time will be formatted in 24-hour format.
+     *
+     * @return A formatted time string in Nepali.
+     *
+     * ```
+     * val time = SimpleTime(16, 30, 0, 0)
+     * val nepaliTime12Hour = getFormattedTimeInNepali(time) // Output: "साँझ ४ : ३०"
+     * val nepaliTime24Hour = getFormattedTimeInNepali(time, false) // Output: "१६ : ३०"
+     * ```
+     */
+    fun getFormattedTimeInNepali(simpleTime: SimpleTime, use12HourFormat: Boolean = true): String {
+        val hourOfDay =
+            when (simpleTime.hour) {
+                in 4..10 -> "बिहान"
+                in 11..15 -> "दिउँसो"
+                in 16..19 -> "साँझ"
+                else -> "राति"
+            }
+
+        val hour = if (use12HourFormat && simpleTime.hour > 12) simpleTime.hour - 12 else simpleTime.hour
+        val formattedHour = if (use12HourFormat && simpleTime.hour == 0) 12 else hour
+
+        return if (use12HourFormat) {
+            "$hourOfDay ${formattedHour.toString().convertToNepaliNumber()} : ${simpleTime.minute.toString().padStart(2, '0').convertToNepaliNumber()}"
+        }
+        else "${formattedHour.toString().convertToNepaliNumber()} : ${simpleTime.minute.toString().padStart(2, '0').convertToNepaliNumber()}"
     }
 
     /**

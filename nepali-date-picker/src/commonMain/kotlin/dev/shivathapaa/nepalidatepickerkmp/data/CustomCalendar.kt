@@ -40,6 +40,23 @@ data class SimpleDate(
 }
 
 /**
+ * Represents a 24Hrs format time of day (hour, minute, second, nanosecond).
+ * Strictly adjusted to the `Asia/Kathmandu` TimeZone.
+ *
+ * @property hour Hour of the day (0-23).
+ * @property minute Minute of the hour (0-59).
+ * @property second Second of the minute (0-59).
+ * @property nanosecond Nanosecond of the second (0-999,999,999).
+ */
+@Immutable
+data class SimpleTime(
+    val hour: Int,
+    val minute: Int,
+    val second: Int,
+    val nanosecond: Int
+)
+
+/**
  * Represents a date in a custom calendar system with detailed information.
  *
  * This data class holds information about a specific date, including its year, month, day,
