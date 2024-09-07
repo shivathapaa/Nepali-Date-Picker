@@ -36,10 +36,14 @@ The library provides a basic set of types/features for working with date picker:
 
 Using this library you can get following things done.
 
-### Getting today's Nepali date
+### Getting today's date and current time
 
 ```kotlin
 NepaliDateConverter.todayNepaliDate
+
+NepaliDateConverter.todayEnglishDate
+
+NepaliDateConverter.currentTime
 ```
 
 ### Converting English date to Nepali date
@@ -89,6 +93,17 @@ val locale = NepaliDateLocale(
             )
 val formattedDate = NepaliDateConverter.formatNepaliDate(customCalendar, locale)
 // formattedDate: "Monday, Asar 11, 2080"
+
+
+// Time formatter
+
+NepaliDateConverter.getFormattedTimeInNepali(NepaliDateConverter.currentTime) // Output: "साँझ ४ : ३०"
+
+NepaliDateConverter.getFormattedTimeInNepali(NepaliDateConverter.currentTime, use12HourFormat = false) // Output: "१६ : ३०"
+
+NepaliDateConverter.getFormattedTimeInEnglish(NepaliDateConverter.currentTime) // Output: "4:30 PM"
+
+NepaliDateConverter.getFormattedTimeInEnglish(NepaliDateConverter.currentTime, use12HourFormat = false) // Output: "16:30"
 ```
 
 ## Using in your projects
