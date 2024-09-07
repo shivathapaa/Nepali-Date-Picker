@@ -24,7 +24,6 @@ plugins {
     alias(libs.plugins.androidLibrary)
     alias(libs.plugins.jetbrainsCompose)
     alias(libs.plugins.composeCompiler)
-    alias(libs.plugins.kotlinxSerialization)
     alias(libs.plugins.mavenPublish)
 }
 
@@ -35,7 +34,7 @@ kotlin {
             jvmTarget.set(JvmTarget.JVM_1_8)
         }
 
-        publishLibraryVariants("release", "debug")
+        publishLibraryVariants("release")
     }
 
     val xcf = XCFramework()
@@ -56,7 +55,6 @@ kotlin {
                 implementation(compose.foundation)
                 implementation(compose.ui)
                 implementation(compose.material3)
-                implementation(libs.kotlinx.serialization.json)
                 implementation(libs.kotlinx.datetime)
             }
         }
@@ -75,22 +73,18 @@ android {
     defaultConfig {
         minSdk = libs.versions.android.minSdk.get().toInt()
     }
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
-    }
 }
 
 
 mavenPublishing {
-    // Define coordinates for the published artifact
+    // Coordinates for the published artifact
     coordinates(
         groupId = "io.github.shivathapaa",
         artifactId = "nepali-date-picker",
-        version = "2.0.0-beta06"
+        version = "2.0.0-beta07"
     )
 
-    // Configure POM metadata for the published artifact
+    // POM metadata for the published artifact
     pom {
         name.set("Nepali Date Picker KMP")
         description.set("Nepali Date Picker for both Android and/or iOS which aligns with the Material3 Date Picker. This library give various utilities to work with Nepali Dates and acts as a bridge between Nepali Calendar and Gregorian Calendar.")
@@ -104,16 +98,16 @@ mavenPublishing {
             }
         }
 
-        // Specify developer information
         developers {
             developer {
                 id.set("shivathapaa")
                 name.set("Shiva Thapa")
-                email.set("shivathapaa.dev@gmail.com")
+                email.set("shivathapa.droid.dev@gmail.com")
+                url.set("https://github.com/shivathapaa/")
             }
         }
 
-        // Specify SCM information
+        // SCM information
         scm {
             url.set("https://github.com/shivathapaa/Nepali-Date-Picker")
         }

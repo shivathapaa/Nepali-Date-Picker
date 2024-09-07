@@ -95,8 +95,6 @@ import dev.shivathapaa.nepalidatepickerkmp.data.SimpleDate
 import dev.shivathapaa.nepalidatepickerkmp.data.toNepaliMonthCalendar
 import dev.shivathapaa.nepalidatepickerkmp.data.toSimpleDate
 import kotlinx.coroutines.launch
-import kotlinx.serialization.encodeToString
-import kotlinx.serialization.json.Json
 import kotlin.math.max
 
 /**
@@ -608,36 +606,24 @@ private class NepaliDatePickerStateImpl(
         } else null
 
     companion object {
-        // Initialize Json with ignoreUnknownKeys = true to handle changes in SimpleDate's structure
-        // and prevent crashes due to missing properties during deserialization.
-        val json = Json { ignoreUnknownKeys = true }
-
         fun Saver(
             nepaliSelectableDates: NepaliSelectableDates, locale: NepaliDateLocale
         ): Saver<NepaliDatePickerStateImpl, Any> = listSaver(save = { state ->
             listOf(
-                state.selectedDate?.let { json.encodeToString(it) }, // Save the encoded date or null
-                Json.encodeToString(state.displayedMonth),
+                state.selectedDate?.encodeToSimpleDateString(),
+                state.displayedMonth.encodeToSimpleDateString(),
                 state.yearRange.first,
                 state.yearRange.last
             )
         }, restore = { value ->
             NepaliDatePickerStateImpl(
-                initialSelectedDate = if (value.isNotEmpty()) decodeDateOrNull(value[0] as? String) else null,
-                initialDisplayedMonth = if (value.size > 1) decodeDateOrNull(value[1] as? String) else null,
+                initialSelectedDate = if (value.isNotEmpty()) decodeSimpleDateFromString(value[0] as? String) else null,
+                initialDisplayedMonth = if (value.size > 1) decodeSimpleDateFromString(value[1] as? String) else null,
                 yearRange = IntRange(value[2] as Int, value[3] as Int),
                 nepaliSelectableDates = nepaliSelectableDates,
                 locale = locale
             )
         })
-
-        @Stable
-        private fun decodeDateOrNull(dateString: String?): SimpleDate? {
-            return when {
-                dateString == null -> null
-                else -> json.decodeFromString<SimpleDate>(dateString)
-            }
-        }
     }
 }
 
@@ -1087,6 +1073,37 @@ internal fun ProvideContentColorTextStyle(
         LocalTextStyle provides mergedStyle,
         content = content
     )
+}
+
+/**
+ * Encode the [CustomCalendar] and [NepaliMonthCalendar] in [SimpleDate] format.
+ */
+private fun CustomCalendar.encodeToSimpleDateString(): String {
+    return "$year,$month,$dayOfMonth"
+}
+
+private fun NepaliMonthCalendar.encodeToSimpleDateString(): String {
+    return "$year,$month,1" // Defaulting to the first day of the month
+}
+
+/**
+ * Decodes a comma-separated string into a [SimpleDate] object.
+ *
+ * The input string should contain exactly three values: year, month, and day of the month.
+ * If the string is invalid or cannot be parsed into integers, this function returns null.
+ *
+ * @param dateString The comma-separated string to decode, e.g., "2081,3,21".
+ * @return A [SimpleDate] object if the string is valid and contains three integer values;
+ *         otherwise, returns null.
+ */
+private fun decodeSimpleDateFromString(dateString: String?): SimpleDate? {
+    return dateString?.split(",")?.takeIf { it.size == 3 }?.let {
+        try {
+            SimpleDate(it[0].toInt(), it[1].toInt(), it[2].toInt())
+        } catch (e: NumberFormatException) {
+            null
+        }
+    }
 }
 
 private const val NepaliDaysInWeek: Int = 7

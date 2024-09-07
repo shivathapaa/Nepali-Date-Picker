@@ -17,7 +17,6 @@
 package dev.shivathapaa.nepalidatepickerkmp.data
 
 import androidx.compose.runtime.Immutable
-import kotlinx.serialization.Serializable
 
 /**
  * Represents a simple date with year, month, and day of the month.
@@ -27,7 +26,6 @@ import kotlinx.serialization.Serializable
  * @property dayOfMonth The day of the month (1-32). Defaults to 1.
  */
 @Immutable
-@Serializable
 data class SimpleDate(
     val year: Int,
     val month: Int,
@@ -61,7 +59,6 @@ data class SimpleDate(
  * @property weekOfYear The week of the year (1-53). Defaults to -1 if not applicable.
  */
 @Immutable
-@Serializable
 data class CustomCalendar(
     val year: Int,
     val month: Int,
@@ -92,7 +89,6 @@ data class CustomCalendar(
  * @property daysFromStartOfWeekToFirstOfMonth The number of days from the start of the week (Sunday) to the first day of the month.
  */
 @Immutable
-@Serializable
 data class NepaliMonthCalendar(
     val year: Int,
     val month: Int,

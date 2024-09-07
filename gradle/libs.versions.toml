@@ -5,13 +5,11 @@ compose-plugin = "1.7.0-beta01"
 android-minSdk = "24"
 android-compileSdk = "34"
 kotlinxDatetime = "0.6.1"
-kotlinxSerializationJson = "1.7.1"
 mavenPublish = "0.29.0"
 
 [libraries]
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
 kotlinx-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.ref = "kotlinxDatetime" }
-kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinxSerializationJson" }
 
 [plugins]
 androidLibrary = { id = "com.android.library", version.ref = "agp" }
@@ -19,5 +17,3 @@ jetbrainsCompose = { id = "org.jetbrains.compose", version.ref = "compose-plugin
 composeCompiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 kotlinMultiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
 mavenPublish = { id = "com.vanniktech.maven.publish", version.ref = "mavenPublish" }
-kotlinxSerialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref ="kotlin" }
-kotlinJvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
