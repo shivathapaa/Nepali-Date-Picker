@@ -21,13 +21,14 @@ You can use this library independent to any platform or in common Kotlin Multipl
 
 ## Types/Features
 
-The library provides a basic set of types/features for working with date picker:
+This library provides variery of features for working with date picker. It is not only limited to date picker but many utilities that serves its purpose with extended support for date and time. 
+Some of them are listed below:
 
 - `CustomCalendar` - Calendar which represents both English and Nepali dates.
 - `NepaliMonthCalendar` - Nepali Month Calendar which consists of the month details.
 - `NepaliDateLocale` - To control language, dateFormat, weekDayName, and monthName.
 - `NepaliDatePickerLang` - Set of supported language (English & Nepali for now).
-- `NepaliDateConverter` - Provides utilities for date conversions (english to nepali and vice versa), get formatted date(6) and many more.
+- `NepaliDateConverter` - Provides utilities for date conversions (english to nepali and vice versa), get formatted date(6), get time, get date-time in ISO 8601 format, calculate days in between two date, and many more.
 - `rememberNepaliDatePickerState()` - To read, write, and manage state of the date picker.
 - `NepaliSelectableDates` - To control selectable dates i.e. enable/disable certain dates.
 - `NepaliDatePickerColors` - Takes `Material3` ?: **Material** colors by **default**. All the colors it uses are taken from your app colors if you've defined Material colors in your project. Also, there's always `.copy()` to modify the color.  
@@ -79,6 +80,28 @@ NepaliDateConverter.getEnglishMonthName(1) // January
 
 "year २०२४".convertToEnglishNumber() // year 2024
 
+```
+
+```kotlin
+// Convert date and time in ISO 8061 format
+val date = SimpleDate(2024, 5, 15)
+val time = SimpleTime(10, 30, 45, 0)
+val isoDateTime = formatToIsoDateTime(date, time)
+println(isoDateTime) // Output: 2024-05-15T04:45:45Z
+
+// Or, use current time
+val date = SimpleDate(2024, 5, 15)
+val isoDateTime = formatToIsoDateTime(date)
+println(isoDateTime) // Output: 2024-05-15T23:45:45Z
+
+// Calculate number of day in between two dates
+val englishStartDate = SimpleDate(1998, 4, 12)
+val englishEndDate = SimpleDate(2024, 9, 21)
+val nepaliStartDate = SimpleDate(2054, 12, 30)
+val nepaliEndDate = SimpleDate(2081, 6, 5)
+
+val nepaliDaysBetween = NepaliDateConverter.getNepaliDaysInBetween(nepaliStartDate, nepaliEndDate) // Output: 9659
+val englishDaysBetween = NepaliDateConverter.getEnglishDaysInBetween(englishStartDate, englishEndDate) // Output: 9659
 ```
 
 ```kotlin
