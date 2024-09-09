@@ -81,7 +81,7 @@ mavenPublishing {
     coordinates(
         groupId = "io.github.shivathapaa",
         artifactId = "nepali-date-picker",
-        version = "2.0.0-beta08"
+        version = "2.0.0-beta09"
     )
 
     // POM metadata for the published artifact
