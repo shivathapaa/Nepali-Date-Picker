@@ -263,16 +263,7 @@ internal object DateConverters {
         return totalNepDaysCount
     }
 
-    // Three overload functions for month details
-    fun getNepaliMonth(
-        nepaliYear: Int, nepaliMonth: Int
-    ): NepaliMonthCalendar {
-        // Calculate and return the month details
-        return calculateNepaliMonthDetails(
-            nepaliYear = nepaliYear, nepaliMonth = nepaliMonth
-        )
-    }
-
+    // Two overload functions for month details
     fun getNepaliMonth(
         nepaliYear: Int, nepaliMonth: Int, addedMonthsCount: Int
     ): NepaliMonthCalendar {
@@ -289,6 +280,32 @@ internal object DateConverters {
             month = simpleNepaliDate.month,
             year = simpleNepaliDate.year
         )
+    }
+
+    /**
+     * Calculates the total number of days between two [SimpleDate] objects in the Nepali calendar.
+     *
+     * @param startDate The starting date.
+     * @param endDate The ending date.
+     * @return The number of days between the two dates. Returns -1 if either date is invalid,
+     *         and throws exception if the year is not found in [daysInMonthMap].
+     */
+    fun nepaliDaysInBetween(startDate: SimpleDate, endDate: SimpleDate): Int {
+        if (startDate.year > endDate.year) {
+            return -nepaliDaysInBetween(endDate, startDate)
+        }
+
+        if (!isNepaliCalendarInConversionRange(startDate.year, startDate.month, startDate.dayOfMonth)
+            || !isNepaliCalendarInConversionRange(endDate.year, endDate.month, endDate.dayOfMonth)
+        ) {
+            throw IllegalArgumentException("Out of Range: Nepali start year ${startDate.year} or end year " +
+                    "${startDate.year} is out of range to compare. Check range value from NepaliDatePickerDefaults.")
+        }
+
+        val startOffset = calculateDayOffset(minNepaliYear, startDate.year, startDate.month) + startDate.dayOfMonth
+        val endOffset = calculateDayOffset(minNepaliYear, endDate.year, endDate.month) + endDate.dayOfMonth
+
+        return endOffset - startOffset
     }
 
     private fun getCustomCalendarUsingDayMonthYear(

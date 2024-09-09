@@ -28,6 +28,7 @@ import dev.shivathapaa.nepalidatepickerkmp.data.SimpleTime
 import kotlinx.datetime.Clock
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toInstant
 import kotlinx.datetime.toLocalDateTime
 
 @Immutable
@@ -83,16 +84,8 @@ internal class NepaliCalendarModel(val locale: NepaliDateLocale = NepaliDateLoca
         return DateConverters.getTotalDaysInNepaliMonth(year, month)
     }
 
-    fun calculateFirstAndLastDayOfNepaliMonth(
-        nepaliYear: Int, nepaliMonth: Int
-    ): NepaliMonthCalendar {
-        return DateConverters.calculateNepaliMonthDetails(nepaliYear, nepaliMonth)
-    }
-
     fun getNepaliMonth(nepaliYear: Int, nepaliMonth: Int): NepaliMonthCalendar {
-        return DateConverters.getNepaliMonth(
-            nepaliYear = nepaliYear, nepaliMonth = nepaliMonth
-        )
+        return DateConverters.calculateNepaliMonthDetails(nepaliYear, nepaliMonth)
     }
 
     fun getNepaliMonth(simpleNepaliDate: SimpleDate): CustomCalendar {
@@ -119,6 +112,40 @@ internal class NepaliCalendarModel(val locale: NepaliDateLocale = NepaliDateLoca
             nepaliMonth = fromNepaliCalendar.month,
             addedMonthsCount = -subtractedMonthsCount
         )
+    }
+
+    fun nepaliDaysInBetween(startDate: SimpleDate, endDate: SimpleDate): Int {
+        return DateConverters.nepaliDaysInBetween(startDate, endDate)
+    }
+
+    fun formatEnglishDateToIsoFormat(englishDate: SimpleDate, time: SimpleTime): String {
+        val localDateTime = LocalDateTime(
+            englishDate.year,
+            englishDate.month,
+            englishDate.dayOfMonth,
+            time.hour,
+            time.minute,
+            time.second,
+            time.nanosecond
+        )
+
+        return localDateTime.toInstant(timeZone).toString()
+    }
+
+    fun formatNepaliDateToIsoFormat(nepaliDate: SimpleDate, time: SimpleTime): String {
+        val convertedEnglishDate = convertToEnglishDate(nepaliDate.year, nepaliDate.month, nepaliDate.dayOfMonth)
+
+        val localDateTime = LocalDateTime(
+            convertedEnglishDate.year,
+            convertedEnglishDate.month,
+            convertedEnglishDate.dayOfMonth,
+            time.hour,
+            time.minute,
+            time.second,
+            time.nanosecond
+        )
+
+        return localDateTime.toInstant(timeZone).toString()
     }
 
     /**

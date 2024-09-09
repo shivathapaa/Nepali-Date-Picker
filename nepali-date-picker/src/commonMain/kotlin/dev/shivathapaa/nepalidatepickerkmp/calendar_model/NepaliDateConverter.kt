@@ -26,6 +26,8 @@ import dev.shivathapaa.nepalidatepickerkmp.data.NepaliMonthCalendar
 import dev.shivathapaa.nepalidatepickerkmp.data.SimpleDate
 import dev.shivathapaa.nepalidatepickerkmp.data.SimpleTime
 import dev.shivathapaa.nepalidatepickerkmp.data.englishMonths
+import kotlinx.datetime.LocalDate
+import kotlinx.datetime.daysUntil
 
 @Immutable
 object NepaliDateConverter {
@@ -108,7 +110,7 @@ object NepaliDateConverter {
     fun getNepaliMonthCalendar(
         nepaliYear: Int, nepaliMonth: Int
     ): NepaliMonthCalendar {
-        return calendarModel.calculateFirstAndLastDayOfNepaliMonth(nepaliYear, nepaliMonth)
+        return calendarModel.getNepaliMonth(nepaliYear, nepaliMonth)
     }
 
     /**
@@ -294,6 +296,81 @@ object NepaliDateConverter {
             dateToCompareFrom.month,
             dateToCompareFrom.dayOfMonth
         )
+    }
+
+    /**
+     * Calculates the total number of days between two [SimpleDate] objects in the Nepali calendar.
+     *
+     * The end date is not added. You can add 1 to its returned value to include the end date too.
+     *
+     * @param startDate The starting date.
+     * @param endDate The ending date.
+     * @return The number of days between the two dates. Throws exception if the year is not in
+     * range [NepaliDatePickerDefaults.NepaliYearRange], or returns -1 if either date is invalid.
+     */
+    fun getNepaliDaysInBetween(startDate: SimpleDate, endDate: SimpleDate): Int {
+        return calendarModel.nepaliDaysInBetween(startDate, endDate)
+    }
+
+    /**
+     * Calculates the total number of days between two [SimpleDate] objects in the English calendar.
+     *
+     * The end date is not added. You can add 1 to its returned value to include the end date too.
+     *
+     * @param startDate The starting date.
+     * @param endDate The ending date.
+     * @return The number of days between the two dates.
+     */
+    fun getEnglishDaysInBetween(startDate: SimpleDate, endDate: SimpleDate): Int {
+        val startLocalDate = LocalDate(startDate.year, startDate.month, startDate.dayOfMonth)
+        val endLocalDate = LocalDate(endDate.year, endDate.month, endDate.dayOfMonth)
+
+        return startLocalDate.daysUntil(endLocalDate)
+    }
+
+    /**
+     * Converts an English (Gregorian) date and time to ISO 8601 UTC format.
+     *
+     * @param englishDate The date in the Gregorian calendar (English date) as a [SimpleDate].
+     * @param time The time of day as a [SimpleTime], default is the current time.
+     *
+     * @return A string in ISO 8601 format representing the UTC date and time.
+     *         The result is in the format `YYYY-MM-DDTHH:mm:ssZ` (Zulu time).
+     *
+     * Example:
+     * ```
+     * val englishDate = SimpleDate(2024, 9, 9)
+     * val time = SimpleTime(14, 30, 15, 0)
+     * val isoFormat = NepaliDateConverter.formatEnglishDateToIsoFormat(englishDate, time)
+     * println(isoFormat)  // Outputs: "2024-09-09T09:00:15Z"
+     * ```
+     */
+    fun formatEnglishDateToIsoFormat(englishDate: SimpleDate, time: SimpleTime = currentTime): String {
+        return calendarModel.formatEnglishDateToIsoFormat(englishDate, time)
+    }
+
+    /**
+     * Converts a Nepali (Bikram Sambat) date and time to ISO 8601 UTC format.
+     *
+     * The Nepali date (Bikram Sambat) is first converted to the equivalent Gregorian (English) date,
+     * and then the time is appended to produce a complete timestamp in UTC.
+     *
+     * @param nepaliDate The date in the Nepali Bikram Sambat calendar as a [SimpleDate].
+     * @param time The time of day as a [SimpleTime], default is the current time.
+     *
+     * @return A string in ISO 8601 format representing the UTC date and time.
+     *         The result is in the format `YYYY-MM-DDTHH:mm:ssZ` (Zulu time).
+     *
+     * Example:
+     * ```
+     * val nepaliDate = SimpleDate(2081, 5, 24)  // Bikram Sambat date
+     * val time = SimpleTime(14, 30, 15, 0)
+     * val isoFormat = NepaliDateConverter.formatNepaliDateToIsoFormat(nepaliDate, time)
+     * println(isoFormat)  // Outputs: "2024-09-09T09:00:15Z"
+     * ```
+     */
+    fun formatNepaliDateToIsoFormat(nepaliDate: SimpleDate, time: SimpleTime = currentTime): String {
+        return calendarModel.formatNepaliDateToIsoFormat(nepaliDate, time)
     }
 
     /**
