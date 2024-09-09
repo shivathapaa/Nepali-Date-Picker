@@ -84,15 +84,15 @@ NepaliDateConverter.getEnglishMonthName(1) // January
 
 ```kotlin
 // Convert date and time in ISO 8061 format
-val date = SimpleDate(2024, 5, 15)
+val date = SimpleDate(2024, 9, 9)
 val time = SimpleTime(10, 30, 45, 0)
-val isoDateTime = formatToIsoDateTime(date, time)
-println(isoDateTime) // Output: 2024-05-15T04:45:45Z
+val isoDateTime = formatEnglishDateToIsoFormat(date, time)
+println(isoDateTime) // Output: 2024-09-09T10:30:45Z
 
-// Or, use current time
-val date = SimpleDate(2024, 5, 15)
-val isoDateTime = formatToIsoDateTime(date)
-println(isoDateTime) // Output: 2024-05-15T23:45:45Z
+// Or, use current time or current date
+val date = SimpleDate(2024, 5, 24)
+val isoDateTime = formatNepaliDateToIsoFormat(date)
+println(isoDateTime) // Output: 2024-09-09T23:22:21Z
 
 // Calculate number of day in between two dates
 val englishStartDate = SimpleDate(1998, 4, 12)
