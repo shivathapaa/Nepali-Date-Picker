@@ -20,6 +20,7 @@ import dev.shivathapaa.nepalidatepickerkmp.calendar_model.NepaliCalendarModel
 import dev.shivathapaa.nepalidatepickerkmp.calendar_model.NepaliDateConverter
 import dev.shivathapaa.nepalidatepickerkmp.calendar_model.NepaliDateConverter.getNepaliMonthCalendar
 import dev.shivathapaa.nepalidatepickerkmp.data.CustomCalendar
+import dev.shivathapaa.nepalidatepickerkmp.data.SimpleDate
 import dev.shivathapaa.nepalidatepickerkmp.data.toNepaliMonthCalendar
 import dev.shivathapaa.nepalidatepickerkmp.data.toSimpleDate
 import kotlin.test.Test
@@ -697,5 +698,72 @@ class NepaliDateConverterTest {
             (customCalendarOf2082.firstDayOfMonth - 1),
             calculatedFirstAndLastDayOf2082.daysFromStartOfWeekToFirstOfMonth
         )
+    }
+
+    @Test
+    fun calculatePositiveEnglishDaysInBetween_fromStartDate20160216ToEndDate20210327_get1866DaysDifference() {
+        val startDate = SimpleDate(2016, 2, 16)
+        val endDate = SimpleDate(2021, 3, 27)
+
+        val daysBetween = NepaliDateConverter.getEnglishDaysInBetween(startDate, endDate)
+
+        assertEquals(1866, daysBetween)
+    }
+
+    @Test
+    fun calculatePositiveEnglishDaysInBetween_fromStartDate19801231ToEndDate20240308_get15773DaysDifference() {
+        val startDate = SimpleDate(1980, 12, 31)
+        val endDate = SimpleDate(2024, 3, 8)
+
+        val daysBetween = NepaliDateConverter.getEnglishDaysInBetween(startDate, endDate)
+
+        assertEquals(15773, daysBetween)
+    }
+
+    @Test
+    fun calculateNegativeEnglishDaysInBetween_fromStartDate20240308ToEndDate19801231_getNegative15773DaysDifference() {
+        val endDate = SimpleDate(1980, 12, 31)
+        val startDate = SimpleDate(2024, 3, 8)
+
+        val daysBetween = NepaliDateConverter.getEnglishDaysInBetween(startDate, endDate)
+
+        assertEquals(-15773, daysBetween)
+    }
+
+    @Test
+    fun calculatePositiveNepaliDaysInBetween_fromStartDate19801231ToEndDate20810524_get36674DaysDifference() {
+        val startDate = SimpleDate(1980, 12, 31)
+        val endDate = SimpleDate(2081, 5, 24)
+
+        val daysBetween = NepaliDateConverter.getNepaliDaysInBetween(startDate, endDate)
+
+        assertEquals(36675, daysBetween)
+    }
+
+    @Test
+    fun calculateNegativeNepaliDaysInBetween_fromStartDate20810524_ToEndDate19801231_getNegative36674DaysDifference() {
+        val endDate = SimpleDate(1980, 12, 31)
+        val startDate = SimpleDate(2081, 5, 24)
+
+        val daysBetween = NepaliDateConverter.getNepaliDaysInBetween(startDate, endDate)
+
+        assertEquals(-36675, daysBetween)
+    }
+
+    @Test
+    fun compareBothEnglishAndNepaliDaysInBetween_useRelativeDateForBothEnglishAndNepali_getSameDaysDifference() {
+        val englishStartDate = SimpleDate(1998, 4, 12)
+        val englishEndDate = SimpleDate(2024, 9, 21)
+        val nepaliStartDate = SimpleDate(2054, 12, 30)
+        val nepaliEndDate = SimpleDate(2081, 6, 5)
+
+        val expectedDaysDifference = 9659
+
+        val nepaliDaysBetween = NepaliDateConverter.getNepaliDaysInBetween(nepaliStartDate, nepaliEndDate)
+        val englishDaysBetween = NepaliDateConverter.getEnglishDaysInBetween(englishStartDate, englishEndDate)
+
+        assertEquals(expectedDaysDifference, nepaliDaysBetween)
+        assertEquals(expectedDaysDifference, englishDaysBetween)
+        assertEquals(nepaliDaysBetween, englishDaysBetween)
     }
 }
