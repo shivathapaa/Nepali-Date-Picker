@@ -329,14 +329,14 @@ val datePickerState = rememberNepaliDatePickerState()
 NepaliDatePicker(datePickerState)
 
 // Customizing color
-  NepaliDatePicker(
-      state = rememberNepaliDatePickerState(),
-      colors = NepaliDatePickerDefaults.colors()
-          .copy(
-              containerColor = MaterialTheme.colorScheme.surfaceContainer,
-              dayContentColor = MaterialTheme.colorScheme.onSurface
-          )
-  )
+NepaliDatePicker(
+    state = rememberNepaliDatePickerState(),
+    colors = NepaliDatePickerDefaults.colors()
+        .copy(
+            containerColor = MaterialTheme.colorScheme.surfaceContainer,
+            dayContentColor = MaterialTheme.colorScheme.onSurface
+        )
+)
 ```
 
 ```kotlin
@@ -370,6 +370,8 @@ if (showNepaliDatePickerDialog) {
 ```kotlin
 // Using rememberNepaliDatePickerState() for different cases 
 val todayNepaliDate = NepaliDateConverter.todayNepaliDate
+
+// Remember, BeforeSelectable, AfterSelectable, RangeSelectable are helper Selectables that helps with enabling and disabling dates before or after today, or before or after certain dates, or in between certain dates, and many other use cases.
 
 // Using Before Selectable
 val customDatePickerStateWithBeforeSelectable = rememberNepaliDatePickerState(
@@ -444,7 +446,7 @@ val currentTime = NepaliDateConverter.currentTime
 // Date conversions
 val convertedNepaliDate = NepaliDateConverter.convertEnglishToNepali(2021, 6, 21)
 
-val convertedEnglishDate = NepaliDateConverter.convertEnglishToNepali(2081, 3, 21)
+val convertedEnglishDate = NepaliDateConverter.convertNepaliToEnglish(2081, 3, 21)
 ```
 
 ```kotlin
