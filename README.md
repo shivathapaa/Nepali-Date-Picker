@@ -371,7 +371,10 @@ if (showNepaliDatePickerDialog) {
 // Using rememberNepaliDatePickerState() for different cases 
 val todayNepaliDate = NepaliDateConverter.todayNepaliDate
 
-// Remember, BeforeSelectable, AfterSelectable, RangeSelectable are helper Selectables that helps with enabling and disabling dates before or after today, or before or after certain dates, or in between certain dates, and many other use cases.
+// Remember that, "BeforeSelectable", "AfterSelectable", and "RangeSelectable" are helper Selectables
+// that helps with enabling and disabling dates before or after today, or before or
+// after certain dates, or in between certain dates, and many other use cases.
+// You have full control of the dates that you want to enable or disable.
 
 // Using Before Selectable
 val customDatePickerStateWithBeforeSelectable = rememberNepaliDatePickerState(
@@ -428,6 +431,18 @@ val customDatePickerStateWithRangeSelectable = rememberNepaliDatePickerState(
     )
 )
 
+// Using your own selectable preferences
+val customSelectableDatePickerState = rememberNepaliDatePickerState(
+    nepaliSelectableDates = object : NepaliSelectableDates {
+        override fun isSelectableDate(customCalendar: CustomCalendar): Boolean {
+            return customCalendar.month != 3 || (customCalendar.dayOfWeek != 7 && customCalendar.dayOfMonth != 15)
+        }
+
+        override fun isSelectableYear(year: Int): Boolean {
+            return year >= 2054
+        }
+    }
+)
 ```
 
 ```kotlin
