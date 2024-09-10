@@ -280,6 +280,8 @@ NepaliDatePicker(state = datePickerStateWithDateLimiter)
 NepaliDatePicker(state = nepaliDatePickerStateWithRangeSelectable)
 ```
 
+[See all examples to get started.](#examples-to-get-started)
+
 ## Support
 
 You have something in mind to change or add? I am open to suggestions. You can support this project by [suggesting changes, requesting enhancement/features, or raising an issue here](https://github.com/shivathapaa/Nepali-Date-Picker/issues/new/choose).
@@ -319,6 +321,7 @@ Here are some examples that can help you to get started. (Also, the documentatio
 
 Don't worry, it's not that complex! For below examples, I have tried to utilize all of the available customization available to help you understand its multiple use cases.
 
+#### Simple use without dialog
 ```kotlin
 // Simple use without dialog
 NepaliDatePicker(rememberNepaliDatePickerState())
@@ -339,6 +342,7 @@ NepaliDatePicker(
 )
 ```
 
+#### Using with dialog
 ```kotlin
 // Using with dialog
 var showNepaliDatePickerDialog by remember { mutableStateOf(false) }
@@ -367,6 +371,7 @@ if (showNepaliDatePickerDialog) {
 }
 ```
 
+#### Using rememberNepaliDatePickerState() for different cases 
 ```kotlin
 // Using rememberNepaliDatePickerState() for different cases 
 val todayNepaliDate = NepaliDateConverter.todayNepaliDate
@@ -445,6 +450,7 @@ val customSelectableDatePickerState = rememberNepaliDatePickerState(
 )
 ```
 
+#### Get today's date
 ```kotlin
 // Get today's date
 val todayNepaliDate = NepaliDateConverter.todayNepaliDate
@@ -452,11 +458,13 @@ val todayNepaliDate = NepaliDateConverter.todayNepaliDate
 val todayEnglishDate = NepaliDateConverter.todayEnglishDate
 ```
 
+#### Get current time
 ```kotlin
 // Get current time
 val currentTime = NepaliDateConverter.currentTime
 ```
 
+#### Date conversions
 ```kotlin
 // Date conversions
 val convertedNepaliDate = NepaliDateConverter.convertEnglishToNepali(2021, 6, 21)
@@ -464,6 +472,7 @@ val convertedNepaliDate = NepaliDateConverter.convertEnglishToNepali(2021, 6, 21
 val convertedEnglishDate = NepaliDateConverter.convertNepaliToEnglish(2081, 3, 21)
 ```
 
+#### Get month details
 ```kotlin
 // Get month details
 val totalDaysInMagh2081 = NepaliDateConverter.getTotalDaysInNepaliMonth(2081, 10)
@@ -471,11 +480,13 @@ val totalDaysInMagh2081 = NepaliDateConverter.getTotalDaysInNepaliMonth(2081, 10
 val getCompleteDetailsOfAsar2078Month = NepaliDateConverter.getNepaliMonthCalendar(2078, 3)
 ```
 
+#### Date comparison
 ```kotlin
 // Date comparison
 val compareDate = NepaliDateConverter.compareDates(convertedNepaliDate, SimpleDate(2090, 2, 12))
 ```
 
+#### Get number of days between two days
 ```kotlin
 // Get number of days between two days
 val noOfDaysBetweenTwoNepaliDates = NepaliDateConverter.getNepaliDaysInBetween(SimpleDate(1998, 11, 23), SimpleDate(2098, 4, 21))
@@ -483,6 +494,7 @@ val noOfDaysBetweenTwoNepaliDates = NepaliDateConverter.getNepaliDaysInBetween(S
 val noOfDaysBetweenTwoEnglishDates = NepaliDateConverter.getEnglishDaysInBetween(SimpleDate(2009, 6, 21), SimpleDate(2500, 3, 23))
 ```
 
+#### Format date time into ISO 2601 UTC
 ```kotlin
 // Format date time into ISO 2601 UTC
 val currentTime = NepaliDateConverter.currentTime
@@ -493,6 +505,7 @@ val formattedEnglishDate = NepaliDateConverter.formatEnglishDateToIsoFormat(toda
 val formattedNepaliDate = NepaliDateConverter.formatNepaliDateToIsoFormat(todayNepaliDate.toSimpleDate(), currentTime)
 ```
 
+#### Get names of the weekdays, and month according to your choice
 ```kotlin
 // Get names of the weekdays, and month according to your choice
 val weekday = NepaliDateConverter.getWeekdayName(2, NameFormat.FULL, NepaliDatePickerLang.NEPALI)
@@ -504,6 +517,7 @@ val nepaliMonthNameInEnglish = NepaliDateConverter.getMonthName(3, NameFormat.SH
 val englishMonthName = NepaliDateConverter.getMonthName(6, NameFormat.FULL)
 ```
 
+#### Format date to make ready for UI
 ```kotlin
 // Format date to make ready for UI
 val currentTime = NepaliDateConverter.currentTime
@@ -523,12 +537,14 @@ val formattedNepaliDate = NepaliDateConverter.formatNepaliDate(2081, 3, 21, 5, N
 //    val englishFormattedDate = NepaliDateConverter.formatEnglishDate(todayEnglishDate, customFormatLocale)
 ```
 
+#### Format time to make ready for UI
 ```kotlin
 // Format time to make ready for UI
 val formattedNepaliTime = NepaliDateConverter.getFormattedTimeInNepali(simpleTime = currentTime, use12HourFormat = false)
 val formattedEnglishTime = NepaliDateConverter.getFormattedTimeInEnglish(simpleTime = currentTime, use12HourFormat = true)
 ```
 
+#### Localize strings to English or Nepali
 ```kotlin
 // Localize strings to English or Nepali
 val nepaliString = "Today is 2024".convertToNepaliNumber() // Today is २०२४
@@ -539,3 +555,4 @@ val localizeString = "Today is 2024".localizeNumber(NepaliDatePickerLang.NEPALI)
 
 // And there are more to explore... ;)
 ```
+---
