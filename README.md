@@ -320,11 +320,13 @@ Thank you for star! 😉
 </p>
 
 ## Examples to get started
-Here are some examples that can help you to get started. (Also, the documentation in the library itself is more declaritive and clear.)
+Here are some examples that can help you to get started. Also, the documentation in the library itself is more explanatory and clear.
 
 Don't worry, it's not that complex! For below examples, I have tried to utilize all of the available customization available to help you understand its multiple use cases.
 
-#### Simple use without dialog
+For basic use cases, you can [read above](#brief-example-usage).
+
+#### Nepali Date Picker without dialog
 ```kotlin
 // Simple use without dialog
 NepaliDatePicker(rememberNepaliDatePickerState())
