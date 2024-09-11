@@ -213,17 +213,20 @@ NepaliDatePicker(state = defaultNepaliDatePickerState)
 var showNepaliDatePickerDialog by remember { mutableStateOf(false) }
 val defaultNepaliDatePickerState = rememberNepaliDatePickerState()
 
+// You can use provided template or use any composable you like for both confirm and dismiss button
 if (showNepaliDatePickerDialog) {
     NepaliDatePickerDialog(
         confirmButton = {
-            TextButton(onClick = { showNepaliDatePickerDialog = false }) {
-                Text(text = "OK")
-            }
+            NepaliDatePickerDefaults.DialogButton(
+                text = "OK",
+                onButtonClick = { showNepaliDatePickerDialog = false }
+            )
         },
         dismissButton = {
-            TextButton(onClick = { showNepaliDatePickerDialog = false }) {
-                Text(text = "Cancel")
-            }
+            NepaliDatePickerDefaults.DialogButton(
+                text = "Cancel",
+                onButtonClick = { showNepaliDatePickerDialog = false }
+            )
         },
         onDismissRequest = { showNepaliDatePickerDialog = false }
     ) {
@@ -350,6 +353,7 @@ val nepaliDatePickerState = rememberNepaliDatePickerState(locale = NepaliDateLoc
 
 Button(onClick = { showNepaliDatePickerDialog = true }) { Text(text = "Show Dialog") }
 
+// You can use provided template or use any composable you like for both confirm and dismiss button
 if (showNepaliDatePickerDialog) {
     NepaliDatePickerDialog(
         onDismissRequest = { showNepaliDatePickerDialog = false },
