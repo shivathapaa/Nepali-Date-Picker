@@ -145,7 +145,7 @@ kotlin {
     sourceSets {
         commonMain {
              dependencies {
-                 implementation("io.github.shivathapaa:nepali-date-picker:1.2.0")
+                 implementation("io.github.shivathapaa:nepali-date-picker:2.0.0-beta10")
              }
         }
     }
@@ -157,8 +157,49 @@ kotlin {
 To add the nepali-date-picker library to your Android project, include the following dependency in your module/app-level build.gradle file:
 
 ```kotlin
+// For app using Kotlin version before 2.0.0
+
 dependencies {
-    implementation("io.github.shivathapaa:nepali-date-picker-android:1.2.0")
+    implementation("io.github.shivathapaa:nepali-date-picker-android:2.0.0-beta10")
+}
+
+// Or use version catalog like below
+```
+
+
+```kotlin
+// For app using Kotlin version after 2.0.0
+
+// Add the Compose compiler Gradle plugin to the Gradle version catalog
+[versions]
+# ...
+kotlin = "2.0.20"
+nepaliDatePickerAndroid = "2.0.0-beta10"
+
+[libraries]
+nepali-date-picker-android = { module = "io.github.shivathapaa:nepali-date-picker-android", version.ref = "nepaliDatePickerAndroid" }
+
+[plugins]
+# ...
+compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
+
+
+// Add the Gradle plugin to the root/project level build.gradle.kts file
+plugins {
+    // ...
+    alias(libs.plugins.compose.compiler) apply false
+}
+
+
+// Apply the plugin and dependency to app level build.gradle.kts file
+plugins {
+    // ...
+    alias(libs.plugins.compose.compiler)
+}
+
+dependencies {
+    // ...
+    implementation(libs.nepali.date.picker.android)
 }
 ```
 
