@@ -320,11 +320,11 @@ Thank you for star! 😉
 </p>
 
 ## Examples to get started
-Here are some examples that can help you to get started. Also, the documentation in the library itself is more explanatory and clear.
+Here are some examples to help you get started. The library's documentation provides further, detailed explanations.
 
-Don't worry, it's not that complex! For below examples, I have tried to utilize all of the available customization available to help you understand its multiple use cases.
+Don't worry, it's not too complex! In the examples below, I've utilized various customization options to showcase multiple use cases, which might seem overwhelming. However, your specific needs may not require all of these options.
 
-For basic use cases, you can [read above](#brief-example-usage).
+For basic use cases, [refer to the section above](#brief-example-usage).
 
 #### Nepali Date Picker without dialog
 ```kotlin
@@ -581,5 +581,6 @@ val formattedTimeWithSpace = NepaliDateConverter.replaceDelimiter(originalTime, 
 ```
 
 
-And there are more to explore... ;)
+And there is always more to explore... ;)
+
 ---
