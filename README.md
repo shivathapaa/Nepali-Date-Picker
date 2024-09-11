@@ -87,12 +87,12 @@ NepaliDateConverter.getEnglishMonthName(1) // January
 // Convert date and time in ISO 8061 format
 val date = SimpleDate(2024, 9, 9)
 val time = SimpleTime(10, 30, 45, 0)
-val isoDateTime = formatEnglishDateToIsoFormat(date, time)
+val isoDateTime = formatEnglishDateNepaliTimeToIsoFormat(date, time)
 println(isoDateTime) // Output: 2024-09-09T10:30:45Z
 
 // Or, use current time or current date
 val date = SimpleDate(2024, 5, 24)
-val isoDateTime = formatNepaliDateToIsoFormat(date)
+val isoDateTime = formatNepaliDateTimeToIsoFormat(date)
 println(isoDateTime) // Output: 2024-09-09T23:22:21Z
 
 // Calculate number of day in between two dates
@@ -501,8 +501,8 @@ val currentTime = NepaliDateConverter.currentTime
 val todayEnglishDate = NepaliDateConverter.todayEnglishDate
 val todayNepaliDate = NepaliDateConverter.todayNepaliDate
 
-val formattedEnglishDate = NepaliDateConverter.formatEnglishDateToIsoFormat(todayEnglishDate, currentTime)
-val formattedNepaliDate = NepaliDateConverter.formatNepaliDateToIsoFormat(todayNepaliDate.toSimpleDate(), currentTime)
+val formattedEnglishDate = NepaliDateConverter.formatEnglishDateNepaliTimeToIsoFormat(todayEnglishDate, currentTime)
+val formattedNepaliDate = NepaliDateConverter.formatNepaliDateTimeToIsoFormat(todayNepaliDate.toSimpleDate(), currentTime)
 ```
 
 #### Get names of the weekdays, and month according to your choice

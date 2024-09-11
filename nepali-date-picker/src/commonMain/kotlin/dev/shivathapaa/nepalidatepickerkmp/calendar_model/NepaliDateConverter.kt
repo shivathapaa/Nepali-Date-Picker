@@ -88,6 +88,20 @@ object NepaliDateConverter {
     }
 
     /**
+     * This function gives particular Nepali month details in Nepali calendar.
+     *
+     * @param nepaliYear takes value between [NepaliDatePickerDefaults.NepaliYearRange]
+     * @param nepaliMonth takes value between 1 to 12
+     *
+     * @return [NepaliMonthCalendar] using [nepaliYear] and [nepaliMonth]
+     */
+    fun getNepaliMonthCalendar(
+        nepaliYear: Int, nepaliMonth: Int
+    ): NepaliMonthCalendar {
+        return calendarModel.getNepaliMonth(nepaliYear, nepaliMonth)
+    }
+
+    /**
      * This function returns total days in a Nepali month.
      *
      * @param year takes value between [NepaliDatePickerDefaults.NepaliYearRange]
@@ -100,17 +114,416 @@ object NepaliDateConverter {
     }
 
     /**
-     * This function gives particular Nepali month details in Nepali calendar.
+     * Calculates the total number of days between two [SimpleDate] objects in the Nepali calendar.
      *
-     * @param nepaliYear takes value between [NepaliDatePickerDefaults.NepaliYearRange]
-     * @param nepaliMonth takes value between 1 to 12
+     * The end date is not added. You can add 1 to its returned value to include the end date too.
      *
-     * @return [NepaliMonthCalendar] using [nepaliYear] and [nepaliMonth]
+     * @param startDate The starting date.
+     * @param endDate The ending date.
+     * @return The number of days between the two dates. Throws exception if the year is not in
+     * range [NepaliDatePickerDefaults.NepaliYearRange], or returns -1 if either date is invalid.
      */
-    fun getNepaliMonthCalendar(
-        nepaliYear: Int, nepaliMonth: Int
-    ): NepaliMonthCalendar {
-        return calendarModel.getNepaliMonth(nepaliYear, nepaliMonth)
+    fun getNepaliDaysInBetween(startDate: SimpleDate, endDate: SimpleDate): Int {
+        return calendarModel.nepaliDaysInBetween(startDate, endDate)
+    }
+
+    /**
+     * Calculates the total number of days between two [SimpleDate] objects in the English calendar.
+     *
+     * The end date is not added. You can add 1 to its returned value to include the end date too.
+     *
+     * @param startDate The starting date.
+     * @param endDate The ending date.
+     * @return The number of days between the two dates.
+     */
+    fun getEnglishDaysInBetween(startDate: SimpleDate, endDate: SimpleDate): Int {
+        val startLocalDate = LocalDate(startDate.year, startDate.month, startDate.dayOfMonth)
+        val endLocalDate = LocalDate(endDate.year, endDate.month, endDate.dayOfMonth)
+
+        return startLocalDate.daysUntil(endLocalDate)
+    }
+
+    /**
+     * Formats a Nepali date based on the specified user preferences. (Without date range validation)
+     *
+     * @param year takes an integer value of year.
+     * @param month takes an integer value of month which takes value between 1 to 12.
+     * @param dayOfMonth takes an integer value of day of month which takes value between 1 to 32.
+     * @param dayOfWeek takes an integer value of day of week which takes value between 1 to 7.
+     * @param locale The [NepaliDateLocale] specifying the user's preferred language,date format,
+     * weekday name format, and month name format.
+     * @return A string representing the formatted date according to the user's preferences.
+     *
+     * The function supports the following date format styles:
+     * - FULL: Monday, Asar 21, 2024  or,  सोमबार, असार २१, २०२४
+     * - LONG: Asar 21, 2024  or,  असार २१, २०२४
+     * - MEDIUM: 2024 Asar 21  or,  २०२४ असार २१
+     * - SHORT_MDY: 06/21/2024  or,  ०६/२१/२०२४
+     * - SHORT_YMD: 2024/06/21  or,  २०२४/०६/२१
+     * - COMPACT_MDY: 06/21/24  or,  ०६/२१/२४
+     * - COMPACT_YMD: 24/06/21  or,  २४/०६/२१
+     *
+     * The function uses the specified weekday and month name formats to match the preferred
+     * language and format style.
+     *
+     * Example usage:
+     * ```
+     * val locale = NepaliDateLocale(
+     *     language = NepaliDatePickerLang.ENGLISH,
+     *     dateFormat = NepaliDateFormatStyle.FULL,
+     *     weekDayName = NameFormat.FULL,
+     *     monthName = NameFormat.FULL
+     * )
+     * val formattedDate = formatNepaliDate(year = 2080, month = 3, dayOfMonth = 15, dayOfWeek = 2, locale)
+     * // formattedDate: "Tuesday, Asar 15, 2080"
+     * ```
+     */
+    fun formatNepaliDate(
+        year: Int,
+        month: Int,
+        dayOfMonth: Int,
+        dayOfWeek: Int,
+        locale: NepaliDateLocale
+    ): String {
+        return calendarModel.formatNepaliDate(year, month, dayOfMonth, dayOfWeek, locale)
+    }
+
+    /**
+     * Overload function of above [formatNepaliDate] function without date range validation.
+     *
+     * Formats a Nepali date based on the specified user preferences. (With date validation)
+     *
+     * @param customCalendar The [CustomCalendar] containing the year, month, day, and weekday.
+     * @param locale The [NepaliDateLocale] specifying the user's preferred language,date format,
+     * weekday name format, and month name format.
+     * @return A string representing the formatted date according to the user's preferences.
+     *
+     * The function supports the following date format styles:
+     * - FULL: Monday, Asar 21, 2024  or,  सोमबार, असार २१, २०२४
+     * - LONG: Asar 21, 2024  or,  असार २१, २०२४
+     * - MEDIUM: 2024 Asar 21  or,  २०२४ असार २१
+     * - SHORT_MDY: 06/21/2024  or,  ०६/२१/२०२४
+     * - SHORT_YMD: 2024/06/21  or,  २०२४/०६/२१
+     * - COMPACT_MDY: 06/21/24  or,  ०६/२१/२४
+     * - COMPACT_YMD: 24/06/21  or,  २४/०६/२१
+     *
+     * The function uses the specified weekday and month name formats to match the preferred
+     * language and format style.
+     *
+     * Example usage:
+     * ```
+     * val customCalendar = CustomCalendar(year = 2080, month = 3, dayOfMonth = 15, dayOfWeek = 2, ....)
+     * val locale = NepaliDateLocale(
+     *     language = NepaliDatePickerLang.ENGLISH,
+     *     dateFormat = NepaliDateFormatStyle.FULL,
+     *     weekDayName = NameFormat.FULL,
+     *     monthName = NameFormat.FULL
+     * )
+     * val formattedDate = formatNepaliDate(customCalendar, locale)
+     * // formattedDate: "Tuesday, Asar 15, 2080"
+     * ```
+     */
+    fun formatNepaliDate(customCalendar: CustomCalendar, locale: NepaliDateLocale): String {
+        return calendarModel.formatNepaliDate(customCalendar, locale)
+    }
+
+    /**
+     * Formats a English date based on the specified user preferences.
+     *
+     * @param year takes an integer value of year.
+     * @param month takes an integer value of month.
+     * @param dayOfMonth takes an integer value of day.
+     * @param dayOfWeek takes an integer value of day of week.
+     * @param locale The [NepaliDateLocale] specifying the user's preferred date format,
+     * weekday name format, and month name format.
+     *
+     * Note: [NepaliDatePickerLang] will be dummy for this case.
+     *
+     * @return A string representing the formatted date according to the user's preferences.
+     *
+     * The function supports the following date format styles:
+     * - FULL: Monday, March 21, 2024
+     * - LONG: March 21, 2024
+     * - MEDIUM: 2024 March 21
+     * - SHORT_MDY: 06/21/2024
+     * - SHORT_YMD: 2024/06/21
+     * - COMPACT_MDY: 06/21/24
+     * - COMPACT_YMD: 24/06/21
+     *
+     * The function uses the specified weekday and month name formats to match the user's
+     * preferred format style.
+     *
+     * Example usage:
+     * ```
+     * val englishDate = CustomCalendar(year = 2024, month = 3, dayOfMonth = 11, dayOfWeek = 2, ....)
+     * val locale = NepaliDateLocale(
+     *     language = NepaliDatePickerLang.ENGLISH, // This is dummy, no need to pass for this case.
+     *     dateFormat = NepaliDateFormatStyle.FULL,
+     *     weekDayName = NameFormat.FULL,
+     *     monthName = NameFormat.FULL
+     * )
+     * val formattedDate = formatEnglishDate(englishDate, locale)
+     * // formattedDate: "Monday, March 11, 2024"
+     * ```
+     */
+    fun formatEnglishDate(
+        year: Int,
+        month: Int,
+        dayOfMonth: Int,
+        dayOfWeek: Int,
+        locale: NepaliDateLocale
+    ): String {
+        return calendarModel.formatEnglishDate(
+            year = year,
+            month = month,
+            dayOfMonth = dayOfMonth,
+            dayOfWeek = dayOfWeek,
+            locale = locale
+        )
+    }
+
+
+    /**
+     * Overload function of above [formatEnglishDate] function without date range validation.
+     *
+     * Formats a English date based on the specified user preferences.
+     *
+     * @param customCalendar The [CustomCalendar] containing the year, month, day, and weekday.
+     * @param locale The [NepaliDateLocale] specifying the user's preferred language,date format,
+     * weekday name format, and month name format.
+     *
+     * Note: [NepaliDatePickerLang] will be dummy for this case.
+     *
+     * @return A string representing the formatted date according to the user's preferences.
+     *
+     * The function supports the following date format styles:
+     * - FULL: Monday, March 21, 2024
+     * - LONG: March 21, 2024
+     * - MEDIUM: 2024 March 21
+     * - SHORT_MDY: 06/21/2024
+     * - SHORT_YMD: 2024/06/21
+     * - COMPACT_MDY: 06/21/24
+     * - COMPACT_YMD: 24/06/21
+     *
+     * The function uses the specified weekday and month name formats to match the user's
+     * preferred format style.
+     *
+     * Example usage:
+     * ```
+     * val englishDate = CustomCalendar(year = 2024, month = 3, dayOfMonth = 11, dayOfWeek = 2, ....)
+     * val locale = NepaliDateLocale(
+     *     language = NepaliDatePickerLang.ENGLISH, // This is dummy, no need to pass for this case.
+     *     dateFormat = NepaliDateFormatStyle.FULL,
+     *     weekDayName = NameFormat.FULL,
+     *     monthName = NameFormat.FULL
+     * )
+     * val formattedDate = formatEnglishDate(englishDate, locale)
+     * // formattedDate: "Monday, March 11, 2024"
+     * ```
+     */
+    fun formatEnglishDate(
+        customCalendar: CustomCalendar,
+        locale: NepaliDateLocale
+    ): String {
+        return calendarModel.formatEnglishDate(
+            year = customCalendar.year,
+            month = customCalendar.month,
+            dayOfMonth = customCalendar.dayOfMonth,
+            dayOfWeek = customCalendar.dayOfWeek,
+            locale = locale
+        )
+    }
+
+    /**
+     * @param dayOfWeek takes value between 1 to 7.
+     * @param format gives name of day either in short or medium or full name. i.e. Sunday, Mon, T, आईतबार, आईत, आ, etc.
+     * @param language gives name of days in english or nepali. i.e. Sunday, Monday, etc. or आईतबार, सोमबार, etc.
+     */
+    fun getWeekdayName(
+        dayOfWeek: Int,
+        format: NameFormat = NameFormat.FULL,
+        language: NepaliDatePickerLang = NepaliDatePickerLang.ENGLISH
+    ): String {
+        if (dayOfWeek !in 1..7) {
+            throw IllegalArgumentException("Invalid dayOfWeek value:$dayOfWeek. Must be between 1 and 7.")
+        }
+
+        val weekdays = language.weekdays[dayOfWeek - 1]
+        return when (format) {
+            NameFormat.SHORT -> weekdays.short
+            NameFormat.MEDIUM -> weekdays.medium
+            NameFormat.FULL -> weekdays.full
+        }
+    }
+
+    /**
+     * @param month takes value between 1 to 12.
+     * @param format gives name of month either in short or full name.
+     * @param language gives name of `Nepali` months in english or nepali.
+     *
+     * [NameFormat.MEDIUM] & [NameFormat.FULL] gives full name of month i.e. January, February, etc.
+     * [NameFormat.SHORT] gives short name of month i.e. Jan, Feb, etc.]
+     *
+     * Use [NepaliDatePickerLang.ENGLISH] for english name of Nepali month.
+     */
+    fun getMonthName(
+        month: Int,
+        format: NameFormat = NameFormat.FULL,
+        language: NepaliDatePickerLang = NepaliDatePickerLang.ENGLISH
+    ): String {
+        return calendarModel.getNepaliMonthName(
+            monthOfYear = month, format = format, language = language
+        )
+    }
+
+    /**
+     * @param month takes value between 1 to 12.
+     * @param format gives name of `English` month either in short or full name.
+     *
+     * [NameFormat.MEDIUM] & [NameFormat.FULL] gives full name of month i.e. January, February, etc.
+     * [NameFormat.SHORT] gives short name of month i.e. Jan, Feb, etc.
+     */
+    fun getEnglishMonthName(
+        month: Int,
+        format: NameFormat = NameFormat.FULL,
+    ): String {
+        if (month !in 1..12) {
+            throw IllegalArgumentException("Invalid monthOfYear value: $month. Must be between 1 and 12.")
+        }
+
+        val monthIndex = englishMonths[month - 1]
+
+        return when (format) {
+            NameFormat.SHORT -> monthIndex.short
+            else -> monthIndex.full
+        }
+    }
+
+    /**
+     * Formats a [SimpleTime] object into a time string in English.
+     *
+     * @param simpleTime The [SimpleTime] object to format.
+     * @param use12HourFormat If true, the time will be formatted in 12-hour format (e.g., "09:45 AM").
+     * If false, the time will be formatted in 24-hour format (e.g., "21:45").
+     *
+     * @return A formatted time string in English.
+     *
+     * ```
+     * val time = SimpleTime(16, 30, 0, 0)
+     * val nepaliTime12Hour = getFormattedTimeInEnglish(time) // Output: "4:30 PM"
+     * val nepaliTime24Hour = getFormattedTimeInEnglish(time, false) // Output: "16:30"
+     * ```
+     */
+    fun getFormattedTimeInEnglish(simpleTime: SimpleTime, use12HourFormat: Boolean = true): String {
+        return if (use12HourFormat) {
+            val amPm = if (simpleTime.hour < 12) "AM" else "PM"
+            val standardHour =
+                if (simpleTime.hour == 0) 12 else if (simpleTime.hour > 12) simpleTime.hour - 12 else simpleTime.hour
+
+            "$standardHour:${simpleTime.minute.toString().padStart(2, '0')} $amPm"
+        } else {
+            "${simpleTime.hour}:${simpleTime.minute.toString().padStart(2, '0')}"
+        }
+    }
+
+    /**
+     * Formats a [SimpleTime] object into a Nepali time string.
+     *
+     * This function generates a formatted time string in Nepali.
+     *
+     * The time of day is determined using hour values to Nepali names:
+     * * 4-10: "बिहान"
+     * * 11-15: "दिउँसो"
+     * * 16-19: "साँझ"
+     * * Other: "राति"
+     *
+     * The hour is displayed in 12-hour format if `use12HourFormat` is true, otherwise in 24-hour format.
+     * Minutes are always displayed with two digits (e.g., 05, 30).
+     * Digits are converted to Nepali using the [convertToNepaliNumber] function.
+     *
+     * @param simpleTime The [SimpleTime] object to format.
+     * @param use12HourFormat If true (default), the time will be formatted in 12-hour format including the time of day.
+     *                        If false, the time will be formatted in 24-hour format.
+     *
+     * @return A formatted time string in Nepali.
+     *
+     * ```
+     * val time = SimpleTime(16, 30, 0, 0)
+     * val nepaliTime12Hour = getFormattedTimeInNepali(time) // Output: "साँझ ४ : ३०"
+     * val nepaliTime24Hour = getFormattedTimeInNepali(time, false) // Output: "१६ : ३०"
+     * ```
+     */
+    fun getFormattedTimeInNepali(simpleTime: SimpleTime, use12HourFormat: Boolean = true): String {
+        val hourOfDay =
+            when (simpleTime.hour) {
+                in 4..10 -> "बिहान"
+                in 11..15 -> "दिउँसो"
+                in 16..19 -> "साँझ"
+                else -> "राति"
+            }
+
+        val hour =
+            if (use12HourFormat && simpleTime.hour > 12) simpleTime.hour - 12 else simpleTime.hour
+        val formattedHour = if (use12HourFormat && simpleTime.hour == 0) 12 else hour
+
+        return if (use12HourFormat) {
+            "$hourOfDay ${
+                formattedHour.toString().convertToNepaliNumber()
+            } : ${simpleTime.minute.toString().padStart(2, '0').convertToNepaliNumber()}"
+        } else "${formattedHour.toString().convertToNepaliNumber()} : ${
+            simpleTime.minute.toString().padStart(2, '0').convertToNepaliNumber()
+        }"
+    }
+
+    /**
+     * Converts a Nepali (Bikram Sambat) date and time to ISO 8601 UTC format.
+     *
+     * The Nepali date (Bikram Sambat) is first converted to the equivalent Gregorian (English) date,
+     * and then the time is appended to produce a complete timestamp in UTC.
+     *
+     * @param nepaliDate The date in the Nepali Bikram Sambat calendar as a [SimpleDate].
+     * @param time The time of day as a [SimpleTime], default is the current time.
+     *
+     * @return A string in ISO 8601 format representing the UTC date and time.
+     *         The result is in the format `YYYY-MM-DDTHH:mm:ssZ` (Zulu time).
+     *
+     * Example:
+     * ```
+     * val nepaliDate = SimpleDate(2081, 5, 24)  // Bikram Sambat date
+     * val time = SimpleTime(14, 30, 15, 0)
+     * val isoFormat = NepaliDateConverter.formatNepaliDateTimeToIsoFormat(nepaliDate, time)
+     * println(isoFormat)  // Outputs: "2024-09-09T09:00:15Z"
+     * ```
+     */
+    fun formatNepaliDateTimeToIsoFormat(
+        nepaliDate: SimpleDate,
+        time: SimpleTime = currentTime
+    ): String {
+        return calendarModel.formatNepaliDateTimeToIsoFormat(nepaliDate, time)
+    }
+
+    /**
+     * Converts an English (Gregorian) date and time to ISO 8601 UTC format.
+     *
+     * @param englishDate The date in the Gregorian calendar (English date) as a [SimpleDate].
+     * @param time The `Nepali` time of day as a [SimpleTime], default is the current time.
+     *
+     * @return A string in ISO 8601 format representing the UTC date and time.
+     *         The result is in the format `YYYY-MM-DDTHH:mm:ssZ` (Zulu time).
+     *
+     * Example:
+     * ```
+     * val englishDate = SimpleDate(2024, 9, 9)
+     * val time = SimpleTime(14, 30, 15, 0)
+     * val isoFormat = NepaliDateConverter.formatEnglishDateNepaliTimeToIsoFormat(englishDate, time)
+     * println(isoFormat)  // Outputs: "2024-09-09T09:00:15Z"
+     * ```
+     */
+    fun formatEnglishDateNepaliTimeToIsoFormat(
+        englishDate: SimpleDate,
+        time: SimpleTime = currentTime
+    ): String {
+        return calendarModel.formatEnglishDateNepaliTimeToIsoFormat(englishDate, time)
     }
 
     /**
@@ -296,279 +709,6 @@ object NepaliDateConverter {
             dateToCompareFrom.month,
             dateToCompareFrom.dayOfMonth
         )
-    }
-
-    /**
-     * Calculates the total number of days between two [SimpleDate] objects in the Nepali calendar.
-     *
-     * The end date is not added. You can add 1 to its returned value to include the end date too.
-     *
-     * @param startDate The starting date.
-     * @param endDate The ending date.
-     * @return The number of days between the two dates. Throws exception if the year is not in
-     * range [NepaliDatePickerDefaults.NepaliYearRange], or returns -1 if either date is invalid.
-     */
-    fun getNepaliDaysInBetween(startDate: SimpleDate, endDate: SimpleDate): Int {
-        return calendarModel.nepaliDaysInBetween(startDate, endDate)
-    }
-
-    /**
-     * Calculates the total number of days between two [SimpleDate] objects in the English calendar.
-     *
-     * The end date is not added. You can add 1 to its returned value to include the end date too.
-     *
-     * @param startDate The starting date.
-     * @param endDate The ending date.
-     * @return The number of days between the two dates.
-     */
-    fun getEnglishDaysInBetween(startDate: SimpleDate, endDate: SimpleDate): Int {
-        val startLocalDate = LocalDate(startDate.year, startDate.month, startDate.dayOfMonth)
-        val endLocalDate = LocalDate(endDate.year, endDate.month, endDate.dayOfMonth)
-
-        return startLocalDate.daysUntil(endLocalDate)
-    }
-
-    /**
-     * Converts an English (Gregorian) date and time to ISO 8601 UTC format.
-     *
-     * @param englishDate The date in the Gregorian calendar (English date) as a [SimpleDate].
-     * @param time The time of day as a [SimpleTime], default is the current time.
-     *
-     * @return A string in ISO 8601 format representing the UTC date and time.
-     *         The result is in the format `YYYY-MM-DDTHH:mm:ssZ` (Zulu time).
-     *
-     * Example:
-     * ```
-     * val englishDate = SimpleDate(2024, 9, 9)
-     * val time = SimpleTime(14, 30, 15, 0)
-     * val isoFormat = NepaliDateConverter.formatEnglishDateToIsoFormat(englishDate, time)
-     * println(isoFormat)  // Outputs: "2024-09-09T09:00:15Z"
-     * ```
-     */
-    fun formatEnglishDateToIsoFormat(englishDate: SimpleDate, time: SimpleTime = currentTime): String {
-        return calendarModel.formatEnglishDateToIsoFormat(englishDate, time)
-    }
-
-    /**
-     * Converts a Nepali (Bikram Sambat) date and time to ISO 8601 UTC format.
-     *
-     * The Nepali date (Bikram Sambat) is first converted to the equivalent Gregorian (English) date,
-     * and then the time is appended to produce a complete timestamp in UTC.
-     *
-     * @param nepaliDate The date in the Nepali Bikram Sambat calendar as a [SimpleDate].
-     * @param time The time of day as a [SimpleTime], default is the current time.
-     *
-     * @return A string in ISO 8601 format representing the UTC date and time.
-     *         The result is in the format `YYYY-MM-DDTHH:mm:ssZ` (Zulu time).
-     *
-     * Example:
-     * ```
-     * val nepaliDate = SimpleDate(2081, 5, 24)  // Bikram Sambat date
-     * val time = SimpleTime(14, 30, 15, 0)
-     * val isoFormat = NepaliDateConverter.formatNepaliDateToIsoFormat(nepaliDate, time)
-     * println(isoFormat)  // Outputs: "2024-09-09T09:00:15Z"
-     * ```
-     */
-    fun formatNepaliDateToIsoFormat(nepaliDate: SimpleDate, time: SimpleTime = currentTime): String {
-        return calendarModel.formatNepaliDateToIsoFormat(nepaliDate, time)
-    }
-
-    /**
-     * @param dayOfWeek takes value between 1 to 7.
-     * @param format gives name of day either in short or medium or full name. i.e. Sunday, Mon, T, आईतबार, आईत, आ, etc.
-     * @param language gives name of days in english or nepali. i.e. Sunday, Monday, etc. or आईतबार, सोमबार, etc.
-     */
-    fun getWeekdayName(
-        dayOfWeek: Int,
-        format: NameFormat = NameFormat.FULL,
-        language: NepaliDatePickerLang = NepaliDatePickerLang.ENGLISH
-    ): String {
-        if (dayOfWeek !in 1..7) {
-            throw IllegalArgumentException("Invalid dayOfWeek value:$dayOfWeek. Must be between 1 and 7.")
-        }
-
-        val weekdays = language.weekdays[dayOfWeek - 1]
-        return when (format) {
-            NameFormat.SHORT -> weekdays.short
-            NameFormat.MEDIUM -> weekdays.medium
-            NameFormat.FULL -> weekdays.full
-        }
-    }
-
-    /**
-     * Formats a Nepali date based on the specified user preferences. (With date validation)
-     *
-     * @param customCalendar The [CustomCalendar] containing the year, month, day, and weekday.
-     * @param locale The [NepaliDateLocale] specifying the user's preferred language,date format,
-     * weekday name format, and month name format.
-     * @return A string representing the formatted date according to the user's preferences.
-     *
-     * The function supports the following date format styles:
-     * - FULL: Monday, Asar 21, 2024  or,  सोमबार, असार २१, २०२४
-     * - LONG: Asar 21, 2024  or,  असार २१, २०२४
-     * - MEDIUM: 2024 Asar 21  or,  २०२४ असार २१
-     * - SHORT_MDY: 06/21/2024  or,  ०६/२१/२०२४
-     * - SHORT_YMD: 2024/06/21  or,  २०२४/०६/२१
-     * - COMPACT_MDY: 06/21/24  or,  ०६/२१/२४
-     * - COMPACT_YMD: 24/06/21  or,  २४/०६/२१
-     *
-     * The function uses the specified weekday and month name formats to match the preferred
-     * language and format style.
-     *
-     * Example usage:
-     * ```
-     * val customCalendar = CustomCalendar(year = 2080, month = 3, day = 15, weekday = 2, ....)
-     * val locale = NepaliDateLocale(
-     *     language = NepaliDatePickerLang.ENGLISH,
-     *     dateFormat = NepaliDateFormatStyle.FULL,
-     *     weekDayName = NameFormat.FULL,
-     *     monthName = NameFormat.FULL
-     * )
-     * val formattedDate = formatNepaliDate(customCalendar, locale)
-     * // formattedDate: "Tuesday, Asar 15, 2080"
-     * ```
-     */
-    fun formatNepaliDate(customCalendar: CustomCalendar, locale: NepaliDateLocale): String {
-        return calendarModel.formatNepaliDate(customCalendar, locale)
-    }
-
-    /**
-     * Formats a [SimpleTime] object into a time string in English.
-     *
-     * @param simpleTime The [SimpleTime] object to format.
-     * @param use12HourFormat If true, the time will be formatted in 12-hour format (e.g., "09:45 AM").
-     * If false, the time will be formatted in 24-hour format (e.g., "21:45").
-     *
-     * @return A formatted time string in English.
-     *
-     * ```
-     * val time = SimpleTime(16, 30, 0, 0)
-     * val nepaliTime12Hour = getFormattedTimeInEnglish(time) // Output: "4:30 PM"
-     * val nepaliTime24Hour = getFormattedTimeInEnglish(time, false) // Output: "16:30"
-     * ```
-     */
-    fun getFormattedTimeInEnglish(simpleTime: SimpleTime, use12HourFormat: Boolean = true): String {
-        return if (use12HourFormat) {
-            val amPm = if (simpleTime.hour < 12) "AM" else "PM"
-            val standardHour =
-                if (simpleTime.hour == 0) 12 else if (simpleTime.hour > 12) simpleTime.hour - 12 else simpleTime.hour
-
-            "$standardHour:${simpleTime.minute.toString().padStart(2, '0')} $amPm"
-        } else {
-            "${simpleTime.hour}:${simpleTime.minute.toString().padStart(2, '0')}"
-        }
-    }
-
-    /**
-     * Formats a [SimpleTime] object into a Nepali time string.
-     *
-     * This function generates a formatted time string in Nepali.
-     *
-     * The time of day is determined using hour values to Nepali names:
-     * * 4-10: "बिहान"
-     * * 11-15: "दिउँसो"
-     * * 16-19: "साँझ"
-     * * Other: "राति"
-     *
-     * The hour is displayed in 12-hour format if `use12HourFormat` is true, otherwise in 24-hour format.
-     * Minutes are always displayed with two digits (e.g., 05, 30).
-     * Digits are converted to Nepali using the [convertToNepaliNumber] function.
-     *
-     * @param simpleTime The [SimpleTime] object to format.
-     * @param use12HourFormat If true (default), the time will be formatted in 12-hour format including the time of day.
-     *                        If false, the time will be formatted in 24-hour format.
-     *
-     * @return A formatted time string in Nepali.
-     *
-     * ```
-     * val time = SimpleTime(16, 30, 0, 0)
-     * val nepaliTime12Hour = getFormattedTimeInNepali(time) // Output: "साँझ ४ : ३०"
-     * val nepaliTime24Hour = getFormattedTimeInNepali(time, false) // Output: "१६ : ३०"
-     * ```
-     */
-    fun getFormattedTimeInNepali(simpleTime: SimpleTime, use12HourFormat: Boolean = true): String {
-        val hourOfDay =
-            when (simpleTime.hour) {
-                in 4..10 -> "बिहान"
-                in 11..15 -> "दिउँसो"
-                in 16..19 -> "साँझ"
-                else -> "राति"
-            }
-
-        val hour = if (use12HourFormat && simpleTime.hour > 12) simpleTime.hour - 12 else simpleTime.hour
-        val formattedHour = if (use12HourFormat && simpleTime.hour == 0) 12 else hour
-
-        return if (use12HourFormat) {
-            "$hourOfDay ${formattedHour.toString().convertToNepaliNumber()} : ${simpleTime.minute.toString().padStart(2, '0').convertToNepaliNumber()}"
-        }
-        else "${formattedHour.toString().convertToNepaliNumber()} : ${simpleTime.minute.toString().padStart(2, '0').convertToNepaliNumber()}"
-    }
-
-    /**
-     * Overload function of above [formatNepaliDate] function without date validation.
-     * Formats a Nepali date based on the specified user preferences. (Without validation)
-     *
-     * @param year takes an integer value of year.
-     * @param month takes an integer value of month which takes value between 1 to 12.
-     * @param dayOfMonth takes an integer value of day of month which takes value between 1 to 32.
-     * @param dayOfWeek takes an integer value of day of week which takes value between 1 to 7.
-     * @param locale The [NepaliDateLocale] specifying the user's preferred language,date format,
-     * weekday name format, and month name format.
-     * @return A string representing the formatted date according to the user's preferences.
-     *
-     */
-    fun formatNepaliDate(
-        year: Int,
-        month: Int,
-        dayOfMonth: Int,
-        dayOfWeek: Int,
-        locale: NepaliDateLocale
-    ): String {
-        return calendarModel.formatNepaliDate(year, month, dayOfMonth, dayOfWeek, locale)
-    }
-
-    /**
-     * @param month takes value between 1 to 12.
-     * @param format gives name of month either in short or full name.
-     * @param language gives name of `Nepali` months in english or nepali.
-     *
-     * [NameFormat.MEDIUM] & [NameFormat.FULL] gives full name of month i.e. January, February, etc.
-     * [NameFormat.SHORT] gives short name of month i.e. Jan, Feb, etc.]
-     *
-     * Use [NepaliDatePickerLang.ENGLISH] for english l
-     */
-    fun getMonthName(
-        month: Int,
-        format: NameFormat = NameFormat.FULL,
-        language: NepaliDatePickerLang = NepaliDatePickerLang.ENGLISH
-    ): String {
-        return calendarModel.getNepaliMonthName(
-            monthOfYear = month, format = format, language = language
-        )
-    }
-
-    /**
-     * @param month takes value between 1 to 12.
-     * @param format gives name of `English` month either in short or full name.
-     *
-     * [NameFormat.MEDIUM] & [NameFormat.FULL] gives full name of month i.e. January, February, etc.
-     * [NameFormat.SHORT] gives short name of month i.e. Jan, Feb, etc.
-     */
-    fun getEnglishMonthName(
-        month: Int,
-        format: NameFormat = NameFormat.FULL,
-    ): String {
-        if (month !in 1..12) {
-            throw IllegalArgumentException("Invalid monthOfYear value: $month. Must be between 1 and 12.")
-        }
-
-        val monthIndex = englishMonths[month - 1]
-
-        return when (format) {
-            NameFormat.SHORT -> monthIndex.short
-            NameFormat.MEDIUM -> monthIndex.full
-            NameFormat.FULL -> monthIndex.full
-        }
     }
 
     /**
