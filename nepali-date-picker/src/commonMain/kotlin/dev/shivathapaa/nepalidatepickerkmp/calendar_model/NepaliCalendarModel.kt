@@ -298,7 +298,7 @@ internal class NepaliCalendarModel(val locale: NepaliDateLocale = NepaliDateLoca
         val day = if (showMonthName) dayOfMonth.toString()
         else dayOfMonth.toString().padStart(2, '0')
 
-        val monthNum = monthNames.toString().padStart(2, '0')
+        val monthNum = month.toString().padStart(2, '0')
         val fullYear = year.toString()
         val shortYear = fullYear.takeLast(2)
 
