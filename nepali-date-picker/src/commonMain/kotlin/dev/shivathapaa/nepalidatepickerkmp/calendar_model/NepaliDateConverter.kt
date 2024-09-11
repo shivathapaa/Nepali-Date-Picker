@@ -712,6 +712,44 @@ object NepaliDateConverter {
     }
 
     /**
+     * Replaces the delimiter in a date string formatted with the original delimiter.
+     *
+     * This function can handle a variety of date formats and will replace the existing
+     * delimiter (`/`) with the specified new delimiter (e.g., `-`, or `.`).
+     * The function works best with date formats or any strings such as:
+     * - SHORT_MDY: 06/21/2024
+     * - SHORT_YMD: 2024/06/21
+     * - COMPACT_MDY: 06/21/24
+     * - COMPACT_YMD: 24/06/21
+     *
+     * Example usage:
+     * ```
+     * val originalDate = "2024/06/21"
+     * val newDelimiter = "-"
+     * val formattedDate = NepaliDateConverter.replaceDelimiter(originalDate, newDelimiter)
+     * // formattedDate: "2024-06-21"
+     *
+     * val originalDate = "२०२४/०६/२१"
+     * val newDelimiter = "-"
+     * val formattedDate = NepaliDateConverter.replaceDelimiter(originalDate, newDelimiter)
+     * // formattedDate: "२०२४-०६-२१"
+     *
+     * val originalTime = "09:45 AM"
+     * val newDelimiterSpace = " "
+     * val oldDelimiter = "/"
+     * val formattedTimeWithSpace = NepaliDateConverter.replaceDelimiter(originalTime, newDelimiterSpace, oldDelimiter)
+     * // formattedTimeWithSpace: "09 45 AM"
+     * ```
+     *
+     * @param dateString The date string containing the original delimiter (e.g., "2024/06/21").
+     * @param newDelimiter The new delimiter to replace the old one (e.g., "-").
+     * @return The date string with the delimiter replaced (e.g., "2024-06-21").
+     */
+    fun replaceDelimiter(dateString: String, newDelimiter: String, oldDelimiter: String = "/"): String {
+        return dateString.replace(oldDelimiter, newDelimiter)
+    }
+
+    /**
      * This function localizes [String] to either English or Nepali, i.e.
      * converts english numbers of string to nepali numbers, and vice versa.
      *

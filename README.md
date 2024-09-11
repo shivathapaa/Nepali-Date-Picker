@@ -188,9 +188,9 @@ and accessible to the community.
 ```
 For more details, see the [LICENSE](https://github.com/shivathapaa/Nepali-Date-Picker/blob/main/LICENSE) file.
 
-## Example usage
+## Brief example usage
 
-Don't forget about the DateRange before using.
+Don't forget about the **DateRange** before using.
 
 You can check this inside library under `NepaliDatePickerDefaults.NepaliYearRange` and `NepaliDatePickerDefaults.EnglishYearRange`
 
@@ -494,9 +494,9 @@ val noOfDaysBetweenTwoNepaliDates = NepaliDateConverter.getNepaliDaysInBetween(S
 val noOfDaysBetweenTwoEnglishDates = NepaliDateConverter.getEnglishDaysInBetween(SimpleDate(2009, 6, 21), SimpleDate(2500, 3, 23))
 ```
 
-#### Format date time into ISO 2601 UTC
+#### Format date time into ISO 2601 UTC to save date in database or have reference
 ```kotlin
-// Format date time into ISO 2601 UTC
+// Format date time into ISO 2601 UTC to save date in database or have reference for other timezone calculations
 val currentTime = NepaliDateConverter.currentTime
 val todayEnglishDate = NepaliDateConverter.todayEnglishDate
 val todayNepaliDate = NepaliDateConverter.todayNepaliDate
@@ -552,7 +552,28 @@ val nepaliStringOnlyDigits = "2024".convertToNepaliNumber() // २०२४
 val englishString = "२०२४ सोमबार".convertToEnglishNumber() // 2024 सोमबार
 
 val localizeString = "Today is 2024".localizeNumber(NepaliDatePickerLang.NEPALI) // Today is २०२४
-
-// And there are more to explore... ;)
 ```
+
+#### Replace delimiter for displaying or saving as you prefer
+```kotlin
+// Replace delimiter for displaying or saving as you prefer
+val originalDate = "2024/06/21"
+val newDelimiter = "-"
+val formattedDate = NepaliDateConverter.replaceDelimiter(originalDate, newDelimiter)
+// formattedDate: "2024-06-21"
+
+val originalDate = "२०२४/०६/२१"
+val newDelimiter = "-"
+val formattedDate = NepaliDateConverter.replaceDelimiter(originalDate, newDelimiter)
+// formattedDate: "२०२४-०६-२१"
+
+val originalTime = "09:45 AM"
+val newDelimiterSpace = " "
+val oldDelimiter = "/"
+val formattedTimeWithSpace = NepaliDateConverter.replaceDelimiter(originalTime, newDelimiterSpace, oldDelimiter)
+// formattedTimeWithSpace: "09 45 AM"
+```
+
+
+And there are more to explore... ;)
 ---
