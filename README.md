@@ -156,7 +156,7 @@ kotlin {
 
 To add the nepali-date-picker library to your Android project, include the following dependency in your module/app-level build.gradle file:
 
-> If you encounter version conflict either use `2.0.0-beta06` or update your jetbrains compose version to `1.7.0-beta01`. Check [this release](https://github.com/shivathapaa/Nepali-Date-Picker/releases/tag/2.0.0-beta07) for more details.
+> If you encounter version conflict using this library then you can either use `2.0.0-beta06` or update your jetbrains compose version to `1.7.0-beta01`. Check [this release](https://github.com/shivathapaa/Nepali-Date-Picker/releases/tag/2.0.0-beta07) for more details.
 
 ```kotlin
 // For app using Kotlin version before 2.0.0
