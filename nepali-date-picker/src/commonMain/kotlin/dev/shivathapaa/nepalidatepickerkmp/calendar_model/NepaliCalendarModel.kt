@@ -89,8 +89,8 @@ internal class NepaliCalendarModel(val locale: NepaliDateLocale = NepaliDateLoca
         return DateConverters.calculateNepaliMonthDetails(nepaliYear, nepaliMonth)
     }
 
-    fun getNepaliMonth(simpleNepaliDate: SimpleDate): CustomCalendar {
-        return DateConverters.getNepaliMonth(simpleNepaliDate = simpleNepaliDate)
+    fun getNepaliCalendar(simpleNepaliDate: SimpleDate): CustomCalendar {
+        return DateConverters.getNepaliCalendar(simpleNepaliDate = simpleNepaliDate)
     }
 
     // Function to add months to a CustomCalendar

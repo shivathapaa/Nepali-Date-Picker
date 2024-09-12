@@ -573,7 +573,7 @@ private class NepaliDatePickerStateImpl(
      * A mutable state of [CustomCalendar] that represents a selected date.
      */
     private var _selectedDate = mutableStateOf(if (initialSelectedDate != null) {
-        val date = calendarModel.getNepaliMonth(simpleNepaliDate = initialSelectedDate)
+        val date = calendarModel.getNepaliCalendar(simpleNepaliDate = initialSelectedDate)
         require(yearRange.contains(date.year)) {
             "The provided initial date's year (${date.year}) is out of the years range of $yearRange."
         }
@@ -878,7 +878,7 @@ private fun NepaliMonth(
                         // To tackle recompositions
                         val currentMonthDate by remember(cellIndex, dayNumber) {
                             derivedStateOf {
-                                calendarModel.getNepaliMonth(
+                                calendarModel.getNepaliCalendar(
                                     SimpleDate(
                                         year = monthCalendar.year,
                                         month = monthCalendar.month,

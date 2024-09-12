@@ -21,6 +21,8 @@ import dev.shivathapaa.nepalidatepickerkmp.data.CustomCalendar
 import dev.shivathapaa.nepalidatepickerkmp.data.NepaliMonthCalendar
 import dev.shivathapaa.nepalidatepickerkmp.data.SimpleDate
 import dev.shivathapaa.nepalidatepickerkmp.data.daysInMonthMap
+import dev.shivathapaa.nepalidatepickerkmp.data.englishDateMap
+import dev.shivathapaa.nepalidatepickerkmp.data.nepaliDateMap
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.daysUntil
 
@@ -31,9 +33,6 @@ internal object DateConverters {
     private val maxNepaliYear = NepaliDatePickerDefaults.NepaliYearRange.last
     private val minEnglishYear = NepaliDatePickerDefaults.EnglishYearRange.first
     private val maxEnglishYear = NepaliDatePickerDefaults.EnglishYearRange.last
-
-    private val startingEnglishCalendar = NepaliDatePickerDefaults.startingEnglishCalendar
-    private val startingNepaliCalendar = NepaliDatePickerDefaults.startingNepaliCalendar
 
     fun getTotalDaysInNepaliMonth(nepaliYYYY: Int, nepaliMM: Int): Int {
         return daysInMonthMap.getValue(nepaliYYYY)[nepaliMM]
@@ -50,13 +49,23 @@ internal object DateConverters {
         }
 
         // Initialize the starting English and Nepali dates
-        val (startingEnglishDate, startingNepaliCalendar, startingDayOfWeek) = initializeStartingDates()
+        val (startingEnglishDate, startingNepaliCalendar) = initializeStartingDates(
+            englishYYYY,
+            false
+        )
 
-        val newEnglishDate = LocalDate(englishYYYY, englishMM, englishDD)
+        val englishLocalDate = LocalDate(
+            year = startingEnglishDate.year,
+            monthNumber = startingEnglishDate.month,
+            dayOfMonth = startingEnglishDate.dayOfMonth
+        )
+
+        val newEnglishDate =
+            LocalDate(year = englishYYYY, monthNumber = englishMM, dayOfMonth = englishDD)
 
         // Calculate the total number of days between the base date and the target date
         val totalDaysDifference = calculateEnglishDaysDifference(
-            startingEnglishDate, newEnglishDate
+            englishLocalDate, newEnglishDate
         )
 
         // Initialize the Nepali date with the starting values
@@ -65,15 +74,15 @@ internal object DateConverters {
             startingNepaliCalendar.month,
             startingNepaliCalendar.dayOfMonth
         )
-        var dayOfWeek = startingDayOfWeek
+        var dayOfWeek = startingNepaliCalendar.dayOfWeek
 
         // Counters for day of year, week of year, and week of month
-        var dayOfYear = 1
-        var weekOfYear = 1
-        var weekOfMonth = 1
+        var dayOfYear = startingNepaliCalendar.dayOfYear
+        var weekOfYear = startingNepaliCalendar.weekOfYear
+        var weekOfMonth = startingNepaliCalendar.weekOfMonth
 
-        var firstDayOfMonth: Int = dayOfWeek
-        var lastDayOfMonth: Int = -1
+        var firstDayOfMonth: Int = startingNepaliCalendar.firstDayOfMonth
+        var lastDayOfMonth: Int = startingNepaliCalendar.lastDayOfMonth
 
         var totalDaysInMonth = daysInMonthMap.getValue(nepaliYYYY)[nepaliMM]
 
@@ -141,7 +150,10 @@ internal object DateConverters {
         }
 
         // Initialize the starting English and Nepali dates
-        val (startingEnglishDate, startingNepaliCalendar, startingDayOfWeek) = initializeStartingDates()
+        val (startingEnglishDate, startingNepaliCalendar) = initializeStartingDates(
+            nepaliYYYY,
+            true
+        )
 
         // Calculate the total number of Nepali days from the starting date to the target date
         val totalNepDaysCount =
@@ -154,17 +166,17 @@ internal object DateConverters {
         // Initialize the English date with the starting values
         var (englishYYYY, englishMM, englishDD) = Triple(
             startingEnglishDate.year,
-            startingEnglishDate.monthNumber,
+            startingEnglishDate.month,
             startingEnglishDate.dayOfMonth
         )
 
-        var dayOfWeek = startingDayOfWeek
-        var dayOfYear = 1
-        var weekOfYear = 1
-        var weekOfMonth = 1
+        var dayOfWeek = startingEnglishDate.dayOfWeek
+        var dayOfYear = startingEnglishDate.dayOfYear
+        var weekOfYear = startingEnglishDate.weekOfYear
+        var weekOfMonth = startingEnglishDate.weekOfMonth
 
-        var firstDayOfMonth: Int = dayOfWeek
-        var lastDayOfMonth: Int = -1
+        var firstDayOfMonth: Int = startingEnglishDate.firstDayOfMonth
+        var lastDayOfMonth: Int = startingEnglishDate.lastDayOfMonth
 
         var totalDaysInMonth =
             if (isEnglishLeapYear(englishYYYY)) daysInMonthOfLeapYear[englishMM] else daysInMonth[englishMM]
@@ -221,16 +233,18 @@ internal object DateConverters {
         )
     }
 
-    private fun initializeStartingDates(): Triple<LocalDate, CustomCalendar, Int> {
-        val startingEnglishDate = LocalDate(
-            startingEnglishCalendar.year,
-            startingEnglishCalendar.month,
-            startingEnglishCalendar.dayOfMonth
-        )
-        val startingNepaliCalendar = startingNepaliCalendar
-        val startingDayOfWeek = 1
+    private fun initializeStartingDates(targetYear: Int, isNepaliDate: Boolean)
+            : Pair<CustomCalendar, CustomCalendar> {
+        val referenceDate =
+            if (isNepaliDate) nepaliDateMap[targetYear - 1]
+            else englishDateMap[targetYear - 1]
 
-        return Triple(startingEnglishDate, startingNepaliCalendar, startingDayOfWeek)
+        val startingEnglishDate =
+            referenceDate?.englishDate ?: NepaliDatePickerDefaults.startingEnglishCalendar
+        val startingNepaliCalendar =
+            referenceDate?.nepaliDate ?: NepaliDatePickerDefaults.startingNepaliCalendar
+
+        return Pair(startingEnglishDate, startingNepaliCalendar)
     }
 
     private fun calculateEnglishDaysDifference(
@@ -263,7 +277,6 @@ internal object DateConverters {
         return totalNepDaysCount
     }
 
-    // Two overload functions for month details
     fun getNepaliMonth(
         nepaliYear: Int, nepaliMonth: Int, addedMonthsCount: Int
     ): NepaliMonthCalendar {
@@ -274,7 +287,7 @@ internal object DateConverters {
         return calculateNepaliMonthDetails(newYear, newMonth)
     }
 
-    fun getNepaliMonth(simpleNepaliDate: SimpleDate): CustomCalendar {
+    fun getNepaliCalendar(simpleNepaliDate: SimpleDate): CustomCalendar {
         return getCustomCalendarUsingDayMonthYear(
             dayOfMonth = simpleNepaliDate.dayOfMonth,
             month = simpleNepaliDate.month,
@@ -291,19 +304,34 @@ internal object DateConverters {
      *         and throws exception if the year is not found in [daysInMonthMap].
      */
     fun nepaliDaysInBetween(startDate: SimpleDate, endDate: SimpleDate): Int {
+        val referenceYear: Int
+
         if (startDate.year > endDate.year) {
             return -nepaliDaysInBetween(endDate, startDate)
+        } else {
+            referenceYear = startDate.year
         }
 
-        if (!isNepaliCalendarInConversionRange(startDate.year, startDate.month, startDate.dayOfMonth)
+        if (!isNepaliCalendarInConversionRange(
+                startDate.year,
+                startDate.month,
+                startDate.dayOfMonth
+            )
             || !isNepaliCalendarInConversionRange(endDate.year, endDate.month, endDate.dayOfMonth)
         ) {
-            throw IllegalArgumentException("Out of Range: Nepali start year ${startDate.year} or end year " +
-                    "${startDate.year} is out of range to compare. Check range value from NepaliDatePickerDefaults.")
+            throw IllegalArgumentException(
+                "Out of Range: Nepali start year ${startDate.year} or end year " +
+                        "${startDate.year} is out of range to compare. Check range value from NepaliDatePickerDefaults."
+            )
         }
 
-        val startOffset = calculateDayOffset(minNepaliYear, startDate.year, startDate.month) + startDate.dayOfMonth
-        val endOffset = calculateDayOffset(minNepaliYear, endDate.year, endDate.month) + endDate.dayOfMonth
+        val startOffset = calculateDayOffset(
+            referenceYear,
+            startDate.year,
+            startDate.month
+        ) + startDate.dayOfMonth
+        val endOffset =
+            calculateDayOffset(referenceYear, endDate.year, endDate.month) + endDate.dayOfMonth
 
         return endOffset - startOffset
     }
@@ -381,10 +409,12 @@ internal object DateConverters {
         val totalDaysInMonth = daysInMonthMap[nepaliYear]?.get(nepaliMonth)
             ?: throw IllegalArgumentException("Invalid year $nepaliYear or month provided $nepaliMonth.")
 
-        val startingNepaliCalendar = startingNepaliCalendar
+        val startingNepaliCalendar = nepaliDateMap[nepaliYear - 1]?.nepaliDate
+            ?: NepaliDatePickerDefaults.startingNepaliCalendar
 
         // Calculate the offset in days from the starting date to the target date
-        val dayOffset = calculateDayOffset(startingNepaliCalendar.year, nepaliYear, nepaliMonth)
+        val dayOffset =
+            calculateDayOffset(startingNepaliCalendar.year, nepaliYear, nepaliMonth)
 
         // Calculate the first day of the month by applying the offset to the base day of the week
         val firstDayOfMonth = (startingNepaliCalendar.firstDayOfMonth + dayOffset) % 7

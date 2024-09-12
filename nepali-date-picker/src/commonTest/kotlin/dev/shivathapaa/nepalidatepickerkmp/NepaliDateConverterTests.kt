@@ -453,7 +453,7 @@ class NepaliDateConverterTest {
         val today = calendarModel.today
 
         val nepaliMonthFromSimpleDate =
-            calendarModel.getNepaliMonth(simpleNepaliDate = today.toSimpleDate())
+            calendarModel.getNepaliCalendar(simpleNepaliDate = today.toSimpleDate())
         val nepaliMonthFromYearAndMonth =
             calendarModel.getNepaliMonth(nepaliYear = today.year, nepaliMonth = today.month)
 
