@@ -1,21 +1,19 @@
 # Nepali-Date-Picker (Android and/or iOS) - KMP
 
+<p align="center">
+  <img src=".github/assets/nepaliDatePickerBanner.png" alt="" width="100%">
+</p>
+
 KMP Nepali Date Picker for both Android and/or iOS which aligns with the Material3 Date Picker. This library provides UI and various utilities to work with Nepali Dates, and acts as a bridge between Nepali Calendar and Gregorian Calendar.
 
 <br>
 <p align="center">
   <img src="https://img.shields.io/github/v/release/shivathapaa/nepali-date-picker" alt="version"/>
   <img src="https://img.shields.io/github/license/shivathapaa/nepali-date-picker?labelColor=F5DDD7&color=E0BFB7" alt="license"/>
-</p>
-<br>
-
-<p align="center">
-  Read on Medium: 
-  <a href="https://medium.com/@shivathapaa/nepali-date-picker-for-android-and-ios-kotlin-multiplatform-a739ea0caf47">
+    <a href="https://medium.com/@shivathapaa/nepali-date-picker-for-android-and-ios-kotlin-multiplatform-a739ea0caf47">
     <img src="https://img.shields.io/badge/Medium-12100E?style=social&logo=medium" alt="Medium"/>
   </a>
 </p>
-
 
 <details>
   <summary><b>Table of Contents</b></summary>
