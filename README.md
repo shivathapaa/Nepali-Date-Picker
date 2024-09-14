@@ -1,13 +1,39 @@
 # Nepali-Date-Picker (Android and/or iOS) - KMP
 
-<p align="center">
-  <img src=".github/assets/nepaliDatePickerBanner.png" alt="" width="100%">
-</p>
-
 KMP Nepali Date Picker for both Android and/or iOS which aligns with the Material3 Date Picker. This library provides UI and various utilities to work with Nepali Dates, and acts as a bridge between Nepali Calendar and Gregorian Calendar.
 
-[Using in your project.](#using-in-your-projects) &nbsp;&nbsp;&nbsp;&nbsp; [See screenshot of Nepali Date Picker](#screenshots) &nbsp;&nbsp;&nbsp;&nbsp;
-Read on Medium: [![Medium](https://img.shields.io/badge/Medium-12100E?style=social&logo=medium)](https://medium.com/@shivathapaa/nepali-date-picker-for-android-and-ios-kotlin-multiplatform-a739ea0caf47)
+<br>
+<p align="center">
+  <img src="https://img.shields.io/github/v/release/shivathapaa/nepali-date-picker" alt="version"/>
+  <img src="https://img.shields.io/github/license/shivathapaa/nepali-date-picker?labelColor=F5DDD7&color=E0BFB7" alt="license"/>
+</p>
+<br>
+
+<p align="center">
+  Read on Medium: 
+  <a href="https://medium.com/@shivathapaa/nepali-date-picker-for-android-and-ios-kotlin-multiplatform-a739ea0caf47">
+    <img src="https://img.shields.io/badge/Medium-12100E?style=social&logo=medium" alt="Medium"/>
+  </a>
+</p>
+
+
+<details>
+  <summary><b>Table of Contents</b></summary>
+
+* [Design overview](#design-overview)
+* [Types/features](#typesfeatures)
+* [Operations highlight](#operations-highlight)
+* [Using in your projects](#using-in-your-projects)
+    * [Common Gradle](#common-gradle)
+    * [Android](#android)
+    * [iOS](#ios)
+    * [Desktop/Web](#desktopweb)
+* [License](#license)
+* [Support](#support)
+* [Screenshots](#screenshots)
+* [Brief simple example usage](#brief-simple-example-usage)
+* [Detailed examples to explore more](#detailed-examples-to-explore-more)
+</details>
 
 ## Design overview
 
@@ -21,7 +47,7 @@ You can use this library independent to any platform or in common Kotlin Multipl
 
 ## Types/Features
 
-This library provides variery of features for working with date picker. It is not only limited to date picker but many utilities that serves its purpose with extended support for date and time. 
+This library provides variety of features for working with date picker. It is not only limited to date picker but many utilities that serves its purpose with extended support for date and time.
 Some of them are listed below:
 
 - `CustomCalendar` - Calendar which represents both English and Nepali dates.
@@ -32,13 +58,13 @@ Some of them are listed below:
 - `NepaliDateConverter` - Provides utilities for date conversions (english to nepali and vice versa), get formatted date(6), get time, get date-time in ISO 8601 format, calculate days in between two date, and many more.
 - `rememberNepaliDatePickerState()` - To read, write, and manage state of the date picker.
 - `NepaliSelectableDates` - To control selectable dates i.e. enable/disable certain dates.
-- `NepaliDatePickerColors` - Takes `Material3` ?: **Material** colors by **default**. All the colors it uses are taken from your app colors if you've defined Material colors in your project. Also, there's always `.copy()` to modify the color.  
+- `NepaliDatePickerColors` - Takes `Material3` ?: **Material** colors by **default**. All the colors it uses are taken from your app colors if you've defined Material colors in your project. Also, there's always `.copy()` to modify the color.
 
-## Operations Highlight
+## Operations highlight
 
 Using this library you can get following things done.
 
-### Getting today's date and current time
+#### Getting today's date and current time
 
 ```kotlin
 NepaliDateConverter.todayNepaliDate
@@ -48,19 +74,19 @@ NepaliDateConverter.todayEnglishDate
 NepaliDateConverter.currentTime
 ```
 
-### Converting English date to Nepali date
+#### Converting English date to Nepali date
 
 ```kotlin
 NepaliDateConverter.convertEnglishToNepali(2024, 6, 21)
 ```
 
-### Converting Nepali date to English date
+#### Converting Nepali date to English date
 
 ```kotlin
 NepaliDateConverter.convertNepaliToEnglish(2081, 3, 21)
 ```
 
-### Other utilities
+#### Other utilities
 
 "This library uses a `1-based index` where 1 represents Sunday or January/Baisakh, 7 represents Saturday or July/Kartik, and 12 represents December/Chaitra."
 
@@ -110,11 +136,11 @@ val englishDaysBetween = NepaliDateConverter.getEnglishDaysInBetween(englishStar
 
 val customCalendar = CustomCalendar(year = 2080, month = 3, day = 11, weekday = 2, ....)
 val locale = NepaliDateLocale(
-        language = NepaliDatePickerLang.ENGLISH,
-        dateFormat = NepaliDateFormatStyle.FULL, // 6 options
-        weekDayName = NameFormat.FULL,
-        monthName = NameFormat.FULL
-            )
+    language = NepaliDatePickerLang.ENGLISH,
+    dateFormat = NepaliDateFormatStyle.FULL, // other 6 options
+    weekDayName = NameFormat.FULL,
+    monthName = NameFormat.FULL
+)
 val formattedDate = NepaliDateConverter.formatNepaliDate(customCalendar, locale)
 // formattedDate: "Monday, Asar 11, 2080"
 
@@ -130,11 +156,19 @@ NepaliDateConverter.getFormattedTimeInEnglish(NepaliDateConverter.currentTime) /
 NepaliDateConverter.getFormattedTimeInEnglish(NepaliDateConverter.currentTime, use12HourFormat = false) // Output: "16:30"
 ```
 
-[See all examples to get started.](#examples-to-get-started)
+[See all examples to get started](#detailed-examples-to-explore-more)
 
 ## Using in your projects
 
 The library is published to [Maven Central. You can find all artifacts here.](https://central.sonatype.com/namespace/io.github.shivathapaa)
+
+This library is almost stable with the release of version `2.0.0-rc01`. However, it currently depends on JetBrains Compose `1.7.0-beta01 or later`.
+I expect to release a fully stable version once JetBrains Compose reaches a stable release. In the meantime, `2.0.0-rc01` is considered `stable` and highly reliable for production use.
+
+> If you encounter version conflicts using this library, you can solve this in two ways:
+> - Use an earlier version of the Nepali-Date-Picker library (`2.0.0-beta06 or before`) if stability is required and your project is using a lower version of JetBrains Compose or Android Compose.
+> - Alternatively, you can update your JetBrains Compose or Android Compose version to `1.7.0-beta01 or later` to resolve the conflict.
+    For more details on this release, check [this release](https://github.com/shivathapaa/Nepali-Date-Picker/releases/tag/2.0.0-rc01).
 
 ### Common Gradle
 
@@ -144,9 +178,9 @@ In multiplatform projects, add a dependency to the commonMain source set depende
 kotlin {
     sourceSets {
         commonMain {
-             dependencies {
-                 implementation("io.github.shivathapaa:nepali-date-picker:2.0.0-beta10")
-             }
+            dependencies {
+                implementation("io.github.shivathapaa:nepali-date-picker:2.0.0-beta10")
+            }
         }
     }
 }
@@ -155,8 +189,6 @@ kotlin {
 ### Android
 
 To add the nepali-date-picker library to your Android project, include the following dependency in your module/app-level build.gradle file:
-
-> If you encounter version conflict using this library then you can either use `2.0.0-beta06` or update your jetbrains compose version to `1.7.0-beta01`. Check [this release](https://github.com/shivathapaa/Nepali-Date-Picker/releases/tag/2.0.0-beta07) for more details.
 
 ```kotlin
 // For app using Kotlin version before 2.0.0
@@ -231,7 +263,34 @@ and accessible to the community.
 ```
 For more details, see the [LICENSE](https://github.com/shivathapaa/Nepali-Date-Picker/blob/main/LICENSE) file.
 
-## Brief example usage
+## Support
+
+You can contribute to this project in several ways:
+
+- Have an idea for an improvement or a new feature? I'm open to suggestions! Feel free to suggest changes, request enhancements, or report issues [here](https://github.com/shivathapaa/Nepali-Date-Picker/issues/new/choose).
+- Share the project with your network to help others discover it.
+- Want to contribute directly? You're welcome to open a pull request! Be sure to review the [CONTRIBUTING.md](https://github.com/shivathapaa/Nepali-Date-Picker/blob/main/CONTRIBUTING.md) guide before getting started.
+- Show your support by giving this repository a Star⭐. It means a lot! 😊
+
+> Thanks to Google and KMP developers for Material3, Jetpack Compose, kotlinx-datetime and other different Apis. :)
+
+## Screenshots
+
+<p align="center">
+  <img src=".github/assets/screenshots/neoWhite.png" alt="Screenshot of Nepali Date Picker" width="20%">&nbsp;
+  <img src=".github/assets/screenshots/neoDark.png" alt="" width="20%">&nbsp;
+  <img src=".github/assets/screenshots/blueWhite.png" alt="" width="20%">&nbsp;
+  <img src=".github/assets/screenshots/orangeDark.png" alt="" width="20%">
+</p>
+<br>
+<p align="center">
+  <img src=".github/assets/screenshots/yearYellowSimulator.png" alt="Screenshot of Nepali Date Picker" width="20%">&nbsp;
+  <img src=".github/assets/screenshots/yellowLightSimulator.png" alt="" width="20%">&nbsp;
+  <img src=".github/assets/screenshots/redLightSimulator.png" alt="" width="20%">&nbsp;
+  <img src=".github/assets/screenshots/redDarkSimulator.png" alt="" width="20%">
+</p>
+
+##  Brief simple example usage
 
 Don't forget about the **DateRange** before using.
 
@@ -278,7 +337,7 @@ if (showNepaliDatePickerDialog) {
 }
 ```
 
-### Using rememberNepaliDatePickerState()
+#### Using rememberNepaliDatePickerState()
 
 ```kotlin
 val defaultNepaliDatePickerState = rememberNepaliDatePickerState()
@@ -326,48 +385,12 @@ NepaliDatePicker(state = datePickerStateWithDateLimiter)
 NepaliDatePicker(state = nepaliDatePickerStateWithRangeSelectable)
 ```
 
-[See all examples to get started.](#examples-to-get-started)
-
-## Support
-
-You have something in mind to change or add? I am open to suggestions. You can support this project by [suggesting changes, requesting enhancement/features, or raising an issue here](https://github.com/shivathapaa/Nepali-Date-Picker/issues/new/choose).
-
-You are free to contribute to this project, do checkout [CONTRIBUTING.md](https://github.com/shivathapaa/Nepali-Date-Picker/blob/main/CONTRIBUTING.md) before starting.
-
-Giving a Star⭐ to this repository is also a way to support this project. 😊
-
-
----
-
-> Thanks to Google and KMP developers for Material3, Jetpack Compose, kotlinx-datetime and other different Apis. :)
-
----
-Thank you for star! 😉
-
----
-
-## Screenshots
-
-<p align="center">
-  <img src=".github/assets/screenshots/neoWhite.png" alt="Screenshot of Nepali Date Picker" width="20%">&nbsp;
-  <img src=".github/assets/screenshots/neoDark.png" alt="" width="20%">&nbsp;
-  <img src=".github/assets/screenshots/blueWhite.png" alt="" width="20%">&nbsp;
-  <img src=".github/assets/screenshots/orangeDark.png" alt="" width="20%">
-</p>
-<br>
-<p align="center">
-  <img src=".github/assets/screenshots/yearYellowSimulator.png" alt="Screenshot of Nepali Date Picker" width="20%">&nbsp;
-  <img src=".github/assets/screenshots/yellowLightSimulator.png" alt="" width="20%">&nbsp;
-  <img src=".github/assets/screenshots/redLightSimulator.png" alt="" width="20%">&nbsp;
-  <img src=".github/assets/screenshots/redDarkSimulator.png" alt="" width="20%">
-</p>
-
-## Examples to get started
+## Detailed examples to explore more
 Here are some examples to help you get started. The library's documentation provides further, detailed explanations.
 
 Don't worry, it's not too complex! In the examples below, I've utilized various customization options to showcase multiple use cases, which might seem overwhelming. However, your specific needs may not require all of these options.
 
-For basic use cases, [refer to the section above](#brief-example-usage).
+For basic use cases, [refer to the section above](#brief-simple-example-usage).
 
 #### Nepali Date Picker without dialog
 ```kotlin
@@ -420,7 +443,7 @@ if (showNepaliDatePickerDialog) {
 }
 ```
 
-#### Using rememberNepaliDatePickerState() for different cases 
+#### Using rememberNepaliDatePickerState() for different cases
 ```kotlin
 // Using rememberNepaliDatePickerState() for different cases 
 val todayNepaliDate = NepaliDateConverter.todayNepaliDate
@@ -627,3 +650,5 @@ val formattedTimeWithSpace = NepaliDateConverter.replaceDelimiter(originalTime, 
 And there is always more to explore... ;)
 
 ---
+
+Thank you for star! 😉
