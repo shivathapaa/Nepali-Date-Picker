@@ -25,7 +25,8 @@ git checkout -b feature/your-feature-name
 git checkout -b bugfix/your-bug-fix-name
 ```
 4. Make your changes: Follow the guidelines below for contributing.
-5. Commit your changes:
+5. Ensure all commits are signed using GPG. Unsigned commits will not be accepted. Learn how to [sign commits](https://docs.github.com/en/authentication/managing-commit-signature-verification/signing-commits).
+6. Commit your changes:
 ```bash
 git commit -m "Describe your changes"
 ```
