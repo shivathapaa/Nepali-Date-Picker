@@ -88,6 +88,7 @@ import dev.shivathapaa.nepalidatepickerkmp.calendar_model.NepaliCalendarModel
 import dev.shivathapaa.nepalidatepickerkmp.calendar_model.NepaliDatePickerColors
 import dev.shivathapaa.nepalidatepickerkmp.calendar_model.NepaliDatePickerDefaults
 import dev.shivathapaa.nepalidatepickerkmp.data.CustomCalendar
+import dev.shivathapaa.nepalidatepickerkmp.data.NameFormat
 import dev.shivathapaa.nepalidatepickerkmp.data.NepaliDateLocale
 import dev.shivathapaa.nepalidatepickerkmp.data.NepaliDatePickerLang
 import dev.shivathapaa.nepalidatepickerkmp.data.NepaliMonthCalendar
@@ -135,6 +136,7 @@ fun NepaliDatePicker(
             locale = state.locale
         )
     },
+    showTodayButton: Boolean = true,
     colors: NepaliDatePickerColors = NepaliDatePickerDefaults.colors()
 ) {
     val calendarModel = NepaliCalendarModel(state.locale)
@@ -154,6 +156,7 @@ fun NepaliDatePicker(
             },
             calendarModel = calendarModel,
             yearRange = state.yearRange,
+            showTodayButton = showTodayButton,
             colors = colors,
             today = today
         )
@@ -247,6 +250,7 @@ private fun NepaliDatePicker(
     calendarModel: NepaliCalendarModel,
     yearRange: IntRange,
     nepaliSelectableDates: NepaliSelectableDates,
+    showTodayButton: Boolean,
     colors: NepaliDatePickerColors,
     today: SimpleDate
 ) {
@@ -264,6 +268,7 @@ private fun NepaliDatePicker(
     var yearPickerVisible by rememberSaveable { mutableStateOf(false) }
 
     val chosenLanguage = calendarModel.locale.language
+    val weekDayFormat = calendarModel.locale.weekDayName
     val fullMonthName = chosenLanguage.months[displayedMonth.month - 1].full
     val fullYear = calendarModel.localizeNumber(
         stringToLocalize = displayedMonth.year.toString(), locale = chosenLanguage
@@ -279,6 +284,7 @@ private fun NepaliDatePicker(
             previousAvailable = monthsListState.canScrollBackward,
             yearPickerVisible = yearPickerVisible,
             yearPickerText = formattedMonthYear,
+            showTodayButton = showTodayButton,
             onNextClicked = {
                 coroutineScope.launch {
                     try {
@@ -303,7 +309,7 @@ private fun NepaliDatePicker(
                     }
                 }
             },
-            onRefreshClicked = {
+            onTodayClicked = {
                 coroutineScope.launch { monthsListState.scrollToItem(initialIndex) }
             },
             onYearPickerButtonClicked = { yearPickerVisible = !yearPickerVisible },
@@ -311,7 +317,11 @@ private fun NepaliDatePicker(
         )
         Box {
             Column(modifier = Modifier.padding(horizontal = DatePickerHorizontalPadding)) {
-                NepaliWeekDays(colors = colors, language = chosenLanguage)
+                NepaliWeekDays(
+                    colors = colors,
+                    language = chosenLanguage,
+                    weekDayFormat = weekDayFormat
+                )
                 NepaliHorizontalMonthList(
                     today = today,
                     lazyListState = monthsListState,
@@ -642,7 +652,8 @@ private fun NepaliMonthsNavigation(
     yearPickerText: String,
     onNextClicked: () -> Unit,
     onPreviousClicked: () -> Unit,
-    onRefreshClicked: () -> Unit,
+    showTodayButton: Boolean,
+    onTodayClicked: () -> Unit,
     onYearPickerButtonClicked: () -> Unit,
     colors: NepaliDatePickerColors
 ) {
@@ -669,8 +680,10 @@ private fun NepaliMonthsNavigation(
             // Show arrows for traversing months (only visible when the year selection is off)
             if (!yearPickerVisible) {
                 Row {
-                    TextButton(onRefreshClicked, enabled = !isToday) {
-                        Text(text = todayText, style = MaterialTheme.typography.labelLarge)
+                    if (showTodayButton) {
+                        TextButton(onTodayClicked, enabled = !isToday) {
+                            Text(text = todayText, style = MaterialTheme.typography.labelLarge)
+                        }
                     }
 
                     IconButton(onClick = onPreviousClicked, enabled = previousAvailable) {
@@ -720,14 +733,13 @@ private fun NepaliYearPickerMenuButton(
  */
 @Composable
 private fun NepaliWeekDays(
-    colors: NepaliDatePickerColors, language: NepaliDatePickerLang
+    colors: NepaliDatePickerColors, language: NepaliDatePickerLang, weekDayFormat: NameFormat
 ) {
     val firstDayOfWeek = NepaliDatePickerDefaults.FIRST_DAY_OF_WEEK
     val weekdays = language.weekdays
-    val dayNames = arrayListOf<String>()
 
-    for (i in firstDayOfWeek..weekdays.size) {
-        dayNames.add(weekdays[i - 1].short)
+    val dayNames = (firstDayOfWeek..firstDayOfWeek + 6).map { dayIndex ->
+        if (weekDayFormat == NameFormat.SHORT) weekdays[dayIndex - 1].short else weekdays[dayIndex - 1].medium
     }
 
     val textStyle = MaterialTheme.typography.bodyLarge
