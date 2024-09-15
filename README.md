@@ -177,7 +177,7 @@ kotlin {
     sourceSets {
         commonMain {
             dependencies {
-                implementation("io.github.shivathapaa:nepali-date-picker:2.0.0-beta10")
+                implementation("io.github.shivathapaa:nepali-date-picker:2.0.0-rc01")
             }
         }
     }
@@ -192,7 +192,7 @@ To add the nepali-date-picker library to your Android project, include the follo
 // For app using Kotlin version before 2.0.0
 
 dependencies {
-    implementation("io.github.shivathapaa:nepali-date-picker-android:2.0.0-beta10")
+    implementation("io.github.shivathapaa:nepali-date-picker-android:2.0.0-rc01")
 }
 
 // Or use version catalog like below
@@ -206,7 +206,7 @@ dependencies {
 [versions]
 # ...
 kotlin = "2.0.20"
-nepaliDatePickerAndroid = "2.0.0-beta10"
+nepaliDatePickerAndroid = "2.0.0-rc01"
 
 [libraries]
 nepali-date-picker-android = { module = "io.github.shivathapaa:nepali-date-picker-android", version.ref = "nepaliDatePickerAndroid" }
@@ -275,17 +275,43 @@ You can contribute to this project in several ways:
 ## Screenshots
 
 <p align="center">
-  <img src=".github/assets/screenshots/neoWhite.png" alt="Screenshot of Nepali Date Picker" width="20%">&nbsp;
-  <img src=".github/assets/screenshots/neoDark.png" alt="" width="20%">&nbsp;
-  <img src=".github/assets/screenshots/blueWhite.png" alt="" width="20%">&nbsp;
-  <img src=".github/assets/screenshots/orangeDark.png" alt="" width="20%">
+  <img src=".github/assets/screenshots/lightGreenInitial.png" alt="Screenshot of Nepali Date Picker" width="20%">&nbsp;
+  <img src=".github/assets/screenshots/orangeDarkLongNepali.png" alt="" width="20%">&nbsp;
+  <img src=".github/assets/screenshots/redLightShort.png" alt="" width="20%">&nbsp;
+  <img src=".github/assets/screenshots/yellowDarkFullNepali.png" alt="" width="20%">
 </p>
 <br>
 <p align="center">
-  <img src=".github/assets/screenshots/yearYellowSimulator.png" alt="Screenshot of Nepali Date Picker" width="20%">&nbsp;
-  <img src=".github/assets/screenshots/yellowLightSimulator.png" alt="" width="20%">&nbsp;
-  <img src=".github/assets/screenshots/redLightSimulator.png" alt="" width="20%">&nbsp;
-  <img src=".github/assets/screenshots/redDarkSimulator.png" alt="" width="20%">
+  <img src=".github/assets/screenshots/orangeLightDaySelectableNepali.png"  alt="Screenshot of Selectable Nepali Date Picker" width="20%">&nbsp;
+  <img src=".github/assets/screenshots/yellowDarkYearRangeSelectable.png" alt="" width="20%">&nbsp;
+  <img src=".github/assets/screenshots/orangeLightYearFull.png" alt="" width="20%">&nbsp;
+  <img src=".github/assets/screenshots/greenDarkYearSelectableNepali.png" alt="" width="20%">
+</p>
+<br>
+<p align="center">
+  <img src=".github/assets/screenshots/lightGreenCompact.png" alt="Screenshots of Nepali Date Picker" width="11%">&nbsp;
+  <img src=".github/assets/screenshots/orangeLightFullNepali.png" alt="" width="11%">&nbsp;
+  <img src=".github/assets/screenshots/neoDarkShort.png" alt="" width="11%">&nbsp;
+  <img src=".github/assets/screenshots/redLightFull.png" alt="" width="11%">&nbsp;
+  <img src=".github/assets/screenshots/blueDarkLong.png" alt="" width="11%">&nbsp;
+  <img src=".github/assets/screenshots/redLightShortNepali.png" alt="" width="11%">&nbsp;
+  <img src=".github/assets/screenshots/yellowLightNepali.png" alt="" width="11%">
+</p>
+<br>
+<p align="center">
+  <img src=".github/assets/screenshots/androidEmulatorLight.png" alt="Screenshots of Nepali Date Picker in simulator" width="9%">&nbsp;
+  <img src=".github/assets/screenshots/iosSimulatorLightNepali.png" alt="" width="9%">&nbsp;
+  <img src=".github/assets/screenshots/lightGreenCompactNepali.png" alt="" width="11%">&nbsp;
+  <img src=".github/assets/screenshots/yellowLight.png" alt="" width="11%">&nbsp;
+  <img src=".github/assets/screenshots/iosSimulatorDark.png" alt="" width="9%">&nbsp;
+  <img src=".github/assets/screenshots/androidEmulatorDarkNepali.png" alt="" width="9%">
+</p>
+
+### Upcoming
+<p align="center">
+  <img src=".github/assets/screenshots/englishDarkWithEnglishAndNepali.png" alt="Screenshots of Nepali Date Picker in simulator" width="18%">&nbsp;
+  <img src=".github/assets/screenshots/englishLightWithBothEnglishNepali.png" alt="" width="18%">&nbsp;
+  <img src=".github/assets/screenshots/nepaliDarkWithEnglishAndNepali.png" alt="" width="18%">
 </p>
 
 ##  Brief simple example usage
