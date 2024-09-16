@@ -18,6 +18,9 @@ package dev.shivathapaa.nepalidatepickerkmp.calendar_model
 
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -27,6 +30,7 @@ import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.State
 import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
@@ -34,6 +38,7 @@ import androidx.compose.ui.graphics.takeOrElse
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import dev.shivathapaa.nepalidatepickerkmp.NepaliSelectableDates
+import dev.shivathapaa.nepalidatepickerkmp.annotations.ExperimentalNepaliDatePickerApi
 import dev.shivathapaa.nepalidatepickerkmp.data.CustomCalendar
 import dev.shivathapaa.nepalidatepickerkmp.data.NepaliDateFormatStyle
 import dev.shivathapaa.nepalidatepickerkmp.data.NepaliDateLocale
@@ -193,6 +198,59 @@ object NepaliDatePickerDefaults {
             modifier = modifier,
             maxLines = 1
         )
+    }
+
+    @ExperimentalNepaliDatePickerApi
+    @Composable
+    internal fun NepaliDatePickerHeadlineWithEnglishDate(
+        selectedDate: CustomCalendar?,
+        selectedEnglishDate: CustomCalendar?,
+        locale: NepaliDateLocale,
+        englishLocale: NepaliDateLocale,
+        modifier: Modifier = Modifier
+    ) {
+        val calendarModel = NepaliCalendarModel(locale)
+
+        val formattedDate = selectedDate?.let { date ->
+            calendarModel.formatNepaliDate(
+                year = date.year,
+                month = date.month,
+                dayOfMonth = date.dayOfMonth,
+                dayOfWeek = date.dayOfWeek,
+                locale = locale
+            )
+        } ?: locale.language.selectDateText
+
+
+        val formattedEnglishDate = selectedEnglishDate?.let { date ->
+            calendarModel.formatEnglishDate(
+                year = date.year,
+                month = date.month,
+                dayOfMonth = date.dayOfMonth,
+                dayOfWeek = date.dayOfWeek,
+                locale = englishLocale
+            )
+        }
+
+        Column(
+            modifier = modifier.heightIn(min = 72.dp, max = 92.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterVertically)
+        ) {
+            Text(
+                text = formattedDate,
+                modifier = Modifier,
+                maxLines = 1
+            )
+
+            if (!formattedEnglishDate.isNullOrEmpty()) {
+                Text(
+                    text = formattedEnglishDate,
+                    modifier = Modifier,
+                    maxLines = 1,
+                    style = MaterialTheme.typography.bodySmall
+                )
+            }
+        }
     }
 
     /**

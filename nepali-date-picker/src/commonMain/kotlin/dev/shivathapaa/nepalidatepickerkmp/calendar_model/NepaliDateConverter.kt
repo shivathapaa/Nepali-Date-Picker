@@ -25,7 +25,6 @@ import dev.shivathapaa.nepalidatepickerkmp.data.NepaliDatePickerLang
 import dev.shivathapaa.nepalidatepickerkmp.data.NepaliMonthCalendar
 import dev.shivathapaa.nepalidatepickerkmp.data.SimpleDate
 import dev.shivathapaa.nepalidatepickerkmp.data.SimpleTime
-import dev.shivathapaa.nepalidatepickerkmp.data.englishMonths
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.daysUntil
 
@@ -235,9 +234,8 @@ object NepaliDateConverter {
      * @param dayOfMonth takes an integer value of day.
      * @param dayOfWeek takes an integer value of day of week.
      * @param locale The [NepaliDateLocale] specifying the user's preferred date format,
-     * weekday name format, and month name format.
+     * weekday name format, language, and month name format.
      *
-     * Note: [NepaliDatePickerLang] will be dummy for this case.
      *
      * @return A string representing the formatted date according to the user's preferences.
      *
@@ -257,7 +255,7 @@ object NepaliDateConverter {
      * ```
      * val englishDate = CustomCalendar(year = 2024, month = 3, dayOfMonth = 11, dayOfWeek = 2, ....)
      * val locale = NepaliDateLocale(
-     *     language = NepaliDatePickerLang.ENGLISH, // This is dummy, no need to pass for this case.
+     *     language = NepaliDatePickerLang.ENGLISH,
      *     dateFormat = NepaliDateFormatStyle.FULL,
      *     weekDayName = NameFormat.FULL,
      *     monthName = NameFormat.FULL
@@ -290,9 +288,8 @@ object NepaliDateConverter {
      *
      * @param customCalendar The [CustomCalendar] containing the year, month, day, and weekday.
      * @param locale The [NepaliDateLocale] specifying the user's preferred language,date format,
-     * weekday name format, and month name format.
+     * weekday name format, language, and month name format.
      *
-     * Note: [NepaliDatePickerLang] will be dummy for this case.
      *
      * @return A string representing the formatted date according to the user's preferences.
      *
@@ -312,7 +309,7 @@ object NepaliDateConverter {
      * ```
      * val englishDate = CustomCalendar(year = 2024, month = 3, dayOfMonth = 11, dayOfWeek = 2, ....)
      * val locale = NepaliDateLocale(
-     *     language = NepaliDatePickerLang.ENGLISH, // This is dummy, no need to pass for this case.
+     *     language = NepaliDatePickerLang.ENGLISH,
      *     dateFormat = NepaliDateFormatStyle.FULL,
      *     weekDayName = NameFormat.FULL,
      *     monthName = NameFormat.FULL
@@ -386,17 +383,9 @@ object NepaliDateConverter {
     fun getEnglishMonthName(
         month: Int,
         format: NameFormat = NameFormat.FULL,
+        language: NepaliDatePickerLang = NepaliDatePickerLang.ENGLISH
     ): String {
-        if (month !in 1..12) {
-            throw IllegalArgumentException("Invalid monthOfYear value: $month. Must be between 1 and 12.")
-        }
-
-        val monthIndex = englishMonths[month - 1]
-
-        return when (format) {
-            NameFormat.SHORT -> monthIndex.short
-            else -> monthIndex.full
-        }
+        return calendarModel.getEnglishMonthName(month, language, format)
     }
 
     /**
@@ -745,7 +734,11 @@ object NepaliDateConverter {
      * @param newDelimiter The new delimiter to replace the old one (e.g., "-").
      * @return The date string with the delimiter replaced (e.g., "2024-06-21").
      */
-    fun replaceDelimiter(dateString: String, newDelimiter: String, oldDelimiter: String = "/"): String {
+    fun replaceDelimiter(
+        dateString: String,
+        newDelimiter: String,
+        oldDelimiter: String = "/"
+    ): String {
         return dateString.replace(oldDelimiter, newDelimiter)
     }
 

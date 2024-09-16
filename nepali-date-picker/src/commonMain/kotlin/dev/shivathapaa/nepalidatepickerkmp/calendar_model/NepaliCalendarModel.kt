@@ -25,7 +25,6 @@ import dev.shivathapaa.nepalidatepickerkmp.data.NepaliDatePickerLang
 import dev.shivathapaa.nepalidatepickerkmp.data.NepaliMonthCalendar
 import dev.shivathapaa.nepalidatepickerkmp.data.SimpleDate
 import dev.shivathapaa.nepalidatepickerkmp.data.SimpleTime
-import dev.shivathapaa.nepalidatepickerkmp.data.englishMonths
 import kotlinx.datetime.Clock
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
@@ -235,9 +234,7 @@ internal class NepaliCalendarModel(val locale: NepaliDateLocale = NepaliDateLoca
      * @param dayOfMonth takes an integer value of day.
      * @param dayOfWeek takes an integer value of day of week.
      * @param locale The [NepaliDateLocale] specifying the user's preferred date format,
-     * weekday name format, and month name format.
-     *
-     * Note: [NepaliDatePickerLang] will be dummy for this case.
+     * weekday name format, language, and month name format.
      *
      * @return A string representing the formatted date according to the user's preferences.
      *
@@ -273,7 +270,7 @@ internal class NepaliCalendarModel(val locale: NepaliDateLocale = NepaliDateLoca
         dayOfWeek: Int,
         locale: NepaliDateLocale
     ): String {
-        val language = NepaliDatePickerLang.ENGLISH
+        val language = locale.language
 
         val showMonthName = locale.dateFormat in listOf(
             NepaliDateFormatStyle.FULL,
@@ -282,7 +279,7 @@ internal class NepaliCalendarModel(val locale: NepaliDateLocale = NepaliDateLoca
         )
 
         val weekday = language.weekdays[dayOfWeek - 1]
-        val monthNames = englishMonths[month - 1]
+        val localizedMonth = language.englishMonths[month - 1]
 
         val weekdayName = when (locale.weekDayName) {
             NameFormat.FULL -> weekday.full
@@ -291,15 +288,19 @@ internal class NepaliCalendarModel(val locale: NepaliDateLocale = NepaliDateLoca
         }
 
         val monthName = when (locale.monthName) {
-            NameFormat.SHORT -> monthNames.short
-            else -> monthNames.full
+            NameFormat.SHORT -> localizedMonth.short
+            else -> localizedMonth.full
         }
 
-        val day = if (showMonthName) dayOfMonth.toString()
-        else dayOfMonth.toString().padStart(2, '0')
+        val day = localizeNumber(
+            if (showMonthName) dayOfMonth.toString()
+            else dayOfMonth.toString().padStart(2, '0'),
+            language
+        )
 
-        val monthNum = month.toString().padStart(2, '0')
-        val fullYear = year.toString()
+        val monthNum =
+            localizeNumber(month.toString().padStart(2, '0'), language)
+        val fullYear = localizeNumber(year.toString(), language)
         val shortYear = fullYear.takeLast(2)
 
         return when (locale.dateFormat) {
@@ -365,6 +366,23 @@ internal class NepaliCalendarModel(val locale: NepaliDateLocale = NepaliDateLoca
         return when (format) {
             NameFormat.SHORT -> month.short
             else -> month.full
+        }
+    }
+
+    fun getEnglishMonthName(
+        month: Int,
+        language: NepaliDatePickerLang,
+        format: NameFormat = NameFormat.FULL
+    ): String {
+        if (month !in 1..12) {
+            throw IllegalArgumentException("Invalid monthOfYear value: $month. Must be between 1 and 12.")
+        }
+
+        val monthIndex = language.englishMonths[month - 1]
+
+        return when (format) {
+            NameFormat.SHORT -> monthIndex.short
+            else -> monthIndex.full
         }
     }
 

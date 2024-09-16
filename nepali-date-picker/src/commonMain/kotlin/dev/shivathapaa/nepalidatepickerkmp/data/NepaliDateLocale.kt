@@ -89,6 +89,7 @@ enum class NepaliDatePickerLang {
     ENGLISH {
         override val weekdays: List<NepaliWeekdayName> = englishWeekdays
         override val months: List<NepaliMonthName> = nepaliMonthsInEnglish
+        override val englishMonths: List<NepaliMonthName> = englishMonthsInEnglish
         override val selectDateText: String = "Select Date"
         override val datePickerTitle: String = "Select Nepali Date"
         override val cancelText: String = "Cancel"
@@ -98,6 +99,7 @@ enum class NepaliDatePickerLang {
     NEPALI {
         override val weekdays: List<NepaliWeekdayName> = nepaliWeekdays
         override val months: List<NepaliMonthName> = nepaliMonths
+        override val englishMonths: List<NepaliMonthName> = englishMonthsInNepali
         override val selectDateText: String = "मिति चयन गर्नुहोस्"
         override val datePickerTitle: String = "नेपाली मिति चयन गर्नुहोस्"
         override val cancelText: String = "रद्द गर्नुहोस्"
@@ -107,6 +109,7 @@ enum class NepaliDatePickerLang {
 
     abstract val weekdays: List<NepaliWeekdayName>
     abstract val months: List<NepaliMonthName>
+    abstract val englishMonths: List<NepaliMonthName>
     abstract val selectDateText: String
     abstract val datePickerTitle: String
     abstract val cancelText: String
@@ -164,7 +167,7 @@ private val englishWeekdays = listOf(
     NepaliWeekdayName("S", "Sat", "Saturday")
 )
 
-internal val englishMonths = listOf(
+private val englishMonthsInEnglish = listOf(
     NepaliMonthName("Jan", "January"),
     NepaliMonthName("Feb", "February"),
     NepaliMonthName("Mar", "March"),
@@ -177,4 +180,19 @@ internal val englishMonths = listOf(
     NepaliMonthName("Oct", "October"),
     NepaliMonthName("Nov", "November"),
     NepaliMonthName("Dec", "December")
+)
+
+private val englishMonthsInNepali = listOf(
+    NepaliMonthName("जन", "जनवरी"),
+    NepaliMonthName("फेब्रु", "फेब्रुअरी"),
+    NepaliMonthName("मार्च", "मार्च"),
+    NepaliMonthName("अप्रि", "अप्रिल"),
+    NepaliMonthName("मे", "मे"),
+    NepaliMonthName("जुन", "जुन"),
+    NepaliMonthName("जुला.", "जुलाई"),
+    NepaliMonthName("अग", "अगस्ट"),
+    NepaliMonthName("सेप्ट", "सेप्टेम्बर"),
+    NepaliMonthName("अक्टो", "अक्टोबर"),
+    NepaliMonthName("नोभे", "नोभेम्बर"),
+    NepaliMonthName("डिसे", "डिसेम्बर")
 )
