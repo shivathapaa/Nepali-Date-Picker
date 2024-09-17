@@ -7,13 +7,23 @@
 KMP Nepali Date Picker for both Android and/or iOS which aligns with the Material3 Date Picker. This library provides UI and various utilities to work with Nepali Dates, and acts as a bridge between Nepali Calendar and Gregorian Calendar.
 
 <br>
+
 <p align="center">
-  <img src="https://img.shields.io/github/v/release/shivathapaa/nepali-date-picker" alt="version"/>
-  <img src="https://img.shields.io/github/license/shivathapaa/nepali-date-picker?labelColor=F5DDD7&color=E0BFB7" alt="license"/>
-    <a href="https://medium.com/@shivathapaa/nepali-date-picker-for-android-and-ios-kotlin-multiplatform-a739ea0caf47">
-    <img src="https://img.shields.io/badge/Medium-12100E?style=social&logo=medium" alt="Medium"/>
-  </a>
+  <a href="https://github.com/shivathapaa/Nepali-Date-Picker/releases">
+    <img alt="version" src="https://img.shields.io/github/v/release/shivathapaa/nepali-date-picker" /></a>&nbsp;
+  <a href="https://github.com/shivathapaa/Nepali-Date-Picker/blob/main/LICENSE">
+    <img alt="license" src="https://img.shields.io/github/license/shivathapaa/nepali-date-picker?labelColor=F5DDD7&color=E0BFB7"/></a>&nbsp;
+  <a href="https://medium.com/@shivathapaa/nepali-date-picker-for-android-and-ios-kotlin-multiplatform-a739ea0caf47">
+    <img src="https://img.shields.io/badge/Read%20on-Medium-12100E?logo=medium" alt="Medium"/></a>
 </p>
+<br>
+<p align="center">
+    <a href="https://github.com">
+    <img alt="Made for community" src="https://img.shields.io/badge/Made%20for%20community-F3FBF7" /></a>&nbsp;
+  <a href="https://github.com/shivathapaa/Nepali-Date-Picker/releases/download/2.1.0-alpha01/NepaliDatePickerMultiTheme-v2.1.0-alpha01.apk">
+    <img alt="Download sample android app" src="https://img.shields.io/badge/download-%20Sample%20Android%20App-3DDC84?logo=android&labelColor=E2E3D8&color=4C662B"></a>
+</p>
+<br>
 
 <details>
   <summary><b>Table of Contents</b></summary>
@@ -307,7 +317,7 @@ You can contribute to this project in several ways:
   <img src=".github/assets/screenshots/androidEmulatorDarkNepali.png" alt="" width="9%">
 </p>
 
-### Upcoming
+### In alpha
 <p align="center">
   <img src=".github/assets/screenshots/englishDarkWithEnglishAndNepali.png" alt="Screenshots of Nepali Date Picker in simulator" width="18%">&nbsp;
   <img src=".github/assets/screenshots/englishLightWithBothEnglishNepali.png" alt="" width="18%">&nbsp;
