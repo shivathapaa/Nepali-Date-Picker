@@ -258,18 +258,34 @@ To integrate this library into your iOS project using CocoaPods:
 
 ## License
 
-This project is licensed under [Mozilla Public License 2.0 (MPL 2.0)](https://github.com/shivathapaa/Nepali-Date-Picker/blob/main/LICENSE)
+This project is licensed under [modified Mozilla Public License 2.0 (MPL 2.0)](https://github.com/shivathapaa/Nepali-Date-Picker/blob/main/LICENSE)
 ```
-License
+Mozilla Public License 2.0 (MPL 2.0)
 
 This project is licensed under the Mozilla Public License 2.0 (MPL 2.0).
-MPL 2.0 is a permissive open-source license that allows you to use,
-modify, and distribute the code, provided that any modifications to
-the MPL-licensed files are also made available under the same license.
-This license is used to ensures that improvements to the code remain open
-and accessible to the community.
+MPL 2.0 is a permissive open-source license that allows you to use, modify,
+and distribute the code, provided that any modifications to the MPL-licensed
+files are also made available under the same license and shared with the community.
+This license ensures that improvements to the code remain open and accessible to the community.
+
+To ensure that improvements to the core library benefit the community, 
+I have added the following terms:
+
+# Additional Modification and Distribution Terms
+
+1. Library Modifications:
+Any modifications made to the files of this Library (the "Covered Software") are
+subject to the terms of this License. If you modify the Library, you must make the
+source code of your modifications available to all recipients of the modified Library
+under the terms of this License.
+
+2. Larger Works:
+Larger works that incorporate this Library may be licensed under different terms,
+provided that modifications to the Library files themselves remain subject to this
+License and are made available to all recipients of the modified Library.
 ```
 For more details, see the [LICENSE](https://github.com/shivathapaa/Nepali-Date-Picker/blob/main/LICENSE) file.
+
 
 ## Support
 
