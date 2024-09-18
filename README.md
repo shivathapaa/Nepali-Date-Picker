@@ -12,7 +12,7 @@ KMP Nepali Date Picker for both Android and/or iOS which aligns with the Materia
   <a href="https://github.com/shivathapaa/Nepali-Date-Picker/releases">
     <img alt="version" src="https://img.shields.io/github/v/release/shivathapaa/nepali-date-picker" /></a>&nbsp;
   <a href="https://github.com/shivathapaa/Nepali-Date-Picker/blob/main/LICENSE">
-    <img alt="license" src="https://img.shields.io/badge/license-modified%20MPL%202.0-E0BFB7?label=license&labelColor=F5DDD7&color=E0BFB7" /></a>&nbsp;
+    <img alt="license" src="https://img.shields.io/github/license/shivathapaa/nepali-date-picker?labelColor=F5DDD7&color=E0BFB7"/></a>&nbsp;
   <a href="https://medium.com/@shivathapaa/nepali-date-picker-for-android-and-ios-kotlin-multiplatform-a739ea0caf47">
     <img src="https://img.shields.io/badge/Read%20on-Medium-12100E?logo=medium" alt="Medium"/></a>
 </p>
@@ -258,7 +258,7 @@ To integrate this library into your iOS project using CocoaPods:
 
 ## License
 
-This project is licensed under [modified Mozilla Public License 2.0 (MPL 2.0)](https://github.com/shivathapaa/Nepali-Date-Picker/blob/main/LICENSE)
+This project is licensed under [Mozilla Public License 2.0 (MPL 2.0)](https://github.com/shivathapaa/Nepali-Date-Picker/blob/main/LICENSE)
 ```
 Mozilla Public License 2.0 (MPL 2.0)
 
@@ -267,7 +267,8 @@ MPL 2.0 is a permissive open-source license that allows you to use, modify,
 and distribute the code, provided that any modifications to the MPL-licensed
 files are also made available under the same license and shared with the community.
 This license ensures that improvements to the code remain open and accessible to the community.
-
+```
+```
 To ensure that improvements to the core library benefit the community, 
 I have added the following terms:
 
