@@ -268,11 +268,12 @@ and distribute the code, provided that any modifications to the MPL-licensed
 files are also made available under the same license and shared with the community.
 This license ensures that improvements to the code remain open and accessible to the community.
 ```
-```
-To ensure that improvements to the core library benefit the community, 
-I have added the following terms:
 
-# Additional Modification and Distribution Terms
+```
+Additional Modification and Distribution Terms
+
+To ensure that improvements to the core library benefit the community,
+I would like to emphasize the following:
 
 1. Library Modifications:
 Any modifications made to the files of this Library (the "Covered Software") are
