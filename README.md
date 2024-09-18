@@ -12,7 +12,7 @@ KMP Nepali Date Picker for both Android and/or iOS which aligns with the Materia
   <a href="https://github.com/shivathapaa/Nepali-Date-Picker/releases">
     <img alt="version" src="https://img.shields.io/github/v/release/shivathapaa/nepali-date-picker" /></a>&nbsp;
   <a href="https://github.com/shivathapaa/Nepali-Date-Picker/blob/main/LICENSE">
-    <img alt="license" src="https://img.shields.io/github/license/shivathapaa/nepali-date-picker?labelColor=F5DDD7&color=E0BFB7"/></a>&nbsp;
+    <img alt="license" src="https://img.shields.io/badge/license-modified%20MPL%202.0-E0BFB7?label=license&labelColor=F5DDD7&color=E0BFB7" /></a>&nbsp;
   <a href="https://medium.com/@shivathapaa/nepali-date-picker-for-android-and-ios-kotlin-multiplatform-a739ea0caf47">
     <img src="https://img.shields.io/badge/Read%20on-Medium-12100E?logo=medium" alt="Medium"/></a>
 </p>
@@ -691,7 +691,7 @@ val formattedDate = NepaliDateConverter.replaceDelimiter(originalDate, newDelimi
 
 val originalTime = "09:45 AM"
 val newDelimiterSpace = " "
-val oldDelimiter = "/"
+val oldDelimiter = ":"
 val formattedTimeWithSpace = NepaliDateConverter.replaceDelimiter(originalTime, newDelimiterSpace, oldDelimiter)
 // formattedTimeWithSpace: "09 45 AM"
 ```
