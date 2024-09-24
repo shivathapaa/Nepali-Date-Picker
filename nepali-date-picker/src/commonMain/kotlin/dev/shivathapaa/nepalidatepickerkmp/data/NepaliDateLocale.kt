@@ -189,7 +189,7 @@ private val englishMonthsInNepali = listOf(
     NepaliMonthName("अप्रि", "अप्रिल"),
     NepaliMonthName("मे", "मे"),
     NepaliMonthName("जुन", "जुन"),
-    NepaliMonthName("जुला.", "जुलाई"),
+    NepaliMonthName("जुला", "जुलाई"),
     NepaliMonthName("अग", "अगस्ट"),
     NepaliMonthName("सेप्ट", "सेप्टेम्बर"),
     NepaliMonthName("अक्टो", "अक्टोबर"),
