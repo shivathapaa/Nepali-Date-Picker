@@ -344,14 +344,10 @@ internal object DateConverters {
         // Normalize the month and adjust the year accordingly
 //        val (newYear, newMonth) = adjustYearAndMonth(year, month)
 
-        // Get the total days in the new month
-        val totalDaysInNewMonth = daysInMonthMap[year]?.get(month)
-            ?: throw IllegalArgumentException("Invalid year $year or month $month passed.")
+        val newMonthDetails = calculateNepaliMonthDetails(year, month)
 
         // Adjust the day of the month if it exceeds the total days in the new month
-        val newDayOfMonth = minOf(dayOfMonth, totalDaysInNewMonth)
-
-        val newMonthDetails = calculateNepaliMonthDetails(year, month)
+        val newDayOfMonth = minOf(dayOfMonth, newMonthDetails.totalDaysInMonth)
 
         // Calculate the day of the week
         val normalizedDayOfWeek =
@@ -364,7 +360,7 @@ internal object DateConverters {
             year = year,
             month = month,
             dayOfMonth = newDayOfMonth,
-            totalDaysInMonth = totalDaysInNewMonth,
+            totalDaysInMonth = newMonthDetails.totalDaysInMonth,
             firstDayOfMonth = newMonthDetails.firstDayOfMonth,
             lastDayOfMonth = newMonthDetails.lastDayOfMonth,
             dayOfWeekInMonth = (newDayOfMonth - 1) / 7 + 1,
@@ -374,10 +370,51 @@ internal object DateConverters {
             weekOfMonth = calculateWeekOfMonth(
                 dayOfMonth = dayOfMonth, firstDayOfMonth = newMonthDetails.firstDayOfMonth
             ),
+            // Todo: Simplify logic
             weekOfYear = calculateWeekOfYear(
-                dayOfYear = totalDayInYear, firstDayOfMonth = newMonthDetails.firstDayOfMonth
+                dayOfYear = totalDayInYear,
+                firstDayOfYear = calculateNepaliMonthDetails(year, 1).firstDayOfMonth
             )
         )
+    }
+
+    fun adjustNepaliDateForDayAdjustments(
+        year: Int,
+        month: Int,
+        dayOfMonth: Int,
+        daysToAdjust: Int
+    ): CustomCalendar {
+        val totalDaysInCurrentMonth = daysInMonthMap[year]?.get(month)
+            ?: throw IllegalArgumentException("Out of range: Invalid year $year or month $month passed.")
+
+        if (dayOfMonth + daysToAdjust in 1..totalDaysInCurrentMonth) {
+            val newDay = dayOfMonth + daysToAdjust
+            return getCustomCalendarUsingDayMonthYear(year, month, newDay)
+        }
+
+        return if (daysToAdjust > 0) { // next month
+            val remainingDays = daysToAdjust - (totalDaysInCurrentMonth - dayOfMonth + 1)
+            val newMonth = month + 1
+            val newYear = if (newMonth > 12) year + 1 else year
+            adjustNepaliDateForDayAdjustments(
+                year = newYear,
+                month = if (newMonth > 12) 1 else newMonth,
+                dayOfMonth = 1,  // first day of the next month
+                daysToAdjust = remainingDays
+            )
+        } else { // previous month
+            val newMonth = month - 1
+            val newYear = if (newMonth < 1) year - 1 else year
+            val daysInPreviousMonth =
+                daysInMonthMap[newYear]?.get(if (newMonth < 1) 12 else newMonth)
+                    ?: throw IllegalArgumentException("Out of range: Year $newYear or month $newMonth invalid due to daysToAdjust $daysToAdjust.")
+            adjustNepaliDateForDayAdjustments(
+                year = newYear,
+                month = if (newMonth < 1) 12 else newMonth,
+                dayOfMonth = daysInPreviousMonth,  // last day of the previous month
+                daysToAdjust = daysToAdjust + dayOfMonth
+            )
+        }
     }
 
     /**
@@ -475,13 +512,14 @@ internal object DateConverters {
     }
 
     /**
-     * Questionable response: Rely less for English Date response
-     * Todo: It passes all the test, but still recheck logic (check added edge cases in UnitTests)
+     * Todo: Simplify its logic
      */
-    private fun calculateWeekOfYear(dayOfYear: Int, firstDayOfMonth: Int): Int {
-        val firstDayOfYear = (firstDayOfMonth - (dayOfYear % 7) + 7) % 7
-        return (dayOfYear + firstDayOfYear) / 7 + 1
+    private fun calculateWeekOfYear(dayOfYear: Int, firstDayOfYear: Int): Int {
+        val totalDaysPassed = dayOfYear + (firstDayOfYear - 1)
+
+        return (totalDaysPassed / 7) + 1
     }
+
 
     /**
      * Helper function to check if the input Nepali date is within the conversion range

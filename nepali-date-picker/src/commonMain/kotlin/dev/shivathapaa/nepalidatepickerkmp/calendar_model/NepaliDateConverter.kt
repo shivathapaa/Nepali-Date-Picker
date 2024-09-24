@@ -87,6 +87,63 @@ object NepaliDateConverter {
     }
 
     /**
+     * Returns the Nepali calendar representation for a specific Nepali date (year, month, day).
+     * This function retrieves the `CustomCalendar` object that holds detailed information about
+     * the Nepali date including the total days in the month, the day of the week, and other
+     * necessary calendar data.
+     *
+     * @param nepaliYYYY The Nepali year (e.g., 2078).
+     * @param nepaliMM The Nepali month (1-based index, i.e., 1 for Baisakh, 12 for Chaitra).
+     * @param nepaliDD The day of the month (1-based index).
+     * @return A `CustomCalendar` object containing calendar information for the specified Nepali date.
+     * @throws IllegalArgumentException if the year, month, or day provided is invalid.
+     */
+    fun getNepaliCalendar(nepaliYYYY: Int, nepaliMM: Int, nepaliDD: Int): CustomCalendar {
+        return calendarModel.getNepaliCalendar(SimpleDate(nepaliYYYY, nepaliMM, nepaliDD))
+    }
+
+    /**
+     * Adjusts a given Nepali date by adding or subtracting number of days.
+     *
+     * This function calculates the resulting Nepali date after adjusting the provided year, month,
+     * and day by a given number of days (positive or negative). It handles all months
+     * and years calculations according to the day adjustment, ensuring correct calculation of Nepali
+     * calendar.
+     *
+     * @param year The Nepali year (e.g., 2081).
+     * @param month The Nepali month (1 to 12).
+     * @param dayOfMonth The Nepali day of the month (1 to 32, depending on the month).
+     * @param daysToAdjust The number of days to adjust by. Positive values will add days, and
+     * negative values will subtract days. i.e, 15, -20, 366, -454,etc.
+     * @return A [CustomCalendar] instance representing the adjusted Nepali date.
+     *
+     * @throws IllegalArgumentException if the provided date is invalid.
+     *
+     * Example usage:
+     * ```
+     * // Add 10 days to Nepali date 2081-03-15
+     * val adjustedDate = getNepaliCalendarAfterAdditionOrSubtraction(2081, 3, 15, 10)
+     * println(adjustedDate) // Output: CustomCalendar(year=2081, month=3, dayOfMonth=25, ...)
+     *
+     * // Subtract 5 days from Nepali date 2081-03-15
+     * val adjustedDate = getNepaliCalendarAfterAdditionOrSubtraction(2081, 3, 15, -5)
+     * println(adjustedDate) // Output: CustomCalendar(year=2081, month=3, dayOfMonth=10, ...)
+     *
+     * // Add 50 days, crossing over to the next month/year
+     * val adjustedDate = getNepaliCalendarAfterAdditionOrSubtraction(2081, 11, 15, 50)
+     * println(adjustedDate) // Output: CustomCalendar(year=2082, month=1, dayOfMonth=5, ...)
+     * ```
+     */
+    fun getNepaliCalendarAfterAdditionOrSubtraction(
+        year: Int,
+        month: Int,
+        dayOfMonth: Int,
+        daysToAdjust: Int
+    ): CustomCalendar {
+        return calendarModel.addOrSubtractDaysToSimpleDate(year, month, dayOfMonth, daysToAdjust)
+    }
+
+    /**
      * This function gives particular Nepali month details in Nepali calendar.
      *
      * @param nepaliYear takes value between [NepaliDatePickerDefaults.NepaliYearRange]

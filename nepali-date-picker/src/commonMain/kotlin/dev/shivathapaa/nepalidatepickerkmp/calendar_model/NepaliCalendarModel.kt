@@ -92,6 +92,20 @@ internal class NepaliCalendarModel(val locale: NepaliDateLocale = NepaliDateLoca
         return DateConverters.getNepaliCalendar(simpleNepaliDate = simpleNepaliDate)
     }
 
+    fun addOrSubtractDaysToSimpleDate(
+        year: Int,
+        month: Int,
+        dayOfMonth: Int,
+        daysToAdjust: Int
+    ): CustomCalendar {
+        return DateConverters.adjustNepaliDateForDayAdjustments(
+            year,
+            month,
+            dayOfMonth,
+            daysToAdjust
+        )
+    }
+
     // Function to add months to a CustomCalendar
     fun plusNepaliMonths(
         fromNepaliCalendar: NepaliMonthCalendar, addedMonthsCount: Int
