@@ -491,7 +491,7 @@ class NepaliDateConverterTest {
             lastDayOfMonth = 7,
             totalDaysInMonth = 32,
             dayOfWeekInMonth = 1,
-            dayOfWeek = 1,
+            dayOfWeek = 4,
             dayOfYear = 94,
             weekOfMonth = 1,
             weekOfYear = 14
@@ -653,7 +653,7 @@ class NepaliDateConverterTest {
             lastDayOfMonth = 7,
             totalDaysInMonth = 32,
             dayOfWeekInMonth = 1,
-            dayOfWeek = 1,
+            dayOfWeek = 4,
             dayOfYear = 94,
             weekOfMonth = 1,
             weekOfYear = 14
@@ -765,5 +765,103 @@ class NepaliDateConverterTest {
         assertEquals(expectedDaysDifference, nepaliDaysBetween)
         assertEquals(expectedDaysDifference, englishDaysBetween)
         assertEquals(nepaliDaysBetween, englishDaysBetween)
+    }
+
+    @Test
+    fun compareCalculatedNepaliCalendarUsingDayMonthYearWithTodayAndAnyStartEndMonthDate_UseTodayAndRandomCalendar_GetSameNepaliCalendar() {
+        val today = NepaliDateConverter.todayNepaliDate
+        val calculatedNepaliCalendarFromToday = NepaliDateConverter.getNepaliCalendar(today.year, today.month, today.dayOfMonth)
+
+        assertEquals(today, calculatedNepaliCalendarFromToday)
+
+        val customStartCalendarOf2079 = CustomCalendar(
+            year = 2079,
+            month = 4,
+            dayOfMonth = 1,
+            era = 2,
+            firstDayOfMonth = 1,
+            lastDayOfMonth = 3,
+            totalDaysInMonth = 31,
+            dayOfWeekInMonth = 1,
+            dayOfWeek = 1,
+            dayOfYear = 95,
+            weekOfMonth = 1,
+            weekOfYear = 15
+        )
+        val calculatedNepaliCalendarOf2079Start = NepaliDateConverter.getNepaliCalendar(customStartCalendarOf2079.year, customStartCalendarOf2079.month, customStartCalendarOf2079.dayOfMonth)
+
+        assertEquals(customStartCalendarOf2079, calculatedNepaliCalendarOf2079Start)
+
+        val customStartCalendarOf2082 = CustomCalendar(
+            year = 2082,
+            month = 4,
+            dayOfMonth = 1,
+            era = 2,
+            firstDayOfMonth = 4,
+            lastDayOfMonth = 7,
+            totalDaysInMonth = 32,
+            dayOfWeekInMonth = 1,
+            dayOfWeek = 4,
+            dayOfYear = 94,
+            weekOfMonth = 1,
+            weekOfYear = 14
+        )
+        val calculatedNepaliCalendarOf2082Start = NepaliDateConverter.getNepaliCalendar(customStartCalendarOf2082.year, customStartCalendarOf2082.month, customStartCalendarOf2082.dayOfMonth)
+
+        assertEquals(customStartCalendarOf2082, calculatedNepaliCalendarOf2082Start)
+
+        val customEndCalendarOf2054 = CustomCalendar(
+            year = 2054,
+            month = 1,
+            dayOfMonth = 31,
+            era = 2,
+            firstDayOfMonth = 1,
+            lastDayOfMonth = 3,
+            totalDaysInMonth = 31,
+            dayOfWeekInMonth = 5,
+            dayOfWeek = 3,
+            dayOfYear = 31,
+            weekOfMonth = 5,
+            weekOfYear = 5
+        )
+        val calculatedNepaliCalendarOf2054End = NepaliDateConverter.getNepaliCalendar(customEndCalendarOf2054.year, customEndCalendarOf2054.month, customEndCalendarOf2054.dayOfMonth)
+
+        assertEquals(customEndCalendarOf2054, calculatedNepaliCalendarOf2054End)
+    }
+
+    @Test
+    fun compareNepaliCalendarAfterDayAdjustments_UseRandomDatesUsingGetCalendar_GetSameNepaliCalendar() {
+        val today = NepaliDateConverter.todayNepaliDate
+        val getTodayAdjustedCalendar = NepaliDateConverter.getNepaliCalendarAfterAdditionOrSubtraction(today.year, today.month, today.dayOfMonth, 0)
+        assertEquals(today, getTodayAdjustedCalendar)
+
+        val customStartCalendarOf2082 = CustomCalendar(
+            year = 2082,
+            month = 4,
+            dayOfMonth = 1,
+            era = 2,
+            firstDayOfMonth = 4,
+            lastDayOfMonth = 7,
+            totalDaysInMonth = 32,
+            dayOfWeekInMonth = 1,
+            dayOfWeek = 4,
+            dayOfYear = 94,
+            weekOfMonth = 1,
+            weekOfYear = 14
+        )
+
+        val adjustedCalendarOf2082 = NepaliDateConverter.getNepaliCalendarAfterAdditionOrSubtraction(customStartCalendarOf2082.year, customStartCalendarOf2082.month, 20, -19)
+
+        assertEquals(customStartCalendarOf2082, adjustedCalendarOf2082)
+
+        val getNepaliCalendar2081 = NepaliDateConverter.getNepaliCalendar(2081, 5, 28)
+        val adjustedNepaliCalendar2081 = NepaliDateConverter.getNepaliCalendarAfterAdditionOrSubtraction(2081, 6, 9, -12)
+
+        assertEquals(getNepaliCalendar2081, adjustedNepaliCalendar2081)
+
+        val getNepaliCalendar2084 = NepaliDateConverter.getNepaliCalendar(2084, 1, 2)
+        val adjustedNepaliCalendar2083 = NepaliDateConverter.getNepaliCalendarAfterAdditionOrSubtraction(2083, 12, 25, 7)
+
+        assertEquals(getNepaliCalendar2084, adjustedNepaliCalendar2083)
     }
 }
