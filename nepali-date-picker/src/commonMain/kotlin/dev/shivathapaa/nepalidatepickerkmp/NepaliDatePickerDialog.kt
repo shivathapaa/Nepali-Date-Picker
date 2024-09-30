@@ -41,7 +41,6 @@ import androidx.compose.ui.util.fastForEach
 import androidx.compose.ui.util.fastForEachIndexed
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
-import dev.shivathapaa.nepalidatepickerkmp.annotations.ExperimentalNepaliDatePickerApi
 import dev.shivathapaa.nepalidatepickerkmp.calendar_model.NepaliDatePickerColors
 import dev.shivathapaa.nepalidatepickerkmp.calendar_model.NepaliDatePickerDefaults
 import kotlin.math.max
@@ -119,56 +118,7 @@ fun NepaliDatePickerDialog(
             tonalElevation = tonalElevation,
         ) {
             Column(verticalArrangement = Arrangement.SpaceBetween) {
-                content()
-                // Buttons
-                Box(
-                    modifier = Modifier
-                        .align(Alignment.End)
-                        .padding(NepaliDialogButtonsPadding)
-                ) {
-                    ProvideContentColorTextStyle(
-                        contentColor = MaterialTheme.colorScheme.primary,
-                        textStyle = MaterialTheme.typography.labelLarge
-                    ) {
-                        NepaliDatePickerDialogFlowRow {
-                            dismissButton?.invoke()
-                            confirmButton()
-                        }
-                    }
-                }
-            }
-        }
-    }
-}
-
-@ExperimentalNepaliDatePickerApi
-@Composable
-fun NepaliDatePickerDialogForWithEnglish(
-    onDismissRequest: () -> Unit,
-    confirmButton: @Composable () -> Unit,
-    modifier: Modifier = Modifier,
-    dismissButton: @Composable (() -> Unit)? = null,
-    shape: Shape = NepaliDatePickerDefaults.shape,
-    tonalElevation: Dp = NepaliDatePickerDefaults.TonalElevation,
-    colors: NepaliDatePickerColors = NepaliDatePickerDefaults.colors(),
-    properties: DialogProperties = DialogProperties(usePlatformDefaultWidth = false),
-    content: @Composable ColumnScope.() -> Unit
-) {
-    NepaliDatePickerBasicDialog(
-        onDismissRequest = onDismissRequest,
-        modifier = modifier.wrapContentHeight(),
-        properties = properties
-    ) {
-        Surface(
-            modifier = Modifier
-                .requiredWidth(ContainerWidth)
-                .heightIn(max = ContainerHeightForDialogWithEnglish),
-            shape = shape,
-            color = colors.containerColor,
-            tonalElevation = tonalElevation,
-        ) {
-            Column(verticalArrangement = Arrangement.SpaceBetween) {
-                content()
+                Box(Modifier.weight(1f, fill = false)) { this@Column.content() }
                 // Buttons
                 Box(
                     modifier = Modifier
