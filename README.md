@@ -10,7 +10,7 @@ KMP Nepali Date Picker for both Android and/or iOS which aligns with the Materia
 
 <p align="center">
   <a href="https://github.com/shivathapaa/Nepali-Date-Picker/releases">
-    <img alt="version" src="https://img.shields.io/github/v/release/shivathapaa/nepali-date-picker" /></a>&nbsp;
+    <img alt="version" src="https://img.shields.io/github/v/release/shivathapaa/nepali-date-picker?label=stable%20release" /></a>&nbsp;
   <a href="https://github.com/shivathapaa/Nepali-Date-Picker/blob/main/LICENSE">
     <img alt="license" src="https://img.shields.io/github/license/shivathapaa/nepali-date-picker?labelColor=F5DDD7&color=E0BFB7"/></a>&nbsp;
   <a href="https://medium.com/@shivathapaa/nepali-date-picker-for-android-and-ios-kotlin-multiplatform-a739ea0caf47">
@@ -20,7 +20,9 @@ KMP Nepali Date Picker for both Android and/or iOS which aligns with the Materia
 <p align="center">
 <!--     <a href="https://github.com">
     <img alt="Made for community" src="https://img.shields.io/badge/Made%20for%20community-F3FBF7" /></a>&nbsp; -->
-  <a href="https://github.com/shivathapaa/Nepali-Date-Picker/releases/download/2.1.0-alpha01/NepaliDatePickerMultiTheme-v2.1.0-alpha01.apk">
+  <a href="https://central.sonatype.com/namespace/io.github.shivathapaa">
+  <img alt="Latest Version in Maven Central" src="https://img.shields.io/maven-central/v/io.github.shivathapaa/nepali-date-picker?label=latest%20in%20Maven%20Central"></a>&nbsp;
+  <a href="https://github.com/shivathapaa/Nepali-Date-Picker/releases/download/2.1.0-alpha03/NepaliDatePicker.Multi-Theme.-v2.1.0-alpha03.apk">
     <img alt="Download sample android app" src="https://img.shields.io/badge/download-%20Sample%20Android%20App-3DDC84?logo=android&labelColor=E2E3D8&color=4C662B"></a>
 </p>
 <br>
@@ -335,11 +337,18 @@ You can contribute to this project in several ways:
   <img src=".github/assets/screenshots/androidEmulatorDarkNepali.png" alt="" width="9%">
 </p>
 
-### In alpha
+### In alpha, [checkout latest releases](https://github.com/shivathapaa/Nepali-Date-Picker/releases)
 <p align="center">
   <img src=".github/assets/screenshots/englishDarkWithEnglishAndNepali.png" alt="Screenshots of Nepali Date Picker in simulator" width="18%">&nbsp;
   <img src=".github/assets/screenshots/englishLightWithBothEnglishNepali.png" alt="" width="18%">&nbsp;
   <img src=".github/assets/screenshots/nepaliDarkWithEnglishAndNepali.png" alt="" width="18%">
+</p>
+
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/4646c68d-bb2f-40e7-9f8a-39348a3b036a"  alt="Screenshot of Nepali Date Range Picker" width="20%">&nbsp;
+  <img src="https://github.com/user-attachments/assets/51f52430-783c-4625-a719-93c9eaedd689" alt="" width="20%">&nbsp;
+  <img src="https://github.com/user-attachments/assets/eea90f08-f895-4cfc-b203-aef1a0e83058" alt="" width="20%">&nbsp;
+  <img src="https://github.com/user-attachments/assets/d79d4afe-65f7-4485-b537-b8314c32d601" alt="" width="20%">
 </p>
 
 ##  Brief simple example usage
