@@ -512,12 +512,18 @@ internal object DateConverters {
     }
 
     /**
-     * Todo: Simplify its logic
+     * Works perfectly for recent tests and edge cases.
+     *
+     * Todo: Add more tests covering more edge cases for this. Still have doubts regarding this.
      */
     private fun calculateWeekOfYear(dayOfYear: Int, firstDayOfYear: Int): Int {
         val totalDaysPassed = dayOfYear + (firstDayOfYear - 1)
 
-        return (totalDaysPassed / 7) + 1
+        return if (totalDaysPassed % 7 == 0) {
+            totalDaysPassed / 7
+        } else {
+            (totalDaysPassed / 7) + 1
+        }
     }
 
 
