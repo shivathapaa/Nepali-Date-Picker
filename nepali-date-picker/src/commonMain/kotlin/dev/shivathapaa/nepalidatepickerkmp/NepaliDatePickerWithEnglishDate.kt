@@ -109,6 +109,8 @@ import kotlinx.coroutines.launch
  *
  * @see NepaliDatePickerDialog
  * @see NepaliDatePicker
+ * @see NepaliDateRangePicker
+ * @see NepaliDateRangePickerWithEnglishDate
  */
 @ExperimentalNepaliDatePickerApi
 @Composable

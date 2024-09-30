@@ -92,9 +92,12 @@ enum class NepaliDatePickerLang {
         override val englishMonths: List<NepaliMonthName> = englishMonthsInEnglish
         override val selectDateText: String = "Select Date"
         override val datePickerTitle: String = "Select Nepali Date"
+        override val dateRangePickerTitle: String = "Select Nepali Dates"
         override val cancelText: String = "Cancel"
         override val okText: String = "OK"
         override val today: String = "TODAY"
+        override val startDate: String = "Start Date"
+        override val endDate: String = "End Date"
     },
     NEPALI {
         override val weekdays: List<NepaliWeekdayName> = nepaliWeekdays
@@ -102,9 +105,12 @@ enum class NepaliDatePickerLang {
         override val englishMonths: List<NepaliMonthName> = englishMonthsInNepali
         override val selectDateText: String = "मिति चयन गर्नुहोस्"
         override val datePickerTitle: String = "नेपाली मिति चयन गर्नुहोस्"
+        override val dateRangePickerTitle: String = "नेपाली मितिहरु चयन गर्नुहोस्"
         override val cancelText: String = "रद्द गर्नुहोस्"
         override val okText: String = "भयो"
         override val today: String = "आज"
+        override val startDate: String = "सुरु मिति"
+        override val endDate: String = "अन्त्य मिति"
     };
 
     abstract val weekdays: List<NepaliWeekdayName>
@@ -112,9 +118,12 @@ enum class NepaliDatePickerLang {
     abstract val englishMonths: List<NepaliMonthName>
     abstract val selectDateText: String
     abstract val datePickerTitle: String
+    abstract val dateRangePickerTitle: String
     abstract val cancelText: String
     abstract val okText: String
     abstract val today: String
+    abstract val startDate: String
+    abstract val endDate: String
 }
 
 private val nepaliMonths = listOf(

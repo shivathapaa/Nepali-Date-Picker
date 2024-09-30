@@ -120,6 +120,8 @@ import kotlin.math.max
  *
  * @see NepaliDatePickerDialog
  * @see NepaliDatePickerWithEnglishDate
+ * @see NepaliDateRangePicker
+ * @see NepaliDateRangePickerWithEnglishDate
  */
 @Composable
 fun NepaliDatePicker(
