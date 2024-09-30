@@ -359,6 +359,44 @@ internal class NepaliCalendarModel(val locale: NepaliDateLocale = NepaliDateLoca
         return localDateTime.toInstant(timeZone).toString()
     }
 
+    /**
+     * Compares a [CustomCalendar] instance with a date represented by the given year, month, and dayOfMonth.
+     *
+     * Returns a negative integer if the [calendar] is before the given date, zero if they are equal,
+     * and a positive integer if the [calendar] is after the given date.
+     *
+     * @param calendar The [CustomCalendar] instance to compare.
+     * @param year The year of the date to compare with.
+     * @param month The month of the date to compare with.
+     * @param dayOfMonth The day of the month of the date to compare with.
+     * @return A negative integer, zero, or a positive integer as described above.
+     */
+    internal fun compareDates(
+        calendar: CustomCalendar,
+        year: Int,
+        month: Int,
+        dayOfMonth: Int
+    ): Int {
+        return when {
+            calendar.year != year -> calendar.year - year
+            calendar.month != month -> calendar.month - month
+            else -> calendar.dayOfMonth - dayOfMonth
+        }
+    }
+
+    internal fun compareDates(
+        simpleDate: SimpleDate,
+        year: Int,
+        month: Int,
+        dayOfMonth: Int
+    ): Int {
+        return when {
+            simpleDate.year != year -> simpleDate.year - year
+            simpleDate.month != month -> simpleDate.month - month
+            else -> simpleDate.dayOfMonth - dayOfMonth
+        }
+    }
+
     private fun validateNepaliDate(year: Int, month: Int, day: Int) {
         if (month !in 1..12) {
             throw IllegalArgumentException("Invalid month value: $month. Must be between 1 and 12.")

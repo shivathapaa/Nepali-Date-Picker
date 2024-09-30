@@ -585,14 +585,14 @@ object NepaliDateConverter {
         object : NepaliSelectableDates {
             override fun isSelectableDate(customCalendar: CustomCalendar): Boolean {
                 return if (includeDate) {
-                    compareDates(
+                    calendarModel.compareDates(
                         customCalendar,
                         simpleDate.year,
                         simpleDate.month,
                         simpleDate.dayOfMonth
                     ) <= 0
                 } else {
-                    compareDates(
+                    calendarModel.compareDates(
                         customCalendar,
                         simpleDate.year,
                         simpleDate.month,
@@ -619,14 +619,14 @@ object NepaliDateConverter {
         object : NepaliSelectableDates {
             override fun isSelectableDate(customCalendar: CustomCalendar): Boolean {
                 return if (includeDate) {
-                    compareDates(
+                    calendarModel.compareDates(
                         customCalendar,
                         simpleDate.year,
                         simpleDate.month,
                         simpleDate.dayOfMonth
                     ) >= 0
                 } else {
-                    compareDates(
+                    calendarModel.compareDates(
                         customCalendar,
                         simpleDate.year,
                         simpleDate.month,
@@ -660,13 +660,13 @@ object NepaliDateConverter {
     ): NepaliSelectableDates =
         object : NepaliSelectableDates {
             override fun isSelectableDate(customCalendar: CustomCalendar): Boolean {
-                val compareMin = compareDates(
+                val compareMin = calendarModel.compareDates(
                     customCalendar,
                     minDate.year,
                     minDate.month,
                     minDate.dayOfMonth
                 )
-                val compareMax = compareDates(
+                val compareMax = calendarModel.compareDates(
                     customCalendar,
                     maxDate.year,
                     maxDate.month,
@@ -686,31 +686,6 @@ object NepaliDateConverter {
             }
         }
 
-    /**
-     * Compares a [CustomCalendar] instance with a date represented by the given year, month, and dayOfMonth.
-     *
-     * Returns a negative integer if the [calendar] is before the given date, zero if they are equal,
-     * and a positive integer if the [calendar] is after the given date.
-     *
-     * @param calendar The [CustomCalendar] instance to compare.
-     * @param year The year of the date to compare with.
-     * @param month The month of the date to compare with.
-     * @param dayOfMonth The day of the month of the date to compare with.
-     * @return A negative integer, zero, or a positive integer as described above.
-     */
-    private fun compareDates(
-        calendar: CustomCalendar,
-        year: Int,
-        month: Int,
-        dayOfMonth: Int
-    ): Int {
-        return when {
-            calendar.year != year -> calendar.year - year
-            calendar.month != month -> calendar.month - month
-            else -> calendar.dayOfMonth - dayOfMonth
-        }
-    }
-
     // Two overload functions [compareDates] can be simplified to one using an interface but,
     // I don't want complexity in outer level. Also, these functions are unlikely to change overtime.
 
@@ -725,7 +700,7 @@ object NepaliDateConverter {
      * @return A negative integer, zero, or a positive integer as described above.
      */
     fun compareDates(dateToCompareFrom: CustomCalendar, dateToCompareTo: SimpleDate): Int {
-        return compareDates(
+        return calendarModel.compareDates(
             dateToCompareFrom,
             dateToCompareTo.year,
             dateToCompareFrom.month,
@@ -749,11 +724,37 @@ object NepaliDateConverter {
         dateToCompareFrom: CustomCalendar,
         dateToCompareTo: CustomCalendar
     ): Int {
-        return compareDates(
+        return calendarModel.compareDates(
             dateToCompareFrom,
             dateToCompareTo.year,
             dateToCompareFrom.month,
             dateToCompareFrom.dayOfMonth
+        )
+    }
+
+    /**
+     * Compares a [SimpleDate] instance with a date represented by the given year, month, and dayOfMonth.
+     *
+     * Returns a negative integer if the [SimpleDate] is before the given date, zero if they are equal,
+     * and a positive integer if the [SimpleDate] is after the given date.
+     *
+     * @param simpleDate The [SimpleDate] instance to compare.
+     * @param year The year of the date to compare with.
+     * @param month The month of the date to compare with.
+     * @param dayOfMonth The day of the month of the date to compare with.
+     * @return A negative integer, zero, or a positive integer as described above.
+     */
+    fun compareDates(
+        simpleDate: SimpleDate,
+        year: Int,
+        month: Int,
+        dayOfMonth: Int
+    ): Int {
+        return calendarModel.compareDates(
+            simpleDate,
+            year,
+            month,
+            dayOfMonth
         )
     }
 
