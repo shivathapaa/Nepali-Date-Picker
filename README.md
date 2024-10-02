@@ -22,7 +22,7 @@ KMP Nepali Date Picker for both Android and/or iOS which aligns with the Materia
     <img alt="Made for community" src="https://img.shields.io/badge/Made%20for%20community-F3FBF7" /></a>&nbsp; -->
   <a href="https://central.sonatype.com/namespace/io.github.shivathapaa">
   <img alt="Latest Version in Maven Central" src="https://img.shields.io/maven-central/v/io.github.shivathapaa/nepali-date-picker?label=latest%20in%20Maven%20Central"></a>&nbsp;
-  <a href="https://github.com/shivathapaa/Nepali-Date-Picker?tab=readme-ov-file#screenshots">
+  <a href="#screenshots">
   <img alt="See Screenshots" src="https://img.shields.io/badge/see_screenshots-blue?color=D6E6DF"></a>&nbsp;
   <a href="https://github.com/shivathapaa/Nepali-Date-Picker/releases/download/2.1.0-alpha03/NepaliDatePicker.Multi-Theme.-v2.1.0-alpha03.apk">
     <img alt="Download sample android app" src="https://img.shields.io/badge/download-%20Sample%20Android%20App-3DDC84?logo=android&labelColor=E2E3D8&color=4C662B"></a>
@@ -205,9 +205,9 @@ For more details, see the [LICENSE](https://github.com/shivathapaa/Nepali-Date-P
 
 ##  Brief simple example usage
 
-Don't forget about the **DateRange** before using. 
-
 This library uses a `1-based index` where 1 represents Sunday or January/Baisakh, 7 represents Saturday or July/Kartik, and 12 represents December/Chaitra.
+
+Don't forget about the **DateRange** before using. 
 
 You can check this inside library under `NepaliDatePickerDefaults.NepaliYearRange` and `NepaliDatePickerDefaults.EnglishYearRange`
 
@@ -216,6 +216,8 @@ You can check this inside library under `NepaliDatePickerDefaults.NepaliYearRang
 EnglishYearRange: IntRange = IntRange(1913, 2043)
 NepaliYearRange: IntRange = IntRange(1970, 2100) 
 ```
+
+For detailed examples and utilities, [explore more](#detailed-examples-to-explore-more).
 
 #### Nepali Date Picker and Nepali Date Range Picker
 ```kotlin
