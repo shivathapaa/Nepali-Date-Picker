@@ -267,9 +267,9 @@ object NepaliDatePickerDefaults {
                 maxLines = 1
             )
 
-            if (!formattedEnglishDate.isNullOrEmpty()) {
+            AnimatedVisibility(!formattedEnglishDate.isNullOrEmpty()) {
                 Text(
-                    text = formattedEnglishDate,
+                    text = formattedEnglishDate ?: "", /* // */
                     modifier = Modifier,
                     maxLines = 1,
                     style = MaterialTheme.typography.bodySmall
@@ -846,9 +846,9 @@ private fun NepaliEnglishDateColumn(
             maxLines = 1
         )
 
-        if (!englishFormattedDate.isNullOrEmpty()) {
+        AnimatedVisibility(!englishFormattedDate.isNullOrEmpty()) {
             Text(
-                text = englishFormattedDate,
+                text = englishFormattedDate ?: "", /* !! */
                 modifier = Modifier,
                 maxLines = 1,
                 style = MaterialTheme.typography.bodySmall
