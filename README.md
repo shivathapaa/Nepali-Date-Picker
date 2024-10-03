@@ -548,7 +548,7 @@ data class NepaliMonthCalendar(
     val daysFromStartOfWeekToFirstOfMonth: Int = firstDayOfMonth - 1
 )
 
-// there are various extension function readily available to utilize will all of them.
+// there are various extension function readily available to utilize all of them.
 ```
 
 #### Get today's date
