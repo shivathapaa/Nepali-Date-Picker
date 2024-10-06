@@ -107,25 +107,13 @@ kotlin {
     }
 }
 ```
+Also checkout, [android setup for api levels below 26](#android-setup-for-api-levels-below-26).
 
 ### Android
 
 To add the nepali-date-picker library to your Android project, include the following dependency in your module/app-level build.gradle file:
 
 ```kotlin
-// For app using Kotlin version before 2.0.0
-
-dependencies {
-    implementation("io.github.shivathapaa:nepali-date-picker-android:2.0.0-rc01")
-}
-
-// Or use version catalog like below
-```
-
-
-```kotlin
-// For app using Kotlin version after 2.0.0
-
 // Add the Compose compiler Gradle plugin to the Gradle version catalog
 [versions]
 # ...
@@ -138,15 +126,17 @@ nepali-date-picker-android = { module = "io.github.shivathapaa:nepali-date-picke
 [plugins]
 # ...
 compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
+```
 
-
+```kotlin
 // Add the Gradle plugin to the root/project level build.gradle.kts file
 plugins {
     // ...
-    alias(libs.plugins.compose.compiler) apply false
+    alias(libs.plugins.compose.compiler) apply false // Kotlin version after 2.0.0
 }
+```
 
-
+```kotlin
 // Apply the plugin and dependency to app level build.gradle.kts file
 plugins {
     // ...
@@ -156,6 +146,37 @@ plugins {
 dependencies {
     // ...
     implementation(libs.nepali.date.picker.android)
+}
+```
+
+#### Android Setup for API Levels Below 26
+
+> Note: This library uses `kotlinx-datetime`, which relies on the `java.time` API. These APIs are only available natively starting from Android API level 26. For devices running API levels 25 and below, core library desugaring is necessary to backport these APIs and ensure compatibility.
+> 
+> By enabling desugaring, your project will support `java.time` functionality on older Android versions, ensuring smooth use of this library across all supported API levels.
+
+If your project targets Android SDK versions **below 26 (Android 8.0)**, you need to enable **core library desugaring** to support the `java.time` APIs used by this library. Follow the steps below:
+
+```kotlin
+// Enable Desugaring in your build.gradle (app-level) file
+android {
+    compileOptions {
+        // Enable core library desugaring for java.time (kotlinx-datetime) APIs
+        isCoreLibraryDesugaringEnabled = true
+
+        sourceCompatibility = JavaVersion.VERSION_1_8
+        targetCompatibility = JavaVersion.VERSION_1_8
+    }
+}
+```
+
+```kotlin
+// Add the Desugaring Dependency in the dependencies {} block of the same build.gradle file
+dependencies {
+    // Add this dependency for desugaring java.time(kotlinx-datetime) APIs
+    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.2")
+
+    // Other dependencies...
 }
 ```
 
@@ -186,19 +207,13 @@ This license ensures that improvements to the code remain open and accessible to
 ```
 Additional Modification and Distribution Terms
 
-To ensure that improvements to the core library benefit the community,
-I would like to emphasize the following:
+To ensure that improvements to the core library remain open and benefit
+the community, I would like to emphasize the following:
 
-1. Library Modifications:
 Any modifications made to the files of this Library (the "Covered Software") are
 subject to the terms of this License. If you modify the Library, you must make the
 source code of your modifications available to all recipients of the modified Library
 under the terms of this License.
-
-2. Larger Works:
-Larger works that incorporate this Library may be licensed under different terms,
-provided that modifications to the Library files themselves remain subject to this
-License and are made available to all recipients of the modified Library.
 ```
 For more details, see the [LICENSE](https://github.com/shivathapaa/Nepali-Date-Picker/blob/main/LICENSE) file.
 
