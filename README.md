@@ -153,7 +153,7 @@ dependencies {
 
 > Note: This library uses `kotlinx-datetime`, which relies on the `java.time` API. These APIs are only available natively starting from Android API level 26. For devices running API levels 25 and below, core library desugaring is necessary to backport these APIs and ensure compatibility.
 > 
-> By enabling desugaring, your project will support `java.time` functionality on older Android versions, ensuring smooth use of this library across all supported API levels.
+> By enabling desugaring, your project will support `java.time` functionality on older Android versions, ensuring smooth use of this library across all supported API levels. For more details [checkout this](https://github.com/Kotlin/kotlinx-datetime?tab=readme-ov-file#using-in-your-projects).
 
 If your project targets Android SDK versions **below 26 (Android 8.0)**, you need to enable **core library desugaring** to support the `java.time` APIs used by this library. Follow the steps below:
 
@@ -599,6 +599,29 @@ NepaliDateConverter.getNepaliCalendar(2082, 4, 16) // returns CustomCalendar
 val totalDaysInMagh2081 = NepaliDateConverter.getTotalDaysInNepaliMonth(2081, 10) // returns 30 (Int)
 
 val getCompleteDetailsOfAsar2078Month = NepaliDateConverter.getNepaliMonthCalendar(2078, 3) // returns NepaliMonthCalendar
+```
+
+#### Add or Subtract number days and get CustomCalendar
+```kotlin
+// You can adjust a Nepali date by adding or subtracting number of days.
+NepaliDateConverter.getNepaliCalendarAfterAdditionOrSubtraction()
+
+// This function calculates the resulting Nepali date after adjusting the provided year,
+// month, and day by a given number of days (positive or negative). It handles all months and
+// years calculations according to the day adjustment, ensuring correct calculation of Nepali calendar.
+// You don't have to worry about the underflow and overflow of days or month or year. ;)
+
+ // Add 10 days to Nepali date 2081-03-15
+ val adjustedDate = NepaliDateConverter.getNepaliCalendarAfterAdditionOrSubtraction(2081, 3, 15, 10)
+ println(adjustedDate) // Output: CustomCalendar(year=2081, month=3, dayOfMonth=25, ...)
+ 
+ // Subtract 5 days from Nepali date 2081-03-15
+ val adjustedDate = NepaliDateConverter.getNepaliCalendarAfterAdditionOrSubtraction(2081, 3, 15, -5)
+ println(adjustedDate) // Output: CustomCalendar(year=2081, month=3, dayOfMonth=10, ...)
+ 
+ // Add 50 days, crossing over to the next month/year
+ val adjustedDate = NepaliDateConverter.getNepaliCalendarAfterAdditionOrSubtraction(2081, 11, 15, 50)
+ println(adjustedDate) // Output: CustomCalendar(year=2082, month=1, dayOfMonth=5, ...)
 ```
 
 #### Date comparison
