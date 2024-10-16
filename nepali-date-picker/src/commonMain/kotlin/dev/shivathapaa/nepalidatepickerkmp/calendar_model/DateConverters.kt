@@ -159,10 +159,6 @@ internal object DateConverters {
         val totalNepDaysCount =
             calculateTotalNepaliDaysCount(startingNepaliCalendar, nepaliYYYY, nepaliMM, nepaliDD)
 
-        // Arrays holding the number of days in each month for regular and leap years
-        val daysInMonth = intArrayOf(0, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31)
-        val daysInMonthOfLeapYear = intArrayOf(0, 31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31)
-
         // Initialize the English date with the starting values
         var (englishYYYY, englishMM, englishDD) = Triple(
             startingEnglishDate.year,
@@ -178,8 +174,7 @@ internal object DateConverters {
         var firstDayOfMonth: Int = startingEnglishDate.firstDayOfMonth
         var lastDayOfMonth: Int = startingEnglishDate.lastDayOfMonth
 
-        var totalDaysInMonth =
-            if (isEnglishLeapYear(englishYYYY)) daysInMonthOfLeapYear[englishMM] else daysInMonth[englishMM]
+        var totalDaysInMonth = getTotalDaysInEnglishMonth(englishYYYY, englishMM)
 
         // Loop through the total Nepali days to calculate the corresponding English date
         repeat(totalNepDaysCount) {
@@ -205,8 +200,7 @@ internal object DateConverters {
                     weekOfYear = 1
                 }
 
-                totalDaysInMonth =
-                    if (isEnglishLeapYear(englishYYYY)) daysInMonthOfLeapYear[englishMM] else daysInMonth[englishMM]
+                totalDaysInMonth = getTotalDaysInEnglishMonth(englishYYYY, englishMM)
                 firstDayOfMonth = dayOfWeek // The first day of the new month
             }
 
@@ -291,7 +285,8 @@ internal object DateConverters {
         return getCustomCalendarUsingDayMonthYear(
             dayOfMonth = simpleNepaliDate.dayOfMonth,
             month = simpleNepaliDate.month,
-            year = simpleNepaliDate.year
+            year = simpleNepaliDate.year,
+            adjustMonth = false
         )
     }
 
@@ -301,7 +296,7 @@ internal object DateConverters {
      * @param startDate The starting date.
      * @param endDate The ending date.
      * @return The number of days between the two dates. Returns -1 if either date is invalid,
-     *         and throws exception if the year is not found in [daysInMonthMap].
+     *         and throws IllegalArgumentException if the year is not found in [daysInMonthMap].
      */
     fun nepaliDaysInBetween(startDate: SimpleDate, endDate: SimpleDate): Int {
         val referenceYear: Int
@@ -339,7 +334,8 @@ internal object DateConverters {
     private fun getCustomCalendarUsingDayMonthYear(
         year: Int,
         month: Int,
-        dayOfMonth: Int
+        dayOfMonth: Int,
+        adjustMonth: Boolean
     ): CustomCalendar {
         // Normalize the month and adjust the year accordingly
 //        val (newYear, newMonth) = adjustYearAndMonth(year, month)
@@ -347,7 +343,15 @@ internal object DateConverters {
         val newMonthDetails = calculateNepaliMonthDetails(year, month)
 
         // Adjust the day of the month if it exceeds the total days in the new month
-        val newDayOfMonth = minOf(dayOfMonth, newMonthDetails.totalDaysInMonth)
+        val newDayOfMonth = if (adjustMonth) {
+            minOf(dayOfMonth, newMonthDetails.totalDaysInMonth)
+        } else {
+            if (dayOfMonth > newMonthDetails.totalDaysInMonth) {
+                throw IllegalArgumentException("Day of Month $dayOfMonth is out of bound. There is no $dayOfMonth in $month month.")
+            } else {
+                dayOfMonth
+            }
+        }
 
         // Calculate the day of the week
         val normalizedDayOfWeek =
@@ -389,7 +393,7 @@ internal object DateConverters {
 
         if (dayOfMonth + daysToAdjust in 1..totalDaysInCurrentMonth) {
             val newDay = dayOfMonth + daysToAdjust
-            return getCustomCalendarUsingDayMonthYear(year, month, newDay)
+            return getCustomCalendarUsingDayMonthYear(year, month, newDay, true)
         }
 
         return if (daysToAdjust > 0) { // next month
@@ -514,7 +518,7 @@ internal object DateConverters {
     /**
      * Works perfectly for recent tests and edge cases.
      *
-     * Todo: Add more tests covering more edge cases for this. Still have doubts regarding this.
+     * Todo: Add more tests covering more edge cases for this. Still have some doubts regarding this.
      */
     private fun calculateWeekOfYear(dayOfYear: Int, firstDayOfYear: Int): Int {
         val totalDaysPassed = dayOfYear + (firstDayOfYear - 1)
@@ -526,6 +530,22 @@ internal object DateConverters {
         }
     }
 
+    /**
+     * Calculates the total number of days in a given month of the Gregorian calendar (English calendar).
+     *
+     * @param year The year (e.g., 2024).
+     * @param month The month (1 for January, 2 for February, ..., 12 for December).
+     * @return The total number of days in the specified month.
+     * @throws IllegalArgumentException If the provided month is invalid (outside the range of 1 to 12).
+     */
+    internal fun getTotalDaysInEnglishMonth(year: Int, month: Int): Int {
+        require(month in 1..12) { "Invalid month: $month. Month must be between 1 and 12." }
+
+        val daysInMonth = intArrayOf(0, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31)
+        val daysInMonthOfLeapYear = intArrayOf(0, 31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31)
+
+        return if (isEnglishLeapYear(year)) daysInMonthOfLeapYear[month] else daysInMonth[month]
+    }
 
     /**
      * Helper function to check if the input Nepali date is within the conversion range
