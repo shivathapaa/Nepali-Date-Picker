@@ -21,7 +21,7 @@ KMP Nepali Date Picker for both Android and/or iOS which aligns with the Materia
 <!--     <a href="https://github.com">
     <img alt="Made for community" src="https://img.shields.io/badge/Made%20for%20community-F3FBF7" /></a>&nbsp; -->
   <a href="https://central.sonatype.com/namespace/io.github.shivathapaa">
-  <img alt="Latest Version in Maven Central" src="https://img.shields.io/maven-central/v/io.github.shivathapaa/nepali-date-picker?label=latest%20in%20Maven%20Central"></a>&nbsp;
+  <img alt="latest release" src="https://img.shields.io/maven-central/v/io.github.shivathapaa/nepali-date-picker?label=latest%20release"></a>&nbsp;
   <a href="#screenshots">
   <img alt="See Screenshots" src="https://img.shields.io/badge/see_screenshots-blue?color=D6E6DF"></a>&nbsp;
   <a href="https://github.com/shivathapaa/Nepali-Date-Picker/releases/download/2.1.0-alpha03/NepaliDatePicker.Multi-Theme.-v2.1.0-alpha03.apk">
