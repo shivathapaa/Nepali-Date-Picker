@@ -92,6 +92,41 @@ internal class NepaliCalendarModel(val locale: NepaliDateLocale = NepaliDateLoca
         return DateConverters.getNepaliCalendar(simpleNepaliDate = simpleNepaliDate)
     }
 
+    /**
+     * Parses a date string into a [CustomCalendar].
+     *
+     * @param dateString a date string in the format "yyyy/MM/dd"
+     * @return a [CustomCalendar], or a `null` in case the parsing failed
+     */
+    fun parse(dateString: String): CustomCalendar? {
+        if (dateString.length != 8) {
+            return null // Invalid format
+        }
+
+        val year = dateString.substring(0, 4).toIntOrNull()
+        val month = dateString.substring(4, 6).toIntOrNull()
+        val day = dateString.substring(6, 8).toIntOrNull()
+
+        if (year == null || month == null || day == null) {
+            return null // Invalid numeric values
+        }
+
+        if (month !in 1..12 || day !in 1..32) {
+            return null // Invalid month or day
+        }
+
+
+        return try {
+            getNepaliCalendar(SimpleDate(year, month, day))
+        } catch (e: IllegalArgumentException) {
+            CustomCalendar(year, month, day, 2, -1, -1, -1)
+        }
+    }
+
+    internal fun removeSlashDelimiter(dateWithDelimiter: String): String {
+        return dateWithDelimiter.replace("/", "")
+    }
+
     fun addOrSubtractDaysToSimpleDate(
         year: Int,
         month: Int,
@@ -436,6 +471,29 @@ internal class NepaliCalendarModel(val locale: NepaliDateLocale = NepaliDateLoca
             NameFormat.SHORT -> monthIndex.short
             else -> monthIndex.full
         }
+    }
+
+    /**
+     * Receives a given local date format string and returns a string that can be displayed to the user
+     * and parsed by the date parser.
+     *
+     * This function:
+     * - Removes all characters that don't match `d`, `M` and `y`, or the date format delimiter `/`.
+     * - Ensures that the format is for two digits day and month, and four digits year.
+     * - Replaces any delimiters other than `/` with `/`.
+     *
+     * The output of this cleanup is always a 10 characters string in yyyy/MM/dd variation.
+     */
+    internal fun datePatternAsInputFormat(localeFormat: String): String {
+        val patternWithDelimiters = localeFormat
+            .replace(Regex("[^dMy/]"), "")
+            .replace(Regex("d{1,2}"), "dd")
+            .replace(Regex("M{1,2}"), "MM")
+            .replace(Regex("y{1,4}"), "yyyy")
+            .replace("My", "M/y")
+            .replace(Regex("[.-]"), "/") // Replace other delimiters with /
+
+        return patternWithDelimiters
     }
 
     fun localizeNumber(stringToLocalize: String, locale: NepaliDatePickerLang): String =
