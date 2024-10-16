@@ -26,8 +26,10 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.TextFieldColors
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.Stable
@@ -578,7 +580,8 @@ class NepaliDatePickerColors(
     val todayDateBorderColor: Color,
     val dayInSelectionRangeContainerColor: Color,
     val dayInSelectionRangeContentColor: Color,
-    val dividerColor: Color
+    val dividerColor: Color,
+    val dateTextFieldColors: TextFieldColors
 ) {
     /**
      * Returns a copy of this NepaliDatePickerColors, optionally overriding some of the values.
@@ -608,7 +611,8 @@ class NepaliDatePickerColors(
         todayDateBorderColor: Color = this.todayDateBorderColor,
         dayInSelectionRangeContainerColor: Color = this.dayInSelectionRangeContainerColor,
         dayInSelectionRangeContentColor: Color = this.dayInSelectionRangeContentColor,
-        dividerColor: Color = this.dividerColor
+        dividerColor: Color = this.dividerColor,
+        dateTextFieldColors: TextFieldColors? = this.dateTextFieldColors
     ) = NepaliDatePickerColors(containerColor.takeOrElse { this.containerColor },
         titleContentColor.takeOrElse { this.titleContentColor },
         headlineContentColor.takeOrElse { this.headlineContentColor },
@@ -632,7 +636,11 @@ class NepaliDatePickerColors(
         todayDateBorderColor.takeOrElse { this.todayDateBorderColor },
         dayInSelectionRangeContainerColor.takeOrElse { this.dayInSelectionRangeContainerColor },
         dayInSelectionRangeContentColor.takeOrElse { this.dayInSelectionRangeContentColor },
-        dividerColor.takeOrElse { this.dividerColor })
+        dividerColor.takeOrElse { this.dividerColor },
+        dateTextFieldColors.takeOrElse { this.dateTextFieldColors })
+
+    internal fun TextFieldColors?.takeOrElse(block: () -> TextFieldColors): TextFieldColors =
+        this ?: block()
 
     /**
      * Represents the content color for a calendar day.
@@ -825,7 +833,8 @@ internal fun getDefaultNepaliDatePickerColors(): NepaliDatePickerColors {
         todayDateBorderColor = MaterialTheme.colorScheme.primary,
         dayInSelectionRangeContainerColor = MaterialTheme.colorScheme.secondaryContainer,
         dayInSelectionRangeContentColor = MaterialTheme.colorScheme.onSecondaryContainer,
-        dividerColor = MaterialTheme.colorScheme.outlineVariant
+        dividerColor = MaterialTheme.colorScheme.outlineVariant,
+        dateTextFieldColors = OutlinedTextFieldDefaults.colors()
     )
 }
 
