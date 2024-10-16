@@ -84,9 +84,6 @@ Core UI specific,
 
 The library is published to [Maven Central. You can find all artifacts here.](https://central.sonatype.com/namespace/io.github.shivathapaa)
 
-This library is almost stable with the release of version `2.0.0-rc01`. However, it currently depends on JetBrains Compose `1.7.0-beta01 or later`.
-I expect to release a fully stable version once JetBrains Compose reaches a stable release. In the meantime, `2.0.0-rc01` is considered `stable` and highly reliable for production use.
-
 > If you encounter version conflicts using this library, you can solve this in two ways:
 > - Use an earlier version of the Nepali-Date-Picker library (`2.0.0-beta06 or before`) if stability is required and your project is using a lower version of JetBrains Compose or Android Compose.
 > - Alternatively, you can update your JetBrains Compose or Android Compose version to `1.7.0-beta01 or later` to resolve the conflict.
@@ -101,7 +98,7 @@ kotlin {
     sourceSets {
         commonMain {
             dependencies {
-                implementation("io.github.shivathapaa:nepali-date-picker:2.0.0-rc01")
+                implementation("io.github.shivathapaa:nepali-date-picker:2.1.0-beta01")
             }
         }
     }
@@ -118,7 +115,7 @@ To add the nepali-date-picker library to your Android project, include the follo
 [versions]
 # ...
 kotlin = "2.0.20"
-nepaliDatePickerAndroid = "2.0.0-rc01"
+nepaliDatePickerAndroid = "2.1.0-beta01"
 
 [libraries]
 nepali-date-picker-android = { module = "io.github.shivathapaa:nepali-date-picker-android", version.ref = "nepaliDatePickerAndroid" }
@@ -764,20 +761,18 @@ You can contribute to this project in several ways:
   <img src=".github/assets/screenshots/iosSimulatorDark.png" alt="" width="9%">&nbsp;
   <img src=".github/assets/screenshots/androidEmulatorDarkNepali.png" alt="" width="9%">
 </p>
-
-### In alpha, [checkout latest releases](https://github.com/shivathapaa/Nepali-Date-Picker/releases)
+<br>
 <p align="center">
-  <img src=".github/assets/screenshots/englishDarkWithEnglishAndNepali.png" alt="Screenshots of Nepali Date Picker in simulator" width="18%">&nbsp;
-  <img src=".github/assets/screenshots/englishLightWithBothEnglishNepali.png" alt="" width="18%">&nbsp;
-  <img src=".github/assets/screenshots/nepaliDarkWithEnglishAndNepali.png" alt="" width="18%">
+  <img src="https://github.com/user-attachments/assets/4646c68d-bb2f-40e7-9f8a-39348a3b036a"  alt="Screenshot of Nepali Date Range Picker" width="9%">&nbsp;
+  <img src="https://github.com/user-attachments/assets/51f52430-783c-4625-a719-93c9eaedd689" alt="" width="9%">&nbsp;
+  <img src=".github/assets/screenshots/englishDarkWithEnglishAndNepali.png" alt="" width="11%">&nbsp;
+  <img src=".github/assets/screenshots/englishLightWithBothEnglishNepali.png" alt="" width="11%">&nbsp;
+  <img src=".github/assets/screenshots/nepaliDarkWithEnglishAndNepali.png" alt="" width="11%">
+  <img src="https://github.com/user-attachments/assets/eea90f08-f895-4cfc-b203-aef1a0e83058" alt="" width="9%">&nbsp;
+  <img src="https://github.com/user-attachments/assets/d79d4afe-65f7-4485-b537-b8314c32d601" alt="" width="9%">
 </p>
 
-<p align="center">
-  <img src="https://github.com/user-attachments/assets/4646c68d-bb2f-40e7-9f8a-39348a3b036a"  alt="Screenshot of Nepali Date Range Picker" width="20%">&nbsp;
-  <img src="https://github.com/user-attachments/assets/51f52430-783c-4625-a719-93c9eaedd689" alt="" width="20%">&nbsp;
-  <img src="https://github.com/user-attachments/assets/eea90f08-f895-4cfc-b203-aef1a0e83058" alt="" width="20%">&nbsp;
-  <img src="https://github.com/user-attachments/assets/d79d4afe-65f7-4485-b537-b8314c32d601" alt="" width="20%">
-</p>
+> Checkout new upcoming feature update images in [latest releases](https://github.com/shivathapaa/Nepali-Date-Picker/releases)
 
 
 ---
