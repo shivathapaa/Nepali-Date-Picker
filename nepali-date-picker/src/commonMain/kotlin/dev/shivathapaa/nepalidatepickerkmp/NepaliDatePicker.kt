@@ -16,13 +16,26 @@
 
 package dev.shivathapaa.nepalidatepickerkmp
 
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.SizeTransform
+import androidx.compose.animation.core.CubicBezierEasing
+import androidx.compose.animation.core.DecayAnimationSpec
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.exponentialDecay
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
-import androidx.compose.foundation.gestures.snapping.rememberSnapFlingBehavior
+import androidx.compose.foundation.gestures.FlingBehavior
+import androidx.compose.foundation.gestures.snapping.SnapLayoutInfoProvider
+import androidx.compose.foundation.gestures.snapping.snapFlingBehavior
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -48,6 +61,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material.icons.filled.DateRange
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -61,6 +76,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.derivedStateOf
@@ -79,6 +95,7 @@ import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
@@ -96,6 +113,7 @@ import dev.shivathapaa.nepalidatepickerkmp.data.SimpleDate
 import dev.shivathapaa.nepalidatepickerkmp.data.toNepaliMonthCalendar
 import dev.shivathapaa.nepalidatepickerkmp.data.toSimpleDate
 import kotlinx.coroutines.launch
+import kotlin.jvm.JvmInline
 import kotlin.math.max
 
 /**
@@ -108,6 +126,8 @@ import kotlin.math.max
  * @param modifier the [Modifier] to be applied to this date picker
  * @param title the title to be displayed in the date picker
  * @param headline the headline to be displayed in the date picker
+ * @param showModeToggle the boolean to let user toggle between Date Picker and Date Input
+ * @param showTodayButton the boolean to control either to show `TODAY` button or not
  * @param colors [NepaliDatePickerColors] that will be used to resolve the colors used for this date
  * picker in different states. See [NepaliDatePickerDefaults.colors].
  *
@@ -140,6 +160,7 @@ fun NepaliDatePicker(
             locale = state.locale
         )
     },
+    showModeToggle: Boolean = true,
     showTodayButton: Boolean = true,
     colors: NepaliDatePickerColors = NepaliDatePickerDefaults.colors()
 ) {
@@ -152,22 +173,45 @@ fun NepaliDatePicker(
         title = title,
         headline = headline,
         colors = colors,
+        modeToggleButton =
+        if (showModeToggle) {
+            {
+                NepaliDisplayModeToggleButton(
+                    modifier = Modifier.padding(NepaliDatePickerModeTogglePadding),
+                    displayMode = state.displayMode,
+                    onDisplayModeChange = { displayMode -> state.displayMode = displayMode },
+                )
+            }
+        } else {
+            null
+        },
         headerMinHeight = HeaderContainerHeight
     ) {
-        NepaliDatePicker(
+        SwitchableNepaliDateEntryContent(
             selectedDate = state.selectedDate,
             nepaliSelectableDates = state.nepaliSelectableDates,
-            displayedMonth = state.displayedMonth,
             onDateSelectionChange = { customCalendar -> state.selectedDate = customCalendar },
-            onDisplayedMonthChange = { month ->
-                state.displayedMonth = month
-            },
             calendarModel = calendarModel,
             yearRange = state.yearRange,
-            showTodayButton = showTodayButton,
             colors = colors,
-            today = today
-        )
+            language = state.locale.language,
+            nepaliDisplayMode = state.displayMode
+        ) {
+            NepaliDatePicker(
+                selectedDate = state.selectedDate,
+                nepaliSelectableDates = state.nepaliSelectableDates,
+                displayedMonth = state.displayedMonth,
+                onDateSelectionChange = { customCalendar -> state.selectedDate = customCalendar },
+                onDisplayedMonthChange = { month ->
+                    state.displayedMonth = month
+                },
+                calendarModel = calendarModel,
+                yearRange = state.yearRange,
+                showTodayButton = showTodayButton,
+                colors = colors,
+                today = today
+            )
+        }
     }
 }
 
@@ -176,6 +220,7 @@ internal fun NepaliDateEntryContainer(
     modifier: Modifier,
     title: (@Composable () -> Unit)?,
     headline: (@Composable () -> Unit)?,
+    modeToggleButton: (@Composable () -> Unit)?,
     colors: NepaliDatePickerColors,
     headerMinHeight: Dp,
     headlineTextStyle: TextStyle = MaterialTheme.typography.headlineLarge,
@@ -194,6 +239,7 @@ internal fun NepaliDateEntryContainer(
         ) {
             Column(modifier = Modifier.fillMaxWidth()) {
                 val horizontalArrangement = when {
+                    headline != null && modeToggleButton != null -> Arrangement.SpaceBetween
                     headline != null -> Arrangement.Start
                     else -> Arrangement.End
                 }
@@ -209,14 +255,134 @@ internal fun NepaliDateEntryContainer(
                             }
                         }
                     }
+                    modeToggleButton?.invoke()
                 }
                 // Display a divider only when there is a title, or headline.
-                if (title != null || headline != null) {
+                if (title != null || headline != null || modeToggleButton != null) {
                     HorizontalDivider(color = colors.dividerColor)
                 }
             }
         }
         content()
+    }
+}
+
+/** Represents the different modes that a date picker can be at. */
+@Immutable
+@JvmInline
+value class DisplayMode internal constructor(internal val value: Int) {
+
+    companion object {
+        /** Date picker mode */
+        val Picker = DisplayMode(0)
+
+        /** Date text input mode */
+        val Input = DisplayMode(1)
+    }
+
+    override fun toString() =
+        when (this) {
+            Picker -> "Picker"
+            Input -> "Input"
+            else -> "Unknown"
+        }
+}
+
+
+@Composable
+internal fun NepaliDisplayModeToggleButton(
+    modifier: Modifier,
+    displayMode: DisplayMode,
+    onDisplayModeChange: (DisplayMode) -> Unit
+) {
+    if (displayMode == DisplayMode.Picker) {
+        IconButton(onClick = { onDisplayModeChange(DisplayMode.Input) }, modifier = modifier) {
+            Icon(
+                imageVector = Icons.Filled.Edit,
+                contentDescription = "getString(Strings.DatePickerSwitchToInputMode)"
+            )
+        }
+    } else {
+        IconButton(onClick = { onDisplayModeChange(DisplayMode.Picker) }, modifier = modifier) {
+            Icon(
+                imageVector = Icons.Filled.DateRange,
+                contentDescription = "getString(Strings.DatePickerSwitchToCalendarMode)"
+            )
+        }
+    }
+}
+
+@Composable
+internal fun SwitchableNepaliDateEntryContent(
+    selectedDate: CustomCalendar?,
+    onDateSelectionChange: (CustomCalendar?) -> Unit,
+    calendarModel: NepaliCalendarModel,
+    yearRange: IntRange,
+    nepaliSelectableDates: NepaliSelectableDates,
+    nepaliDisplayMode: DisplayMode,
+    colors: NepaliDatePickerColors,
+    language: NepaliDatePickerLang,
+    pickerContent: @Composable () -> Unit
+) {
+    val parallaxTarget = with(LocalDensity.current) { -48.dp.roundToPx() }
+    AnimatedContent(
+        targetState = nepaliDisplayMode,
+        transitionSpec = {
+            if (targetState == DisplayMode.Input) {
+                slideInVertically { height -> height } +
+                        fadeIn(
+                            animationSpec =
+                            tween(
+                                durationMillis = (100.0).toInt(),
+                                delayMillis = (100.0).toInt()
+                            )
+                        ) togetherWith
+                        fadeOut(tween(durationMillis = (100.0).toInt())) +
+                        slideOutVertically(targetOffsetY = { _ -> parallaxTarget })
+            } else {
+                slideInVertically(
+                    animationSpec = tween(delayMillis = (50.0).toInt()),
+                    initialOffsetY = { _ -> parallaxTarget }
+                ) +
+                        fadeIn(
+                            animationSpec =
+                            tween(
+                                durationMillis = (100.0).toInt(),
+                                delayMillis = (100.0).toInt()
+                            )
+                        ) togetherWith
+                        slideOutVertically(targetOffsetY = { fullHeight -> fullHeight }) +
+                        fadeOut(animationSpec = tween((100.0).toInt()))
+            }
+                .using(
+                    SizeTransform(
+                        clip = true,
+                        sizeAnimationSpec = { _, _ ->
+                            tween(
+                                (500.0).toInt(),
+                                easing = CubicBezierEasing(0.05f, 0.7f, 0.1f, 1.0f)
+                            )
+                        }
+                    )
+                )
+        },
+        label = "NepaliDatePickerDisplayModeAnimation"
+    ) { mode ->
+        when (mode) {
+            DisplayMode.Picker ->
+                pickerContent.invoke()
+
+            DisplayMode.Input ->
+                NepaliDateInputContent(
+                    selectedDate = selectedDate,
+                    onDateSelectionChange = { onDateSelectionChange(it) },
+                    calendarModel = calendarModel,
+                    yearRange = yearRange,
+                    nepaliSelectableDates = nepaliSelectableDates,
+                    language = language,
+                    colors = colors
+                )
+        }
     }
 }
 
@@ -393,6 +559,7 @@ interface NepaliDatePickerState {
     var selectedDate: CustomCalendar?
     var displayedMonth: NepaliMonthCalendar
     val selectedEnglishDate: CustomCalendar?
+    var displayMode: DisplayMode
     val yearRange: IntRange
     val nepaliSelectableDates: NepaliSelectableDates
     val locale: NepaliDateLocale
@@ -491,6 +658,7 @@ fun rememberNepaliDatePickerState(
     initialSelectedDate: SimpleDate? = null,
     initialDisplayedMonth: SimpleDate? = initialSelectedDate,
     yearRange: IntRange = NepaliDatePickerDefaults.NepaliYearRange,
+    initialDisplayMode: DisplayMode = DisplayMode.Picker,
     nepaliSelectableDates: NepaliSelectableDates = NepaliDatePickerDefaults.AllDates,
     locale: NepaliDateLocale = NepaliDatePickerDefaults.DefaultLocale,
 ): NepaliDatePickerState {
@@ -501,6 +669,7 @@ fun rememberNepaliDatePickerState(
             initialSelectedDate = initialSelectedDate,
             initialDisplayedMonth = initialDisplayedMonth,
             yearRange = yearRange,
+            initialDisplayMode = initialDisplayMode,
             nepaliSelectableDates = nepaliSelectableDates,
             locale = locale
         )
@@ -534,12 +703,14 @@ fun NepaliDatePickerState(
     initialSelectedDate: SimpleDate? = null,
     initialDisplayedMonth: SimpleDate? = initialSelectedDate,
     yearRange: IntRange = NepaliDatePickerDefaults.NepaliYearRange,
+    initialDisplayMode: DisplayMode = DisplayMode.Picker,
     nepaliSelectableDates: NepaliSelectableDates = NepaliDatePickerDefaults.AllDates,
     locale: NepaliDateLocale
 ): NepaliDatePickerState = NepaliDatePickerStateImpl(
     initialSelectedDate = initialSelectedDate,
     initialDisplayedMonth = initialDisplayedMonth,
     yearRange = yearRange,
+    initialDisplayMode = initialDisplayMode,
     nepaliSelectableDates = nepaliSelectableDates,
     locale = locale
 )
@@ -604,6 +775,7 @@ private class NepaliDatePickerStateImpl(
     initialSelectedDate: SimpleDate?,
     initialDisplayedMonth: SimpleDate?,
     yearRange: IntRange,
+    initialDisplayMode: DisplayMode,
     nepaliSelectableDates: NepaliSelectableDates,
     locale: NepaliDateLocale
 ) : BaseNepaliDatePickerStateImpl(
@@ -649,6 +821,17 @@ private class NepaliDatePickerStateImpl(
             )
         } else null
 
+    private var _displayMode = mutableStateOf(initialDisplayMode)
+
+    override var displayMode: DisplayMode
+        get() = _displayMode.value
+        set(displayMode) {
+            selectedDate?.let {
+                displayedMonth = it.toNepaliMonthCalendar()
+            }
+            _displayMode.value = displayMode
+        }
+
     companion object {
         fun Saver(
             nepaliSelectableDates: NepaliSelectableDates, locale: NepaliDateLocale
@@ -657,13 +840,15 @@ private class NepaliDatePickerStateImpl(
                 state.selectedDate?.encodeToSimpleDateString(),
                 state.displayedMonth.encodeToSimpleDateString(),
                 state.yearRange.first,
-                state.yearRange.last
+                state.yearRange.last,
+                state.displayMode.value
             )
         }, restore = { value ->
             NepaliDatePickerStateImpl(
                 initialSelectedDate = if (value.isNotEmpty()) decodeSimpleDateFromString(value[0] as? String) else null,
                 initialDisplayedMonth = if (value.size > 1) decodeSimpleDateFromString(value[1] as? String) else null,
                 yearRange = IntRange(value[2] as Int, value[3] as Int),
+                initialDisplayMode = DisplayMode(value[4] as Int),
                 nepaliSelectableDates = nepaliSelectableDates,
                 locale = locale
             )
@@ -823,7 +1008,7 @@ private fun NepaliHorizontalMonthList(
             )
         }
     }
-    val snapFlingBehavior = rememberSnapFlingBehavior(lazyListState = lazyListState)
+    val snapFlingBehavior = rememberCustomSnapFlingBehavior(lazyListState = lazyListState)
 
     LazyRow(
         modifier = Modifier, state = lazyListState, flingBehavior = snapFlingBehavior
@@ -1164,6 +1349,37 @@ internal fun ProvideContentColorTextStyle(
 }
 
 /**
+ * Creates and remembers a [FlingBehavior] that will represent natural fling curve with snap to
+ * the most visible month in the months list.
+ *
+ * @param lazyListState a [LazyListState]
+ * @param decayAnimationSpec the decay to use
+ */
+@Composable
+internal fun rememberCustomSnapFlingBehavior(
+    lazyListState: LazyListState,
+    decayAnimationSpec: DecayAnimationSpec<Float> = exponentialDecay()
+): FlingBehavior {
+    return remember(decayAnimationSpec, lazyListState) {
+        val original = SnapLayoutInfoProvider(lazyListState)
+        val snapLayoutInfoProvider =
+            object : SnapLayoutInfoProvider by original {
+                override fun calculateApproachOffset(
+                    velocity: Float,
+                    decayOffset: Float
+                ): Float = 0.0f
+            }
+
+        snapFlingBehavior(
+            snapLayoutInfoProvider = snapLayoutInfoProvider,
+            decayAnimationSpec = decayAnimationSpec,
+            snapAnimationSpec = spring(stiffness = Spring.StiffnessMediumLow)
+        )
+    }
+}
+
+
+/**
  * Encode the [CustomCalendar] and [NepaliMonthCalendar] in [SimpleDate] format.
  */
 internal fun CustomCalendar.encodeToSimpleDateString(): String {
@@ -1216,3 +1432,4 @@ internal val YearPickerContentBottomPadding = 8.dp
 internal val NepaliDatePickerTitlePadding = PaddingValues(start = 24.dp, end = 12.dp, top = 16.dp)
 private val NepaliDatePickerHeadlinePadding =
     PaddingValues(start = 24.dp, end = 12.dp, bottom = 12.dp)
+internal val NepaliDatePickerModeTogglePadding = PaddingValues(end = 12.dp, bottom = 12.dp)

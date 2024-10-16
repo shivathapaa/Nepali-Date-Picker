@@ -46,6 +46,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import dev.shivathapaa.nepalidatepickerkmp.annotations.ExperimentalNepaliDatePickerApi
 import dev.shivathapaa.nepalidatepickerkmp.calendar_model.NepaliCalendarModel
 import dev.shivathapaa.nepalidatepickerkmp.calendar_model.NepaliDatePickerColors
@@ -71,6 +72,7 @@ import kotlinx.coroutines.launch
  * @param englishDateLocale the locale [NepaliDateLocale] for the english date
  * @param title the title to be displayed in the Nepali date range picker
  * @param headline the headline to be displayed in the Nepali date range picker
+ * @param showModeToggle the boolean to let user toggle between Date Picker and Date Input
  * @param showTodayButton the control to either show or hide `TODAY` button for navigating to today's date.
  * It is also affected by [showYearPickerAndMonthNavigation].
  * @param showMonthsVertically the control to either show months vertically or horizontally.
@@ -117,6 +119,7 @@ fun NepaliDateRangePickerWithEnglishDate(
             locale = state.locale
         )
     },
+    showModeToggle: Boolean = true,
     showTodayButton: Boolean = true,
     showMonthsVertically: Boolean = true,
     showYearPickerAndMonthNavigation: Boolean = true,
@@ -129,14 +132,25 @@ fun NepaliDateRangePickerWithEnglishDate(
         modifier = modifier,
         title = title,
         headline = headline,
+        modeToggleButton =
+        if (showModeToggle) {
+            {
+                NepaliDisplayModeToggleButton(
+                    modifier = Modifier.padding(NepaliDatePickerModeTogglePadding),
+                    displayMode = state.displayMode,
+                    onDisplayModeChange = { displayMode -> state.displayMode = displayMode },
+                )
+            }
+        } else {
+            null
+        },
         colors = colors,
-        headlineTextStyle = MaterialTheme.typography.titleLarge,
+        headlineTextStyle = MaterialTheme.typography.titleLarge.copy(fontSize = 21.sp),
         headerMinHeight = NepaliRangeSelectionHeaderContainerHeight - NepaliRangePickerHeaderHeightOffset,
     ) {
-        NepaliEnglishDateRangePickerContent(
+        SwitchableNepaliDateRangeEntryContent(
             selectedNepaliStartDate = state.selectedStartNepaliDate,
             selectedNepaliEndDate = state.selectedEndNepaliDate,
-            displayedMonth = state.displayedMonth,
             onDatesSelectionChange = { startNepaliCalendar, endNepaliCalendar ->
                 try {
                     state.setSelection(
@@ -149,22 +163,44 @@ fun NepaliDateRangePickerWithEnglishDate(
             },
             calendarModel = calendarModel,
             colors = colors,
-            showTodayButton = showTodayButton,
             nepaliSelectableDates = state.nepaliSelectableDates,
             yearRange = state.yearRange,
-            onDisplayedMonthChange = {
-                state.displayedMonth = it
-            },
-            today = today,
-            englishDateLocale = englishDateLocale,
-            showMonthsVertically = showMonthsVertically,
-            showYearPickerAndMonthNavigation = showYearPickerAndMonthNavigation
-        )
+            language = state.locale.language,
+            nepaliDisplayMode = state.displayMode
+        ) {
+            NepaliEnglishDateRangePicker(
+                selectedNepaliStartDate = state.selectedStartNepaliDate,
+                selectedNepaliEndDate = state.selectedEndNepaliDate,
+                displayedMonth = state.displayedMonth,
+                onDatesSelectionChange = { startNepaliCalendar, endNepaliCalendar ->
+                    try {
+                        state.setSelection(
+                            startNepaliDate = startNepaliCalendar,
+                            endNepaliDate = endNepaliCalendar
+                        )
+                    } catch (iae: IllegalArgumentException) {
+                        // By default, ignore exceptions that setSelection throws.
+                    }
+                },
+                calendarModel = calendarModel,
+                colors = colors,
+                showTodayButton = showTodayButton,
+                nepaliSelectableDates = state.nepaliSelectableDates,
+                yearRange = state.yearRange,
+                onDisplayedMonthChange = {
+                    state.displayedMonth = it
+                },
+                today = today,
+                englishDateLocale = englishDateLocale,
+                showMonthsVertically = showMonthsVertically,
+                showYearPickerAndMonthNavigation = showYearPickerAndMonthNavigation
+            )
+        }
     }
 }
 
 @Composable
-private fun NepaliEnglishDateRangePickerContent(
+private fun NepaliEnglishDateRangePicker(
     selectedNepaliStartDate: CustomCalendar?,
     selectedNepaliEndDate: CustomCalendar?,
     displayedMonth: NepaliMonthCalendar,

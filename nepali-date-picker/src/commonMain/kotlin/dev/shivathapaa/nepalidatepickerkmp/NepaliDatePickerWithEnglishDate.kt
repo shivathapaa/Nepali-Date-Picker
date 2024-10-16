@@ -21,7 +21,6 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.gestures.snapping.rememberSnapFlingBehavior
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -97,6 +96,8 @@ import kotlinx.coroutines.launch
  * @param englishDateLocale the locale [NepaliDateLocale] for the english date
  * @param title the title to be displayed in the date picker
  * @param headline the headline to be displayed in the date picker
+ * @param showModeToggle the boolean to let user toggle between Date Picker and Date Input
+ * @param showTodayButton the boolean to control either to show `TODAY` button or not
  * @param colors [NepaliDatePickerColors] that will be used to resolve the colors used for this date
  * picker in different states. See [NepaliDatePickerDefaults.colors].
  *
@@ -133,6 +134,7 @@ fun NepaliDatePickerWithEnglishDate(
             englishLocale = englishDateLocale
         )
     },
+    showModeToggle: Boolean = true,
     showTodayButton: Boolean = true,
     colors: NepaliDatePickerColors = NepaliDatePickerDefaults.colors()
 ) {
@@ -144,24 +146,47 @@ fun NepaliDatePickerWithEnglishDate(
         modifier = modifier,
         title = title,
         headline = headline,
+        modeToggleButton =
+        if (showModeToggle) {
+            {
+                NepaliDisplayModeToggleButton(
+                    modifier = Modifier.padding(NepaliDatePickerModeTogglePadding),
+                    displayMode = state.displayMode,
+                    onDisplayModeChange = { displayMode -> state.displayMode = displayMode },
+                )
+            }
+        } else {
+            null
+        },
         colors = colors,
         headerMinHeight = HeaderContainerHeight
     ) {
-        NepaliDatePicker(
+        SwitchableNepaliDateEntryContent(
             selectedDate = state.selectedDate,
             nepaliSelectableDates = state.nepaliSelectableDates,
-            displayedMonth = state.displayedMonth,
             onDateSelectionChange = { customCalendar -> state.selectedDate = customCalendar },
-            onDisplayedMonthChange = { month ->
-                state.displayedMonth = month
-            },
             calendarModel = calendarModel,
             yearRange = state.yearRange,
-            showTodayButton = showTodayButton,
-            englishDateLocale = englishDateLocale,
             colors = colors,
-            today = today
-        )
+            language = state.locale.language,
+            nepaliDisplayMode = state.displayMode,
+        ) {
+            NepaliDatePicker(
+                selectedDate = state.selectedDate,
+                nepaliSelectableDates = state.nepaliSelectableDates,
+                displayedMonth = state.displayedMonth,
+                onDateSelectionChange = { customCalendar -> state.selectedDate = customCalendar },
+                onDisplayedMonthChange = { month ->
+                    state.displayedMonth = month
+                },
+                calendarModel = calendarModel,
+                yearRange = state.yearRange,
+                showTodayButton = showTodayButton,
+                englishDateLocale = englishDateLocale,
+                colors = colors,
+                today = today
+            )
+        }
     }
 }
 
@@ -453,7 +478,7 @@ private fun NepaliHorizontalMonthList(
             )
         }
     }
-    val snapFlingBehavior = rememberSnapFlingBehavior(lazyListState = lazyListState)
+    val snapFlingBehavior = rememberCustomSnapFlingBehavior(lazyListState = lazyListState)
 
     LazyRow(
         modifier = Modifier, state = lazyListState, flingBehavior = snapFlingBehavior
