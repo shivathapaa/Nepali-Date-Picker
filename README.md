@@ -774,6 +774,16 @@ You can contribute to this project in several ways:
 
 > Checkout new upcoming feature update images in [latest releases](https://github.com/shivathapaa/Nepali-Date-Picker/releases)
 
+### In beta,
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/674cc284-0e75-46fa-874a-08d1136073c7" alt="Screenshots of Nepali Date Picker and Date Input" width="12%">&nbsp;
+  <img src="https://github.com/user-attachments/assets/3157f785-feb8-4565-b912-521171573878" alt="" width="12%">&nbsp;
+  <img src="https://github.com/user-attachments/assets/ba4c711b-9cef-4ccc-9f04-5cf29e64951c" alt="" width="12%">&nbsp;
+  <img src="https://github.com/user-attachments/assets/4aab90bd-f4ba-415f-900d-2a73947ea4bf"  alt="" width="12%">&nbsp;
+  <img src="https://github.com/user-attachments/assets/36e29d2c-98d6-4ae5-b171-69435e8a038f" alt="" width="12%">&nbsp;
+  <img src="https://github.com/user-attachments/assets/3c087926-ef3e-4156-a28c-07acdde3697e" alt="" width="12%">&nbsp;
+  <img src="https://github.com/user-attachments/assets/a8446d3f-6094-463f-9ec9-31028ca78fff" alt="" width="12%">
+</p>
 
 ---
 
