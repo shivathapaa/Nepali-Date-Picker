@@ -24,7 +24,7 @@ KMP Nepali Date Picker for both Android and/or iOS which aligns with the Materia
   <img alt="latest release" src="https://img.shields.io/maven-central/v/io.github.shivathapaa/nepali-date-picker?label=latest%20release"></a>&nbsp;
   <a href="#screenshots">
   <img alt="See Screenshots" src="https://img.shields.io/badge/see_screenshots-blue?color=D6E6DF"></a>&nbsp;
-  <a href="https://github.com/shivathapaa/Nepali-Date-Picker/releases/download/2.2.0-beta01/NepaliDatePicker.Multi-Theme.-v2.2.0-beta01.apk">
+  <a href="https://github.com/shivathapaa/Nepali-Date-Picker/releases/download/2.2.1-beta01/NepaliDatePicker.Multi-Theme.-v2.2.1-beta01.apk">
     <img alt="Download sample android app" src="https://img.shields.io/badge/download-%20Sample%20Android%20App-3DDC84?logo=android&labelColor=E2E3D8&color=4C662B"></a>
 </p>
 <br>
@@ -93,12 +93,14 @@ The library is published to [Maven Central. You can find all artifacts here.](ht
 
 In multiplatform projects, add a dependency to the commonMain source set dependencies
 
+> For targeting minimum sdk 21, use `2.2.1-dev01` version of the library which is stable, and is special release for specific case of supporting 21 minsdk. (If I get multiple requests for support below 24 sdk i.e. from 21, then I will release upcoming updates with the changes itself.)
+
 ```kotlin
 kotlin {
     sourceSets {
         commonMain {
             dependencies {
-                implementation("io.github.shivathapaa:nepali-date-picker:2.1.0-beta01")
+                implementation("io.github.shivathapaa:nepali-date-picker:2.2.1-beta01")
             }
         }
     }
@@ -115,7 +117,7 @@ To add the nepali-date-picker library to your Android project, include the follo
 [versions]
 # ...
 kotlin = "2.0.20"
-nepaliDatePickerAndroid = "2.1.0-beta01"
+nepaliDatePickerAndroid = "2.2.1-beta01"
 
 [libraries]
 nepali-date-picker-android = { module = "io.github.shivathapaa:nepali-date-picker-android", version.ref = "nepaliDatePickerAndroid" }
