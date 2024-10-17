@@ -98,6 +98,17 @@ enum class NepaliDatePickerLang {
         override val today: String = "TODAY"
         override val startDate: String = "Start Date"
         override val endDate: String = "End Date"
+        override val nepaliDate: String = "Nepali Date"
+        override val errorInvalidMonthOrDay: String =
+            "Month or day is incorrect, please enter a valid date"
+        override val errorInvalidDay: String =
+            "Day is invalid, please recheck total days in month"
+        override val errorDateOutOfYearRange: String =
+            "Date is out of expected year range"
+        override val errorDateNotAllowed: String =
+            "Date is not allowed, please write allowed date"
+        override val errorInvalidRange: String =
+            "Date range input is not allowed, please write allowed dates"
     },
     NEPALI {
         override val weekdays: List<NepaliWeekdayName> = nepaliWeekdays
@@ -111,6 +122,17 @@ enum class NepaliDatePickerLang {
         override val today: String = "आज"
         override val startDate: String = "सुरु मिति"
         override val endDate: String = "अन्त्य मिति"
+        override val nepaliDate: String = "नेपाली मिति"
+        override val errorInvalidMonthOrDay: String =
+            "महिना वा दिन गलत छ, कृपया मान्य मिति लेख्नुहोस्"
+        override val errorInvalidDay: String =
+            "दिन मिलेन, कृपया महिनाको कुल दिनको संख्या पुनः जाँच गर्नुहोस्"
+        override val errorDateOutOfYearRange: String =
+            "कृपया सही मिति लेख्नुहोस्, मिति अपेक्षित वर्षहरूको सीमा बाहिर छ । अपेक्षित वर्षहरू"
+        override val errorDateNotAllowed: String =
+            "यो मिति छान्न दिइएको छैन, छान्न दिइएको मिति लेख्नुहोस्"
+        override val errorInvalidRange: String =
+            "यो मिति सीमा छान्न दिइएको छैन, छान्न दिइएका मितिहरू लेख्नुहोस्"
     };
 
     abstract val weekdays: List<NepaliWeekdayName>
@@ -124,6 +146,12 @@ enum class NepaliDatePickerLang {
     abstract val today: String
     abstract val startDate: String
     abstract val endDate: String
+    abstract val nepaliDate: String
+    abstract val errorInvalidMonthOrDay: String
+    abstract val errorInvalidDay: String
+    abstract val errorDateOutOfYearRange: String
+    abstract val errorDateNotAllowed: String
+    abstract val errorInvalidRange: String
 }
 
 private val nepaliMonths = listOf(
