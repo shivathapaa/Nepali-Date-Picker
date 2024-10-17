@@ -28,7 +28,6 @@ import dev.shivathapaa.nepalidatepickerkmp.calendar_model.NepaliCalendarModel
 import dev.shivathapaa.nepalidatepickerkmp.calendar_model.NepaliDatePickerColors
 import dev.shivathapaa.nepalidatepickerkmp.data.CustomCalendar
 import dev.shivathapaa.nepalidatepickerkmp.data.NepaliDatePickerLang
-import dev.shivathapaa.nepalidatepickerkmp.data.toSimpleDate
 
 @Composable
 internal fun NepaliDateRangeInputContent(
@@ -41,29 +40,28 @@ internal fun NepaliDateRangeInputContent(
     nepaliSelectableDates: NepaliSelectableDates,
     colors: NepaliDatePickerColors
 ) {
-    // Obtain the DateInputFormat for the default Locale.
-    val errorInvalidMonthOrDay = "Month or day is incorrect. Please enter a valid date"
-    val errorDateInvalidInput = "Day is invalid. Please recheck total days in month"
     val errorDateOutOfYearRange =
-        "Date out of expected year range ${yearRange.first} - ${yearRange.last}"
-    val errorInvalidNotAllowed = "Date is not allowed"
-    val errorInvalidRange = "Date range input is invalid. Recheck allowed dates"
+        calendarModel.localizeNumber(
+            stringToLocalize = "${language.errorDateOutOfYearRange} ${yearRange.first} - ${yearRange.last}",
+            locale = language
+        )
+
     val dateInputValidator =
         remember {
             NepaliDateInputValidator(
                 yearRange = yearRange,
                 nepaliSelectableDates = nepaliSelectableDates,
-                errorInvalidMonthOrDay = errorInvalidMonthOrDay,
-                errorDateInvalidInput = errorDateInvalidInput,
+                errorInvalidMonthOrDay = language.errorInvalidMonthOrDay,
+                errorDateInvalidInput = language.errorInvalidDay,
                 errorDateOutOfYearRange = errorDateOutOfYearRange,
-                errorInvalidNotAllowed = errorInvalidNotAllowed,
-                errorInvalidRangeInput = errorInvalidRange
+                errorInvalidNotAllowed = language.errorDateNotAllowed,
+                errorInvalidRangeInput = language.errorInvalidRange
             )
         }
     // Apply both start and end dates for proper validation.
     dateInputValidator.apply {
-        currentStartDate = selectedStartDate?.toSimpleDate()
-        currentEndDate = selectedEndDate?.toSimpleDate()
+        currentStartDate = selectedStartDate
+        currentEndDate = selectedEndDate
     }
     Row(
         modifier = Modifier.padding(paddingValues = NepaliDateInputTextFieldPadding),

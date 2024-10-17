@@ -45,7 +45,6 @@ import dev.shivathapaa.nepalidatepickerkmp.calendar_model.NepaliDateConverter.co
 import dev.shivathapaa.nepalidatepickerkmp.calendar_model.NepaliDatePickerColors
 import dev.shivathapaa.nepalidatepickerkmp.data.CustomCalendar
 import dev.shivathapaa.nepalidatepickerkmp.data.NepaliDatePickerLang
-import dev.shivathapaa.nepalidatepickerkmp.data.SimpleDate
 import dev.shivathapaa.nepalidatepickerkmp.data.toSimpleDate
 import kotlin.jvm.JvmInline
 
@@ -59,28 +58,30 @@ internal fun NepaliDateInputContent(
     nepaliSelectableDates: NepaliSelectableDates,
     colors: NepaliDatePickerColors
 ) {
-    val errorInvalidMonthOrDay = "Month or day is incorrect. Please enter a valid date"
-    val errorDateInvalidInput = "Day is invalid. Please recheck total days in month"
     val errorDateOutOfYearRange =
-        "Date out of expected year range ${yearRange.first} - ${yearRange.last}"
-    val errorInvalidNotAllowed = "Date is invalid and is not allowed"
+        calendarModel.localizeNumber(
+            stringToLocalize = "${language.errorDateOutOfYearRange} ${yearRange.first} - ${yearRange.last}",
+            locale = language
+        )
+
+
     val dateInputValidator =
         remember {
             NepaliDateInputValidator(
                 yearRange = yearRange,
                 nepaliSelectableDates = nepaliSelectableDates,
-                errorInvalidMonthOrDay = errorInvalidMonthOrDay,
-                errorDateInvalidInput = errorDateInvalidInput,
+                errorInvalidMonthOrDay = language.errorInvalidMonthOrDay,
+                errorDateInvalidInput = language.errorInvalidDay,
                 errorDateOutOfYearRange = errorDateOutOfYearRange,
-                errorInvalidNotAllowed = errorInvalidNotAllowed,
+                errorInvalidNotAllowed = language.errorDateNotAllowed,
                 errorInvalidRangeInput = "" // Not used for a single date input
             )
         }
-    val labelText = "Nepali Date"
+
     NepaliDateInputTextField(
         modifier = Modifier.fillMaxWidth().padding(NepaliDateInputTextFieldPadding),
         calendarModel = calendarModel,
-        label = { Text(labelText) },
+        label = { Text(language.nepaliDate) },
         placeholder = { Text(PatternFormat) },
         initialSelectedDate = selectedDate,
         onDateSelectionChange = onDateSelectionChange,
@@ -88,7 +89,7 @@ internal fun NepaliDateInputContent(
         nepaliDateInputValidator =
         dateInputValidator.apply {
             // Only need to apply the start date, as this is for a single date input.
-            currentStartDate = selectedDate?.toSimpleDate() // Todo: Check this
+            currentStartDate = selectedDate
         },
         language = language,
         colors = colors
@@ -118,7 +119,7 @@ internal fun NepaliDateInputTextField(
                     val year = date.year.toString()
                     val month = date.month.toString().padStart(2, '0')
                     val day = date.dayOfMonth.toString().padStart(2, '0')
-                    calendarModel.removeSlashDelimiter(dateWithDelimiter = "$year/$month/$day")
+                    "$year$month$day"
                 } ?: "",
                 TextRange(0, 0)
             )
@@ -161,8 +162,6 @@ internal fun NepaliDateInputTextField(
         },
         modifier =
         modifier
-            // Add bottom padding when there is no error. Otherwise, remove it as the error text
-            // will take additional height.
             .padding(
                 bottom =
                 if (errorText.value.isNotBlank()) {
@@ -175,7 +174,7 @@ internal fun NepaliDateInputTextField(
         placeholder = placeholder,
         supportingText = { if (errorText.value.isNotBlank()) Text(errorText.value) },
         isError = errorText.value.isNotBlank(),
-        visualTransformation = DateVisualTransformation(),
+        visualTransformation = DateVisualTransformation(language, calendarModel::localizeNumber),
         keyboardOptions =
         KeyboardOptions(
             autoCorrectEnabled = false,
@@ -196,8 +195,8 @@ internal class NepaliDateInputValidator(
     private val errorDateOutOfYearRange: String,
     private val errorInvalidNotAllowed: String,
     private val errorInvalidRangeInput: String,
-    internal var currentStartDate: SimpleDate? = null,
-    internal var currentEndDate: SimpleDate? = null,
+    internal var currentStartDate: CustomCalendar? = null,
+    internal var currentEndDate: CustomCalendar? = null,
 ) {
     fun validate(
         dateToValidate: CustomCalendar?,
@@ -215,7 +214,7 @@ internal class NepaliDateInputValidator(
             return errorDateInvalidInput
         }
 
-        // Check that the provided SelectableDates allows this date to be selected.
+        // Check that the provided NepaliSelectableDates allows this date to be selected.
         with(nepaliSelectableDates) {
             if (
                 !isSelectableYear(dateToValidate.year) ||
@@ -272,12 +271,13 @@ internal value class NepaliDateInputIdentifier internal constructor(internal val
         }
 }
 
-private class DateVisualTransformation() : VisualTransformation {
-
+private class DateVisualTransformation(
+    private val language: NepaliDatePickerLang,
+    private val localizeNumber: (String, NepaliDatePickerLang) -> String
+) : VisualTransformation {
     private val firstDelimiterOffset: Int = 4 // Index of first delimiter (/)
     private val secondDelimiterOffset: Int = 7 // Index of second delimiter (/)
-    private val dateFormatLength: Int =
-        LengthOfCharOfFormattedInputDate // Total length of date format (yyyy/MM/dd)
+    private val dateFormatLength: Int = LengthOfCharOfFormattedInputDate
 
     private val dateOffsetTranslator =
         object : OffsetMapping {
@@ -315,7 +315,10 @@ private class DateVisualTransformation() : VisualTransformation {
                 transformedText += "/" // Add delimiter
             }
         }
-        return TransformedText(AnnotatedString(transformedText), dateOffsetTranslator)
+
+        val localizedString = localizeNumber(transformedText, language)
+
+        return TransformedText(AnnotatedString(localizedString), dateOffsetTranslator)
     }
 }
 
