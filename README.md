@@ -24,7 +24,7 @@ KMP Nepali Date Picker for both Android and/or iOS which aligns with the Materia
   <img alt="latest release" src="https://img.shields.io/maven-central/v/io.github.shivathapaa/nepali-date-picker?label=latest%20release"></a>&nbsp;
   <a href="#screenshots">
   <img alt="See Screenshots" src="https://img.shields.io/badge/see_screenshots-blue?color=D6E6DF"></a>&nbsp;
-  <a href="https://github.com/shivathapaa/Nepali-Date-Picker/releases/download/2.2.1-beta01/NepaliDatePicker.Multi-Theme.-v2.2.1-beta01.apk">
+  <a href="https://github.com/shivathapaa/Nepali-Date-Picker/releases/download/2.2.1/NepaliDatePicker.Multi-Theme.-v2.2.1.apk">
     <img alt="Download sample android app" src="https://img.shields.io/badge/download-%20Sample%20Android%20App-3DDC84?logo=android&labelColor=E2E3D8&color=4C662B"></a>
 </p>
 <br>
@@ -49,7 +49,7 @@ KMP Nepali Date Picker for both Android and/or iOS which aligns with the Materia
 
 ## Design overview
 
-This library strictly follows `Material` (Material3) design principles. Considering UI/UX, `nepali-date-picker` aligns with new `androidx.compose.material3.DatePicker`.
+This library strictly follows `Material` (Material3) design principles. Considering UI, `nepali-date-picker` aligns with new `androidx.compose.material3.DatePicker`.
 
 If you are familiar with the Material3 Date Picker then you will find it very similar, and you can adapt it with little to no time.
 
@@ -85,22 +85,20 @@ Core UI specific,
 The library is published to [Maven Central. You can find all artifacts here.](https://central.sonatype.com/namespace/io.github.shivathapaa)
 
 > If you encounter version conflicts using this library, you can solve this in two ways:
-> - Use an earlier version of the Nepali-Date-Picker library (`2.0.0-beta06 or before`) if stability is required and your project is using a lower version of JetBrains Compose or Android Compose.
-> - Alternatively, you can update your JetBrains Compose or Android Compose version to `1.7.0-beta01 or later` to resolve the conflict.
+> - **_Recommended:_** Update your JetBrains Compose or Android Compose version to `1.7.0-beta01 or later` to resolve the conflict.
     For more details on this release, check [this release](https://github.com/shivathapaa/Nepali-Date-Picker/releases/tag/2.0.0-rc01).
+> - Use an earlier version of the Nepali-Date-Picker library (`2.0.0-beta06 or before`) if stability is required and your project is using a lower version of JetBrains Compose or Android Compose.
 
 ### Common Gradle
 
 In multiplatform projects, add a dependency to the commonMain source set dependencies
-
-> For targeting minimum sdk 21, use `2.2.1-dev01` version of the library which is stable, and is special release for specific case of supporting 21 minsdk. (If I get multiple requests for support below 24 sdk i.e. from 21, then I will release upcoming updates with the changes itself.)
 
 ```kotlin
 kotlin {
     sourceSets {
         commonMain {
             dependencies {
-                implementation("io.github.shivathapaa:nepali-date-picker:2.2.1-beta01")
+                implementation("io.github.shivathapaa:nepali-date-picker:2.2.1")
             }
         }
     }
@@ -117,7 +115,7 @@ To add the nepali-date-picker library to your Android project, include the follo
 [versions]
 # ...
 kotlin = "2.0.20"
-nepaliDatePickerAndroid = "2.2.1-beta01"
+nepaliDatePickerAndroid = "2.2.1"
 
 [libraries]
 nepali-date-picker-android = { module = "io.github.shivathapaa:nepali-date-picker-android", version.ref = "nepaliDatePickerAndroid" }
@@ -150,11 +148,11 @@ dependencies {
 
 #### Android Setup for API Levels Below 26
 
-> Note: This library uses `kotlinx-datetime`, which relies on the `java.time` API. These APIs are only available natively starting from Android API level 26. For devices running API levels 25 and below, core library desugaring is necessary to backport these APIs and ensure compatibility.
-> 
+> **Note:** This library uses `kotlinx-datetime`, which relies on the `java.time` API. These APIs are only available natively starting from Android API level 26. For devices running API levels 25 and below, core library desugaring is necessary to backport these APIs and ensure compatibility.
+>
 > By enabling desugaring, your project will support `java.time` functionality on older Android versions, ensuring smooth use of this library across all supported API levels. For more details [checkout this](https://github.com/Kotlin/kotlinx-datetime?tab=readme-ov-file#using-in-your-projects).
 
-If your project targets Android SDK versions **below 26 (Android 8.0)**, you need to enable **core library desugaring** to support the `java.time` APIs used by this library. Follow the steps below:
+If your project targets Android SDK versions **below 26 (Android 8.0)**, you need to enable **core library desugaring** to support the `java.time` APIs used by this library. [Directly checkout this](https://developer.android.com/studio/write/java8-support#library-desugaring) or you can follow the steps below:
 
 ```kotlin
 // Enable Desugaring in your build.gradle (app-level) file
@@ -221,7 +219,7 @@ For more details, see the [LICENSE](https://github.com/shivathapaa/Nepali-Date-P
 
 This library uses a `1-based index` where 1 represents Sunday or January/Baisakh, 7 represents Saturday or July/Kartik, and 12 represents December/Chaitra.
 
-Don't forget about the **DateRange** before using. 
+Don't forget about the **DateRange** before using.
 
 You can check this inside library under `NepaliDatePickerDefaults.NepaliYearRange` and `NepaliDatePickerDefaults.EnglishYearRange`
 
@@ -321,6 +319,7 @@ val customizedDatePickerState = rememberNepaliDatePickerState(
             return (year % 5 != 0)
         }
     },
+    initialDisplayMode = DisplayMode.Input,
     locale = NepaliDateLocale(language = NepaliDatePickerLang.NEPALI)
 )
 val customizedNepaliDateRangePickerState = rememberNepaliDateRangePickerState(
@@ -332,6 +331,7 @@ val customizedNepaliDateRangePickerState = rememberNepaliDateRangePickerState(
         simpleDate = SimpleDate(2083, 12, 10),
         includeDate = true
     ),
+    initialDisplayMode = DisplayMode.Input,
     locale = NepaliDatePickerDefaults.DefaultLocale
 )
 
@@ -774,9 +774,6 @@ You can contribute to this project in several ways:
   <img src="https://github.com/user-attachments/assets/d79d4afe-65f7-4485-b537-b8314c32d601" alt="" width="9%">
 </p>
 
-> Checkout new upcoming feature update images in [latest releases](https://github.com/shivathapaa/Nepali-Date-Picker/releases)
-
-### In beta,
 <p align="center">
   <img src="https://github.com/user-attachments/assets/674cc284-0e75-46fa-874a-08d1136073c7" alt="Screenshots of Nepali Date Picker and Date Input" width="12%">&nbsp;
   <img src="https://github.com/user-attachments/assets/3157f785-feb8-4565-b912-521171573878" alt="" width="12%">&nbsp;
