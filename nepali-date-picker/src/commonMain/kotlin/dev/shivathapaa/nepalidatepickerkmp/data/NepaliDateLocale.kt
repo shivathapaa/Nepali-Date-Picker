@@ -91,8 +91,11 @@ enum class NepaliDatePickerLang {
         override val months: List<NepaliMonthName> = nepaliMonthsInEnglish
         override val englishMonths: List<NepaliMonthName> = englishMonthsInEnglish
         override val selectDateText: String = "Select Date"
+        override val writeDateText: String = "Write Date"
         override val datePickerTitle: String = "Select Nepali Date"
+        override val dateInputTitle: String = "Write Nepali Date"
         override val dateRangePickerTitle: String = "Select Nepali Dates"
+        override val dateRangeInputTitle: String = "Write Nepali Dates"
         override val cancelText: String = "Cancel"
         override val okText: String = "OK"
         override val today: String = "TODAY"
@@ -115,8 +118,11 @@ enum class NepaliDatePickerLang {
         override val months: List<NepaliMonthName> = nepaliMonths
         override val englishMonths: List<NepaliMonthName> = englishMonthsInNepali
         override val selectDateText: String = "मिति चयन गर्नुहोस्"
+        override val writeDateText: String = "मिति लेख्नुहोस्"
         override val datePickerTitle: String = "नेपाली मिति चयन गर्नुहोस्"
+        override val dateInputTitle: String = "नेपाली मिति लेख्नुहोस्"
         override val dateRangePickerTitle: String = "नेपाली मितिहरु चयन गर्नुहोस्"
+        override val dateRangeInputTitle: String = "नेपाली मितिहरु लेख्नुहोस्"
         override val cancelText: String = "रद्द गर्नुहोस्"
         override val okText: String = "भयो"
         override val today: String = "आज"
@@ -139,8 +145,11 @@ enum class NepaliDatePickerLang {
     abstract val months: List<NepaliMonthName>
     abstract val englishMonths: List<NepaliMonthName>
     abstract val selectDateText: String
+    abstract val writeDateText: String
     abstract val datePickerTitle: String
+    abstract val dateInputTitle: String
     abstract val dateRangePickerTitle: String
+    abstract val dateRangeInputTitle: String
     abstract val cancelText: String
     abstract val okText: String
     abstract val today: String

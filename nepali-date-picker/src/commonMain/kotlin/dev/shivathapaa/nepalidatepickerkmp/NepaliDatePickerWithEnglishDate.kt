@@ -122,7 +122,8 @@ fun NepaliDatePickerWithEnglishDate(
     title: (@Composable () -> Unit)? = {
         NepaliDatePickerDefaults.NepaliDatePickerTitle(
             modifier = Modifier.padding(NepaliDatePickerTitlePadding),
-            language = state.locale.language
+            language = state.locale.language,
+            displayMode = state.displayMode
         )
     },
     headline: (@Composable () -> Unit)? = {
@@ -131,7 +132,8 @@ fun NepaliDatePickerWithEnglishDate(
             selectedDate = state.selectedDate,
             selectedEnglishDate = state.selectedEnglishDate,
             locale = state.locale,
-            englishLocale = englishDateLocale
+            englishLocale = englishDateLocale,
+            displayMode = state.displayMode
         )
     },
     showModeToggle: Boolean = true,

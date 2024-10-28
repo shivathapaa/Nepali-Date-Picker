@@ -43,6 +43,7 @@ import androidx.compose.ui.graphics.takeOrElse
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import dev.shivathapaa.nepalidatepickerkmp.DisplayMode
 import dev.shivathapaa.nepalidatepickerkmp.NepaliSelectableDates
 import dev.shivathapaa.nepalidatepickerkmp.annotations.ExperimentalNepaliDatePickerApi
 import dev.shivathapaa.nepalidatepickerkmp.data.CustomCalendar
@@ -186,27 +187,36 @@ object NepaliDatePickerDefaults {
 
     @Composable
     internal fun NepaliDatePickerTitle(
-        modifier: Modifier = Modifier, language: NepaliDatePickerLang
+        modifier: Modifier = Modifier, language: NepaliDatePickerLang, displayMode: DisplayMode
     ) {
-        Text(
-            text = language.datePickerTitle,
-            modifier = modifier
-        )
+        when (displayMode) {
+            DisplayMode.Picker ->
+                Text(text = language.datePickerTitle, modifier = modifier)
+
+            DisplayMode.Input ->
+                Text(text = language.dateInputTitle, modifier = modifier)
+        }
     }
 
     @Composable
     internal fun NepaliDateRangePickerTitle(
-        modifier: Modifier = Modifier, language: NepaliDatePickerLang
+        modifier: Modifier = Modifier, language: NepaliDatePickerLang, displayMode: DisplayMode
     ) {
-        Text(
-            text = language.dateRangePickerTitle,
-            modifier = modifier
-        )
+        when (displayMode) {
+            DisplayMode.Picker ->
+                Text(text = language.dateRangePickerTitle, modifier = modifier)
+
+            DisplayMode.Input ->
+                Text(text = language.dateRangeInputTitle, modifier = modifier)
+        }
     }
 
     @Composable
     internal fun NepaliDatePickerHeadline(
-        selectedDate: CustomCalendar?, modifier: Modifier = Modifier, locale: NepaliDateLocale
+        selectedDate: CustomCalendar?,
+        locale: NepaliDateLocale,
+        displayMode: DisplayMode,
+        modifier: Modifier = Modifier
     ) {
         val calendarModel = NepaliCalendarModel(locale)
 
@@ -218,7 +228,11 @@ object NepaliDatePickerDefaults {
                 dayOfWeek = date.dayOfWeek,
                 locale = locale
             )
-        } ?: locale.language.selectDateText
+        } ?: if (displayMode == DisplayMode.Input) {
+            locale.language.writeDateText
+        } else {
+            locale.language.selectDateText
+        }
 
         Text(
             text = formattedDate,
@@ -234,6 +248,7 @@ object NepaliDatePickerDefaults {
         selectedEnglishDate: CustomCalendar?,
         locale: NepaliDateLocale,
         englishLocale: NepaliDateLocale,
+        displayMode: DisplayMode,
         modifier: Modifier = Modifier
     ) {
         val calendarModel = NepaliCalendarModel(locale)
@@ -246,7 +261,11 @@ object NepaliDatePickerDefaults {
                 dayOfWeek = date.dayOfWeek,
                 locale = locale
             )
-        } ?: locale.language.selectDateText
+        } ?: if (displayMode == DisplayMode.Input) {
+            locale.language.writeDateText
+        } else {
+            locale.language.selectDateText
+        }
 
 
         val formattedEnglishDate = selectedEnglishDate?.let { date ->

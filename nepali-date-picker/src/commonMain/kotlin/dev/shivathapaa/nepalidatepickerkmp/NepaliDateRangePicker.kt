@@ -120,7 +120,8 @@ fun NepaliDateRangePicker(
     title: (@Composable () -> Unit)? = {
         NepaliDatePickerDefaults.NepaliDateRangePickerTitle(
             modifier = Modifier.padding(NepaliDateRangePickerTitlePadding),
-            language = state.locale.language
+            language = state.locale.language,
+            displayMode = state.displayMode
         )
     },
     headline: (@Composable () -> Unit)? = {
