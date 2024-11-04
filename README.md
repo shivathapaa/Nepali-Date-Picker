@@ -240,7 +240,7 @@ NepaliDatePicker(state = defaultNepaliDatePickerState)
 
 val defaultNepaliDateRangePickerState = rememberNepaliDateRangePickerState()
 
-// NepaliDateRangePicker(defaultNepaliDateRangePickerState)
+NepaliDateRangePicker(defaultNepaliDateRangePickerState)
 // NepaliDateRangePickerWithEnglishDate(defaultNepaliDateRangePickerState)
 ```
 
@@ -514,6 +514,32 @@ val customSelectableDatePickerState = rememberNepaliDatePickerState(
         }
     }
 )
+```
+
+#### For defining state outside/inside of composition (Alternative way)
+```kotlin
+// Outside of composition (may be in viewModel, or lambdas), or inside the composition
+val stateForPicker = NepaliDatePickerState(
+    initialSelectedDate = SimpleDate(2081, 8, 21),
+    initialDisplayedMonth = SimpleDate(2081, 7, 21),
+    yearRange = IntRange(1998, 2100),
+    nepaliSelectableDates = NepaliDatePickerDefaults.AllDates,
+    initialDisplayMode = DisplayMode.Picker,
+    locale = NepaliDatePickerDefaults.DefaultLocale
+)
+
+val stateForRangePicker = NepaliDateRangePickerState(
+    initialSelectedStartNepaliDate = SimpleDate(2081, 8, 21),
+    initialSelectedEndNepaliDate = SimpleDate(2081, 9, 21),
+    initialDisplayedMonth = SimpleDate(2081, 7, 21),
+    yearRange = IntRange(1998, 2100),
+    nepaliSelectableDates = NepaliDatePickerDefaults.AllDates,
+    initialDisplayMode = DisplayMode.Picker,
+    locale = NepaliDatePickerDefaults.DefaultRangePickerLocale
+)
+
+NepaliDatePicker(state = stateForPicker)
+NepaliDateRangePicker(state = stateForRangePicker)
 ```
 
 ### Utilities to explore
