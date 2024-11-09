@@ -98,7 +98,7 @@ kotlin {
     sourceSets {
         commonMain {
             dependencies {
-                implementation("io.github.shivathapaa:nepali-date-picker:2.2.1")
+                implementation("io.github.shivathapaa:nepali-date-picker:2.2.3")
             }
         }
     }
@@ -115,7 +115,7 @@ To add the nepali-date-picker library to your Android project, include the follo
 [versions]
 # ...
 kotlin = "2.0.20"
-nepaliDatePickerAndroid = "2.2.1"
+nepaliDatePickerAndroid = "2.2.3"
 
 [libraries]
 nepali-date-picker-android = { module = "io.github.shivathapaa:nepali-date-picker-android", version.ref = "nepaliDatePickerAndroid" }
@@ -181,7 +181,17 @@ dependencies {
 
 The library supports various iOS architectures, including `iosarm64`, `iossimulatorarm64`, and `iosx64`.
 
-To integrate this library into your iOS project using CocoaPods:
+To integrate this library into your iOS project using Swift Package Manager(SPM):
+
+- Add the library using Package.swift from repo - https://github.com/shivathapaa/Nepali-Date-Picker-SPM/tree/main (After adding you are good to go!)
+
+```swift
+import SwiftUI
+import SwiftData
+import nepali_date_picker // import Nepali Date Picker library
+
+// Create view ...
+```
 
 > Will be updated very soon....
 
