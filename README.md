@@ -85,7 +85,7 @@ Core UI specific,
 The library is published to [Maven Central. You can find all artifacts here.](https://central.sonatype.com/namespace/io.github.shivathapaa)
 
 > If you encounter version conflicts using this library, you can solve this in two ways:
-> - **_Recommended:_** Update your JetBrains Compose or Android Compose version to `1.7.0-beta01 or later` to resolve the conflict.
+> - **_Recommended:_** Update your JetBrains Compose or Android Compose version to `1.7.0 or later` to resolve the conflict.
     For more details on this release, check [this release](https://github.com/shivathapaa/Nepali-Date-Picker/releases/tag/2.0.0-rc01).
 > - Use an earlier version of the Nepali-Date-Picker library (`2.0.0-beta06 or before`) if stability is required and your project is using a lower version of JetBrains Compose or Android Compose.
 
@@ -194,8 +194,6 @@ import nepali_date_picker // import Nepali Date Picker library
 
 // Create view ...
 ```
-
-> Will be updated very soon....
 
 > ### Desktop/Web
 > Will work on it if it will be helpful to community. [Let me know](https://github.com/shivathapaa/Nepali-Date-Picker/issues/new/choose) if I should!
