@@ -37,12 +37,16 @@ kotlin {
         publishLibraryVariants("release")
     }
 
+    val xcFrameworkName = "nepali-date-picker"
     val xcf = XCFramework()
+
     listOf(
         iosX64(), iosArm64(), iosSimulatorArm64()
     ).forEach {
         it.binaries.framework {
-            baseName = "nepali-date-picker"
+            baseName = xcFrameworkName
+
+            binaryOption("bundleId", "io.github.shivathapaa.${xcFrameworkName}")
             xcf.add(this)
             isStatic = true
         }
