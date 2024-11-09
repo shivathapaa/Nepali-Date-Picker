@@ -183,6 +183,8 @@ The library supports various iOS architectures, including `iosarm64`, `iossimula
 
 To integrate this library into your iOS project using Swift Package Manager(SPM):
 
+- Go to Xcode -> File -> Add package dependencies -> Paste below url for package -> Add package -> Done
+
 - Add the library using Package.swift from repo - https://github.com/shivathapaa/Nepali-Date-Picker-SPM/tree/main (After adding you are good to go!)
 
 ```swift
