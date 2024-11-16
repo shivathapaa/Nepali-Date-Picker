@@ -24,7 +24,7 @@ KMP Nepali Date Picker for both Android and/or iOS which aligns with the Materia
   <img alt="latest release" src="https://img.shields.io/maven-central/v/io.github.shivathapaa/nepali-date-picker?label=latest%20release"></a>&nbsp;
   <a href="#screenshots">
   <img alt="See Screenshots" src="https://img.shields.io/badge/see_screenshots-blue?color=D6E6DF"></a>&nbsp;
-  <a href="https://github.com/shivathapaa/Nepali-Date-Picker/releases/download/2.2.1/NepaliDatePicker.Multi-Theme.-v2.2.1.apk">
+  <a href="https://github.com/shivathapaa/Nepali-Date-Picker/releases/download/2.2.4/Nepali_Date_Picker_v2.2.4.apk">
     <img alt="Download sample android app" src="https://img.shields.io/badge/download-%20Sample%20Android%20App-3DDC84?logo=android&labelColor=E2E3D8&color=4C662B"></a>
 </p>
 <br>
@@ -171,7 +171,7 @@ android {
 // Add the Desugaring Dependency in the dependencies {} block of the same build.gradle file
 dependencies {
     // Add this dependency for desugaring java.time(kotlinx-datetime) APIs
-    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.2")
+    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.3")
 
     // Other dependencies...
 }
