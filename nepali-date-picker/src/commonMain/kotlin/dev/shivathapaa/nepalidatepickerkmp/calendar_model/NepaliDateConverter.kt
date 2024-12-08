@@ -170,6 +170,18 @@ object NepaliDateConverter {
     }
 
     /**
+     * This function returns total days in a English month.
+     *
+     * @param year takes value between [NepaliDatePickerDefaults.EnglishYearRange]
+     * @param month takes value between 1 to 12
+     *
+     * @return total days in a month
+     */
+    fun getTotalDaysInEnglishMonth(year: Int, month: Int): Int {
+        return calendarModel.getTotalDaysInEnglishMonth(year, month)
+    }
+
+    /**
      * Calculates the total number of days between two [SimpleDate] objects in the Nepali calendar.
      *
      * The end date is not added. You can add 1 to its returned value to include the end date too.

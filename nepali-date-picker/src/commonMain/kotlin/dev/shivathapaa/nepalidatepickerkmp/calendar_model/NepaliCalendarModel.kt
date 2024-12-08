@@ -84,6 +84,10 @@ internal class NepaliCalendarModel(val locale: NepaliDateLocale = NepaliDateLoca
         return DateConverters.getTotalDaysInNepaliMonth(year, month)
     }
 
+    fun getTotalDaysInEnglishMonth(year: Int, month: Int): Int {
+        return DateConverters.getTotalDaysInEnglishMonth(year, month)
+    }
+
     fun getNepaliMonth(nepaliYear: Int, nepaliMonth: Int): NepaliMonthCalendar {
         return DateConverters.calculateNepaliMonthDetails(nepaliYear, nepaliMonth)
     }
