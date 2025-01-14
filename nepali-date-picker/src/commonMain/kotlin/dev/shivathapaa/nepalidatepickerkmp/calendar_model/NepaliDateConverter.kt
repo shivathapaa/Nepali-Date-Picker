@@ -514,9 +514,9 @@ object NepaliDateConverter {
     fun getFormattedTimeInNepali(simpleTime: SimpleTime, use12HourFormat: Boolean = true): String {
         val hourOfDay =
             when (simpleTime.hour) {
-                in 4..10 -> "बिहान"
-                in 11..15 -> "दिउँसो"
-                in 16..19 -> "साँझ"
+                in 3..11 -> "बिहान"
+                in 12..16 -> "दिउँसो"
+                in 17..19 -> "साँझ"
                 else -> "राति"
             }
 
