@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
+import com.vanniktech.maven.publish.KotlinMultiplatform
 import com.vanniktech.maven.publish.SonatypeHost
-import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.plugin.mpp.apple.XCFramework
 
@@ -29,7 +29,6 @@ plugins {
 
 kotlin {
     androidTarget {
-        @OptIn(ExperimentalKotlinGradlePluginApi::class)
         compilerOptions {
             jvmTarget.set(JvmTarget.JVM_1_8)
         }
@@ -88,6 +87,12 @@ mavenPublishing {
         version = "2.2.5"
     )
 
+    configure(
+        KotlinMultiplatform(
+            sourcesJar = true
+        )
+    )
+
     // POM metadata for the published artifact
     pom {
         name.set("Nepali Date Picker KMP")
@@ -106,7 +111,7 @@ mavenPublishing {
             developer {
                 id.set("shivathapaa")
                 name.set("Shiva Thapa")
-                email.set("shivathapa.droid.dev@gmail.com")
+                email.set("query.shivathapaa.dev@gmail.com")
                 url.set("https://github.com/shivathapaa/")
             }
         }
