@@ -468,8 +468,8 @@ object NepaliDateConverter {
      *
      * ```
      * val time = SimpleTime(16, 30, 0, 0)
-     * val nepaliTime12Hour = getFormattedTimeInEnglish(time) // Output: "4:30 PM"
-     * val nepaliTime24Hour = getFormattedTimeInEnglish(time, false) // Output: "16:30"
+     * val englishTime12Hour = getFormattedTimeInEnglish(time) // Output: "4:30 PM"
+     * val englishTime24Hour = getFormattedTimeInEnglish(time, false) // Output: "16:30"
      * ```
      */
     fun getFormattedTimeInEnglish(simpleTime: SimpleTime, use12HourFormat: Boolean = true): String {
@@ -507,7 +507,7 @@ object NepaliDateConverter {
      *
      * ```
      * val time = SimpleTime(16, 30, 0, 0)
-     * val nepaliTime12Hour = getFormattedTimeInNepali(time) // Output: "साँझ ४ : ३०"
+     * val nepaliTime12Hour = getFormattedTimeInNepali(time) // Output: "दिउँसो ४ : ३०"
      * val nepaliTime24Hour = getFormattedTimeInNepali(time, false) // Output: "१६ : ३०"
      * ```
      */
@@ -548,7 +548,7 @@ object NepaliDateConverter {
      * Example:
      * ```
      * val nepaliDate = SimpleDate(2081, 5, 24)  // Bikram Sambat date
-     * val time = SimpleTime(14, 30, 15, 0)
+     * val time = SimpleTime(14, 45, 15, 0)
      * val isoFormat = NepaliDateConverter.formatNepaliDateTimeToIsoFormat(nepaliDate, time)
      * println(isoFormat)  // Outputs: "2024-09-09T09:00:15Z"
      * ```
@@ -572,7 +572,7 @@ object NepaliDateConverter {
      * Example:
      * ```
      * val englishDate = SimpleDate(2024, 9, 9)
-     * val time = SimpleTime(14, 30, 15, 0)
+     * val time = SimpleTime(14, 45, 15, 0)
      * val isoFormat = NepaliDateConverter.formatEnglishDateNepaliTimeToIsoFormat(englishDate, time)
      * println(isoFormat)  // Outputs: "2024-09-09T09:00:15Z"
      * ```
@@ -795,7 +795,7 @@ object NepaliDateConverter {
      *
      * val originalTime = "09:45 AM"
      * val newDelimiterSpace = " "
-     * val oldDelimiter = "/"
+     * val oldDelimiter = ":"
      * val formattedTimeWithSpace = NepaliDateConverter.replaceDelimiter(originalTime, newDelimiterSpace, oldDelimiter)
      * // formattedTimeWithSpace: "09 45 AM"
      * ```
