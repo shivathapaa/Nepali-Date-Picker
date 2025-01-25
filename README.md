@@ -29,11 +29,7 @@ KMP Nepali Date Picker for both Android and/or iOS which aligns with the Materia
 </p>
 <br>
 
-### Additional Tools
-
-> **Note:** If you also want to implement date utilities and converters in your backend or Python project, the package is available on PyPI. [nepali_calendar_utils](https://github.com/shivathapaa/nepali_calendar_utils).
-
-This [nepali_calendar_utils](https://github.com/shivathapaa/nepali_calendar_utils) Python package provides a collection of utilities for working with Nepali Dates, offering seamless conversion and integration between the Nepali Calendar and the Gregorian Calendar. Whether you're building localized applications, working with Nepali date systems, or creating custom date-based utilities, this package simplifies the process with intuitive and efficient tools.
+> **Note:** If you also want to implement date utilities and converters in your backend or Python project, the package is available on PyPI as _**nepali_calendar_utils**_. Similar to this library, [nepali_calendar_utils](https://github.com/shivathapaa/nepali_calendar_utils) Python package provides a collection of utilities for working with Nepali Dates, offering seamless conversion and integration between the Nepali Calendar and the Gregorian Calendar.
 
 <br>
 
