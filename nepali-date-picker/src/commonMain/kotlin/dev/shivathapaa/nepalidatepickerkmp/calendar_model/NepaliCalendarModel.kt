@@ -25,6 +25,7 @@ import dev.shivathapaa.nepalidatepickerkmp.data.NepaliDatePickerLang
 import dev.shivathapaa.nepalidatepickerkmp.data.NepaliMonthCalendar
 import dev.shivathapaa.nepalidatepickerkmp.data.SimpleDate
 import dev.shivathapaa.nepalidatepickerkmp.data.SimpleTime
+import dev.shivathapaa.nepalidatepickerkmp.data.toSimpleDate
 import kotlinx.datetime.Clock
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
@@ -36,17 +37,46 @@ internal class NepaliCalendarModel(val locale: NepaliDateLocale = NepaliDateLoca
     private val timeZone = TimeZone.of(zoneId = "Asia/Kathmandu")
     private val localEnglishDateTime: LocalDateTime = Clock.System.now().toLocalDateTime(timeZone)
 
+    @Deprecated(message = "Use todayNepaliSimpleDate or todayNepaliCalendar instead")
     val today
         get(): CustomCalendar {
             return getNepaliDateInstance()
         }
 
+    val todayNepaliSimpleDate
+        get(): SimpleDate {
+            return getNepaliDateInstance().toSimpleDate()
+        }
+
+    val todayNepaliCalendar
+        get(): CustomCalendar {
+            return getNepaliDateInstance()
+        }
+
+    @Deprecated("Use todayEnglishSimpleDate or todayEnglishCalendar")
     val todayEnglish
         get(): SimpleDate = SimpleDate(
             year = localEnglishDateTime.year,
             month = localEnglishDateTime.monthNumber,
             dayOfMonth = localEnglishDateTime.dayOfMonth
         )
+
+    val todayEnglishSimpleDate
+        get(): SimpleDate = SimpleDate(
+            year = localEnglishDateTime.year,
+            month = localEnglishDateTime.monthNumber,
+            dayOfMonth = localEnglishDateTime.dayOfMonth
+        )
+
+    val todayEnglishCalendar
+        get(): CustomCalendar {
+            val todayNepaliDate = todayNepaliSimpleDate
+            return convertToEnglishDate(
+                nepaliYYYY = todayNepaliDate.year,
+                nepaliMM = todayNepaliDate.month,
+                nepaliDD = todayNepaliDate.dayOfMonth
+            )
+        }
 
     val currentTime
         get(): SimpleTime {

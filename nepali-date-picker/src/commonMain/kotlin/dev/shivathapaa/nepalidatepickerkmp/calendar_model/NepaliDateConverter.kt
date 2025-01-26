@@ -35,14 +35,52 @@ object NepaliDateConverter {
     /**
      * @return [CustomCalendar] with today's date in Nepali calendar
      */
+    @Deprecated(
+        message = "Use todayNepaliSimpleDate or todayNepaliCalendar instead",
+        replaceWith = ReplaceWith(expression = "NepaliDateConverter.todayNepaliCalendar"),
+        level = DeprecationLevel.WARNING
+    )
     val todayNepaliDate
         get() = calendarModel.today
+
+    /**
+     * @return [SimpleDate] with today's date in Nepali calendar
+     */
+    val todayNepaliSimpleDate: SimpleDate
+        get() = calendarModel.todayNepaliSimpleDate
+
+    /**
+     * @return [CustomCalendar] with today's date in Nepali calendar
+     */
+    val todayNepaliCalendar: CustomCalendar
+        get() = calendarModel.todayNepaliCalendar
 
     /**
      * Strictly adjusted to `Asia/Kathmandu` TimeZone.
      *
      * @return the current date in the English calendar as a [SimpleDate].
      */
+    val todayEnglishSimpleDate: SimpleDate
+        get() = calendarModel.todayEnglishSimpleDate
+
+    /**
+     * Strictly adjusted to `Asia/Kathmandu` TimeZone.
+     *
+     * @return the current date in the English calendar as a [CustomCalendar].
+     */
+    val todayEnglishCalendar: CustomCalendar
+        get() = calendarModel.todayEnglishCalendar
+
+    /**
+     * Strictly adjusted to `Asia/Kathmandu` TimeZone.
+     *
+     * @return the current date in the English calendar as a [SimpleDate].
+     */
+    @Deprecated(
+        "Use todayEnglishSimpleDate or todayEnglishCalendar instead",
+        replaceWith = ReplaceWith(expression = "NepaliDateConverter.todayEnglishSimpleDate"),
+        level = DeprecationLevel.WARNING
+    )
     val todayEnglishDate: SimpleDate
         get() = calendarModel.todayEnglish
 
