@@ -608,9 +608,11 @@ data class NepaliMonthCalendar(
 #### Get today's date
 ```kotlin
 // Get today's date
-val todayNepaliDate = NepaliDateConverter.todayNepaliDate
+val todayNepaliDate = NepaliDateConverter.todayNepaliSimpleDate // returns SimpleDate
+val todayNepaliCalendar = NepaliDateConverter.todayNepaliCalendar // returns CustomCalendar
 
-val todayEnglishDate = NepaliDateConverter.todayEnglishDate
+val todayEnglishDate = NepaliDateConverter.todayEnglishSimpleDate // returns SimpleDate
+val todayEnglishCalendar = NepaliDateConverter.todayEnglishCalendar // returns CustomCalendar
 ```
 
 #### Get current time
@@ -681,8 +683,8 @@ val noOfDaysBetweenTwoEnglishDates = NepaliDateConverter.getEnglishDaysInBetween
 ```kotlin
 // Format date time into ISO 2601 UTC to save date in database or have reference for other timezone calculations
 val currentTime = NepaliDateConverter.currentTime
-val todayEnglishDate = NepaliDateConverter.todayEnglishDate
-val todayNepaliDate = NepaliDateConverter.todayNepaliDate
+val todayEnglishDate = NepaliDateConverter.todayEnglishSimpleDate
+val todayNepaliDate = NepaliDateConverter.todayNepaliCalendar
 
 val formattedEnglishDate = NepaliDateConverter.formatEnglishDateNepaliTimeToIsoFormat(todayEnglishDate, currentTime) // returns "2024-09-09T23:22:21Z"
 val formattedNepaliDate = NepaliDateConverter.formatNepaliDateTimeToIsoFormat(todayNepaliDate.toSimpleDate(), currentTime) // returns "2024-09-09T23:22:21Z"
@@ -704,8 +706,8 @@ val englishMonthName = NepaliDateConverter.getEnglishMonthName(6, NameFormat.FUL
 ```kotlin
 // Format date to make ready for UI
 val currentTime = NepaliDateConverter.currentTime
-val todayEnglishDate = NepaliDateConverter.todayEnglishDate
-val todayNepaliDate = NepaliDateConverter.todayNepaliDate
+val todayEnglishDate = NepaliDateConverter.todayEnglishSimpleDate
+val todayNepaliDate = NepaliDateConverter.todayNepaliCalendar
 
 val customFormatLocale = NepaliDateLocale(
     language = NepaliDatePickerLang.NEPALI,
