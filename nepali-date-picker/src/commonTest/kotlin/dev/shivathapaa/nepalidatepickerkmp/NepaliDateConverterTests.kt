@@ -889,4 +889,23 @@ class NepaliDateConverterTest {
         assertEquals(nepaliCalendarForStartWeekdayUsingEnglishDate, nepaliCalendarForStartWeekdayUsingNepaliDate)
         assertEquals(nepaliCalendarForEndYearStartWeekDayUsingEnglishDate, nepaliCalendarForEndYearStartWeekDayUsingNepaliDate)
     }
+
+    @Test
+    fun compareTodayDateAndCalendar_UseNewTodayDateAndCalendarFunctions_GetSameDates() {
+        val modelTodayNepaliCalendar = calendarModel.todayNepaliCalendar
+
+        val todayNepaliDate = NepaliDateConverter.todayNepaliSimpleDate
+        val todayNepaliCalendar = NepaliDateConverter.todayNepaliCalendar
+
+        assertEquals(modelTodayNepaliCalendar, todayNepaliCalendar)
+        assertEquals(todayNepaliDate, todayNepaliCalendar.toSimpleDate())
+
+        val modelTodayEnglishCalendar = calendarModel.todayEnglishCalendar
+
+        val todayEnglishDate = NepaliDateConverter.todayEnglishSimpleDate
+        val todayEnglishCalendar = NepaliDateConverter.todayEnglishCalendar
+
+        assertEquals(todayEnglishCalendar, modelTodayEnglishCalendar)
+        assertEquals(todayEnglishDate, todayEnglishCalendar.toSimpleDate())
+    }
 }
