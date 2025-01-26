@@ -84,7 +84,7 @@ mavenPublishing {
     coordinates(
         groupId = "io.github.shivathapaa",
         artifactId = "nepali-date-picker",
-        version = "2.2.6"
+        version = "2.3.0"
     )
 
     configure(
