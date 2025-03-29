@@ -8,8 +8,8 @@ build/
 # Local configuration file (sdk path, etc)
 local.properties
 
-# For privates
-gradle.properties
+## For privates
+#gradle.properties
 
 # Log/OS Files
 *.log
