@@ -1,11 +1,11 @@
 [versions]
 agp = "8.7.2"
-kotlin = "2.1.0"
+kotlin = "2.1.20"
 compose-plugin = "1.7.3"
 android-minSdk = "21"
 android-compileSdk = "35"
-kotlinxDatetime = "0.6.1"
-mavenPublish = "0.30.0"
+kotlinxDatetime = "0.6.2"
+mavenPublish = "0.31.0"
 
 [libraries]
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
