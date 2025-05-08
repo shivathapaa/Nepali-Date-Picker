@@ -59,6 +59,7 @@ kotlin {
                 implementation(compose.ui)
                 implementation(compose.material3)
                 implementation(libs.kotlinx.datetime)
+                implementation(libs.material.icons.core)
             }
         }
 
@@ -84,7 +85,7 @@ mavenPublishing {
     coordinates(
         groupId = "io.github.shivathapaa",
         artifactId = "nepali-date-picker",
-        version = "2.3.1"
+        version = "2.3.2"
     )
 
     configure(
