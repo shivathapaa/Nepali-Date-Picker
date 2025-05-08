@@ -71,7 +71,6 @@ import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import dev.shivathapaa.nepalidatepickerkmp.annotations.ExperimentalNepaliDatePickerApi
 import dev.shivathapaa.nepalidatepickerkmp.calendar_model.NepaliCalendarModel
 import dev.shivathapaa.nepalidatepickerkmp.calendar_model.NepaliDatePickerColors
 import dev.shivathapaa.nepalidatepickerkmp.calendar_model.NepaliDatePickerDefaults
@@ -113,7 +112,6 @@ import kotlinx.coroutines.launch
  * @see NepaliDateRangePicker
  * @see NepaliDateRangePickerWithEnglishDate
  */
-@ExperimentalNepaliDatePickerApi
 @Composable
 fun NepaliDatePickerWithEnglishDate(
     state: NepaliDatePickerState,
@@ -149,17 +147,17 @@ fun NepaliDatePickerWithEnglishDate(
         title = title,
         headline = headline,
         modeToggleButton =
-        if (showModeToggle) {
-            {
-                NepaliDisplayModeToggleButton(
-                    modifier = Modifier.padding(NepaliDatePickerModeTogglePadding),
-                    displayMode = state.displayMode,
-                    onDisplayModeChange = { displayMode -> state.displayMode = displayMode },
-                )
-            }
-        } else {
-            null
-        },
+            if (showModeToggle) {
+                {
+                    NepaliDisplayModeToggleButton(
+                        modifier = Modifier.padding(NepaliDatePickerModeTogglePadding),
+                        displayMode = state.displayMode,
+                        onDisplayModeChange = { displayMode -> state.displayMode = displayMode },
+                    )
+                }
+            } else {
+                null
+            },
         colors = colors,
         headerMinHeight = HeaderContainerHeight
     ) {

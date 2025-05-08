@@ -241,7 +241,6 @@ object NepaliDatePickerDefaults {
         )
     }
 
-    @ExperimentalNepaliDatePickerApi
     @Composable
     internal fun NepaliDatePickerHeadlineWithEnglishDate(
         selectedDate: CustomCalendar?,
@@ -632,7 +631,8 @@ class NepaliDatePickerColors(
         dayInSelectionRangeContentColor: Color = this.dayInSelectionRangeContentColor,
         dividerColor: Color = this.dividerColor,
         dateTextFieldColors: TextFieldColors? = this.dateTextFieldColors
-    ) = NepaliDatePickerColors(containerColor.takeOrElse { this.containerColor },
+    ) = NepaliDatePickerColors(
+        containerColor.takeOrElse { this.containerColor },
         titleContentColor.takeOrElse { this.titleContentColor },
         headlineContentColor.takeOrElse { this.headlineContentColor },
         weekdayContentColor.takeOrElse { this.weekdayContentColor },
