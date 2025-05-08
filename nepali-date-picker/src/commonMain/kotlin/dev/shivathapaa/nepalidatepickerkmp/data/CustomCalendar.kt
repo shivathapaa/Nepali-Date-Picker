@@ -123,6 +123,20 @@ data class NepaliMonthCalendar(
 }
 
 /**
+ * A data holder representing a [CustomCalendar] and [SimpleTime].
+ *
+ * Combines a [CustomCalendar] instance (representing the calendar) and a [SimpleTime] instance (representing the time).
+ *
+ * @property customCalendar The custom calendar represented by [CustomCalendar].
+ * @property simpleTime The corresponding time of day represented by [SimpleTime].
+ */
+@Immutable
+data class CustomDateTime(
+    val customCalendar: CustomCalendar,
+    val simpleTime: SimpleTime
+)
+
+/**
  * Converts a [CustomCalendar] object to a [SimpleDate] object.
  *
  * This function extracts the year, month, and day of the month from the [CustomCalendar]

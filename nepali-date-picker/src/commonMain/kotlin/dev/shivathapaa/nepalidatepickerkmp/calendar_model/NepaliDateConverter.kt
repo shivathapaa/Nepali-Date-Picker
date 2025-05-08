@@ -19,6 +19,7 @@ package dev.shivathapaa.nepalidatepickerkmp.calendar_model
 import androidx.compose.runtime.Immutable
 import dev.shivathapaa.nepalidatepickerkmp.NepaliSelectableDates
 import dev.shivathapaa.nepalidatepickerkmp.data.CustomCalendar
+import dev.shivathapaa.nepalidatepickerkmp.data.CustomDateTime
 import dev.shivathapaa.nepalidatepickerkmp.data.NameFormat
 import dev.shivathapaa.nepalidatepickerkmp.data.NepaliDateLocale
 import dev.shivathapaa.nepalidatepickerkmp.data.NepaliDatePickerLang
@@ -620,6 +621,61 @@ object NepaliDateConverter {
         time: SimpleTime = currentTime
     ): String {
         return calendarModel.formatEnglishDateNepaliTimeToIsoFormat(englishDate, time)
+    }
+
+    /**
+     * Converts ISO 8601 UTC format to [CustomDateTime] which represents the Nepali [CustomCalendar] and Nepali [SimpleTime].
+     *
+     * @param isoDateTime The ISO 8601 format string
+     * Examples of the ISO 8601 format dateTime:
+     * - `2020-08-30T18:43:00Z`
+     * - `2020-08-30T18:43:00.50Z`
+     * - `2020-08-30T18:43:00.123456789Z`
+     * - `2020-08-30T18:40:00+03:00`
+     * - `2020-08-30T18:40:00+03:30:20`
+     * * `2020-01-01T23:59:59.123456789+01`
+     * * `+02020-01-31T23:59:59Z`
+     *
+     *
+     * @return [CustomDateTime] which represents the Nepali [CustomCalendar] and Nepali [SimpleTime]
+     *
+     * @throws IllegalArgumentException if the isoDateTime text cannot be parsed or the date boundaries are exceeded.
+     *
+     * Example:
+     * ```
+     * val customNepaliDateTime = NepaliDateConverter.getNepaliDateTimeFromIsoFormat("2024-09-09T09:00:15Z)
+     * println(customNepaliDateTime)  // Outputs: CustomDateTime(customCalendar = CustomCalendar(..), simpleTime = SimpleTime(..))
+     * ```
+     */
+    fun getNepaliDateTimeFromIsoFormat(isoDateTime: String): CustomDateTime {
+        return calendarModel.getNepaliDateTimeFromIsoFormat(isoDateTime)
+    }
+
+    /**
+     * Converts ISO 8601 UTC format to [CustomDateTime] which represents the English [CustomCalendar] and Nepali [SimpleTime].
+     *
+     * @param isoDateTime The ISO 8601 format string
+     * Examples of the ISO 8601 format dateTime:
+     * - `2020-08-30T18:43:00Z`
+     * - `2020-08-30T18:43:00.50Z`
+     * - `2020-08-30T18:43:00.123456789Z`
+     * - `2020-08-30T18:40:00+03:00`
+     * - `2020-08-30T18:40:00+03:30:20`
+     * * `2020-01-01T23:59:59.123456789+01`
+     * * `+02020-01-31T23:59:59Z`
+     *
+     * @return [CustomDateTime] which represents the English [CustomCalendar] and Nepali [SimpleTime]
+     *
+     * @throws IllegalArgumentException if the isoDateTime text cannot be parsed or the date boundaries are exceeded.
+     *
+     * Example:
+     * ```
+     * val customEnglishDateTime = NepaliDateConverter.getEnglishDateNepaliTimeFromIsoFormat("2024-09-09T09:00:15Z)
+     * println(customEnglishDateTime)  // Outputs: CustomDateTime(customCalendar = CustomCalendar(..), simpleTime = SimpleTime(..))
+     * ```
+     */
+    fun getEnglishDateNepaliTimeFromIsoFormat(isoDateTime: String): CustomDateTime {
+        return calendarModel.getEnglishDateNepaliTimeFromIsoFormat(isoDateTime)
     }
 
     /**
