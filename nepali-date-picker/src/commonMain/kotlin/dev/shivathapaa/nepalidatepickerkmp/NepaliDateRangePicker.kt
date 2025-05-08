@@ -146,17 +146,17 @@ fun NepaliDateRangePicker(
         title = title,
         headline = headline,
         modeToggleButton =
-        if (showModeToggle) {
-            {
-                NepaliDisplayModeToggleButton(
-                    modifier = Modifier.padding(NepaliDatePickerModeTogglePadding),
-                    displayMode = state.displayMode,
-                    onDisplayModeChange = { displayMode -> state.displayMode = displayMode },
-                )
-            }
-        } else {
-            null
-        },
+            if (showModeToggle) {
+                {
+                    NepaliDisplayModeToggleButton(
+                        modifier = Modifier.padding(NepaliDatePickerModeTogglePadding),
+                        displayMode = state.displayMode,
+                        onDisplayModeChange = { displayMode -> state.displayMode = displayMode },
+                    )
+                }
+            } else {
+                null
+            },
         colors = colors,
         headlineTextStyle = MaterialTheme.typography.titleLarge.copy(fontSize = 21.sp),
         headerMinHeight = NepaliRangeSelectionHeaderContainerHeight - NepaliRangePickerHeaderHeightOffset,
@@ -232,10 +232,10 @@ internal fun SwitchableNepaliDateRangeEntryContent(
                 slideInVertically { height -> height } +
                         fadeIn(
                             animationSpec =
-                            tween(
-                                durationMillis = (100.0).toInt(),
-                                delayMillis = (100.0).toInt()
-                            )
+                                tween(
+                                    durationMillis = (100.0).toInt(),
+                                    delayMillis = (100.0).toInt()
+                                )
                         ) togetherWith
                         fadeOut(tween(durationMillis = (100.0).toInt())) +
                         slideOutVertically(targetOffsetY = { _ -> parallaxTarget })
@@ -246,10 +246,10 @@ internal fun SwitchableNepaliDateRangeEntryContent(
                 ) +
                         fadeIn(
                             animationSpec =
-                            tween(
-                                durationMillis = (100.0).toInt(),
-                                delayMillis = (100.0).toInt()
-                            )
+                                tween(
+                                    durationMillis = (100.0).toInt(),
+                                    delayMillis = (100.0).toInt()
+                                )
                         ) togetherWith
                         slideOutVertically(targetOffsetY = { fullHeight -> fullHeight }) +
                         fadeOut(animationSpec = tween((100.0).toInt()))
@@ -1032,15 +1032,15 @@ internal fun ContentDrawScope.drawRangeBackground(
         color = color,
         topLeft = Offset(startX, startY),
         size =
-        Size(
-            width =
-            when {
-                y1 == y2 -> endX - startX
-                isRtl -> -startX
-                else -> this.size.width - startX
-            },
-            height = itemStateLayerHeight
-        )
+            Size(
+                width =
+                    when {
+                        y1 == y2 -> endX - startX
+                        isRtl -> -startX
+                        else -> this.size.width - startX
+                    },
+                height = itemStateLayerHeight
+            )
     )
 
     if (y1 != y2) {
@@ -1058,10 +1058,10 @@ internal fun ContentDrawScope.drawRangeBackground(
             color = color,
             topLeft = Offset(topLeftX, endY),
             size =
-            Size(
-                width = if (isRtl) endX - this.size.width else endX,
-                height = itemStateLayerHeight
-            )
+                Size(
+                    width = if (isRtl) endX - this.size.width else endX,
+                    height = itemStateLayerHeight
+                )
         )
     }
 }

@@ -87,10 +87,10 @@ internal fun NepaliDateInputContent(
         onDateSelectionChange = onDateSelectionChange,
         nepaliDateInputIdentifier = NepaliDateInputIdentifier.SingleDateInput,
         nepaliDateInputValidator =
-        dateInputValidator.apply {
-            // Only need to apply the start date, as this is for a single date input.
-            currentStartDate = selectedDate
-        },
+            dateInputValidator.apply {
+                // Only need to apply the start date, as this is for a single date input.
+                currentStartDate = selectedDate
+            },
         language = language,
         colors = colors
     )
@@ -115,12 +115,12 @@ internal fun NepaliDateInputTextField(
         mutableStateOf(
             TextFieldValue(
                 text =
-                initialSelectedDate?.let { date ->
-                    val year = date.year.toString()
-                    val month = date.month.toString().padStart(2, '0')
-                    val day = date.dayOfMonth.toString().padStart(2, '0')
-                    "$year$month$day"
-                } ?: "",
+                    initialSelectedDate?.let { date ->
+                        val year = date.year.toString()
+                        val month = date.month.toString().padStart(2, '0')
+                        val day = date.dayOfMonth.toString().padStart(2, '0')
+                        "$year$month$day"
+                    } ?: "",
                 TextRange(0, 0)
             )
         )
@@ -161,26 +161,26 @@ internal fun NepaliDateInputTextField(
             }
         },
         modifier =
-        modifier
-            .padding(
-                bottom =
-                if (errorText.value.isNotBlank()) {
-                    0.dp
-                } else {
-                    NepaliDateInputTextNonErroneousBottomPadding
-                }
-            ),
+            modifier
+                .padding(
+                    bottom =
+                        if (errorText.value.isNotBlank()) {
+                            0.dp
+                        } else {
+                            NepaliDateInputTextNonErroneousBottomPadding
+                        }
+                ),
         label = label,
         placeholder = placeholder,
         supportingText = { if (errorText.value.isNotBlank()) Text(errorText.value) },
         isError = errorText.value.isNotBlank(),
         visualTransformation = DateVisualTransformation(language, calendarModel::localizeNumber),
         keyboardOptions =
-        KeyboardOptions(
-            autoCorrectEnabled = false,
-            keyboardType = KeyboardType.Number,
-            imeAction = ImeAction.Done
-        ),
+            KeyboardOptions(
+                autoCorrectEnabled = false,
+                keyboardType = KeyboardType.Number,
+                imeAction = ImeAction.Done
+            ),
         singleLine = true,
         colors = colors.dateTextFieldColors
     )

@@ -176,17 +176,17 @@ fun NepaliDatePicker(
         headline = headline,
         colors = colors,
         modeToggleButton =
-        if (showModeToggle) {
-            {
-                NepaliDisplayModeToggleButton(
-                    modifier = Modifier.padding(NepaliDatePickerModeTogglePadding),
-                    displayMode = state.displayMode,
-                    onDisplayModeChange = { displayMode -> state.displayMode = displayMode },
-                )
-            }
-        } else {
-            null
-        },
+            if (showModeToggle) {
+                {
+                    NepaliDisplayModeToggleButton(
+                        modifier = Modifier.padding(NepaliDatePickerModeTogglePadding),
+                        displayMode = state.displayMode,
+                        onDisplayModeChange = { displayMode -> state.displayMode = displayMode },
+                    )
+                }
+            } else {
+                null
+            },
         headerMinHeight = HeaderContainerHeight
     ) {
         SwitchableNepaliDateEntryContent(
@@ -334,10 +334,10 @@ internal fun SwitchableNepaliDateEntryContent(
                 slideInVertically { height -> height } +
                         fadeIn(
                             animationSpec =
-                            tween(
-                                durationMillis = (100.0).toInt(),
-                                delayMillis = (100.0).toInt()
-                            )
+                                tween(
+                                    durationMillis = (100.0).toInt(),
+                                    delayMillis = (100.0).toInt()
+                                )
                         ) togetherWith
                         fadeOut(tween(durationMillis = (100.0).toInt())) +
                         slideOutVertically(targetOffsetY = { _ -> parallaxTarget })
@@ -348,10 +348,10 @@ internal fun SwitchableNepaliDateEntryContent(
                 ) +
                         fadeIn(
                             animationSpec =
-                            tween(
-                                durationMillis = (100.0).toInt(),
-                                delayMillis = (100.0).toInt()
-                            )
+                                tween(
+                                    durationMillis = (100.0).toInt(),
+                                    delayMillis = (100.0).toInt()
+                                )
                         ) togetherWith
                         slideOutVertically(targetOffsetY = { fullHeight -> fullHeight }) +
                         fadeOut(animationSpec = tween((100.0).toInt()))
@@ -742,18 +742,19 @@ internal abstract class BaseNepaliDatePickerStateImpl(
 
     protected val calendarModel = NepaliCalendarModel(locale)
 
-    private var _displayedMonth = mutableStateOf(if (initialDisplayedMonth != null) {
-        val month = calendarModel.getNepaliMonth(
-            nepaliYear = initialDisplayedMonth.year, nepaliMonth = initialDisplayedMonth.month
-        )
-        require(yearRange.contains(month.year)) {
-            "The initial display month's year (${month.year}) is out of the years range of $yearRange."
-        }
-        month
-    } else {
-        // Set the displayed month to the current one.
-        calendarModel.today.toNepaliMonthCalendar()
-    })
+    private var _displayedMonth = mutableStateOf(
+        if (initialDisplayedMonth != null) {
+            val month = calendarModel.getNepaliMonth(
+                nepaliYear = initialDisplayedMonth.year, nepaliMonth = initialDisplayedMonth.month
+            )
+            require(yearRange.contains(month.year)) {
+                "The initial display month's year (${month.year}) is out of the years range of $yearRange."
+            }
+            month
+        } else {
+            // Set the displayed month to the current one.
+            calendarModel.today.toNepaliMonthCalendar()
+        })
 
     var displayedMonth: NepaliMonthCalendar
         get() = _displayedMonth.value
@@ -790,15 +791,16 @@ private class NepaliDatePickerStateImpl(
     /**
      * A mutable state of [CustomCalendar] that represents a selected date.
      */
-    private var _selectedDate = mutableStateOf(if (initialSelectedDate != null) {
-        val date = calendarModel.getNepaliCalendar(simpleNepaliDate = initialSelectedDate)
-        require(yearRange.contains(date.year)) {
-            "The provided initial date's year (${date.year}) is out of the years range of $yearRange."
-        }
-        date
-    } else {
-        null
-    })
+    private var _selectedDate = mutableStateOf(
+        if (initialSelectedDate != null) {
+            val date = calendarModel.getNepaliCalendar(simpleNepaliDate = initialSelectedDate)
+            require(yearRange.contains(date.year)) {
+                "The provided initial date's year (${date.year}) is out of the years range of $yearRange."
+            }
+            date
+        } else {
+            null
+        })
 
     override var selectedDate: CustomCalendar?
         get() = _selectedDate.value

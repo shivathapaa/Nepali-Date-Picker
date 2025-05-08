@@ -134,17 +134,17 @@ fun NepaliDateRangePickerWithEnglishDate(
         title = title,
         headline = headline,
         modeToggleButton =
-        if (showModeToggle) {
-            {
-                NepaliDisplayModeToggleButton(
-                    modifier = Modifier.padding(NepaliDatePickerModeTogglePadding),
-                    displayMode = state.displayMode,
-                    onDisplayModeChange = { displayMode -> state.displayMode = displayMode },
-                )
-            }
-        } else {
-            null
-        },
+            if (showModeToggle) {
+                {
+                    NepaliDisplayModeToggleButton(
+                        modifier = Modifier.padding(NepaliDatePickerModeTogglePadding),
+                        displayMode = state.displayMode,
+                        onDisplayModeChange = { displayMode -> state.displayMode = displayMode },
+                    )
+                }
+            } else {
+                null
+            },
         colors = colors,
         headlineTextStyle = MaterialTheme.typography.titleLarge.copy(fontSize = 21.sp),
         headerMinHeight = NepaliRangeSelectionHeaderContainerHeight - NepaliRangePickerHeaderHeightOffset,
