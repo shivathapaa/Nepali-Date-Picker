@@ -363,12 +363,14 @@ class DateTimeFormatterTest {
         val nepaliDate = SimpleDate(2081, 5, 24)
         val time = SimpleTime(14, 45, 15, 0)
 
-        val nepaliDateIsoFormat = NepaliDateConverter.formatNepaliDateTimeToIsoFormat(nepaliDate, time)
+        val nepaliDateIsoFormat =
+            NepaliDateConverter.formatNepaliDateTimeToIsoFormat(nepaliDate, time)
         val correctNepaliDateIsoFormat = "2024-09-09T09:00:15Z"
         assertEquals(correctNepaliDateIsoFormat, nepaliDateIsoFormat)
 
         val englishDate = SimpleDate(2024, 9, 9)
-        val englishDateIsoFormat = NepaliDateConverter.formatEnglishDateNepaliTimeToIsoFormat(englishDate, time)
+        val englishDateIsoFormat =
+            NepaliDateConverter.formatEnglishDateNepaliTimeToIsoFormat(englishDate, time)
         val correctEnglishDateIsoFormat = "2024-09-09T09:00:15Z"
         assertEquals(correctEnglishDateIsoFormat, englishDateIsoFormat)
 
@@ -376,14 +378,64 @@ class DateTimeFormatterTest {
     }
 
     @Test
+    fun convertIsoFormatToNepaliCalendarAndNepaliTime_ISO8601DateTime_GetNepaliCalendarAndNepaliTime() {
+        val customDateTimeFromIso =
+            NepaliDateConverter.getNepaliDateTimeFromIsoFormat(isoDateTime = "2024-09-09T09:00:15Z")
+        val correctNepaliCalendar =
+            NepaliDateConverter.getNepaliCalendar(nepaliYYYY = 2081, nepaliMM = 5, nepaliDD = 24)
+        val correctNepaliTime = SimpleTime(14, 45, 15, 0)
+        assertEquals(correctNepaliCalendar, customDateTimeFromIso.customCalendar)
+        assertEquals(correctNepaliTime, customDateTimeFromIso.simpleTime)
+
+        val customDateTimeFromIso2 =
+            NepaliDateConverter.getNepaliDateTimeFromIsoFormat(isoDateTime = "2020-08-30T18:43:00.123456789Z")
+        val correctNepaliCalendar2 =
+            NepaliDateConverter.getNepaliCalendar(nepaliYYYY = 2077, nepaliMM = 5, nepaliDD = 15)
+        val correctNepaliTime2 = SimpleTime(0, 28, 0, 123456789)
+        assertEquals(correctNepaliCalendar2, customDateTimeFromIso2.customCalendar)
+        assertEquals(correctNepaliTime2, customDateTimeFromIso2.simpleTime)
+    }
+
+    @Test
+    fun convertIsoFormatToEnglishCalendarAndNepaliTime_ISO8601DateTime_GetEnglishCalendarAndNepaliTime() {
+        val customDateTimeFromIso =
+            NepaliDateConverter.getEnglishDateNepaliTimeFromIsoFormat(isoDateTime = "2024-09-09T09:00:15Z")
+        val correctNepaliCalendar =
+            NepaliDateConverter.getNepaliCalendar(nepaliYYYY = 2081, nepaliMM = 5, nepaliDD = 24)
+        val correctEnglishCalendar = NepaliDateConverter.convertNepaliToEnglish(
+            nepaliYYYY = correctNepaliCalendar.year,
+            nepaliMM = correctNepaliCalendar.month,
+            nepaliDD = correctNepaliCalendar.dayOfMonth
+        )
+        val correctNepaliTime = SimpleTime(14, 45, 15, 0)
+        assertEquals(correctEnglishCalendar, customDateTimeFromIso.customCalendar)
+        assertEquals(correctNepaliTime, customDateTimeFromIso.simpleTime)
+
+        val customDateTimeFromIso2 =
+            NepaliDateConverter.getEnglishDateNepaliTimeFromIsoFormat(isoDateTime = "2020-01-01T23:59:59.123456789+01")
+        val correctNepaliCalendar2 =
+            NepaliDateConverter.getNepaliCalendar(nepaliYYYY = 2076, nepaliMM = 9, nepaliDD = 17)
+        val correctEnglishCalendar2 = NepaliDateConverter.convertNepaliToEnglish(
+            nepaliYYYY = correctNepaliCalendar2.year,
+            nepaliMM = correctNepaliCalendar2.month,
+            nepaliDD = correctNepaliCalendar2.dayOfMonth
+        )
+        val correctNepaliTime2 = SimpleTime(4, 44, 59, 123456789)
+        assertEquals(correctEnglishCalendar2, customDateTimeFromIso2.customCalendar)
+        assertEquals(correctNepaliTime2, customDateTimeFromIso2.simpleTime)
+    }
+
+    @Test
     fun formatAndCompareTimeToIsoFormat_TodayEnglishAndNepaliDate_GetSameFormattedTimeInIsoFormat() {
         val time = SimpleTime(14, 30, 15, 0)
 
         val nepaliDate = NepaliDateConverter.todayNepaliDate.toSimpleDate()
-        val nepaliDateIsoFormat = NepaliDateConverter.formatNepaliDateTimeToIsoFormat(nepaliDate, time)
+        val nepaliDateIsoFormat =
+            NepaliDateConverter.formatNepaliDateTimeToIsoFormat(nepaliDate, time)
 
         val englishDate = NepaliDateConverter.todayEnglishDate
-        val englishDateIsoFormat = NepaliDateConverter.formatEnglishDateNepaliTimeToIsoFormat(englishDate, time)
+        val englishDateIsoFormat =
+            NepaliDateConverter.formatEnglishDateNepaliTimeToIsoFormat(englishDate, time)
 
         assertEquals(nepaliDateIsoFormat, englishDateIsoFormat)
     }
@@ -397,14 +449,16 @@ class DateTimeFormatterTest {
         assertEquals(correctFormattedDate, formattedDate)
 
         val originalNepaliDate = "२०२४/०६/२१"
-        val formattedNepaliDate = NepaliDateConverter.replaceDelimiter(originalNepaliDate, newDelimiter)
+        val formattedNepaliDate =
+            NepaliDateConverter.replaceDelimiter(originalNepaliDate, newDelimiter)
         val correctFormattedNepaliDate = "२०२४-०६-२१"
         assertEquals(correctFormattedNepaliDate, formattedNepaliDate)
 
         val originalTime = "09:45 AM"
         val newDelimiterSpace = " "
         val oldDelimiter = ":"
-        val formattedTimeWithSpace = NepaliDateConverter.replaceDelimiter(originalTime, newDelimiterSpace, oldDelimiter)
+        val formattedTimeWithSpace =
+            NepaliDateConverter.replaceDelimiter(originalTime, newDelimiterSpace, oldDelimiter)
         val correctedFormattedTimeWithSpace = "09 45 AM"
         assertEquals(correctedFormattedTimeWithSpace, formattedTimeWithSpace)
     }
