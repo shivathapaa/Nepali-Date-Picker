@@ -39,7 +39,7 @@ object NepaliDateConverter {
     @Deprecated(
         message = "Use todayNepaliSimpleDate or todayNepaliCalendar instead",
         replaceWith = ReplaceWith(expression = "NepaliDateConverter.todayNepaliCalendar"),
-        level = DeprecationLevel.WARNING
+        level = DeprecationLevel.ERROR
     )
     val todayNepaliDate
         get() = calendarModel.today
@@ -80,7 +80,7 @@ object NepaliDateConverter {
     @Deprecated(
         "Use todayEnglishSimpleDate or todayEnglishCalendar instead",
         replaceWith = ReplaceWith(expression = "NepaliDateConverter.todayEnglishSimpleDate"),
-        level = DeprecationLevel.WARNING
+        level = DeprecationLevel.ERROR
     )
     val todayEnglishDate: SimpleDate
         get() = calendarModel.todayEnglish
