@@ -102,7 +102,7 @@ kotlin {
     sourceSets {
         commonMain {
             dependencies {
-                implementation("io.github.shivathapaa:nepali-date-picker:2.2.3")
+                implementation("io.github.shivathapaa:nepali-date-picker:<latest-version>")
             }
         }
     }
@@ -118,8 +118,8 @@ To add the nepali-date-picker library to your Android project, include the follo
 // Add the Compose compiler Gradle plugin to the Gradle version catalog
 [versions]
 # ...
-kotlin = "2.0.20"
-nepaliDatePickerAndroid = "2.2.3"
+kotlin = "2.1.20"
+nepaliDatePickerAndroid = "2.4.0" // Check for latest release
 
 [libraries]
 nepali-date-picker-android = { module = "io.github.shivathapaa:nepali-date-picker-android", version.ref = "nepaliDatePickerAndroid" }
@@ -602,6 +602,12 @@ data class NepaliMonthCalendar(
     val daysFromStartOfWeekToFirstOfMonth: Int = firstDayOfMonth - 1
 )
 
+ // A data holder representing a CustomCalendar and SimpleTime
+data class CustomDateTime(
+    val customCalendar: CustomCalendar,
+    val simpleTime: SimpleTime
+)
+
 // there are various extension function readily available to utilize all of them.
 ```
 
@@ -679,15 +685,26 @@ val noOfDaysBetweenTwoNepaliDates = NepaliDateConverter.getNepaliDaysInBetween(S
 val noOfDaysBetweenTwoEnglishDates = NepaliDateConverter.getEnglishDaysInBetween(SimpleDate(2009, 6, 21), SimpleDate(2500, 3, 23)) // returns 179244
 ```
 
-#### Format date time into ISO 2601 UTC to save date in database or have reference
+#### Format date time into ISO 8601 UTC to save date in database or have reference
 ```kotlin
-// Format date time into ISO 2601 UTC to save date in database or have reference for other timezone calculations
+// Format date time into ISO 8601 UTC to save date in database or have reference for other timezone calculations
 val currentTime = NepaliDateConverter.currentTime
 val todayEnglishDate = NepaliDateConverter.todayEnglishSimpleDate
 val todayNepaliDate = NepaliDateConverter.todayNepaliCalendar
 
 val formattedEnglishDate = NepaliDateConverter.formatEnglishDateNepaliTimeToIsoFormat(todayEnglishDate, currentTime) // returns "2024-09-09T23:22:21Z"
 val formattedNepaliDate = NepaliDateConverter.formatNepaliDateTimeToIsoFormat(todayNepaliDate.toSimpleDate(), currentTime) // returns "2024-09-09T23:22:21Z"
+```
+
+#### Convert ISO 8601 UTC format to CustomDateTime which represents the CustomCalendar and  SimpleTime
+```kotlin
+// Converts ISO 8601 UTC format to CustomDateTime which represents the Nepali CustomCalendar and Nepali SimpleTime
+val customNepaliDateTime = NepaliDateConverter.getNepaliDateTimeFromIsoFormat
+println(customNepaliDateTime)  // Outputs: CustomDateTime(customCalendar = CustomCalendar(..), simpleTime = SimpleTime(..))
+
+// Converts ISO 8601 UTC format to CustomDateTime which represents the English CustomCalendar and Nepali SimpleTime
+val customEnglishDateTime = NepaliDateConverter.getEnglishDateNepaliTimeFromIsoFormat("2024-09-09T09:00:15Z")
+println(customEnglishDateTime)  // Outputs: CustomDateTime(customCalendar = CustomCalendar(..), simpleTime = SimpleTime(..))
 ```
 
 #### Get names of the weekdays, and month according to your choice
