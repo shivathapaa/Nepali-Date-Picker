@@ -88,7 +88,7 @@ class DateTimeFormatterTest {
 
     @Test
     fun formatNepaliDateUsingOtherHelperFunctionOfNames_CustomCalendarDate_GetFormattedDateInString() {
-        val customCalendar = NepaliDateConverter.todayNepaliDate
+        val customCalendar = NepaliDateConverter.todayNepaliCalendar
 
         val weekDayNameInEnglish = NepaliDateConverter.getWeekdayName(
             dayOfWeek = customCalendar.dayOfWeek,
@@ -236,7 +236,7 @@ class DateTimeFormatterTest {
 
     @Test
     fun formatEnglishDateUsingOtherHelperFunctionOfNames_CustomCalendarDate_GetFormattedDateInString() {
-        val todayNepaliDate = NepaliDateConverter.todayNepaliDate
+        val todayNepaliDate = NepaliDateConverter.todayNepaliCalendar
         val customCalendar = NepaliDateConverter.convertNepaliToEnglish(
             todayNepaliDate.year,
             todayNepaliDate.month,
@@ -429,11 +429,11 @@ class DateTimeFormatterTest {
     fun formatAndCompareTimeToIsoFormat_TodayEnglishAndNepaliDate_GetSameFormattedTimeInIsoFormat() {
         val time = SimpleTime(14, 30, 15, 0)
 
-        val nepaliDate = NepaliDateConverter.todayNepaliDate.toSimpleDate()
+        val nepaliDate = NepaliDateConverter.todayNepaliCalendar.toSimpleDate()
         val nepaliDateIsoFormat =
             NepaliDateConverter.formatNepaliDateTimeToIsoFormat(nepaliDate, time)
 
-        val englishDate = NepaliDateConverter.todayEnglishDate
+        val englishDate = NepaliDateConverter.todayEnglishSimpleDate
         val englishDateIsoFormat =
             NepaliDateConverter.formatEnglishDateNepaliTimeToIsoFormat(englishDate, time)
 
