@@ -16,6 +16,7 @@
 
 import com.vanniktech.maven.publish.KotlinMultiplatform
 import com.vanniktech.maven.publish.SonatypeHost
+import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.plugin.mpp.apple.XCFramework
 
@@ -51,6 +52,23 @@ kotlin {
         }
     }
 
+    jvm()
+    macosX64()
+    macosArm64()
+
+    js(IR) {
+        browser()
+        nodejs()
+    }
+
+    @OptIn(ExperimentalWasmDsl::class)
+    wasmJs {
+        browser()
+        nodejs()
+        binaries.executable()
+        binaries.library()
+    }
+
     sourceSets {
         val commonMain by getting {
             dependencies {
@@ -66,6 +84,17 @@ kotlin {
         val commonTest by getting {
             dependencies {
                 implementation(libs.kotlin.test)
+            }
+        }
+
+        jsMain.dependencies {
+            implementation(compose.html.core)
+            implementation(npm("@js-joda/timezone", "2.3.0"))
+        }
+
+        val wasmJsMain by getting {
+            dependencies {
+                implementation(npm("@js-joda/timezone", "2.3.0"))
             }
         }
     }
