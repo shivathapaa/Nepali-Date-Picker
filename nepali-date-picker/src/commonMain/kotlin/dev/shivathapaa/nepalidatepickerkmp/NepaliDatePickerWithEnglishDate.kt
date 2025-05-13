@@ -140,7 +140,7 @@ fun NepaliDatePickerWithEnglishDate(
 ) {
     val calendarModel = NepaliCalendarModel(state.locale)
     // Because it's expensive
-    val today = calendarModel.today.toSimpleDate()
+    val today = calendarModel.todayNepaliSimpleDate
 
     NepaliDateEntryContainer(
         modifier = modifier,

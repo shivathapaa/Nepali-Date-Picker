@@ -168,7 +168,7 @@ fun NepaliDatePicker(
 ) {
     val calendarModel = NepaliCalendarModel(state.locale)
     // Because it's expensive
-    val today = calendarModel.today.toSimpleDate()
+    val today = calendarModel.todayNepaliSimpleDate
 
     NepaliDateEntryContainer(
         modifier = modifier,
@@ -753,7 +753,7 @@ internal abstract class BaseNepaliDatePickerStateImpl(
             month
         } else {
             // Set the displayed month to the current one.
-            calendarModel.today.toNepaliMonthCalendar()
+            calendarModel.todayNepaliCalendar.toNepaliMonthCalendar()
         })
 
     var displayedMonth: NepaliMonthCalendar

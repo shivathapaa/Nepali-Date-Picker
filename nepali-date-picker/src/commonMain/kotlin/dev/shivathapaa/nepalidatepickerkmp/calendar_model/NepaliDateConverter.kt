@@ -42,7 +42,7 @@ object NepaliDateConverter {
         level = DeprecationLevel.ERROR
     )
     val todayNepaliDate
-        get() = calendarModel.today
+        get() = calendarModel.todayNepaliSimpleDate
 
     /**
      * @return [SimpleDate] with today's date in Nepali calendar
@@ -83,7 +83,7 @@ object NepaliDateConverter {
         level = DeprecationLevel.ERROR
     )
     val todayEnglishDate: SimpleDate
-        get() = calendarModel.todayEnglish
+        get() = calendarModel.todayEnglishSimpleDate
 
     /**
      * Gets the current time in Kathmandu.

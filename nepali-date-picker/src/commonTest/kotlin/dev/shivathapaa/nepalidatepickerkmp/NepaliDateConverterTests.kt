@@ -450,7 +450,7 @@ class NepaliDateConverterTest {
 
     @Test
     fun getNepaliMonth_todayNepaliDate_GetSameCustomMonthAndNepaliCalendarProperties() {
-        val today = calendarModel.today
+        val today = calendarModel.todayNepaliCalendar
 
         val nepaliMonthFromSimpleDate =
             calendarModel.getNepaliCalendar(simpleNepaliDate = today.toSimpleDate())

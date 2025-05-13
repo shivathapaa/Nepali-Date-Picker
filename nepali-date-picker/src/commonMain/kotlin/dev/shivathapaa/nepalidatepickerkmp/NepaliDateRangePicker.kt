@@ -139,7 +139,7 @@ fun NepaliDateRangePicker(
     colors: NepaliDatePickerColors = NepaliDatePickerDefaults.colors()
 ) {
     val calendarModel = NepaliCalendarModel(state.locale)
-    val today = calendarModel.today.toSimpleDate()
+    val today = calendarModel.todayNepaliSimpleDate
 
     NepaliDateEntryContainer(
         modifier = modifier,
