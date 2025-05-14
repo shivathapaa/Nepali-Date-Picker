@@ -125,7 +125,7 @@ mavenPublishing {
     coordinates(
         groupId = "io.github.shivathapaa",
         artifactId = "nepali-date-picker",
-        version = "2.4.0"
+        version = "2.5.0-beta01"
     )
 
     configure(
@@ -137,7 +137,7 @@ mavenPublishing {
     // POM metadata for the published artifact
     pom {
         name.set("Nepali Date Picker KMP")
-        description.set("Nepali Date Picker for both Android and/or iOS which aligns with the Material3 Date Picker. This library give various utilities to work with Nepali Dates and acts as a bridge between Nepali Calendar and Gregorian Calendar.")
+        description.set("Nepali Date Picker for both Android and/or iOS and/or KMP (JVM, JS, Wasm) which aligns with the Material3 Date Picker. This library give various utilities to work with Nepali Dates and acts as a bridge between Nepali Calendar and Gregorian Calendar.")
         inceptionYear.set("2024")
         url.set("https://github.com/shivathapaa/Nepali-Date-Picker")
 
