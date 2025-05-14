@@ -4,7 +4,7 @@
   <img src=".github/assets/nepaliDatePickerBanner.png" alt="" width="100%">
 </p>
 
-KMP Nepali Date Picker for both Android and/or iOS which aligns with the Material3 Date Picker. This library provides UI and various utilities to work with Nepali Dates, and acts as a bridge between Nepali Calendar and Gregorian Calendar.
+KMP Nepali Date Picker for both Android and/or iOS and/or KMP (JVM, JS, Wasm) which aligns with the Material3 Date Picker. This library provides UI and various utilities to work with Nepali Dates, and acts as a bridge between Nepali Calendar and Gregorian Calendar.
 
 <br>
 
@@ -57,7 +57,7 @@ This library strictly follows `Material` (Material3) design principles. Consider
 
 If you are familiar with the Material3 Date Picker then you will find it very similar, and you can adapt it with little to no time.
 
-This library puts Nepali Calendar in light as OpenSource for developers involved in both Android and/or iOS and/or KMP.
+This library puts Nepali Calendar in light as OpenSource for developers involved in both Android and/or iOS and/or KMP (JVM, JS, Wasm).
 
 You can use this library independent to any platform or in common Kotlin Multiplatform code.
 
@@ -745,6 +745,64 @@ val englishFormattedDate = NepaliDateConverter.formatEnglishDate(todayEnglishDat
 // Format time to make ready for UI
 val formattedNepaliTime = NepaliDateConverter.getFormattedTimeInNepali(simpleTime = currentTime, use12HourFormat = true) // returns "राति १२ : ०४"
 val formattedEnglishTime = NepaliDateConverter.getFormattedTimeInEnglish(simpleTime = currentTime, use12HourFormat = false) // returns "0:04"
+```
+
+#### Format date time using a Unicode pattern
+```kotlin
+// Format time using a Unicode pattern
+val time = NepaliDateConverter.currentTime
+
+val result = NepaliDateConverter.formatTimeByUnicodePattern(
+    unicodePattern = "hh:mm:ss a",
+    time = time,
+    language = NepaliDatePickerLang.NEPALI
+) // result: "०२:४५:१५ दिउँसो"
+
+val result = NepaliDateConverter.formatTimeByUnicodePattern(
+    unicodePattern = "hh:mm:ss A",
+    time = time,
+    language = NepaliDatePickerLang.ENGLISH
+) // result: "02:45:15 AM"
+
+// Format only Nepali date using a Unicode pattern
+val nepaliCalendar = NepaliDateConverter.todayNepaliCalendar
+
+val result = NepaliDateConverter.formatNepaliDateByUnicodePattern(
+    unicodePattern = "EEEE, MMM dd yyyy",
+    calendar = nepaliCalendar,
+    language = NepaliDatePickerLang.NEPALI // use ENGLISH for english
+) // result: "सोमबार, भदौ २४ २०८१"
+
+// Format only English date using a Unicode pattern
+val englishCalendar = NepaliDateConverter.todayEnglishCalendar
+
+val result = NepaliDateConverter.formatEnglishDateByUnicodePattern(
+    unicodePattern = "E, MMM dd yyyy",
+    calendar = englishCalendar,
+    language = NepaliDatePickerLang.ENGLISH // use NEPALI for english
+) // result: "Sat, May 24 2025"
+
+// Format full Nepali date and time using a Unicode pattern
+val nepaliCalendar = NepaliDateConverter.todayNepaliCalendar
+val time = NepaliDateConverter.currentTime
+
+val result = NepaliDateConverter.formatNepaliDateTimeByUnicodePattern(
+    unicodePattern = "yyyy MMMM dd, EEEE a hh:mm:ss",
+    calendar = nepaliCalendar,
+    time = time,
+    language = NepaliDatePickerLang.NEPALI // use ENGLISH for english
+) // result: "२०८१ भदौ २४, सोमबार दिउँसो ०२:४५:१५"
+
+// Format full English date and time using a Unicode pattern
+val englishCalendar = NepaliDateConverter.todayEnglishCalendar
+val time = NepaliDateConverter.currentTime
+
+val result = NepaliDateConverter.formatEnglishDateTimeByUnicodePattern(
+    unicodePattern = "yyyy MMMM dd, EEEE hh:mm:ss A",
+    calendar = englishCalendar,
+    time = time,
+    language = NepaliDatePickerLang.ENGLISH // use NEPALI for english
+) // result: "2025 May 24, Monday 02:45:15 PM"
 ```
 
 #### Localize strings to English or Nepali
