@@ -5,14 +5,12 @@ compose-plugin = "1.8.0"
 android-minSdk = "21"
 android-compileSdk = "36"
 kotlinxDatetime = "0.6.2"
-kotlinxDatetimeZoneinfo = "2025a-spi.0.6.2"
 materialIconsCore = "1.7.3"
 mavenPublish = "0.31.0"
 
 [libraries]
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
 kotlinx-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.ref = "kotlinxDatetime" }
-kotlinx-datetime-zoneinfo = { module = "org.jetbrains.kotlinx:kotlinx-datetime-zoneinfo", version.ref = "kotlinxDatetimeZoneinfo" }
 material-icons-core = { module = "org.jetbrains.compose.material:material-icons-core", version.ref = "materialIconsCore" }
 
 [plugins]
