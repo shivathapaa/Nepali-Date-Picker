@@ -442,7 +442,7 @@ object NepaliDateConverter {
     /**
      * Formats a time based on the specified Unicode pattern and language preferences.
      *
-     * @param time An optional [SimpleTime] that holds the time details (hour, minute, second, nanosecond).
+     * @param time A [SimpleTime] that holds the time details (hour, minute, second, nanosecond).
      * @param unicodePattern A string specifying the pattern to use for formatting the date and time. The pattern supports
      *        various placeholders like "HH", "hh", "mm", "ss", "SSS", "a", etc.
      * @param language The [NepaliDatePickerLang] specifying the language for formatting the date and time.
