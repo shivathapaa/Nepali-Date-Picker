@@ -18,6 +18,12 @@ package dev.shivathapaa.nepalidatepickerkmp
 
 import dev.shivathapaa.nepalidatepickerkmp.calendar_model.NepaliDateConverter
 import dev.shivathapaa.nepalidatepickerkmp.calendar_model.NepaliDateConverter.convertToNepaliNumber
+import dev.shivathapaa.nepalidatepickerkmp.calendar_model.NepaliDateConverter.formatEnglishDateByUnicodePattern
+import dev.shivathapaa.nepalidatepickerkmp.calendar_model.NepaliDateConverter.formatEnglishDateTimeByUnicodePattern
+import dev.shivathapaa.nepalidatepickerkmp.calendar_model.NepaliDateConverter.formatNepaliDateByUnicodePattern
+import dev.shivathapaa.nepalidatepickerkmp.calendar_model.NepaliDateConverter.formatNepaliDateTimeByUnicodePattern
+import dev.shivathapaa.nepalidatepickerkmp.calendar_model.NepaliDateConverter.formatTimeByUnicodePattern
+import dev.shivathapaa.nepalidatepickerkmp.calendar_model.NepaliDateConverter.getNepaliCalendar
 import dev.shivathapaa.nepalidatepickerkmp.calendar_model.NepaliDateConverter.localizeNumber
 import dev.shivathapaa.nepalidatepickerkmp.data.NameFormat
 import dev.shivathapaa.nepalidatepickerkmp.data.NepaliDateFormatStyle
@@ -331,6 +337,235 @@ class DateTimeFormatterTest {
 
         assertEquals(correctCompatNepaliFormattedDate, toTestCompatNepaliFormattedDate)
     }
+
+    @Test
+    fun formatNepaliDateTime_FullPattern_ReturnsCorrectFormat() {
+        val testCalendar = getNepaliCalendar(nepaliYYYY = 2081, nepaliMM = 5, nepaliDD = 24)
+        // CustomCalendar(year=2081, month=5, dayOfMonth=24, era=2, firstDayOfMonth=7, lastDayOfMonth=2, totalDaysInMonth=31, dayOfWeekInMonth=4, dayOfWeek=2, dayOfYear=150, weekOfMonth=5, weekOfYear=23)
+
+        val testTime = SimpleTime(
+            hour = 14,
+            minute = 45,
+            second = 15,
+            nanosecond = 123_000_000
+        )
+
+        fun check(
+            pattern: String,
+            expected: String,
+            lang: NepaliDatePickerLang = NepaliDatePickerLang.NEPALI
+        ) {
+            val result = formatNepaliDateTimeByUnicodePattern(
+                unicodePattern = pattern,
+                calendar = testCalendar,
+                time = testTime,
+                language = lang
+            )
+            assertEquals(expected, result, "Pattern: $pattern")
+        }
+
+        check("yyyy", "२०८१")
+        check("yy", "८१")
+        check("MMMM", "भदौ")
+        check("MMM", "भ")
+        check("MM", "०५")
+        check("M", "५")
+        check("dd", "२४")
+        check("d", "२४")
+        check("D", "१५०")
+        check("w", "२३")
+
+        check("EEEE", "Monday", NepaliDatePickerLang.ENGLISH)
+        check("EEEE", "सोमबार")
+        check("E", "सोम")
+        check("EEEEE", "सो")
+
+        check("ee", "०२")
+        check("e", "२")
+
+        check("HH", "१४")
+        check("H", "१४")
+        check("hh", "०२")
+        check("h", "२")
+        check("mm", "४५")
+        check("m", "४५")
+        check("ss", "१५")
+        check("s", "१५")
+
+        check("SSSS", "१२३०")
+        check("SSS", "१२३")
+        check("SS", "१२")
+        check("S", "१")
+
+        check("a", "दिउँसो")
+        check("A", "दिउँसो")
+
+        check("yyyy-MM-dd E a hh:mm:ss", "२०८१-०५-२४ सोम दिउँसो ०२:४५:१५")
+    }
+
+    @Test
+    fun formatEnglishDateTime_FullPattern_ReturnsCorrectFormat() {
+        val testCalendar = getNepaliCalendar(nepaliYYYY = 2081, nepaliMM = 5, nepaliDD = 24)
+        // CustomCalendar(year=2081, month=5, dayOfMonth=24, era=2, firstDayOfMonth=7, lastDayOfMonth=2, totalDaysInMonth=31, dayOfWeekInMonth=4, dayOfWeek=2, dayOfYear=150, weekOfMonth=5, weekOfYear=23)
+
+        val testTime = SimpleTime(
+            hour = 14,
+            minute = 45,
+            second = 15,
+            nanosecond = 123_000_000
+        )
+
+        fun check(pattern: String, expected: String) {
+            val result = formatEnglishDateTimeByUnicodePattern(
+                unicodePattern = pattern,
+                calendar = testCalendar,
+                time = testTime
+            )
+            assertEquals(expected, result, "Pattern: $pattern")
+        }
+
+        check("yyyy", "2081")
+        check("yy", "81")
+        check("MMMM", "May")
+        check("MMM", "May")
+        check("MM", "05")
+        check("M", "5")
+        check("dd", "24")
+        check("d", "24")
+        check("D", "150")
+        check("w", "23")
+
+        check("EEEE", "Monday")
+        check("E", "Mon")
+        check("EEEEE", "M")
+
+        check("ee", "02")
+        check("e", "2")
+
+        check("HH", "14")
+        check("H", "14")
+        check("hh", "02")
+        check("h", "2")
+        check("mm", "45")
+        check("m", "45")
+        check("ss", "15")
+        check("s", "15")
+
+        check("SSSS", "1230")
+        check("SSS", "123")
+        check("SS", "12")
+        check("S", "1")
+
+        check("a", "pm")
+        check("A", "PM")
+
+        check("yyyy-MM-dd E A hh:mm:ss", "2081-05-24 Mon PM 02:45:15")
+    }
+
+    @Test
+    fun formatDateTime_MidnightAndEndOfDay_CorrectFormat() {
+        val calendar = getNepaliCalendar(2081, 1, 1)
+
+        val midnight = SimpleTime(0, 0, 0, 0)
+        val endOfDay = SimpleTime(23, 59, 59, 999000000)
+
+        fun check(time: SimpleTime, expected: String) {
+            val result = formatEnglishDateTimeByUnicodePattern("HH:mm:ss.SSS a", calendar, time)
+            assertEquals(expected, result)
+        }
+
+        check(midnight, "00:00:00.000 am")
+        check(endOfDay, "23:59:59.999 pm")
+    }
+
+    @Test
+    fun formatDateTime_EmptyPattern_ReturnsEmptyString() {
+        val calendar = getNepaliCalendar(2081, 1, 1)
+        val result = formatEnglishDateTimeByUnicodePattern("", calendar)
+        assertEquals("", result)
+    }
+
+    @Test
+    fun formatDateTime_UnsupportedTokens_IgnoresThem() {
+        val calendar = getNepaliCalendar(2081, 1, 1)
+        val pattern = "yyyy-MM-XX HH:mm:ss ??"
+        val result =
+            formatEnglishDateTimeByUnicodePattern(pattern, calendar, SimpleTime(10, 30, 0, 0))
+        assertEquals("2081-01-XX 10:30:00 ??", result)
+    }
+
+    @Test
+    fun formatDateTime_AllTokensMixed_ReturnsCompleteFormat() {
+        val calendar = getNepaliCalendar(2081, 5, 24)
+        val time = SimpleTime(14, 45, 15, 123000000)
+
+        val pattern =
+            "yyyy yy MMMM MMM MM M dd d D EEEE E EEEEE ee e w HH H hh h mm m ss s SSSS SSS SS S a A"
+        val expected =
+            "2081 81 May May 05 5 24 24 150 Monday Mon M 02 2 23 14 14 02 2 45 45 15 15 1230 123 12 1 pm PM"
+
+        val result = formatEnglishDateTimeByUnicodePattern(pattern, calendar, time)
+        assertEquals(expected, result)
+    }
+
+    @Test
+    fun formatNepaliDateTime_AllTokensMixed_ReturnsCompleteFormat() {
+        val calendar = getNepaliCalendar(2081, 5, 24)
+        val time = SimpleTime(14, 45, 15, 123000000)
+
+        val pattern =
+            "yyyy yy MMMM MMM MM M dd d D EEEE E EEEEE ee e w HH H hh h mm m ss s SSSS SSS SS S a A"
+        val expected =
+            "२०८१ ८१ भदौ भ ०५ ५ २४ २४ १५० सोमबार सोम सो ०२ २ २३ १४ १४ ०२ २ ४५ ४५ १५ १५ १२३० १२३ १२ १ दिउँसो दिउँसो"
+
+        val result = formatNepaliDateTimeByUnicodePattern(pattern, calendar, time)
+        assertEquals(expected, result, "Pattern: $pattern")
+    }
+
+    @Test
+    fun formatOnlyDate_EnglishAndNepali() {
+        val calendar = getNepaliCalendar(2081, 5, 24)
+
+        val en = formatEnglishDateByUnicodePattern("yyyy-MM-dd", calendar)
+        val np = formatNepaliDateByUnicodePattern("yyyy-MM-dd", calendar)
+
+        assertEquals("2081-05-24", en)
+        assertEquals("२०८१-०५-२४", np)
+    }
+
+    @Test
+    fun formatOnlyTime_AM_PM_LanguageSensitive() {
+        val morning = SimpleTime(9, 5, 3, 45000000)
+        val night = SimpleTime(22, 30, 0, 0)
+
+        assertEquals(
+            "09:05:03 am",
+            formatTimeByUnicodePattern("hh:mm:ss a", morning, NepaliDatePickerLang.ENGLISH)
+        )
+        assertEquals(
+            "१०:३०:०० राति",
+            formatTimeByUnicodePattern("hh:mm:ss a", night, NepaliDatePickerLang.NEPALI)
+        )
+    }
+
+    @Test
+    fun formatAmPm_LanguageDifference() {
+        val morning = SimpleTime(5, 0, 0, 0)
+        val evening = SimpleTime(18, 0, 0, 0)
+
+        assertEquals("am", formatTimeByUnicodePattern("a", morning, NepaliDatePickerLang.ENGLISH))
+        assertEquals("pm", formatTimeByUnicodePattern("a", evening, NepaliDatePickerLang.ENGLISH))
+
+        assertEquals("बिहान", formatTimeByUnicodePattern("a", morning, NepaliDatePickerLang.NEPALI))
+        assertEquals("साँझ", formatTimeByUnicodePattern("a", evening, NepaliDatePickerLang.NEPALI))
+
+        assertEquals("AM", formatTimeByUnicodePattern("A", morning, NepaliDatePickerLang.ENGLISH))
+        assertEquals("PM", formatTimeByUnicodePattern("A", evening, NepaliDatePickerLang.ENGLISH))
+
+        assertEquals("बिहान", formatTimeByUnicodePattern("A", morning, NepaliDatePickerLang.NEPALI))
+        assertEquals("साँझ", formatTimeByUnicodePattern("A", evening, NepaliDatePickerLang.NEPALI))
+    }
+
 
     @Test
     fun formatTimeInEnglish_RandomSimpleTime_GetFormattedTimeInEnglish() {
