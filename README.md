@@ -1,4 +1,4 @@
-# Nepali-Date-Picker (Android and/or iOS) - KMP
+# Nepali-Date-Picker (Android and/or iOS) - KMP (JVM, JS, Wasm)
 
 <p align="center">
   <img src=".github/assets/nepaliDatePickerBanner.png" alt="" width="100%">
@@ -119,7 +119,7 @@ To add the nepali-date-picker library to your Android project, include the follo
 [versions]
 # ...
 kotlin = "2.1.20"
-nepaliDatePickerAndroid = "2.4.0" // Check for latest release
+nepaliDatePickerAndroid = "2.5.0-beta01" // Check for latest release
 
 [libraries]
 nepali-date-picker-android = { module = "io.github.shivathapaa:nepali-date-picker-android", version.ref = "nepaliDatePickerAndroid" }
