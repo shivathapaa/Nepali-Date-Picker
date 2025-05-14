@@ -511,8 +511,8 @@ object NepaliDateConverter {
      * - `w`: Week of the year (e.g., "23" or "२३")
      *
      * - `EEEE`: Full weekday name (e.g., "Monday" or "सोमबार")
-     * - `E`: Medium weekday name (e.g., "M" or "सो")
-     * - `EEEEE`: Small weekday name, if defined (e.g., "M" or "स")
+     * - `E`: Medium weekday name (e.g., "Mon" or "सोम")
+     * - `EEEEE`: Short weekday name, if defined (e.g., "M" or "स")
      * - `ee`: Two-digit day of week (e.g., "02" or "०२")
      * - `e`: Day of week, no padding (e.g., "2" or "२")
      *
@@ -561,8 +561,8 @@ object NepaliDateConverter {
      * - `w`: Week of the year (e.g., "23" or "२३")
      *
      * - `EEEE`: Full weekday name (e.g., "Monday" or "सोमबार")
-     * - `E`: Medium weekday name (e.g., "M" or "सो")
-     * - `EEEEE`: Small weekday name, if defined (e.g., "M" or "स")
+     * - `E`: Medium weekday name (e.g., "Mon" or "सोम")
+     * - `EEEEE`: Short weekday name, if defined (e.g., "M" or "स")
      * - `ee`: Two-digit day of week (e.g., "02" or "०२")
      * - `e`: Day of week, no padding (e.g., "2" or "२")
      *
@@ -613,8 +613,8 @@ object NepaliDateConverter {
      * - `w`: Week of the year (e.g., "23" or "२३")
      *
      * - `EEEE`: Full weekday name (e.g., "Monday" or "सोमबार")
-     * - `E`: Medium weekday name (e.g., "M" or "सो")
-     * - `EEEEE`: Small weekday name, if defined (e.g., "M" or "स")
+     * - `E`: Medium weekday name (e.g., "Mon" or "सोम")
+     * - `EEEEE`: Short weekday name, if defined (e.g., "M" or "स")
      * - `ee`: Two-digit day of week (e.g., "02" or "०२")
      * - `e`: Day of week, no padding (e.g., "2" or "२")
      *
