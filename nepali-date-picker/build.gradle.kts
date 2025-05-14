@@ -69,6 +69,9 @@ kotlin {
         binaries.library()
     }
 
+    @OptIn(ExperimentalWasmDsl::class)
+    wasmWasi()
+
     sourceSets {
         val commonMain by getting {
             dependencies {
@@ -87,14 +90,22 @@ kotlin {
             }
         }
 
-        jsMain.dependencies {
-            implementation(compose.html.core)
-            implementation(npm("@js-joda/timezone", "2.3.0"))
+        val jsMain by getting {
+            dependencies {
+                implementation(compose.html.core)
+                implementation(npm("@js-joda/timezone", "2.3.0"))
+            }
         }
 
         val wasmJsMain by getting {
             dependencies {
                 implementation(npm("@js-joda/timezone", "2.3.0"))
+            }
+        }
+
+        val wasmWasiMain by getting {
+            dependencies {
+                implementation(libs.kotlinx.datetime.zoneinfo)
             }
         }
     }
