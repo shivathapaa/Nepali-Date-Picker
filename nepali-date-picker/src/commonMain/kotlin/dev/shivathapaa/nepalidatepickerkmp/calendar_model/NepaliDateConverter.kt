@@ -440,6 +440,303 @@ object NepaliDateConverter {
     }
 
     /**
+     * Formats a time based on the specified Unicode pattern and language preferences.
+     *
+     * @param time An optional [SimpleTime] that holds the time details (hour, minute, second, nanosecond).
+     * @param unicodePattern A string specifying the pattern to use for formatting the date and time. The pattern supports
+     *        various placeholders like "HH", "hh", "mm", "ss", "SSS", "a", etc.
+     * @param language The [NepaliDatePickerLang] specifying the language for formatting the date and time.
+     *
+     * @return A string representing the formatted time according to the provided Unicode pattern and language preferences.
+     *
+     * The function supports the following placeholders in the [unicodePattern]:
+     * - `HH`: Hour in 24-hour format (00–23) (e.g., "08" or "०८")
+     * - `H`: Hour in 24-hour format, no padding (e.g., "8" or "८")
+     * - `hh`: Hour in 12-hour format (01–12) (e.g., "01" or "०१")
+     * - `h`: Hour in 12-hour format, no padding (e.g., "1" or "१")
+     * - `mm`: Minutes, two-digit (e.g., "05" or "०५")
+     * - `m`: Minutes, no padding (e.g., "5" or "५")
+     * - `ss`: Seconds, two-digit (e.g., "09" or "०९")
+     * - `s`: Seconds, no padding (e.g., "9" or "९")
+     *
+     * - `SSSS`: Four-digit nanosecond precision (e.g., "1234" or "१२३४")
+     * - `SSS`: Millisecond precision (e.g., "123" or "१२३")
+     * - `SS`: Two-digit fractional seconds (e.g., "12" or "१२")
+     * - `S`: One-digit fractional second (e.g., "1" or "१")
+     *
+     * - `a`: Lowercase AM/PM or localized period (e.g., "am" or "बिहान")
+     * - `A`: Uppercase AM/PM or localized period (e.g., "AM" or "साँझ")
+     *
+     * Example usage:
+     * ```
+     * val time = SimpleTime(hour = 15, minute = 30, second = 45, nanosecond = 123)
+     * val formattedTime = formatTimeByUnicodePattern(
+     *     calendar,
+     *     time,
+     *     "hh:mm:ss.SSS A"
+     * )
+     * // formattedTime: "03:30:45.123 PM"
+     * ```
+     */
+    fun formatTimeByUnicodePattern(
+        unicodePattern: String,
+        time: SimpleTime,
+        language: NepaliDatePickerLang = NepaliDatePickerLang.ENGLISH
+    ): String = calendarModel.formatTimeByUnicodePattern(
+        unicodePattern = unicodePattern,
+        time = time,
+        language = language
+    )
+
+    /**
+     * Formats an English date based on the specified Unicode pattern and language preferences.
+     *
+     * @param calendar A [CustomCalendar] representing the date.
+     * @param unicodePattern A string specifying the pattern to use for formatting the date and time. The pattern supports
+     *        various placeholders like "yyyy", "MM", "dd", "D", "w", "E", etc.
+     * @param language The [NepaliDatePickerLang] specifying the language for formatting the date and time.
+     *
+     * @return A string representing the formatted date according to the provided Unicode pattern and language preferences.
+     *
+     * The function supports the following placeholders in the [unicodePattern]:
+     * - `yyyy`: Four-digit year (e.g., "2025" or "२०२५")
+     * - `yy`: Two-digit year (e.g., "25" or "२५")
+     * - `MMMM`: Full month name (e.g., "January" or "जनवरी")
+     * - `MMM`: Abbreviated month name (e.g., "Jan" or "जन")
+     * - `MM`: Two-digit month (e.g., "01" or "०१")
+     * - `M`: Month number, no padding (e.g., "1" or "१")
+     * - `dd`: Two-digit day of month (e.g., "04" or "०४")
+     * - `d`: Day of month, no padding (e.g., "4" or "४")
+     * - `D`: Day of the year (1–366) (e.g., "123" or "१२३")
+     * - `w`: Week of the year (e.g., "23" or "२३")
+     *
+     * - `EEEE`: Full weekday name (e.g., "Monday" or "सोमबार")
+     * - `E`: Medium weekday name (e.g., "M" or "सो")
+     * - `EEEEE`: Small weekday name, if defined (e.g., "M" or "स")
+     * - `ee`: Two-digit day of week (e.g., "02" or "०२")
+     * - `e`: Day of week, no padding (e.g., "2" or "२")
+     *
+     * Example usage:
+     * ```
+     * val calendar = CustomCalendar(year = 2025, month = 5, dayOfMonth = 14, dayOfWeek = 3,...)
+     * val formattedDateTime = formatEnglishDateByUnicodePattern(
+     *     "yyyy-MM-dd EEEE",
+     *     calendar,
+     *     NepaliDatePickerLang.ENGLISH
+     * )
+     * // formattedDateTime: "2025-05-14 Tuesday"
+     * ```
+     */
+    fun formatEnglishDateByUnicodePattern(
+        unicodePattern: String,
+        calendar: CustomCalendar,
+        language: NepaliDatePickerLang = NepaliDatePickerLang.ENGLISH
+    ): String = calendarModel.formatEnglishDateByUnicodePattern(
+        unicodePattern = unicodePattern,
+        calendar = calendar,
+        language = language
+    )
+
+    /**
+     * Formats a Nepali date based on the specified Unicode pattern and language preferences.
+     *
+     * @param calendar A [CustomCalendar] representing the date.
+     * @param unicodePattern A string specifying the pattern to use for formatting the date and time. The pattern supports
+     *        various placeholders like "yyyy", "MM", "dd", "D", "E", "ee", etc.
+     * @param language The [NepaliDatePickerLang] specifying the language for formatting the date and time. Defaults to
+     *        [NepaliDatePickerLang.NEPALI], which uses Nepali month and weekday names.
+     *
+     * @return A string representing the formatted date and time according to the provided Unicode pattern and language preferences.
+     *
+     * The function supports the following placeholders in the [unicodePattern]:
+     * - `yyyy`: Four-digit year (e.g., "2025" or "२०२५")
+     * - `yy`: Two-digit year (e.g., "25" or "२५")
+     * - `MMMM`: Full month name (e.g., "Baisakh" or "बैशाख")
+     * - `MMM`: Abbreviated month name (e.g., "Bai" or "बै")
+     * - `MM`: Two-digit month (e.g., "01" or "०१")
+     * - `M`: Month number, no padding (e.g., "1" or "१")
+     * - `dd`: Two-digit day of month (e.g., "04" or "०४")
+     * - `d`: Day of month, no padding (e.g., "4" or "४")
+     * - `D`: Day of the year (1–366) (e.g., "123" or "१२३")
+     * - `w`: Week of the year (e.g., "23" or "२३")
+     *
+     * - `EEEE`: Full weekday name (e.g., "Monday" or "सोमबार")
+     * - `E`: Medium weekday name (e.g., "M" or "सो")
+     * - `EEEEE`: Small weekday name, if defined (e.g., "M" or "स")
+     * - `ee`: Two-digit day of week (e.g., "02" or "०२")
+     * - `e`: Day of week, no padding (e.g., "2" or "२")
+     *
+     * Example usage:
+     * ```
+     * val calendar = CustomCalendar(year = 2025, month = 5, dayOfMonth = 14, dayOfWeek = 3, ...)
+     * val formattedDateTime = formatNepaliDateByUnicodePattern(
+     *     "yyyy-MM-dd EEEE",
+     *     calendar,
+     *     NepaliDatePickerLang.ENGLISH
+     * )
+     * // formattedDateTime: "2025-05-14 Tuesday"
+     * ```
+     */
+    fun formatNepaliDateByUnicodePattern(
+        unicodePattern: String,
+        calendar: CustomCalendar,
+        language: NepaliDatePickerLang = NepaliDatePickerLang.NEPALI
+    ): String = calendarModel.formatNepaliDateByUnicodePattern(
+        unicodePattern = unicodePattern,
+        calendar = calendar,
+        language = language
+    )
+
+    /**
+     * Formats an English date and time based on the specified Unicode pattern and language preferences.
+     *
+     * @param calendar A [CustomCalendar] representing the date.
+     * @param time An optional [SimpleTime] that holds the time details (hour, minute, second, nanosecond).
+     *        If not provided, the time part will be omitted in the formatted string.
+     * @param unicodePattern A string specifying the pattern to use for formatting the date and time. The pattern supports
+     *        various placeholders like "yyyy", "MM", "dd", "hh", "mm", "ss", etc.
+     * @param language The [NepaliDatePickerLang] specifying the language for formatting the date and time. Defaults to
+     *        [NepaliDatePickerLang.ENGLISH], which uses English month and weekday names.
+     *
+     * @return A string representing the formatted date and time according to the provided Unicode pattern and language preferences.
+     *
+     * The function supports the following placeholders in the [unicodePattern]:
+     * - `yyyy`: Four-digit year (e.g., "2025" or "२०२५")
+     * - `yy`: Two-digit year (e.g., "25" or "२५")
+     * - `MMMM`: Full month name (e.g., "January" or "जनवरी")
+     * - `MMM`: Abbreviated month name (e.g., "Jan" or "जन")
+     * - `MM`: Two-digit month (e.g., "01" or "०१")
+     * - `M`: Month number, no padding (e.g., "1" or "१")
+     * - `dd`: Two-digit day of month (e.g., "04" or "०४")
+     * - `d`: Day of month, no padding (e.g., "4" or "४")
+     * - `D`: Day of the year (1–366) (e.g., "123" or "१२३")
+     * - `w`: Week of the year (e.g., "23" or "२३")
+     *
+     * - `EEEE`: Full weekday name (e.g., "Monday" or "सोमबार")
+     * - `E`: Medium weekday name (e.g., "M" or "सो")
+     * - `EEEEE`: Small weekday name, if defined (e.g., "M" or "स")
+     * - `ee`: Two-digit day of week (e.g., "02" or "०२")
+     * - `e`: Day of week, no padding (e.g., "2" or "२")
+     *
+     * - `HH`: Hour in 24-hour format (00–23) (e.g., "08" or "०८")
+     * - `H`: Hour in 24-hour format, no padding (e.g., "8" or "८")
+     * - `hh`: Hour in 12-hour format (01–12) (e.g., "01" or "०१")
+     * - `h`: Hour in 12-hour format, no padding (e.g., "1" or "१")
+     * - `mm`: Minutes, two-digit (e.g., "05" or "०५")
+     * - `m`: Minutes, no padding (e.g., "5" or "५")
+     * - `ss`: Seconds, two-digit (e.g., "09" or "०९")
+     * - `s`: Seconds, no padding (e.g., "9" or "९")
+     *
+     * - `SSSS`: Four-digit nanosecond precision (e.g., "1234" or "१२३४")
+     * - `SSS`: Millisecond precision (e.g., "123" or "१२३")
+     * - `SS`: Two-digit fractional seconds (e.g., "12" or "१२")
+     * - `S`: One-digit fractional second (e.g., "1" or "१")
+     *
+     * - `a`: Lowercase AM/PM or localized period (e.g., "am" or "बिहान")
+     * - `A`: Uppercase AM/PM or localized period (e.g., "AM" or "साँझ")
+     *
+     * Example usage:
+     * ```
+     * val calendar = CustomCalendar(year = 2025, month = 5, dayOfMonth = 14, dayOfWeek = 3,...)
+     * val time = SimpleTime(hour = 15, minute = 30, second = 45, nanosecond = 123)
+     * val formattedDateTime = formatEnglishDateTimeByUnicodePattern(
+     *     "yyyy-MM-dd EEEE hh:mm:ss a",
+     *     calendar,
+     *     time
+     * )
+     * // formattedDateTime: "2025-05-14 Tuesday 03:30:45 PM"
+     * ```
+     */
+    fun formatEnglishDateTimeByUnicodePattern(
+        unicodePattern: String,
+        calendar: CustomCalendar,
+        time: SimpleTime? = null,
+        language: NepaliDatePickerLang = NepaliDatePickerLang.ENGLISH
+    ): String {
+        return calendarModel.formatEnglishDateTimeByUnicodePattern(
+            unicodePattern = unicodePattern,
+            calendar = calendar,
+            time = time,
+            language = language
+        )
+    }
+
+    /**
+     * Formats a Nepali date and time based on the specified Unicode pattern and language preferences.
+     *
+     * @param calendar A [CustomCalendar] representing the date.
+     * @param time An optional [SimpleTime] that holds the time details (hour, minute, second, nanosecond).
+     *        If not provided, the time part will be omitted in the formatted string.
+     * @param unicodePattern A string specifying the pattern to use for formatting the date and time. The pattern supports
+     *        various placeholders like "yyyy", "MM", "dd", "hh", "mm", "ss", etc.
+     * @param language The [NepaliDatePickerLang] specifying the language for formatting the date and time. Defaults to
+     *        [NepaliDatePickerLang.NEPALI], which uses Nepali month and weekday names.
+     *
+     * @return A string representing the formatted date and time according to the provided Unicode pattern and language preferences.
+     *
+     * The function supports the following placeholders in the [unicodePattern]:
+     * - `yyyy`: Four-digit year (e.g., "2025" or "२०२५")
+     * - `yy`: Two-digit year (e.g., "25" or "२५")
+     * - `MMMM`: Full month name (e.g., "Baisakh" or "बैशाख")
+     * - `MMM`: Abbreviated month name (e.g., "Bai" or "बै")
+     * - `MM`: Two-digit month (e.g., "01" or "०१")
+     * - `M`: Month number, no padding (e.g., "1" or "१")
+     * - `dd`: Two-digit day of month (e.g., "04" or "०४")
+     * - `d`: Day of month, no padding (e.g., "4" or "४")
+     * - `D`: Day of the year (1–366) (e.g., "123" or "१२३")
+     * - `w`: Week of the year (e.g., "23" or "२३")
+     *
+     * - `EEEE`: Full weekday name (e.g., "Monday" or "सोमबार")
+     * - `E`: Medium weekday name (e.g., "M" or "सो")
+     * - `EEEEE`: Small weekday name, if defined (e.g., "M" or "स")
+     * - `ee`: Two-digit day of week (e.g., "02" or "०२")
+     * - `e`: Day of week, no padding (e.g., "2" or "२")
+     *
+     * - `HH`: Hour in 24-hour format (00–23) (e.g., "08" or "०८")
+     * - `H`: Hour in 24-hour format, no padding (e.g., "8" or "८")
+     * - `hh`: Hour in 12-hour format (01–12) (e.g., "01" or "०१")
+     * - `h`: Hour in 12-hour format, no padding (e.g., "1" or "१")
+     * - `mm`: Minutes, two-digit (e.g., "05" or "०५")
+     * - `m`: Minutes, no padding (e.g., "5" or "५")
+     * - `ss`: Seconds, two-digit (e.g., "09" or "०९")
+     * - `s`: Seconds, no padding (e.g., "9" or "९")
+     *
+     * - `SSSS`: Four-digit nanosecond precision (e.g., "1234" or "१२३४")
+     * - `SSS`: Millisecond precision (e.g., "123" or "१२३")
+     * - `SS`: Two-digit fractional seconds (e.g., "12" or "१२")
+     * - `S`: One-digit fractional second (e.g., "1" or "१")
+     *
+     * - `a`: Lowercase AM/PM or localized period (e.g., "am" or "बिहान")
+     * - `A`: Uppercase AM/PM or localized period (e.g., "AM" or "साँझ")
+     *
+     * Example usage:
+     * ```
+     * val calendar = CustomCalendar(year = 2025, month = 5, dayOfMonth = 14, dayOfWeek = 3)
+     * val time = SimpleTime(hour = 15, minute = 30, second = 45, nanosecond = 123)
+     * val formattedDateTime = formatNepaliDateTimeByUnicodePattern(
+     *     "yyyy-MM-dd EEEE hh:mm:ss.SSS a"
+     *     calendar,
+     *     time,
+     *     NepaliDatePickerLang.ENGLISH
+     * )
+     * // formattedDateTime: "2025-05-14 Tuesday 03:30:45.123 am"
+     * ```
+     */
+    fun formatNepaliDateTimeByUnicodePattern(
+        unicodePattern: String,
+        calendar: CustomCalendar,
+        time: SimpleTime? = null,
+        language: NepaliDatePickerLang = NepaliDatePickerLang.NEPALI
+    ): String {
+        return calendarModel.formatNepaliDateTimeByUnicodePattern(
+            unicodePattern = unicodePattern,
+            calendar = calendar,
+            time = time,
+            language = language
+        )
+    }
+
+    /**
      * @param dayOfWeek takes value between 1 to 7.
      * @param format gives name of day either in short or medium or full name. i.e. Sunday, Mon, T, आईतबार, आईत, आ, etc.
      * @param language gives name of days in english or nepali. i.e. Sunday, Monday, etc. or आईतबार, सोमबार, etc.

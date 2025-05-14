@@ -24,6 +24,7 @@ import dev.shivathapaa.nepalidatepickerkmp.data.NepaliDateFormatStyle
 import dev.shivathapaa.nepalidatepickerkmp.data.NepaliDateLocale
 import dev.shivathapaa.nepalidatepickerkmp.data.NepaliDatePickerLang
 import dev.shivathapaa.nepalidatepickerkmp.data.NepaliMonthCalendar
+import dev.shivathapaa.nepalidatepickerkmp.data.NepaliMonthName
 import dev.shivathapaa.nepalidatepickerkmp.data.SimpleDate
 import dev.shivathapaa.nepalidatepickerkmp.data.SimpleTime
 import dev.shivathapaa.nepalidatepickerkmp.data.toSimpleDate
@@ -399,6 +400,82 @@ internal class NepaliCalendarModel(val locale: NepaliDateLocale = NepaliDateLoca
         }
     }
 
+    fun formatTimeByUnicodePattern(
+        unicodePattern: String,
+        time: SimpleTime,
+        language: NepaliDatePickerLang
+    ): String {
+        val replacements = getTimeFormatReplacements(
+            time = time,
+            language = language
+        )
+        return applyReplacements(unicodePattern = unicodePattern, replacements = replacements)
+    }
+
+    fun formatEnglishDateByUnicodePattern(
+        unicodePattern: String,
+        calendar: CustomCalendar,
+        language: NepaliDatePickerLang
+    ): String {
+        val replacements = getDateFormatReplacements(
+            calendar = calendar,
+            language = language,
+            onGetMonthNames = { language.englishMonths[it] }
+        )
+        return applyReplacements(unicodePattern = unicodePattern, replacements = replacements)
+    }
+
+    fun formatNepaliDateByUnicodePattern(
+        unicodePattern: String,
+        calendar: CustomCalendar,
+        language: NepaliDatePickerLang
+    ): String {
+        val replacements = getDateFormatReplacements(
+            calendar = calendar,
+            language = language,
+            onGetMonthNames = { language.months[it] }
+        )
+        return applyReplacements(unicodePattern = unicodePattern, replacements = replacements)
+    }
+
+    fun formatEnglishDateTimeByUnicodePattern(
+        unicodePattern: String,
+        calendar: CustomCalendar,
+        time: SimpleTime?,
+        language: NepaliDatePickerLang
+    ): String {
+        val replacements =
+            getDateFormatReplacements(
+                calendar = calendar,
+                language = language,
+                onGetMonthNames = { language.englishMonths[it] }
+            ).toMutableMap()
+        time?.let {
+            replacements.putAll(getTimeFormatReplacements(time = it, language = language))
+        }
+
+        return applyReplacements(unicodePattern = unicodePattern, replacements = replacements)
+    }
+
+    fun formatNepaliDateTimeByUnicodePattern(
+        unicodePattern: String,
+        calendar: CustomCalendar,
+        time: SimpleTime?,
+        language: NepaliDatePickerLang
+    ): String {
+        val replacements =
+            getDateFormatReplacements(
+                calendar = calendar,
+                language = language,
+                onGetMonthNames = { language.months[it] }
+            ).toMutableMap()
+        time?.let {
+            replacements.putAll(getTimeFormatReplacements(time = it, language = language))
+        }
+
+        return applyReplacements(unicodePattern = unicodePattern, replacements = replacements)
+    }
+
     fun formatEnglishDateNepaliTimeToIsoFormat(englishDate: SimpleDate, time: SimpleTime): String {
         val localDateTime = LocalDateTime(
             englishDate.year,
@@ -613,5 +690,118 @@ internal class NepaliCalendarModel(val locale: NepaliDateLocale = NepaliDateLoca
             builder.append(nepaliToEnglishDigits[char] ?: char)
         }
         return builder.toString()
+    }
+
+    private fun getTimeFormatReplacements(
+        time: SimpleTime,
+        language: NepaliDatePickerLang
+    ): Map<String, String> {
+        val hour = time.hour
+        val hour24 = hour.toString()
+        val hour12 = when {
+            hour == 0 -> "12"
+            hour > 12 -> (hour - 12).toString()
+            else -> hour.toString()
+        }
+        val hour242Digit = hour.toString().padStart(2, '0')
+        val hour122Digit = hour12.padStart(2, '0')
+
+        val minute = time.minute.toString()
+        val minute2Digit = time.minute.toString().padStart(2, '0')
+        val second = time.second.toString()
+        val second2Digit = time.second.toString().padStart(2, '0')
+
+        val nanoStr = time.nanosecond.toString().take(1)
+        val nanoStr2Digit = time.nanosecond.toString().padStart(2, '0').take(2)
+        val nanoStr3Digit = time.nanosecond.toString().padStart(3, '0').take(3)
+        val nanoStr4Digit = time.nanosecond.toString().padStart(4, '0').take(4)
+
+        val amPm = when (language) {
+            NepaliDatePickerLang.NEPALI -> getNepaliAmPm(hour)
+            else -> if (hour < 12) "AM" else "PM"
+        }
+
+        val amPmLowerCase = when (language) {
+            NepaliDatePickerLang.NEPALI -> amPm
+            else -> amPm.lowercase()
+        }
+
+        return mapOf(
+            "HH" to localizeNumber(hour242Digit, language),
+            "H" to localizeNumber(hour24, language),
+            "hh" to localizeNumber(hour122Digit, language),
+            "h" to localizeNumber(hour12, language),
+            "mm" to localizeNumber(minute2Digit, language),
+            "m" to localizeNumber(minute, language),
+            "ss" to localizeNumber(second2Digit, language),
+            "s" to localizeNumber(second, language),
+            "SSSS" to localizeNumber(nanoStr4Digit, language),
+            "SSS" to localizeNumber(nanoStr3Digit, language),
+            "SS" to localizeNumber(nanoStr2Digit, language),
+            "S" to localizeNumber(nanoStr, language),
+            "a" to amPmLowerCase,
+            "A" to amPm
+        )
+    }
+
+    private fun getDateFormatReplacements(
+        calendar: CustomCalendar,
+        language: NepaliDatePickerLang,
+        onGetMonthNames: (Int) -> NepaliMonthName
+    ): Map<String, String> =
+        with(calendar) {
+            val yearStr = year.toString()
+            val shortYear = yearStr.takeLast(2)
+            val monthStr = month.toString()
+            val monthStr2Digit = month.toString().padStart(2, '0')
+            val dayStr = dayOfMonth.toString()
+            val dayStr2Digit = dayOfMonth.toString().padStart(2, '0')
+            val weekdayIndex = dayOfWeek - 1
+            val weekday = language.weekdays[weekdayIndex]
+            val weekdayStr = dayOfWeek.toString()
+            val weekdayStr2Digit = weekdayStr.padStart(2, '0')
+            val weekOfTheYear = weekOfYear.toString()
+            val dayOfTheYear = dayOfYear.toString()
+
+            val monthName = onGetMonthNames(month - 1)
+
+            return mutableMapOf(
+                "yyyy" to localizeNumber(yearStr, language),
+                "yy" to localizeNumber(shortYear, language),
+                "MMMM" to monthName.full,
+                "MMM" to monthName.short,
+                "MM" to localizeNumber(monthStr2Digit, language),
+                "M" to localizeNumber(monthStr, language),
+                "dd" to localizeNumber(dayStr2Digit, language),
+                "d" to localizeNumber(dayStr, language),
+                "D" to localizeNumber(dayOfTheYear, language),
+                "EEEEE" to weekday.short,
+                "EEEE" to weekday.full,
+                "E" to weekday.medium,
+                "ee" to localizeNumber(weekdayStr2Digit, language),
+                "e" to localizeNumber(weekdayStr, language),
+                "w" to localizeNumber(weekOfTheYear, language)
+            )
+        }
+
+    private fun applyReplacements(
+        unicodePattern: String,
+        replacements: Map<String, String>
+    ): String {
+        val sortedKeys = replacements.keys.sortedByDescending { it.length }
+        val patternRegex = Regex(sortedKeys.joinToString(separator = "|") { Regex.escape(it) })
+
+        return patternRegex.replace(unicodePattern) { matchResult ->
+            replacements[matchResult.value] ?: matchResult.value
+        }
+    }
+
+    private fun getNepaliAmPm(hour: Int): String {
+        return when (hour) {
+            in 3..11 -> "बिहान"
+            in 12..16 -> "दिउँसो"
+            in 17..19 -> "साँझ"
+            else -> "राति"
+        }
     }
 }
