@@ -199,8 +199,8 @@ import nepali_date_picker // import Nepali Date Picker library
 // Create view ...
 ```
 
-> ### Desktop/Web
-> Will work on it if it will be helpful to community. [Let me know](https://github.com/shivathapaa/Nepali-Date-Picker/issues/new/choose) if I should!
+### Desktop, Wasm, & Js
+The library supports Desktop, Wasm, and Js from version [v2.5.0-beta01](https://github.com/shivathapaa/Nepali-Date-Picker/releases/tag/2.5.0-beta01). See all artifacts [here](https://central.sonatype.com/namespace/io.github.shivathapaa)
 
 ## License
 
