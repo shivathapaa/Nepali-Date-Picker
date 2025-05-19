@@ -749,6 +749,47 @@ val formattedEnglishTime = NepaliDateConverter.getFormattedTimeInEnglish(simpleT
 
 #### Format date time using a Unicode pattern
 ```kotlin
+// The function supports the following placeholders in the unicodePattern:
+
+// Date Components
+// yyyy - Four-digit year (e.g., "2025" or "२०२५")
+// yy - Two-digit year (e.g., "25" or "२५")
+// MMMM - Full month name (e.g., "January" or "जनवरी")
+// MMM - Abbreviated month name (e.g., "Jan" or "जन")
+// MM - Two-digit month (e.g., "01" or "०१")
+// M - Month number, no padding (e.g., "1" or "१")
+// dd - Two-digit day of month (e.g., "04" or "०४")
+// d - Day of month, no padding (e.g., "4" or "४")
+// D - Day of the year (1–366) (e.g., "123" or "१२३")
+// w - Week of the year (e.g., "23" or "२३")
+
+// Weekday Components
+// EEEE - Full weekday name (e.g., "Monday" or "सोमबार")
+// E - Medium weekday name (e.g., "Mon" or "सोम")
+// EEEEE - Short weekday name, if defined (e.g., "M" or "स")
+// ee - Two-digit day of week (e.g., "02" or "०२")
+// e - Day of week, no padding (e.g., "2" or "२")
+
+// Time Components (24-hour and 12-hour)
+// HH - Hour in 24-hour format (00–23) (e.g., "08" or "०८")
+// H - Hour in 24-hour format, no padding (e.g., "8" or "८")
+// hh - Hour in 12-hour format (01–12) (e.g., "01" or "०१")
+// h - Hour in 12-hour format, no padding (e.g., "1" or "१")
+// mm - Minutes, two-digit (e.g., "05" or "०५")
+// m - Minutes, no padding (e.g., "5" or "५")
+// ss - Seconds, two-digit (e.g., "09" or "०९")
+// s - Seconds, no padding (e.g., "9" or "९")
+
+// Fractional Seconds
+// SSSS - Four-digit nanosecond precision (e.g., "1234" or "१२३४")
+// SSS - Millisecond precision (e.g., "123" or "१२३")
+// SS - Two-digit fractional seconds (e.g., "12" or "१२")
+// S - One-digit fractional second (e.g., "1" or "१")
+
+// Period Markers
+// a - Lowercase AM/PM or localized period (e.g., "am" or "बिहान")
+// A - Uppercase AM/PM or localized period (e.g., "AM" or "साँझ")
+
 // Format time using a Unicode pattern
 val time = NepaliDateConverter.currentTime
 
@@ -770,7 +811,7 @@ val nepaliCalendar = NepaliDateConverter.todayNepaliCalendar
 val result = NepaliDateConverter.formatNepaliDateByUnicodePattern(
     unicodePattern = "EEEE, MMM dd yyyy",
     calendar = nepaliCalendar,
-    language = NepaliDatePickerLang.NEPALI // use ENGLISH for english
+    language = NepaliDatePickerLang.NEPALI // use ENGLISH for English
 ) // result: "सोमबार, भदौ २४ २०८१"
 
 // Format only English date using a Unicode pattern
@@ -779,7 +820,7 @@ val englishCalendar = NepaliDateConverter.todayEnglishCalendar
 val result = NepaliDateConverter.formatEnglishDateByUnicodePattern(
     unicodePattern = "E, MMM dd yyyy",
     calendar = englishCalendar,
-    language = NepaliDatePickerLang.ENGLISH // use NEPALI for english
+    language = NepaliDatePickerLang.ENGLISH // use NEPALI for Nepali
 ) // result: "Sat, May 24 2025"
 
 // Format full Nepali date and time using a Unicode pattern
@@ -790,7 +831,7 @@ val result = NepaliDateConverter.formatNepaliDateTimeByUnicodePattern(
     unicodePattern = "yyyy MMMM dd, EEEE a hh:mm:ss",
     calendar = nepaliCalendar,
     time = time,
-    language = NepaliDatePickerLang.NEPALI // use ENGLISH for english
+    language = NepaliDatePickerLang.NEPALI // use ENGLISH for English
 ) // result: "२०८१ भदौ २४, सोमबार दिउँसो ०२:४५:१५"
 
 // Format full English date and time using a Unicode pattern
@@ -801,7 +842,7 @@ val result = NepaliDateConverter.formatEnglishDateTimeByUnicodePattern(
     unicodePattern = "yyyy MMMM dd, EEEE hh:mm:ss A",
     calendar = englishCalendar,
     time = time,
-    language = NepaliDatePickerLang.ENGLISH // use NEPALI for english
+    language = NepaliDatePickerLang.ENGLISH // use NEPALI for Nepali
 ) // result: "2025 May 24, Monday 02:45:15 PM"
 ```
 
