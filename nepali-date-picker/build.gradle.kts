@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-import com.vanniktech.maven.publish.KotlinMultiplatform
-import com.vanniktech.maven.publish.SonatypeHost
 import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.plugin.mpp.apple.XCFramework
@@ -25,7 +23,6 @@ plugins {
     alias(libs.plugins.androidLibrary)
     alias(libs.plugins.jetbrainsCompose)
     alias(libs.plugins.composeCompiler)
-    alias(libs.plugins.mavenPublish)
 }
 
 kotlin {
@@ -106,55 +103,4 @@ android {
     defaultConfig {
         minSdk = libs.versions.android.minSdk.get().toInt()
     }
-}
-
-
-mavenPublishing {
-    // Coordinates for the published artifact
-    coordinates(
-        groupId = "io.github.shivathapaa",
-        artifactId = "nepali-date-picker",
-        version = "2.5.1"
-    )
-
-    configure(
-        KotlinMultiplatform(
-            sourcesJar = true
-        )
-    )
-
-    // POM metadata for the published artifact
-    pom {
-        name.set("Nepali Date Picker KMP")
-        description.set("Nepali Date Picker for both Android and/or iOS and/or KMP (JVM, JS, Wasm) which aligns with the Material3 Date Picker. This library give various utilities to work with Nepali Dates and acts as a bridge between Nepali Calendar and Gregorian Calendar.")
-        inceptionYear.set("2024")
-        url.set("https://github.com/shivathapaa/Nepali-Date-Picker")
-
-        licenses {
-            license {
-                name.set("MPL 2.0")
-                url.set("https://github.com/shivathapaa/Nepali-Date-Picker/blob/main/LICENSE")
-            }
-        }
-
-        developers {
-            developer {
-                id.set("shivathapaa")
-                name.set("Shiva Thapa")
-                email.set("query.shivathapaa.dev@gmail.com")
-                url.set("https://github.com/shivathapaa/")
-            }
-        }
-
-        // SCM information
-        scm {
-            url.set("https://github.com/shivathapaa/Nepali-Date-Picker")
-        }
-    }
-
-    // Configure publishing to Maven Central
-    publishToMavenCentral(SonatypeHost.CENTRAL_PORTAL)
-
-    // Enable GPG signing for all publications
-    signAllPublications()
 }

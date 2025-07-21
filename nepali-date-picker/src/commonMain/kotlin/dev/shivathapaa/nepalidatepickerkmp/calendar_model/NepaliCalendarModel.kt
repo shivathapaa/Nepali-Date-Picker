@@ -28,16 +28,20 @@ import dev.shivathapaa.nepalidatepickerkmp.data.NepaliMonthName
 import dev.shivathapaa.nepalidatepickerkmp.data.SimpleDate
 import dev.shivathapaa.nepalidatepickerkmp.data.SimpleTime
 import dev.shivathapaa.nepalidatepickerkmp.data.toSimpleDate
-import kotlinx.datetime.Clock
-import kotlinx.datetime.Instant
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
+import kotlinx.datetime.number
 import kotlinx.datetime.toInstant
 import kotlinx.datetime.toLocalDateTime
+import kotlin.time.Clock
+import kotlin.time.ExperimentalTime
+import kotlin.time.Instant
 
 @Immutable
 internal class NepaliCalendarModel(val locale: NepaliDateLocale = NepaliDateLocale()) {
     private val timeZone = TimeZone.of(zoneId = "Asia/Kathmandu")
+
+    @OptIn(ExperimentalTime::class)
     private val localEnglishDateTime: LocalDateTime = Clock.System.now().toLocalDateTime(timeZone)
 
     @Deprecated(message = "Use todayNepaliSimpleDate or todayNepaliCalendar instead")
@@ -60,15 +64,15 @@ internal class NepaliCalendarModel(val locale: NepaliDateLocale = NepaliDateLoca
     val todayEnglish
         get(): SimpleDate = SimpleDate(
             year = localEnglishDateTime.year,
-            month = localEnglishDateTime.monthNumber,
-            dayOfMonth = localEnglishDateTime.dayOfMonth
+            month = localEnglishDateTime.month.number,
+            dayOfMonth = localEnglishDateTime.day
         )
 
     val todayEnglishSimpleDate
         get(): SimpleDate = SimpleDate(
             year = localEnglishDateTime.year,
-            month = localEnglishDateTime.monthNumber,
-            dayOfMonth = localEnglishDateTime.dayOfMonth
+            month = localEnglishDateTime.month.number,
+            dayOfMonth = localEnglishDateTime.day
         )
 
     val todayEnglishCalendar
@@ -81,6 +85,7 @@ internal class NepaliCalendarModel(val locale: NepaliDateLocale = NepaliDateLoca
             )
         }
 
+    @OptIn(ExperimentalTime::class)
     val currentTime
         get(): SimpleTime {
             val nowTime: LocalDateTime = Clock.System.now().toLocalDateTime(timeZone)
@@ -96,8 +101,8 @@ internal class NepaliCalendarModel(val locale: NepaliDateLocale = NepaliDateLoca
     private fun getNepaliDateInstance(): CustomCalendar {
         return DateConverters.convertToNepaliCalendar(
             englishYYYY = localEnglishDateTime.year,
-            englishMM = localEnglishDateTime.monthNumber,
-            englishDD = localEnglishDateTime.dayOfMonth
+            englishMM = localEnglishDateTime.month.number,
+            englishDD = localEnglishDateTime.day
         )
     }
 
@@ -155,7 +160,7 @@ internal class NepaliCalendarModel(val locale: NepaliDateLocale = NepaliDateLoca
 
         return try {
             getNepaliCalendar(SimpleDate(year, month, day))
-        } catch (e: IllegalArgumentException) {
+        } catch (_: IllegalArgumentException) {
             CustomCalendar(year, month, day, 2, -1, -1, -1)
         }
     }
@@ -476,6 +481,7 @@ internal class NepaliCalendarModel(val locale: NepaliDateLocale = NepaliDateLoca
         return applyReplacements(unicodePattern = unicodePattern, replacements = replacements)
     }
 
+    @OptIn(ExperimentalTime::class)
     fun formatEnglishDateNepaliTimeToIsoFormat(englishDate: SimpleDate, time: SimpleTime): String {
         val localDateTime = LocalDateTime(
             englishDate.year,
@@ -490,6 +496,7 @@ internal class NepaliCalendarModel(val locale: NepaliDateLocale = NepaliDateLoca
         return localDateTime.toInstant(timeZone).toString()
     }
 
+    @OptIn(ExperimentalTime::class)
     fun formatNepaliDateTimeToIsoFormat(nepaliDate: SimpleDate, time: SimpleTime): String {
         val convertedEnglishDate =
             convertToEnglishDate(nepaliDate.year, nepaliDate.month, nepaliDate.dayOfMonth)
@@ -507,14 +514,15 @@ internal class NepaliCalendarModel(val locale: NepaliDateLocale = NepaliDateLoca
         return localDateTime.toInstant(timeZone).toString()
     }
 
+    @OptIn(ExperimentalTime::class)
     fun getNepaliDateTimeFromIsoFormat(isoDateTime: String): CustomDateTime {
         val instant = Instant.parse(isoDateTime)
         val localDateTime = instant.toLocalDateTime(timeZone)
 
         val nepaliCalendar = NepaliDateConverter.convertEnglishToNepali(
             englishYYYY = localDateTime.year,
-            englishMM = localDateTime.monthNumber,
-            englishDD = localDateTime.dayOfMonth
+            englishMM = localDateTime.month.number,
+            englishDD = localDateTime.day
         )
         val simpleNepaliTime = SimpleTime(
             hour = localDateTime.hour,
@@ -526,14 +534,15 @@ internal class NepaliCalendarModel(val locale: NepaliDateLocale = NepaliDateLoca
         return CustomDateTime(customCalendar = nepaliCalendar, simpleTime = simpleNepaliTime)
     }
 
+    @OptIn(ExperimentalTime::class)
     fun getEnglishDateNepaliTimeFromIsoFormat(isoDateTime: String): CustomDateTime {
         val instant = Instant.parse(isoDateTime)
         val localDateTime = instant.toLocalDateTime(timeZone)
 
         val nepaliCalendar = NepaliDateConverter.convertEnglishToNepali(
             englishYYYY = localDateTime.year,
-            englishMM = localDateTime.monthNumber,
-            englishDD = localDateTime.dayOfMonth
+            englishMM = localDateTime.month.number,
+            englishDD = localDateTime.day
         )
         val englishCalendar = NepaliDateConverter.convertNepaliToEnglish(
             nepaliYYYY = nepaliCalendar.year,

@@ -56,12 +56,12 @@ internal object DateConverters {
 
         val englishLocalDate = LocalDate(
             year = startingEnglishDate.year,
-            monthNumber = startingEnglishDate.month,
-            dayOfMonth = startingEnglishDate.dayOfMonth
+            month = startingEnglishDate.month,
+            day = startingEnglishDate.dayOfMonth
         )
 
         val newEnglishDate =
-            LocalDate(year = englishYYYY, monthNumber = englishMM, dayOfMonth = englishDD)
+            LocalDate(year = englishYYYY, month = englishMM, day = englishDD)
 
         // Calculate the total number of days between the base date and the target date
         val totalDaysDifference = calculateEnglishDaysDifference(

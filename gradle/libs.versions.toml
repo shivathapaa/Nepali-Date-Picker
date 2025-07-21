@@ -1,12 +1,11 @@
 [versions]
-agp = "8.7.2"
-kotlin = "2.1.21"
-compose-plugin = "1.8.0"
+agp = "8.10.1"
+kotlin = "2.2.0"
+compose-plugin = "1.8.2"
 android-minSdk = "21"
 android-compileSdk = "36"
-kotlinxDatetime = "0.6.2"
+kotlinxDatetime = "0.7.1"
 materialIconsCore = "1.7.3"
-mavenPublish = "0.31.0"
 
 [libraries]
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
@@ -18,4 +17,3 @@ androidLibrary = { id = "com.android.library", version.ref = "agp" }
 jetbrainsCompose = { id = "org.jetbrains.compose", version.ref = "compose-plugin" }
 composeCompiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 kotlinMultiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
-mavenPublish = { id = "com.vanniktech.maven.publish", version.ref = "mavenPublish" }
