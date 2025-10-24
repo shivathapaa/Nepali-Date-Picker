@@ -30,7 +30,7 @@ plugins {
 kotlin {
     androidTarget {
         compilerOptions {
-            jvmTarget.set(JvmTarget.JVM_1_8)
+            jvmTarget.set(JvmTarget.JVM_11)
         }
 
         publishLibraryVariants("release")
@@ -74,7 +74,7 @@ kotlin {
                 implementation(compose.runtime)
                 implementation(compose.foundation)
                 implementation(compose.ui)
-                implementation(compose.material3)
+                implementation(libs.material3)
                 implementation(libs.kotlinx.datetime)
                 implementation(libs.material.icons.core)
             }

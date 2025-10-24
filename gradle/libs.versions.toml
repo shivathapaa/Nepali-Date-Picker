@@ -1,10 +1,11 @@
 [versions]
-agp = "8.10.1"
-kotlin = "2.2.0"
-compose-plugin = "1.8.2"
+agp = "8.11.2"
+kotlin = "2.2.21"
+compose-plugin = "1.9.1"
 android-minSdk = "21"
 android-compileSdk = "36"
 kotlinxDatetime = "0.7.1"
+material3 = "1.9.0"
 materialIconsCore = "1.7.3"
 mavenPublish = "0.34.0"
 
@@ -12,6 +13,7 @@ mavenPublish = "0.34.0"
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
 kotlinx-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.ref = "kotlinxDatetime" }
 material-icons-core = { module = "org.jetbrains.compose.material:material-icons-core", version.ref = "materialIconsCore" }
+material3 = { module = "org.jetbrains.compose.material3:material3", version.ref = "material3" }
 
 [plugins]
 androidLibrary = { id = "com.android.library", version.ref = "agp" }
