@@ -1,5 +1,5 @@
 [versions]
-agp = "8.11.2"
+agp = "8.11.1"
 kotlin = "2.2.21"
 compose-plugin = "1.9.1"
 android-minSdk = "21"
@@ -16,8 +16,9 @@ material-icons-core = { module = "org.jetbrains.compose.material:material-icons-
 material3 = { module = "org.jetbrains.compose.material3:material3", version.ref = "material3" }
 
 [plugins]
-androidLibrary = { id = "com.android.library", version.ref = "agp" }
 jetbrainsCompose = { id = "org.jetbrains.compose", version.ref = "compose-plugin" }
 composeCompiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 kotlinMultiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
 mavenPublish = { id = "com.vanniktech.maven.publish", version.ref = "mavenPublish" }
+androidKotlinMultiplatformLibrary = { id = "com.android.kotlin.multiplatform.library", version.ref = "agp" }
+androidLint = { id = "com.android.lint", version.ref = "agp" }

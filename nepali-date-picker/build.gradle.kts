@@ -21,19 +21,24 @@ import org.jetbrains.kotlin.gradle.plugin.mpp.apple.XCFramework
 
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
-    alias(libs.plugins.androidLibrary)
+    alias(libs.plugins.androidKotlinMultiplatformLibrary)
     alias(libs.plugins.jetbrainsCompose)
     alias(libs.plugins.composeCompiler)
     alias(libs.plugins.mavenPublish)
 }
 
 kotlin {
-    androidTarget {
-        compilerOptions {
-            jvmTarget.set(JvmTarget.JVM_11)
-        }
+    androidLibrary {
+        namespace = "io.github.shivathapaa"
+        compileSdk = libs.versions.android.compileSdk.get().toInt()
+        minSdk = libs.versions.android.minSdk.get().toInt()
 
-        publishLibraryVariants("release")
+        withJava()
+        compilations.configureEach {
+            compilerOptions.configure {
+                jvmTarget.set(JvmTarget.JVM_11)
+            }
+        }
     }
 
     val xcFrameworkName = "nepali-date-picker"
@@ -96,14 +101,6 @@ kotlin {
                 implementation(npm("@js-joda/timezone", "2.3.0"))
             }
         }
-    }
-}
-
-android {
-    namespace = "io.github.shivathapaa"
-    compileSdk = libs.versions.android.compileSdk.get().toInt()
-    defaultConfig {
-        minSdk = libs.versions.android.minSdk.get().toInt()
     }
 }
 
