@@ -1,7 +1,7 @@
 [versions]
 agp = "8.11.1"
 kotlin = "2.2.21"
-compose-plugin = "1.9.1"
+compose-plugin = "1.9.2"
 android-minSdk = "21"
 android-compileSdk = "36"
 kotlinxDatetime = "0.7.1"
@@ -21,4 +21,3 @@ composeCompiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "k
 kotlinMultiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
 mavenPublish = { id = "com.vanniktech.maven.publish", version.ref = "mavenPublish" }
 androidKotlinMultiplatformLibrary = { id = "com.android.kotlin.multiplatform.library", version.ref = "agp" }
-androidLint = { id = "com.android.lint", version.ref = "agp" }

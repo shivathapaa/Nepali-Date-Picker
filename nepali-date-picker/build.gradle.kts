@@ -63,6 +63,9 @@ kotlin {
     js(IR) {
         browser()
         nodejs()
+        useEsModules()
+        binaries.executable()
+        binaries.library()
     }
 
     @OptIn(ExperimentalWasmDsl::class)
@@ -74,21 +77,17 @@ kotlin {
     }
 
     sourceSets {
-        val commonMain by getting {
-            dependencies {
-                implementation(compose.runtime)
-                implementation(compose.foundation)
-                implementation(compose.ui)
-                implementation(libs.material3)
-                implementation(libs.kotlinx.datetime)
-                implementation(libs.material.icons.core)
-            }
+        commonMain.dependencies {
+            implementation(compose.runtime)
+            implementation(compose.foundation)
+            implementation(compose.ui)
+            implementation(libs.material3)
+            implementation(libs.kotlinx.datetime)
+            implementation(libs.material.icons.core)
         }
 
-        val commonTest by getting {
-            dependencies {
-                implementation(libs.kotlin.test)
-            }
+        commonTest.dependencies {
+            implementation(libs.kotlin.test)
         }
 
         jsMain.dependencies {
@@ -96,10 +95,8 @@ kotlin {
             implementation(npm("@js-joda/timezone", "2.3.0"))
         }
 
-        val wasmJsMain by getting {
-            dependencies {
-                implementation(npm("@js-joda/timezone", "2.3.0"))
-            }
+        wasmJsMain.dependencies {
+            implementation(npm("@js-joda/timezone", "2.3.0"))
         }
     }
 }
@@ -109,7 +106,7 @@ mavenPublishing {
     coordinates(
         groupId = "io.github.shivathapaa",
         artifactId = "nepali-date-picker",
-        version = "2.6.0"
+        version = "2.6.1"
     )
 
     configure(platform = KotlinMultiplatform(sourcesJar = true))
