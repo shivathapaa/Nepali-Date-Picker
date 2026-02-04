@@ -16,3 +16,5 @@ dependencyResolutionManagement {
 
 rootProject.name = "NepaliDatePickerKmp"
 include(":nepali-date-picker")
+include(":sample:androidApp")
+include(":sample:composeApp")

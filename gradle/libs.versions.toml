@@ -2,14 +2,17 @@
 agp = "9.0.0"
 kotlin = "2.3.0"
 compose-plugin = "1.10.0"
-android-minSdk = "21"
+android-minSdk = "23"
 android-compileSdk = "36"
+android-targetSdk = "36"
 kotlinxDatetime = "0.7.1"
 material3 = "1.9.0"
 materialIconsCore = "1.7.3"
+androidx-activityCompose = "1.12.3"
 mavenPublish = "0.36.0"
 
 [libraries]
+androidx-activityCompose = { module = "androidx.activity:activity-compose", version.ref = "androidx-activityCompose" }
 compose-ui = { module = "org.jetbrains.compose.ui:ui", version.ref = "compose-plugin" }
 foundation = { module = "org.jetbrains.compose.foundation:foundation", version.ref = "compose-plugin" }
 html-core = { module = "org.jetbrains.compose.html:html-core", version.ref = "compose-plugin" }
@@ -25,3 +28,4 @@ composeCompiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "k
 kotlinMultiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
 mavenPublish = { id = "com.vanniktech.maven.publish", version.ref = "mavenPublish" }
 androidKotlinMultiplatformLibrary = { id = "com.android.kotlin.multiplatform.library", version.ref = "agp" }
+android-application = { id = "com.android.application", version.ref = "agp" }
