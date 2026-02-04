@@ -105,7 +105,7 @@ mavenPublishing {
     coordinates(
         groupId = "io.github.shivathapaa",
         artifactId = "nepali-date-picker",
-        version = "2.6.1"
+        version = "2.6.2"
     )
 
     configure(KotlinMultiplatform(sourcesJar = SourcesJar.Sources()))
