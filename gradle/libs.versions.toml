@@ -1,19 +1,23 @@
 [versions]
-agp = "8.11.1"
-kotlin = "2.2.21"
-compose-plugin = "1.9.2"
+agp = "9.0.0"
+kotlin = "2.3.0"
+compose-plugin = "1.10.0"
 android-minSdk = "21"
 android-compileSdk = "36"
 kotlinxDatetime = "0.7.1"
 material3 = "1.9.0"
 materialIconsCore = "1.7.3"
-mavenPublish = "0.34.0"
+mavenPublish = "0.36.0"
 
 [libraries]
+compose-ui = { module = "org.jetbrains.compose.ui:ui", version.ref = "compose-plugin" }
+foundation = { module = "org.jetbrains.compose.foundation:foundation", version.ref = "compose-plugin" }
+html-core = { module = "org.jetbrains.compose.html:html-core", version.ref = "compose-plugin" }
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
 kotlinx-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.ref = "kotlinxDatetime" }
 material-icons-core = { module = "org.jetbrains.compose.material:material-icons-core", version.ref = "materialIconsCore" }
 material3 = { module = "org.jetbrains.compose.material3:material3", version.ref = "material3" }
+runtime = { module = "org.jetbrains.compose.runtime:runtime", version.ref = "compose-plugin" }
 
 [plugins]
 jetbrainsCompose = { id = "org.jetbrains.compose", version.ref = "compose-plugin" }

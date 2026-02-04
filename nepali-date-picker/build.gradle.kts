@@ -15,6 +15,7 @@
  */
 
 import com.vanniktech.maven.publish.KotlinMultiplatform
+import com.vanniktech.maven.publish.SourcesJar
 import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.plugin.mpp.apple.XCFramework
@@ -29,15 +30,13 @@ plugins {
 
 kotlin {
     androidLibrary {
-        namespace = "io.github.shivathapaa"
+        namespace = "io.github.shivathapaa.picker"
         compileSdk = libs.versions.android.compileSdk.get().toInt()
         minSdk = libs.versions.android.minSdk.get().toInt()
 
         withJava()
-        compilations.configureEach {
-            compilerOptions.configure {
-                jvmTarget.set(JvmTarget.JVM_11)
-            }
+        compilerOptions {
+            jvmTarget.set(JvmTarget.JVM_11)
         }
     }
 
@@ -78,9 +77,9 @@ kotlin {
 
     sourceSets {
         commonMain.dependencies {
-            implementation(compose.runtime)
-            implementation(compose.foundation)
-            implementation(compose.ui)
+            implementation(libs.runtime)
+            implementation(libs.foundation)
+            implementation(libs.compose.ui)
             implementation(libs.material3)
             implementation(libs.kotlinx.datetime)
             implementation(libs.material.icons.core)
@@ -91,12 +90,12 @@ kotlin {
         }
 
         jsMain.dependencies {
-            implementation(compose.html.core)
-            implementation(npm("@js-joda/timezone", "2.3.0"))
+            implementation(libs.html.core)
+            implementation(npm("@js-joda/timezone", "2.23.0"))
         }
 
         wasmJsMain.dependencies {
-            implementation(npm("@js-joda/timezone", "2.3.0"))
+            implementation(npm("@js-joda/timezone", "2.23.0"))
         }
     }
 }
@@ -109,7 +108,7 @@ mavenPublishing {
         version = "2.6.1"
     )
 
-    configure(platform = KotlinMultiplatform(sourcesJar = true))
+    configure(KotlinMultiplatform(sourcesJar = SourcesJar.Sources()))
 
     // POM metadata for the published artifact
     pom {
