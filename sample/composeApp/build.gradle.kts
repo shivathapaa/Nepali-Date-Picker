@@ -38,6 +38,7 @@ kotlin {
             implementation(libs.foundation)
             implementation(libs.material3)
             implementation(project(":nepali-date-picker"))
+            implementation(libs.material.icons.core)
         }
         jvmMain.dependencies {
             implementation(compose.desktop.currentOs)
