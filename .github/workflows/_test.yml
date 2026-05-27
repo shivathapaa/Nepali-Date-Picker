@@ -35,10 +35,12 @@ jobs:
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v4
 
-      # macOS: Apple natives + JVM + JS/Wasm node + sample. Uses *NodeTest because
-      # the test code is pure-Kotlin with no DOM dependency — running karma+Chrome
-      # would add a heavy host requirement for zero extra coverage. Browser tests
-      # can be added later when UI tests start exercising the DOM.
+      # macOS: Apple natives + JVM + Android host + Wasm WASI node + sample.
+      # JS/Wasm-JS node tests run on the Linux leg only — they execute pure-Kotlin
+      # compiled to V8, so host OS adds no signal, and the macOS GitHub Actions
+      # Node runtime has historically flaked at `node:internal/timers` mid-suite.
+      # Wasm WASI node stays on macOS because it has no Linux-leg twin and is
+      # cheap.
       - name: Build & test (macOS)
         if: runner.os == 'macOS'
         run: |
@@ -47,8 +49,6 @@ jobs:
             :nepali-date-picker:core:macosArm64Test \
             :nepali-date-picker:core:jvmTest \
             :nepali-date-picker:core:testAndroidHostTest \
-            :nepali-date-picker:core:jsNodeTest \
-            :nepali-date-picker:core:wasmJsNodeTest \
             :nepali-date-picker:core:wasmWasiNodeTest \
             :sample:androidApp:assembleDebug \
             --stacktrace
