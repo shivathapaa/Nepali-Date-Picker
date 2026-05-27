@@ -5,6 +5,12 @@ name: Test
 on:
   workflow_call:
 
+# Force JS-based actions onto Node 24 ahead of GitHub's June 2026 cutover. Only
+# needed for actions that haven't shipped a v5 (Node 24) major yet - currently
+# the gradle/actions/* family. Safe to drop once they release a Node-24 major.
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 jobs:
   test:
     name: Build & test (${{ matrix.os }})
@@ -18,10 +24,10 @@ jobs:
         os: [macos-latest, ubuntu-latest, windows-latest]
     steps:
       - name: Check out code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Set up JDK 21
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           distribution: 'zulu'
           java-version: 21
@@ -66,7 +72,7 @@ jobs:
 
       - name: Upload test reports
         if: failure()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: test-reports-${{ matrix.os }}
           path: |

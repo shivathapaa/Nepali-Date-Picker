@@ -13,13 +13,19 @@ concurrency:
 permissions:
   contents: read
 
+# Force JS-based actions onto Node 24 ahead of GitHub's June 2026 cutover. Only
+# needed for actions that haven't shipped a v5 (Node 24) major yet - currently
+# the gradle/actions/* family. Safe to drop once they release a Node-24 major.
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 jobs:
   validate-wrapper:
     name: Validate Gradle wrapper
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: gradle/actions/wrapper-validation@v4
 
   test:
