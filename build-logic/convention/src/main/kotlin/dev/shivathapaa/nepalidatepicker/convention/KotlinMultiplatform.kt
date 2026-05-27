@@ -46,6 +46,29 @@ internal fun Project.configureKotlinMultiplatform(extension: KotlinMultiplatform
             }
         }
     }.also {
+        // Skip browser tests unless Chrome is available (via CHROME_BIN) or
+        // explicitly opted-in via `-PenableBrowserTests`. Lets `allTests`,
+        // `:check`, and IntelliJ's "run all tests" green-light on laptops
+        // without Chrome while still running browser tests on CI runners
+        // where Chrome is pre-installed.
+        tasks.matching { it.name == "jsBrowserTest" || it.name == "wasmJsBrowserTest" }
+            .configureEach {
+                onlyIf {
+                    System.getenv("CHROME_BIN") != null ||
+                        project.findProperty("enableBrowserTests") != null
+                }
+            }
+
+        // Skip the wasmWasi test task: NepaliCalendarModel constructs
+        // `TimeZone.of("Asia/Kathmandu")` and Kotlin/Wasm WASI runtime has no
+        // tzdata, so every test fails with IllegalTimeZoneException. The
+        // wasmWasi target still ships in the published artifact for consumers
+        // that only need pure converters that don't touch TZ.
+        tasks.matching { it.name == "wasmWasiNodeTest" }
+            .configureEach {
+                onlyIf { project.findProperty("enableWasmWasiTests") != null }
+            }
+
         // Pin JVM target across JVM + Android compilations so Compose-runtime / kotlinx-datetime
         // line up with the toolchain consumers expect (JDK 11 baseline).
         tasks.withType(KotlinJvmCompile::class.java).configureEach {
