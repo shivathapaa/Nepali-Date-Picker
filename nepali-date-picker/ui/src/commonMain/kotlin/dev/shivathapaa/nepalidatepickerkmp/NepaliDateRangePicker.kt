@@ -65,6 +65,7 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import dev.shivathapaa.nepalidatepickerkmp.annotations.ExperimentalNepaliDatePickerApi
+import dev.shivathapaa.nepalidatepickerkmp.calendar_model.NepaliCalendarDefaults
 import dev.shivathapaa.nepalidatepickerkmp.calendar_model.NepaliCalendarModel
 import dev.shivathapaa.nepalidatepickerkmp.calendar_model.NepaliDatePickerColors
 import dev.shivathapaa.nepalidatepickerkmp.calendar_model.NepaliDatePickerDefaults
@@ -690,7 +691,7 @@ fun rememberNepaliDateRangePickerState(
     initialSelectedStartNepaliDate: SimpleDate? = null,
     initialSelectedEndNepaliDate: SimpleDate? = null,
     initialDisplayedMonth: SimpleDate? = initialSelectedStartNepaliDate,
-    yearRange: IntRange = NepaliDatePickerDefaults.NepaliYearRange,
+    yearRange: IntRange = NepaliCalendarDefaults.NepaliYearRange,
     initialDisplayMode: DisplayMode = DisplayMode.Picker,
     nepaliSelectableDates: NepaliSelectableDates = NepaliDatePickerDefaults.AllDates,
     locale: NepaliDateLocale = NepaliDatePickerDefaults.DefaultRangePickerLocale
@@ -741,7 +742,7 @@ fun NepaliDateRangePickerState(
     initialSelectedStartNepaliDate: SimpleDate? = null,
     initialSelectedEndNepaliDate: SimpleDate? = null,
     initialDisplayedMonth: SimpleDate? = initialSelectedStartNepaliDate,
-    yearRange: IntRange = NepaliDatePickerDefaults.NepaliYearRange,
+    yearRange: IntRange = NepaliCalendarDefaults.NepaliYearRange,
     initialDisplayMode: DisplayMode = DisplayMode.Picker,
     nepaliSelectableDates: NepaliSelectableDates = NepaliDatePickerDefaults.AllDates,
     locale: NepaliDateLocale,

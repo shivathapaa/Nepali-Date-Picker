@@ -101,6 +101,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.fastForEach
+import dev.shivathapaa.nepalidatepickerkmp.calendar_model.NepaliCalendarDefaults
 import dev.shivathapaa.nepalidatepickerkmp.calendar_model.NepaliCalendarModel
 import dev.shivathapaa.nepalidatepickerkmp.calendar_model.NepaliDatePickerColors
 import dev.shivathapaa.nepalidatepickerkmp.calendar_model.NepaliDatePickerDefaults
@@ -567,22 +568,6 @@ interface NepaliDatePickerState {
     val locale: NepaliDateLocale
 }
 
-@Stable
-interface NepaliSelectableDates {
-
-    /**
-     * Returns true if the date item representing the [customCalendar] should be enabled for
-     * selection in the UI.
-     */
-    fun isSelectableDate(customCalendar: CustomCalendar) = true
-
-    /**
-     * Returns true if a given [year] should be enabled for selection in the UI. When a year is
-     * defined as non selectable, all the dates in that year will also be non selectable.
-     */
-    fun isSelectableYear(year: Int) = true
-}
-
 /**
  * Creates a [NepaliDatePickerState] for a [NepaliDatePicker] that is remembered across compositions.
  *
@@ -659,7 +644,7 @@ interface NepaliSelectableDates {
 fun rememberNepaliDatePickerState(
     initialSelectedDate: SimpleDate? = null,
     initialDisplayedMonth: SimpleDate? = initialSelectedDate,
-    yearRange: IntRange = NepaliDatePickerDefaults.NepaliYearRange,
+    yearRange: IntRange = NepaliCalendarDefaults.NepaliYearRange,
     initialDisplayMode: DisplayMode = DisplayMode.Picker,
     nepaliSelectableDates: NepaliSelectableDates = NepaliDatePickerDefaults.AllDates,
     locale: NepaliDateLocale = NepaliDatePickerDefaults.DefaultLocale,
@@ -704,7 +689,7 @@ fun rememberNepaliDatePickerState(
 fun NepaliDatePickerState(
     initialSelectedDate: SimpleDate? = null,
     initialDisplayedMonth: SimpleDate? = initialSelectedDate,
-    yearRange: IntRange = NepaliDatePickerDefaults.NepaliYearRange,
+    yearRange: IntRange = NepaliCalendarDefaults.NepaliYearRange,
     initialDisplayMode: DisplayMode = DisplayMode.Picker,
     nepaliSelectableDates: NepaliSelectableDates = NepaliDatePickerDefaults.AllDates,
     locale: NepaliDateLocale
@@ -1142,8 +1127,8 @@ internal fun NepaliMonth(
                         val isToday = todayDate == currentMonthDate.toSimpleDate()
                         val startDateSelected = startDate == currentMonthDate
                         val endDateSelected = endDate == currentMonthDate
-                        val startingNepaliYear = NepaliDatePickerDefaults.startingNepaliCalendar
-                        val endingNepaliYear = NepaliDatePickerDefaults.endNepaliCalendar
+                        val startingNepaliYear = NepaliCalendarDefaults.startingNepaliCalendar
+                        val endingNepaliYear = NepaliCalendarDefaults.endNepaliCalendar
 
                         val inRange =
                             if (nepaliSelectedRangeInfo != null) {

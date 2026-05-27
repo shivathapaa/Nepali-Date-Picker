@@ -1,14 +1,14 @@
 [versions]
-agp = "9.0.0"
-kotlin = "2.3.0"
-compose-plugin = "1.10.0"
+agp = "9.0.1"
+kotlin = "2.3.21"
+compose-plugin = "1.11.0"
 android-minSdk = "23"
-android-compileSdk = "36"
-android-targetSdk = "36"
-kotlinxDatetime = "0.7.1"
+android-compileSdk = "37"
+android-targetSdk = "37"
+kotlinxDatetime = "0.8.0"
 material3 = "1.9.0"
 materialIconsCore = "1.7.3"
-androidx-activityCompose = "1.12.3"
+androidx-activityCompose = "1.13.0"
 mavenPublish = "0.36.0"
 
 [libraries]

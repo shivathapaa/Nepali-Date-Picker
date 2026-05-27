@@ -93,16 +93,30 @@ The library is published to [Maven Central. You can find all artifacts here.](ht
     For more details on this release, check [this release](https://github.com/shivathapaa/Nepali-Date-Picker/releases/tag/2.0.0-rc01).
 > - Use an earlier version of the Nepali-Date-Picker library (`2.0.0-beta06 or before`) if stability is required and your project is using a lower version of JetBrains Compose or Android Compose.
 
+### Artifacts (3.0.0+)
+
+Starting with **3.0.0** the library ships as **two artifacts** instead of one umbrella:
+
+| Artifact | Contents | When to depend on it |
+| --- | --- | --- |
+| `io.github.shivathapaa:nepali-date-picker-core` | `NepaliDateConverter`, `NepaliCalendarModel`, `CustomCalendar`, `NepaliCalendarDefaults`, `NepaliSelectableDates` and other data utilities. Pure Kotlin + `kotlinx-datetime` + `compose-runtime` (only for `@Immutable`). No Material3 or UI dependencies. | Backend / non-UI modules that only need date conversion. |
+| `io.github.shivathapaa:nepali-date-picker-ui` | All composables - `NepaliDatePicker`, `NepaliDatePickerDialog`, `NepaliDateRangePicker`, `NepaliDateInput`, `NepaliDatePickerDefaults`, etc. Transitively brings in `-core`. | Any module that renders the picker UI. |
+
+If you used `io.github.shivathapaa:nepali-date-picker:2.x` before, the drop-in replacement is `nepali-date-picker-ui:3.0.0` - see the [migration guide](#migrating-from-26x-to-30x) below.
+
 ### Common Gradle
 
-In multiplatform projects, add a dependency to the commonMain source set dependencies
+In multiplatform projects, add the UI artifact to the commonMain source set dependencies (it transitively brings the core converter utilities):
 
 ```kotlin
 kotlin {
     sourceSets {
         commonMain {
             dependencies {
-                implementation("io.github.shivathapaa:nepali-date-picker:<latest-version>")
+                implementation("io.github.shivathapaa:nepali-date-picker-ui:<latest-version>")
+
+                // Or, if you only need the date converter / calendar utilities (no UI):
+                // implementation("io.github.shivathapaa:nepali-date-picker-core:<latest-version>")
             }
         }
     }
@@ -119,10 +133,12 @@ To add the nepali-date-picker library to your Android project, include the follo
 [versions]
 # ...
 kotlin = "2.1.20"
-nepaliDatePickerAndroid = "2.5.0-beta01" // Check for latest release
+nepaliDatePicker = "3.0.0" // Check for latest release
 
 [libraries]
-nepali-date-picker-android = { module = "io.github.shivathapaa:nepali-date-picker-android", version.ref = "nepaliDatePickerAndroid" }
+nepali-date-picker-ui = { module = "io.github.shivathapaa:nepali-date-picker-ui", version.ref = "nepaliDatePicker" }
+# Optional, only if you need the converter without the UI artifact:
+# nepali-date-picker-core = { module = "io.github.shivathapaa:nepali-date-picker-core", version.ref = "nepaliDatePicker" }
 
 [plugins]
 # ...
@@ -146,7 +162,7 @@ plugins {
 
 dependencies {
     // ...
-    implementation(libs.nepali.date.picker.android)
+    implementation(libs.nepali.date.picker.ui)
 }
 ```
 
@@ -201,6 +217,44 @@ import nepali_date_picker // import Nepali Date Picker library
 
 ### Desktop, Wasm, & Js
 The library supports Desktop, Wasm, and Js from version [v2.5.0-beta01](https://github.com/shivathapaa/Nepali-Date-Picker/releases/tag/2.5.0-beta01). See all artifacts [here](https://central.sonatype.com/namespace/io.github.shivathapaa)
+
+## Migrating from 2.6.x to 3.0.x
+
+**3.0.0 splits the single `nepali-date-picker` artifact into two modules and is a breaking release.** All consumer code stays in the same package (`dev.shivathapaa.nepalidatepickerkmp.*`), so most projects only need to update the dependency coordinate plus a handful of qualified references. See [`CHANGELOG.md`](./CHANGELOG.md) for the full diff.
+
+### 1. Replace the dependency coordinate
+
+```diff
+- implementation("io.github.shivathapaa:nepali-date-picker:2.6.2")
++ implementation("io.github.shivathapaa:nepali-date-picker-ui:3.0.0")
+```
+
+`-ui` transitively pulls `-core`, so a single line covers projects that previously used the umbrella artifact. If you only need date conversion utilities (no Compose UI), depend on `nepali-date-picker-core` directly instead.
+
+### 2. Move calendar-range constants to `NepaliCalendarDefaults`
+
+Five symbols moved from the UI-side `NepaliDatePickerDefaults` to the new Compose-free `NepaliCalendarDefaults` in `:core`:
+
+| Before (`2.6.x`) | After (`3.0.x`) |
+| --- | --- |
+| `NepaliDatePickerDefaults.NepaliYearRange` | `NepaliCalendarDefaults.NepaliYearRange` |
+| `NepaliDatePickerDefaults.EnglishYearRange` | `NepaliCalendarDefaults.EnglishYearRange` |
+| `NepaliDatePickerDefaults.startingNepaliCalendar` | `NepaliCalendarDefaults.startingNepaliCalendar` |
+| `NepaliDatePickerDefaults.endNepaliCalendar` | `NepaliCalendarDefaults.endNepaliCalendar` |
+| `NepaliDatePickerDefaults.startingEnglishCalendar` | `NepaliCalendarDefaults.startingEnglishCalendar` |
+
+Add the import `dev.shivathapaa.nepalidatepickerkmp.calendar_model.NepaliCalendarDefaults` and rename the qualifier - `NepaliDatePickerDefaults` keeps everything else (colors, typography, dialog defaults, headlines).
+
+### 3. Visibility changes (only affects code that already used these internals)
+
+`NepaliCalendarModel` and its two `compareDates` overloads were `internal` to the single module before; they are now public so the UI module can call into the core module across the artifact boundary. Existing call sites continue to work; you may now reference these from your own code as well.
+
+### Nothing else changes
+
+* Package name (`dev.shivathapaa.nepalidatepickerkmp.*`) is unchanged.
+* All composables (`NepaliDatePicker`, `NepaliDatePickerDialog`, range pickers, inputs, headlines) keep the same signatures.
+* `NepaliDateConverter`, `NepaliSelectableDates`, `NepaliDateLocale`, `CustomCalendar`, etc. keep the same API surface.
+* The iOS XCFramework still ships as `nepali-date-picker.xcframework` (now produced by the `:ui` module).
 
 ## License
 

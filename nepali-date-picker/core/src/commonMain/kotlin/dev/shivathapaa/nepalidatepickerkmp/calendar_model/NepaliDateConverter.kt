@@ -102,7 +102,7 @@ object NepaliDateConverter {
     /**
      * This function converts english date to nepali date.
      *
-     * @param englishYYYY year in english calendar which takes value between [NepaliDatePickerDefaults.EnglishYearRange]
+     * @param englishYYYY year in english calendar which takes value between [NepaliCalendarDefaults.EnglishYearRange]
      * @param englishMM month in english calendar which takes value between 1 to 12
      * @param englishDD day in english calendar which takes value between 1 to 31
      */
@@ -115,7 +115,7 @@ object NepaliDateConverter {
     /**
      * This function converts nepali date to english date.
      *
-     * @param nepaliYYYY year in nepali calendar which takes value between [NepaliDatePickerDefaults.NepaliYearRange]
+     * @param nepaliYYYY year in nepali calendar which takes value between [NepaliCalendarDefaults.NepaliYearRange]
      * @param nepaliMM month in nepali calendar which takes value between 1 to 12
      * @param nepaliDD day in nepali calendar which takes value between 1 to 32
      */
@@ -185,7 +185,7 @@ object NepaliDateConverter {
     /**
      * This function gives particular Nepali month details in Nepali calendar.
      *
-     * @param nepaliYear takes value between [NepaliDatePickerDefaults.NepaliYearRange]
+     * @param nepaliYear takes value between [NepaliCalendarDefaults.NepaliYearRange]
      * @param nepaliMonth takes value between 1 to 12
      *
      * @return [NepaliMonthCalendar] using [nepaliYear] and [nepaliMonth]
@@ -199,7 +199,7 @@ object NepaliDateConverter {
     /**
      * This function returns total days in a Nepali month.
      *
-     * @param year takes value between [NepaliDatePickerDefaults.NepaliYearRange]
+     * @param year takes value between [NepaliCalendarDefaults.NepaliYearRange]
      * @param month takes value between 1 to 12
      *
      * @return total days in a month
@@ -211,7 +211,7 @@ object NepaliDateConverter {
     /**
      * This function returns total days in a English month.
      *
-     * @param year takes value between [NepaliDatePickerDefaults.EnglishYearRange]
+     * @param year takes value between [NepaliCalendarDefaults.EnglishYearRange]
      * @param month takes value between 1 to 12
      *
      * @return total days in a month
@@ -228,7 +228,7 @@ object NepaliDateConverter {
      * @param startDate The starting date.
      * @param endDate The ending date.
      * @return The number of days between the two dates. Throws exception if the year is not in
-     * range [NepaliDatePickerDefaults.NepaliYearRange], or returns -1 if either date is invalid.
+     * range [NepaliCalendarDefaults.NepaliYearRange], or returns -1 if either date is invalid.
      */
     fun getNepaliDaysInBetween(startDate: SimpleDate, endDate: SimpleDate): Int {
         return calendarModel.nepaliDaysInBetween(startDate, endDate)

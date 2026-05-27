@@ -1,0 +1,31 @@
+import org.jetbrains.kotlin.gradle.plugin.mpp.apple.XCFramework
+
+plugins {
+    id("picker.kotlinMultiplatform")
+    id("picker.composeMultiplatform")
+    id("picker.mavenPublish")
+}
+
+kotlin {
+    val xcFrameworkName = "nepali-date-picker"
+    val xcf = XCFramework(xcFrameworkName)
+
+    listOf(iosArm64(), iosSimulatorArm64()).forEach { target ->
+        target.binaries.framework {
+            baseName = xcFrameworkName
+            binaryOption("bundleId", "io.github.shivathapaa.$xcFrameworkName")
+            xcf.add(this)
+            isStatic = true
+        }
+    }
+
+    sourceSets {
+        commonMain.dependencies {
+            api(projects.nepaliDatePicker.core)
+        }
+
+        jsMain.dependencies {
+            implementation(libs.html.core)
+        }
+    }
+}

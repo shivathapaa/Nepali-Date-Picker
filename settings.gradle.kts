@@ -1,5 +1,8 @@
 enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
+
 pluginManagement {
+    includeBuild("build-logic")
+
     repositories {
         google()
         gradlePluginPortal()
@@ -15,6 +18,9 @@ dependencyResolutionManagement {
 }
 
 rootProject.name = "NepaliDatePickerKmp"
-include(":nepali-date-picker")
+
+include(":nepali-date-picker:core")
+include(":nepali-date-picker:ui")
+
 include(":sample:androidApp")
 include(":sample:composeApp")

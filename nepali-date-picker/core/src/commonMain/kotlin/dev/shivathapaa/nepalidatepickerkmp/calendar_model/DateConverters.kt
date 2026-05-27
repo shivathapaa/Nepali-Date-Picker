@@ -29,10 +29,10 @@ import kotlinx.datetime.daysUntil
 @Immutable
 internal object DateConverters {
 
-    private val minNepaliYear = NepaliDatePickerDefaults.NepaliYearRange.first
-    private val maxNepaliYear = NepaliDatePickerDefaults.NepaliYearRange.last
-    private val minEnglishYear = NepaliDatePickerDefaults.EnglishYearRange.first
-    private val maxEnglishYear = NepaliDatePickerDefaults.EnglishYearRange.last
+    private val minNepaliYear = NepaliCalendarDefaults.NepaliYearRange.first
+    private val maxNepaliYear = NepaliCalendarDefaults.NepaliYearRange.last
+    private val minEnglishYear = NepaliCalendarDefaults.EnglishYearRange.first
+    private val maxEnglishYear = NepaliCalendarDefaults.EnglishYearRange.last
 
     fun getTotalDaysInNepaliMonth(nepaliYYYY: Int, nepaliMM: Int): Int {
         return daysInMonthMap.getValue(nepaliYYYY)[nepaliMM]
@@ -234,9 +234,9 @@ internal object DateConverters {
             else englishDateMap[targetYear - 1]
 
         val startingEnglishDate =
-            referenceDate?.englishDate ?: NepaliDatePickerDefaults.startingEnglishCalendar
+            referenceDate?.englishDate ?: NepaliCalendarDefaults.startingEnglishCalendar
         val startingNepaliCalendar =
-            referenceDate?.nepaliDate ?: NepaliDatePickerDefaults.startingNepaliCalendar
+            referenceDate?.nepaliDate ?: NepaliCalendarDefaults.startingNepaliCalendar
 
         return Pair(startingEnglishDate, startingNepaliCalendar)
     }
@@ -451,7 +451,7 @@ internal object DateConverters {
             ?: throw IllegalArgumentException("Invalid year $nepaliYear or month provided $nepaliMonth.")
 
         val startingNepaliCalendar = nepaliDateMap[nepaliYear - 1]?.nepaliDate
-            ?: NepaliDatePickerDefaults.startingNepaliCalendar
+            ?: NepaliCalendarDefaults.startingNepaliCalendar
 
         // Calculate the offset in days from the starting date to the target date
         val dayOffset =

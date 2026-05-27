@@ -38,7 +38,7 @@ import kotlin.time.ExperimentalTime
 import kotlin.time.Instant
 
 @Immutable
-internal class NepaliCalendarModel(val locale: NepaliDateLocale = NepaliDateLocale()) {
+class NepaliCalendarModel(val locale: NepaliDateLocale = NepaliDateLocale()) {
     private val timeZone = TimeZone.of(zoneId = "Asia/Kathmandu")
 
     @OptIn(ExperimentalTime::class)
@@ -571,7 +571,7 @@ internal class NepaliCalendarModel(val locale: NepaliDateLocale = NepaliDateLoca
      * @param dayOfMonth The day of the month of the date to compare with.
      * @return A negative integer, zero, or a positive integer as described above.
      */
-    internal fun compareDates(
+    fun compareDates(
         calendar: CustomCalendar,
         year: Int,
         month: Int,
@@ -584,7 +584,7 @@ internal class NepaliCalendarModel(val locale: NepaliDateLocale = NepaliDateLoca
         }
     }
 
-    internal fun compareDates(
+    fun compareDates(
         simpleDate: SimpleDate,
         year: Int,
         month: Int,

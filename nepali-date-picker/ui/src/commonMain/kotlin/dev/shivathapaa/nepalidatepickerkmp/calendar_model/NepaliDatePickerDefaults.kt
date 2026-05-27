@@ -480,57 +480,6 @@ object NepaliDatePickerDefaults {
         }
     }
 
-    /** The range of years for the Nepali date picker */
-    val EnglishYearRange: IntRange = IntRange(1913, 2043)
-    val NepaliYearRange: IntRange = IntRange(1970, 2100)
-
-    /** Starting Nepali date */
-    internal val startingNepaliCalendar = CustomCalendar(
-        year = NepaliYearRange.first,
-        month = 1,
-        dayOfMonth = 1,
-        totalDaysInMonth = 31,
-        dayOfWeekInMonth = 1,
-        dayOfWeek = 1,
-        dayOfYear = 1,
-        weekOfMonth = 1,
-        era = 2,
-        weekOfYear = 1,
-        firstDayOfMonth = 1, // Sunday
-        lastDayOfMonth = 3   // Tuesday
-    )
-
-    /** End Nepali Calendar. Will change overtime */
-    internal val endNepaliCalendar = CustomCalendar(
-        year = 2100,
-        month = 12,
-        dayOfMonth = 31,
-        era = 2,
-        firstDayOfMonth = 2,
-        lastDayOfMonth = 4,
-        totalDaysInMonth = 31,
-        dayOfWeekInMonth = 5,
-        dayOfWeek = 4,
-        dayOfYear = 366,
-        weekOfMonth = 5,
-        weekOfYear = 53
-    )
-
-    /** Starting English date */
-    internal val startingEnglishCalendar = CustomCalendar(
-        year = EnglishYearRange.first,
-        month = 4,
-        dayOfMonth = 13,
-        totalDaysInMonth = 30,
-        dayOfWeekInMonth = 2,
-        dayOfWeek = 1,
-        dayOfYear = 103,
-        weekOfMonth = 3,
-        era = 1,
-        weekOfYear = 16,
-        firstDayOfMonth = 3, // Tuesday
-        lastDayOfMonth = 4   // Wednesday
-    )
 }
 
 

@@ -21,7 +21,6 @@ kotlin {
         binaries.executable()
     }
     listOf(
-        iosX64(),
         iosArm64(),
         iosSimulatorArm64()
     ).forEach {
@@ -37,7 +36,7 @@ kotlin {
             implementation(libs.compose.ui)
             implementation(libs.foundation)
             implementation(libs.material3)
-            implementation(project(":nepali-date-picker"))
+            implementation(projects.nepaliDatePicker.ui)
             implementation(libs.material.icons.core)
         }
         jvmMain.dependencies {

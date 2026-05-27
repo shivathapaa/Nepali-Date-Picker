@@ -71,6 +71,7 @@ import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import dev.shivathapaa.nepalidatepickerkmp.calendar_model.NepaliCalendarDefaults
 import dev.shivathapaa.nepalidatepickerkmp.calendar_model.NepaliCalendarModel
 import dev.shivathapaa.nepalidatepickerkmp.calendar_model.NepaliDatePickerColors
 import dev.shivathapaa.nepalidatepickerkmp.calendar_model.NepaliDatePickerDefaults
@@ -597,8 +598,8 @@ internal fun NepaliEnglishMonth(
                         val isToday = todayDate == currentMonthDate.toSimpleDate()
                         val startDateSelected = startDate == currentMonthDate
                         val endDateSelected = endDate == currentMonthDate
-                        val startingNepaliYear = NepaliDatePickerDefaults.startingNepaliCalendar
-                        val endingNepaliYear = NepaliDatePickerDefaults.endNepaliCalendar
+                        val startingNepaliYear = NepaliCalendarDefaults.startingNepaliCalendar
+                        val endingNepaliYear = NepaliCalendarDefaults.endNepaliCalendar
 
                         val inRange =
                             if (nepaliSelectedRangeInfo != null) {
