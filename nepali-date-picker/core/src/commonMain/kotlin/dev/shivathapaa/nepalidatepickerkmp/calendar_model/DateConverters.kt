@@ -35,6 +35,9 @@ internal object DateConverters {
     private val maxEnglishYear = NepaliCalendarDefaults.EnglishYearRange.last
 
     fun getTotalDaysInNepaliMonth(nepaliYYYY: Int, nepaliMM: Int): Int {
+        require(nepaliMM in 1..12) {
+            "Invalid month: $nepaliMM. Must be between 1 and 12."
+        }
         return daysInMonthMap.getValue(nepaliYYYY)[nepaliMM]
     }
 
@@ -388,6 +391,9 @@ internal object DateConverters {
         dayOfMonth: Int,
         daysToAdjust: Int
     ): CustomCalendar {
+        require(month in 1..12) {
+            "Invalid month: $month. Must be between 1 and 12."
+        }
         val totalDaysInCurrentMonth = daysInMonthMap[year]?.get(month)
             ?: throw IllegalArgumentException("Out of range: Invalid year $year or month $month passed.")
 
@@ -447,6 +453,9 @@ internal object DateConverters {
     fun calculateNepaliMonthDetails(
         nepaliYear: Int, nepaliMonth: Int
     ): NepaliMonthCalendar {
+        require(nepaliMonth in 1..12) {
+            "Invalid month: $nepaliMonth. Must be between 1 and 12."
+        }
         val totalDaysInMonth = daysInMonthMap[nepaliYear]?.get(nepaliMonth)
             ?: throw IllegalArgumentException("Invalid year $nepaliYear or month provided $nepaliMonth.")
 

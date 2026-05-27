@@ -205,11 +205,31 @@ class CalendarPropertiesTests {
 
     @Test
     fun getNepaliCalendar_invalidMonth_throws() {
-        // Mirrors the inconsistency exposed by DateArithmeticTests: month=13 walks
-        // off the IntArray instead of triggering the elvis branch.
-        val ex = kotlin.runCatching {
+        assertFailsWith<IllegalArgumentException> {
             NepaliDateConverter.getNepaliCalendar(2081, 13, 1)
-        }.exceptionOrNull()
-        assertTrue(ex != null)
+        }
+        assertFailsWith<IllegalArgumentException> {
+            NepaliDateConverter.getNepaliCalendar(2081, 0, 1)
+        }
+    }
+
+    @Test
+    fun getTotalDaysInNepaliMonth_invalidMonth_throws() {
+        assertFailsWith<IllegalArgumentException> {
+            NepaliDateConverter.getTotalDaysInNepaliMonth(2081, 0)
+        }
+        assertFailsWith<IllegalArgumentException> {
+            NepaliDateConverter.getTotalDaysInNepaliMonth(2081, 13)
+        }
+    }
+
+    @Test
+    fun getNepaliMonthCalendar_invalidMonth_throws() {
+        assertFailsWith<IllegalArgumentException> {
+            NepaliDateConverter.getNepaliMonthCalendar(2081, 0)
+        }
+        assertFailsWith<IllegalArgumentException> {
+            NepaliDateConverter.getNepaliMonthCalendar(2081, 13)
+        }
     }
 }

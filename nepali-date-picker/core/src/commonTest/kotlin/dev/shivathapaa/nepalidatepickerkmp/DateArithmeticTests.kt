@@ -124,15 +124,12 @@ class DateArithmeticTests {
 
     @Test
     fun addDays_invalidMonthThrows() {
-        // Currently throws ArrayIndexOutOfBoundsException because
-        // adjustNepaliDateForDayAdjustments does `daysInMonthMap[year]?.get(month)`
-        // and the IntArray is size 13 (indices 0..12). The elvis branch that emits
-        // IllegalArgumentException only fires when the year is missing, not when
-        // the month is out of bounds. Library should normalise to IAE.
-        val ex = kotlin.runCatching {
+        assertFailsWith<IllegalArgumentException> {
             NepaliDateConverter.getNepaliCalendarAfterAdditionOrSubtraction(2081, 13, 1, 5)
-        }.exceptionOrNull()
-        assertTrue(ex != null, "Expected an exception for month=13")
+        }
+        assertFailsWith<IllegalArgumentException> {
+            NepaliDateConverter.getNepaliCalendarAfterAdditionOrSubtraction(2081, 0, 1, 5)
+        }
     }
 
     // ── plus / minus months ──────────────────────────────────────────────────
