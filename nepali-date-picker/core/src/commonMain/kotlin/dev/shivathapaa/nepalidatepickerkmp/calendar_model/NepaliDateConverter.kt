@@ -826,9 +826,9 @@ object NepaliDateConverter {
      * This function generates a formatted time string in Nepali.
      *
      * The time of day is determined using hour values to Nepali names:
-     * * 4-10: "बिहान"
-     * * 11-15: "दिउँसो"
-     * * 16-19: "साँझ"
+     * * 3-11: "बिहान"
+     * * 12-16: "दिउँसो"
+     * * 17-19: "साँझ"
      * * Other: "राति"
      *
      * The hour is displayed in 12-hour format if `use12HourFormat` is true, otherwise in 24-hour format.
@@ -1106,8 +1106,8 @@ object NepaliDateConverter {
         return calendarModel.compareDates(
             dateToCompareFrom,
             dateToCompareTo.year,
-            dateToCompareFrom.month,
-            dateToCompareFrom.dayOfMonth
+            dateToCompareTo.month,
+            dateToCompareTo.dayOfMonth
         )
     }
 
@@ -1130,8 +1130,8 @@ object NepaliDateConverter {
         return calendarModel.compareDates(
             dateToCompareFrom,
             dateToCompareTo.year,
-            dateToCompareFrom.month,
-            dateToCompareFrom.dayOfMonth
+            dateToCompareTo.month,
+            dateToCompareTo.dayOfMonth
         )
     }
 

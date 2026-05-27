@@ -316,7 +316,7 @@ internal object DateConverters {
         ) {
             throw IllegalArgumentException(
                 "Out of Range: Nepali start year ${startDate.year} or end year " +
-                        "${startDate.year} is out of range to compare. Check range value from NepaliDatePickerDefaults."
+                        "${endDate.year} is out of range to compare. Check range value from NepaliDatePickerDefaults."
             )
         }
 
