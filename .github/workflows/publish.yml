@@ -1,21 +1,92 @@
 name: Publish
+
 on:
   release:
     types: [released, prereleased]
+
+concurrency:
+  # Never cancel an in-flight publish — a half-cancelled deploy can leave a
+  # bundle hanging on Central Portal.
+  group: publish-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
 jobs:
-  publish:
-    name: Release build and publish
-    runs-on: macOS-latest
+  # ── Gate 1: tamper-check the Gradle wrapper before we execute it ───────────
+  validate-wrapper:
+    name: Validate Gradle wrapper
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
     steps:
-      - name: Check out code
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+      - uses: gradle/actions/wrapper-validation@v4
+
+  # ── Gate 2: release tag must match the version we're about to publish ─────
+  verify-version:
+    name: Verify release tag matches VERSION_NAME
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Compare release tag to gradle.properties
+        run: |
+          set -euo pipefail
+          tag="${{ github.event.release.tag_name }}"
+          tag="${tag#v}"
+          version_name=$(grep '^VERSION_NAME=' gradle.properties | cut -d= -f2 | tr -d '[:space:]')
+          if [ -z "$version_name" ]; then
+            echo "::error::Could not read VERSION_NAME from gradle.properties"
+            exit 1
+          fi
+          if [ "$tag" != "$version_name" ]; then
+            echo "::error::Release tag '$tag' does not match gradle.properties VERSION_NAME '$version_name'. Bump VERSION_NAME or retag before publishing."
+            exit 1
+          fi
+          echo "✅ Tag '$tag' matches VERSION_NAME '$version_name'."
+
+  # ── Gate 3: every test on every host must pass ────────────────────────────
+  # Reusable workflow runs a fail-fast: false matrix across macOS, Linux and
+  # Windows. `needs: test` below waits for ALL matrix legs to succeed.
+  test:
+    needs: [validate-wrapper, verify-version]
+    uses: ./.github/workflows/_test.yml
+
+  # ── Gate 4: publish only if every gate above is green ─────────────────────
+  publish:
+    name: Publish to Maven Central
+    needs: test
+    runs-on: macos-latest
+    timeout-minutes: 60
+    # Optional manual approval before publishing — configure protection rules
+    # on the `maven-central` environment in repo settings if you want a human
+    # gate too. Without rules, the environment is permissive.
+    environment: maven-central
+    steps:
+      - uses: actions/checkout@v4
+
       - name: Set up JDK 21
         uses: actions/setup-java@v4
         with:
           distribution: 'zulu'
           java-version: 21
-      - name: Publish to MavenCentral
-        run: ./gradlew publishToMavenCentral --no-configuration-cache
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Publish :core and :ui in a single Gradle run
+        # Both modules share one Gradle invocation. If :core fails, :ui never
+        # runs (Gradle's default fail-fast). The remaining half-state risk is
+        # :core releasing successfully and :ui failing afterwards — Central
+        # Portal cleanup would then be manual. There is no Vanniktech task
+        # today that atomically promotes two deployments together.
+        run: |
+          ./gradlew \
+            :nepali-date-picker:core:publishAndReleaseToMavenCentral \
+            :nepali-date-picker:ui:publishAndReleaseToMavenCentral \
+            --no-parallel \
+            --stacktrace
         env:
           ORG_GRADLE_PROJECT_mavenCentralUsername: ${{ secrets.MAVEN_CENTRAL_USERNAME }}
           ORG_GRADLE_PROJECT_mavenCentralPassword: ${{ secrets.MAVEN_CENTRAL_PASSWORD }}

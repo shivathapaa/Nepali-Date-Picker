@@ -1,0 +1,73 @@
+name: Test
+
+# Reusable workflow that runs the full :core + :ui test matrix on macOS,
+# Linux and Windows. Used by both ci.yml (per-PR) and publish.yml (release gate).
+on:
+  workflow_call:
+
+jobs:
+  test:
+    name: Build & test (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 60
+    strategy:
+      # Surface failures from every host even if one fails — needed so the
+      # release gate sees the complete picture.
+      fail-fast: false
+      matrix:
+        os: [macos-latest, ubuntu-latest, windows-latest]
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: 21
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      # macOS: Apple natives + JVM + JS/Wasm node + sample. Uses *NodeTest because
+      # the test code is pure-Kotlin with no DOM dependency — running karma+Chrome
+      # would add a heavy host requirement for zero extra coverage. Browser tests
+      # can be added later when UI tests start exercising the DOM.
+      - name: Build & test (macOS)
+        if: runner.os == 'macOS'
+        run: |
+          ./gradlew \
+            :nepali-date-picker:core:iosSimulatorArm64Test \
+            :nepali-date-picker:core:macosArm64Test \
+            :nepali-date-picker:core:jvmTest \
+            :nepali-date-picker:core:jsNodeTest \
+            :nepali-date-picker:core:wasmJsNodeTest \
+            :sample:androidApp:assembleDebug \
+            --stacktrace
+
+      # Linux: JVM + JS/Wasm node + linuxX64 native + sample. No Apple, no mingw.
+      - name: Build & test (Linux)
+        if: runner.os == 'Linux'
+        run: |
+          ./gradlew \
+            :nepali-date-picker:core:jvmTest \
+            :nepali-date-picker:core:jsNodeTest \
+            :nepali-date-picker:core:wasmJsNodeTest \
+            :nepali-date-picker:core:linuxX64Test \
+            :sample:androidApp:assembleDebug \
+            --stacktrace
+
+      # Windows: mingwX64 only - everything else is covered elsewhere.
+      - name: Build & test (Windows)
+        if: runner.os == 'Windows'
+        run: ./gradlew :nepali-date-picker:core:mingwX64Test --stacktrace
+
+      - name: Upload test reports
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-reports-${{ matrix.os }}
+          path: |
+            **/build/reports/tests/
+            **/build/test-results/
+          retention-days: 30
