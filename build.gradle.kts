@@ -41,7 +41,8 @@ tasks.register("checkLocal") {
         ":nepali-date-picker:core:iosSimulatorArm64Test",
         ":nepali-date-picker:core:macosArm64Test",
         ":nepali-date-picker:core:jsNodeTest",
-        ":nepali-date-picker:core:wasmJsNodeTest"
+        ":nepali-date-picker:core:wasmJsNodeTest",
+        ":nepali-date-picker:core:wasmWasiNodeTest"
     )
 }
 

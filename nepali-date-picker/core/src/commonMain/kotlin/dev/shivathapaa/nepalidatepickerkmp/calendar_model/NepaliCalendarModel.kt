@@ -28,8 +28,9 @@ import dev.shivathapaa.nepalidatepickerkmp.data.NepaliMonthName
 import dev.shivathapaa.nepalidatepickerkmp.data.SimpleDate
 import dev.shivathapaa.nepalidatepickerkmp.data.SimpleTime
 import dev.shivathapaa.nepalidatepickerkmp.data.toSimpleDate
+import kotlinx.datetime.FixedOffsetTimeZone
 import kotlinx.datetime.LocalDateTime
-import kotlinx.datetime.TimeZone
+import kotlinx.datetime.UtcOffset
 import kotlinx.datetime.number
 import kotlinx.datetime.toInstant
 import kotlinx.datetime.toLocalDateTime
@@ -39,7 +40,11 @@ import kotlin.time.Instant
 
 @Immutable
 class NepaliCalendarModel(val locale: NepaliDateLocale = NepaliDateLocale()) {
-    private val timeZone = TimeZone.of(zoneId = "Asia/Kathmandu")
+    // Nepal Time is a fixed +05:45 offset with no DST and no historical transitions, so a
+    // FixedOffsetTimeZone gives the same answers as TimeZone.of("Asia/Kathmandu") while
+    // working on every Kotlin target — including mingwX64 (Windows native) and wasmWasi,
+    // which don't ship the IANA tzdata bundle that named lookups need.
+    private val timeZone = FixedOffsetTimeZone(UtcOffset(hours = 5, minutes = 45))
 
     @OptIn(ExperimentalTime::class)
     private val localEnglishDateTime: LocalDateTime = Clock.System.now().toLocalDateTime(timeZone)

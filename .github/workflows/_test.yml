@@ -49,6 +49,7 @@ jobs:
             :nepali-date-picker:core:testAndroidHostTest \
             :nepali-date-picker:core:jsNodeTest \
             :nepali-date-picker:core:wasmJsNodeTest \
+            :nepali-date-picker:core:wasmWasiNodeTest \
             :sample:androidApp:assembleDebug \
             --stacktrace
 
@@ -61,6 +62,7 @@ jobs:
             :nepali-date-picker:core:testAndroidHostTest \
             :nepali-date-picker:core:jsNodeTest \
             :nepali-date-picker:core:wasmJsNodeTest \
+            :nepali-date-picker:core:wasmWasiNodeTest \
             :nepali-date-picker:core:linuxX64Test \
             :sample:androidApp:assembleDebug \
             --stacktrace

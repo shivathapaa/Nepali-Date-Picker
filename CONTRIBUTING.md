@@ -94,7 +94,6 @@ The repository ships shared IntelliJ / Android Studio run configurations under `
 
 Opt-in flags for environments that can run them:
 - `-PenableBrowserTests` - runs `jsBrowserTest` / `wasmJsBrowserTest` (needs Chrome).
-- `-PenableWasmWasiTests` - runs `wasmWasiNodeTest` (needs WASI tzdata for `Asia/Kathmandu`).
 - `-PenableAppleSimulatorTargets` (or `CI=true`) - declares the `iosX64`, `watchosSimulatorArm64`, `tvosSimulatorArm64` targets locally; CI already sets `CI=true`, so the published artifact always ships them.
 
 ### Running the sample app
