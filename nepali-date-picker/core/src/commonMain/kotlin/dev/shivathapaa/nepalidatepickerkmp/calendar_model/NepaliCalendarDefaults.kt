@@ -27,6 +27,9 @@ import dev.shivathapaa.nepalidatepickerkmp.data.CustomCalendar
  */
 object NepaliCalendarDefaults {
 
+    /** The default first day of the week (1 = Sunday). */
+    const val FIRST_DAY_OF_WEEK: Int = 1
+
     /** Supported range of years in the English (Gregorian) calendar. */
     val EnglishYearRange: IntRange = IntRange(1913, 2043)
 

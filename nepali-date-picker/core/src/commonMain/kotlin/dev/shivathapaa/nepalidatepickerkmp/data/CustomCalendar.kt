@@ -30,12 +30,20 @@ data class SimpleDate(
     val year: Int,
     val month: Int,
     val dayOfMonth: Int = 1
-) {
+) : Comparable<SimpleDate> {
     /**
      * Returns the position of a [SimpleDate] within given years range.
      */
     fun indexIn(years: IntRange): Int {
         return (year - years.first) * 12 + month - 1
+    }
+
+    override fun compareTo(other: SimpleDate): Int {
+        return when {
+            year != other.year -> year - other.year
+            month != other.month -> month - other.month
+            else -> dayOfMonth - other.dayOfMonth
+        }
     }
 }
 

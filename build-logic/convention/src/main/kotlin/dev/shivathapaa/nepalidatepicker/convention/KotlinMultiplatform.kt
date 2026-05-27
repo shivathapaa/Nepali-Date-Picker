@@ -57,7 +57,7 @@ internal fun Project.configureKotlinMultiplatformAndroidLibrary(
     extension: KotlinMultiplatformAndroidComponentsExtension,
 ) {
     extension.finalizeDsl { android ->
-        val moduleName = project.path.removePrefix(":").replace(':', '.')
+        val moduleName = project.path.removePrefix(":").replace(':', '.').replace('-', '_')
         android.namespace = "dev.shivathapaa.nepalidatepicker.$moduleName"
         android.compileSdk = libs.findVersion("android-compileSdk").get().requiredVersion.toInt()
         android.minSdk = libs.findVersion("android-minSdk").get().requiredVersion.toInt()
