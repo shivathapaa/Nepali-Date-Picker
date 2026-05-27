@@ -16,7 +16,7 @@
 
 package dev.shivathapaa.nepalidatepickerkmp
 
-import androidx.compose.runtime.Stable
+import dev.shivathapaa.nepalidatepickerkmp.annotation.Stable
 import dev.shivathapaa.nepalidatepickerkmp.data.CustomCalendar
 
 /**

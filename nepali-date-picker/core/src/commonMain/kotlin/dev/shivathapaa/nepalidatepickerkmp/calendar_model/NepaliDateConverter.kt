@@ -16,8 +16,8 @@
 
 package dev.shivathapaa.nepalidatepickerkmp.calendar_model
 
-import androidx.compose.runtime.Immutable
 import dev.shivathapaa.nepalidatepickerkmp.NepaliSelectableDates
+import dev.shivathapaa.nepalidatepickerkmp.annotation.Immutable
 import dev.shivathapaa.nepalidatepickerkmp.data.CustomCalendar
 import dev.shivathapaa.nepalidatepickerkmp.data.CustomDateTime
 import dev.shivathapaa.nepalidatepickerkmp.data.NameFormat

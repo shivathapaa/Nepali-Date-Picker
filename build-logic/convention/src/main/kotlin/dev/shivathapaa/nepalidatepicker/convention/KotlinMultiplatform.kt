@@ -36,6 +36,15 @@ internal fun Project.configureKotlinMultiplatform(extension: KotlinMultiplatform
                 implementation(libs.findLibrary("kotlin-test").get())
             }
         }
+        targets.configureEach {
+            compilations.configureEach {
+                compileTaskProvider.configure {
+                    compilerOptions {
+                        freeCompilerArgs.add("-Xexpect-actual-classes")
+                    }
+                }
+            }
+        }
     }.also {
         // Pin JVM target across JVM + Android compilations so Compose-runtime / kotlinx-datetime
         // line up with the toolchain consumers expect (JDK 11 baseline).

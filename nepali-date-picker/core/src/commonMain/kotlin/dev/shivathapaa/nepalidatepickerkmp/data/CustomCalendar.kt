@@ -16,7 +16,7 @@
 
 package dev.shivathapaa.nepalidatepickerkmp.data
 
-import androidx.compose.runtime.Immutable
+import dev.shivathapaa.nepalidatepickerkmp.annotation.Immutable
 
 /**
  * Represents a simple date with year, month, and day of the month.

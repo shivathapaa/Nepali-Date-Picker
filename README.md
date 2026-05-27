@@ -99,8 +99,27 @@ Starting with **3.0.0** the library ships as **two artifacts** instead of one um
 
 | Artifact | Contents | When to depend on it |
 | --- | --- | --- |
-| `io.github.shivathapaa:nepali-date-picker-core` | `NepaliDateConverter`, `NepaliCalendarModel`, `CustomCalendar`, `NepaliCalendarDefaults`, `NepaliSelectableDates` and other data utilities. Pure Kotlin + `kotlinx-datetime` + `compose-runtime` (only for `@Immutable`). No Material3 or UI dependencies. | Backend / non-UI modules that only need date conversion. |
+| `io.github.shivathapaa:nepali-date-picker-core` | `NepaliDateConverter`, `NepaliCalendarModel`, `CustomCalendar`, `NepaliCalendarDefaults`, `NepaliSelectableDates` and other data utilities. Pure Kotlin + `kotlinx-datetime`. **Zero Compose / UI dependencies** - `@Immutable` / `@Stable` are expect-annotations that alias to `androidx.compose.runtime.*` only on Compose-supported targets. | Backend / CLI / embedded modules that only need date conversion, or any non-Compose Kotlin target. |
 | `io.github.shivathapaa:nepali-date-picker-ui` | All composables - `NepaliDatePicker`, `NepaliDatePickerDialog`, `NepaliDateRangePicker`, `NepaliDateInput`, `NepaliDatePickerDefaults`, etc. Transitively brings in `-core`. | Any module that renders the picker UI. |
+
+#### Supported KMP targets
+
+`-core` targets a strict superset of `-ui` because `-core` carries no Compose dependency.
+
+| Target | `-core` | `-ui` |
+| --- | :---: | :---: |
+| `android` | yes | yes |
+| `jvm` | yes | yes |
+| `js` (IR) | yes | yes |
+| `wasmJs` | yes | yes |
+| `iosArm64`, `iosSimulatorArm64` | yes | yes |
+| `macosArm64` | yes | yes |
+| `iosX64`, `macosX64` | yes | no (Compose Multiplatform dropped Apple x86_64 in 1.11) |
+| `linuxX64`, `linuxArm64` | yes | no |
+| `mingwX64` (Windows native) | yes | no |
+| `watchosArm64`, `watchosSimulatorArm64`, `watchosX64` | yes | no |
+| `tvosArm64`, `tvosSimulatorArm64`, `tvosX64` | yes | no |
+| `wasmWasi` | yes | no |
 
 If you used `io.github.shivathapaa:nepali-date-picker:2.x` before, the drop-in replacement is `nepali-date-picker-ui:3.0.0` - see the [migration guide](#migrating-from-26x-to-30x) below.
 
