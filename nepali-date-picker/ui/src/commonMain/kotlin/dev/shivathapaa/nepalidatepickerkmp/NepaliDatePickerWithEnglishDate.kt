@@ -39,10 +39,7 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
-import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
-import androidx.compose.material.icons.filled.ArrowDropDown
+import dev.shivathapaa.nepalidatepickerkmp.icons.NepaliIcons
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -419,13 +416,13 @@ internal fun NepaliEnglishMonthsNavigation(
 
                     IconButton(onClick = onPreviousClicked, enabled = previousAvailable) {
                         Icon(
-                            Icons.AutoMirrored.Filled.KeyboardArrowLeft, contentDescription = null
+                            NepaliIcons.KeyboardArrowLeft, contentDescription = null
                         )
                     }
 
                     IconButton(onClick = onNextClicked, enabled = nextAvailable) {
                         Icon(
-                            Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = null
+                            NepaliIcons.KeyboardArrowRight, contentDescription = null
                         )
                     }
                 }
@@ -452,7 +449,7 @@ private fun NepaliYearPickerMenuButton(
         content()
         Spacer(Modifier.size(ButtonDefaults.IconSpacing))
         Icon(
-            imageVector = Icons.Filled.ArrowDropDown,
+            imageVector = NepaliIcons.ArrowDropDown,
             contentDescription = null,
             modifier = Modifier.rotate(if (expanded) 180f else 0f)
         )

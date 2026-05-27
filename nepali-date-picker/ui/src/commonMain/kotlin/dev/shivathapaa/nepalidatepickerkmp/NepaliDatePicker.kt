@@ -57,12 +57,7 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
-import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
-import androidx.compose.material.icons.filled.ArrowDropDown
-import androidx.compose.material.icons.filled.DateRange
-import androidx.compose.material.icons.filled.Edit
+import dev.shivathapaa.nepalidatepickerkmp.icons.NepaliIcons
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -301,14 +296,14 @@ internal fun NepaliDisplayModeToggleButton(
     if (displayMode == DisplayMode.Picker) {
         IconButton(onClick = { onDisplayModeChange(DisplayMode.Input) }, modifier = modifier) {
             Icon(
-                imageVector = Icons.Filled.Edit,
+                imageVector = NepaliIcons.Edit,
                 contentDescription = "getString(Strings.DatePickerSwitchToInputMode)"
             )
         }
     } else {
         IconButton(onClick = { onDisplayModeChange(DisplayMode.Picker) }, modifier = modifier) {
             Icon(
-                imageVector = Icons.Filled.DateRange,
+                imageVector = NepaliIcons.DateRange,
                 contentDescription = "getString(Strings.DatePickerSwitchToCalendarMode)"
             )
         }
@@ -896,13 +891,13 @@ internal fun NepaliMonthsNavigation(
 
                     IconButton(onClick = onPreviousClicked, enabled = previousAvailable) {
                         Icon(
-                            Icons.AutoMirrored.Filled.KeyboardArrowLeft, contentDescription = null
+                            NepaliIcons.KeyboardArrowLeft, contentDescription = null
                         )
                     }
 
                     IconButton(onClick = onNextClicked, enabled = nextAvailable) {
                         Icon(
-                            Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = null
+                            NepaliIcons.KeyboardArrowRight, contentDescription = null
                         )
                     }
                 }
@@ -929,7 +924,7 @@ private fun NepaliYearPickerMenuButton(
         content()
         Spacer(Modifier.size(ButtonDefaults.IconSpacing))
         Icon(
-            imageVector = Icons.Filled.ArrowDropDown,
+            imageVector = NepaliIcons.ArrowDropDown,
             contentDescription = null,
             modifier = Modifier.rotate(if (expanded) 180f else 0f)
         )

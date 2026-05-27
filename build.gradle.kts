@@ -59,7 +59,7 @@ tasks.register("moduleGraph") {
               ← (no internal deps; kotlinx-datetime + compose-runtime)
             :nepali-date-picker:ui
               ← :nepali-date-picker:core
-              ← Compose Multiplatform (runtime, foundation, ui, material3, material-icons-core)
+              ← Compose Multiplatform (runtime, foundation, ui, material3)
             :sample:composeApp
               ← :nepali-date-picker:ui
             :sample:androidApp

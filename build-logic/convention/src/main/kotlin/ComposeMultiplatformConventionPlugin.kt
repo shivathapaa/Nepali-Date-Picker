@@ -18,7 +18,6 @@ class ComposeMultiplatformConventionPlugin : Plugin<Project> {
                     implementation(libs.findLibrary("foundation").get())
                     implementation(libs.findLibrary("compose-ui").get())
                     implementation(libs.findLibrary("material3").get())
-                    implementation(libs.findLibrary("material-icons-core").get())
                 }
             }
         }
