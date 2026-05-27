@@ -114,11 +114,11 @@ Starting with **3.0.0** the library ships as **two artifacts** instead of one um
 | `wasmJs` | yes | yes |
 | `iosArm64`, `iosSimulatorArm64` | yes | yes |
 | `macosArm64` | yes | yes |
-| `iosX64`, `macosX64` | yes | no (Compose Multiplatform dropped Apple x86_64 in 1.11) |
+| `iosX64` | yes | no (Compose Multiplatform dropped Apple x86_64 in 1.11) |
 | `linuxX64`, `linuxArm64` | yes | no |
 | `mingwX64` (Windows native) | yes | no |
-| `watchosArm64`, `watchosSimulatorArm64`, `watchosX64` | yes | no |
-| `tvosArm64`, `tvosSimulatorArm64`, `tvosX64` | yes | no |
+| `watchosArm64`, `watchosSimulatorArm64` | yes | no |
+| `tvosArm64`, `tvosSimulatorArm64` | yes | no |
 | `wasmWasi` | yes | no |
 
 If you used `io.github.shivathapaa:nepali-date-picker:2.x` before, the drop-in replacement is `nepali-date-picker-ui:3.0.0` - see the [migration guide](#migrating-from-26x-to-30x) below.
@@ -308,7 +308,7 @@ This library uses a `1-based index` where 1 represents Sunday or January/Baisakh
 
 Don't forget about the **DateRange** before using.
 
-You can check this inside library under `NepaliDatePickerDefaults.NepaliYearRange` and `NepaliDatePickerDefaults.EnglishYearRange`
+You can check this inside library under `NepaliCalendarDefaults.NepaliYearRange` and `NepaliCalendarDefaults.EnglishYearRange` (moved from `NepaliDatePickerDefaults` in `3.0.0` - see the [migration guide](#migrating-from-26x-to-30x)).
 
 ```
 // This will be changed overtime to support wider dates.
