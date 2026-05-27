@@ -84,5 +84,10 @@ internal fun Project.configureKotlinMultiplatformAndroidLibrary(
         android.namespace = "dev.shivathapaa.nepalidatepicker.$moduleName"
         android.compileSdk = libs.findVersion("android-compileSdk").get().requiredVersion.toInt()
         android.minSdk = libs.findVersion("android-minSdk").get().requiredVersion.toInt()
+
+        // Opt the android KMP target into running `commonTest` on the JVM host (Robolectric-free).
+        // Without this, AGP warns: "The 'commonTest' source directory exists, but android host
+        // tests are not enabled" and `commonTest` only executes on jvm / native / js / wasmJs.
+        android.withHostTestBuilder { }.configure { }
     }
 }

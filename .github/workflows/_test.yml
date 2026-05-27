@@ -40,17 +40,19 @@ jobs:
             :nepali-date-picker:core:iosSimulatorArm64Test \
             :nepali-date-picker:core:macosArm64Test \
             :nepali-date-picker:core:jvmTest \
+            :nepali-date-picker:core:testAndroidHostTest \
             :nepali-date-picker:core:jsNodeTest \
             :nepali-date-picker:core:wasmJsNodeTest \
             :sample:androidApp:assembleDebug \
             --stacktrace
 
-      # Linux: JVM + JS/Wasm node + linuxX64 native + sample. No Apple, no mingw.
+      # Linux: JVM + Android host + JS/Wasm node + linuxX64 native + sample. No Apple, no mingw.
       - name: Build & test (Linux)
         if: runner.os == 'Linux'
         run: |
           ./gradlew \
             :nepali-date-picker:core:jvmTest \
+            :nepali-date-picker:core:testAndroidHostTest \
             :nepali-date-picker:core:jsNodeTest \
             :nepali-date-picker:core:wasmJsNodeTest \
             :nepali-date-picker:core:linuxX64Test \

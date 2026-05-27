@@ -34,9 +34,10 @@ tasks.register("checkAll") {
  */
 tasks.register("checkLocal") {
     group = "verification"
-    description = "Runs JVM + Apple native + JS/Wasm node tests (no browser, no Chrome required)."
+    description = "Runs JVM + Android host + Apple native + JS/Wasm node tests (no browser, no Chrome required)."
     dependsOn(
         ":nepali-date-picker:core:jvmTest",
+        ":nepali-date-picker:core:testAndroidHostTest",
         ":nepali-date-picker:core:iosSimulatorArm64Test",
         ":nepali-date-picker:core:macosArm64Test",
         ":nepali-date-picker:core:jsNodeTest",

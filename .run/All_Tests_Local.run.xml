@@ -11,6 +11,7 @@
       <option name="taskNames">
         <list>
           <option value=":nepali-date-picker:core:jvmTest" />
+          <option value=":nepali-date-picker:core:testAndroidHostTest" />
           <option value=":nepali-date-picker:core:iosSimulatorArm64Test" />
           <option value=":nepali-date-picker:core:macosArm64Test" />
           <option value=":nepali-date-picker:core:jsNodeTest" />
