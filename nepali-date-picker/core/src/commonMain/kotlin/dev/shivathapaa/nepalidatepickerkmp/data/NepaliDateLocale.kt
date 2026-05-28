@@ -28,14 +28,27 @@ import dev.shivathapaa.nepalidatepickerkmp.annotation.Immutable
  * @property dateFormat The style of date formatting to use. Defaults to LONG.
  * @property weekDayName The format for displaying weekday names (FULL, MEDIUM, or SHORT). Defaults to FULL.
  * @property monthName The format for displaying month names (FULL, MEDIUM, or SHORT). Defaults to FULL.
+ * @property digitScript Explicit numeral script for digits. `null` (the default) means
+ *   "follow the [language]" — see [defaultDigitScript]. Set this to render Nepali month
+ *   names with Latin digits, or English month names with Devanagari digits.
  */
 @Immutable
 data class NepaliDateLocale(
     val language: NepaliDatePickerLang = NepaliDatePickerLang.ENGLISH,
     val dateFormat: NepaliDateFormatStyle = NepaliDateFormatStyle.LONG,
     val weekDayName: NameFormat = NameFormat.FULL,
-    val monthName: NameFormat = NameFormat.FULL
-)
+    val monthName: NameFormat = NameFormat.FULL,
+    val digitScript: DigitScript? = null
+) {
+    /**
+     * Concrete digit script to render numerals with. Returns [digitScript] when the
+     * consumer set it explicitly, otherwise falls back to [language]'s default.
+     *
+     * `.copy(language = ...)` updates this automatically when no explicit override exists.
+     */
+    val resolvedDigitScript: DigitScript
+        get() = digitScript ?: language.defaultDigitScript()
+}
 
 /**
  * Represents the format for displaying names (e.g., weekdays or months).

@@ -8,6 +8,8 @@
  *  http://mozilla.org/MPL/2.0/
  */
 
+@file:Suppress("DEPRECATION") // intentionally exercises the deprecated convertTo*Number / localizeNumber alias — see DigitScriptTests for new API coverage
+
 package dev.shivathapaa.nepalidatepickerkmp
 
 import dev.shivathapaa.nepalidatepickerkmp.calendar_model.NepaliCalendarModel

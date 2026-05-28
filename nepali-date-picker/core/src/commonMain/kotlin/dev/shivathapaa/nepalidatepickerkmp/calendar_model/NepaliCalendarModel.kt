@@ -19,6 +19,8 @@ package dev.shivathapaa.nepalidatepickerkmp.calendar_model
 import dev.shivathapaa.nepalidatepickerkmp.annotation.Immutable
 import dev.shivathapaa.nepalidatepickerkmp.data.CustomCalendar
 import dev.shivathapaa.nepalidatepickerkmp.data.CustomDateTime
+import dev.shivathapaa.nepalidatepickerkmp.data.DigitScript
+import dev.shivathapaa.nepalidatepickerkmp.data.defaultDigitScript
 import dev.shivathapaa.nepalidatepickerkmp.data.NameFormat
 import dev.shivathapaa.nepalidatepickerkmp.data.NepaliDateFormatStyle
 import dev.shivathapaa.nepalidatepickerkmp.data.NepaliDateLocale
@@ -666,42 +668,13 @@ class NepaliCalendarModel(val locale: NepaliDateLocale = NepaliDateLocale()) {
         return patternWithDelimiters
     }
 
-    fun localizeNumber(stringToLocalize: String, locale: NepaliDatePickerLang): String =
-        if (locale == NepaliDatePickerLang.ENGLISH) stringToLocalize else stringToLocalize.convertToNepaliNumber()
-
-    fun localizeNumbersToNepali(englishString: String): String =
-        englishString.convertToNepaliNumber()
-
-    fun localizeNumberToEnglish(nepaliString: String): String =
-        nepaliString.convertToEnglishNumber()
-
-    private val nepaliDigits = charArrayOf('०', '१', '२', '३', '४', '५', '६', '७', '८', '९')
-
-    private fun String.convertToNepaliNumber(): String {
-        val builder = StringBuilder(length)
-        for (char in this) {
-            builder.append(if (char in '0'..'9') nepaliDigits[char - '0'] else char)
-        }
-        return builder.toString()
-    }
-
-    private val nepaliToEnglishDigits = mapOf(
-        '०' to '0',
-        '१' to '1',
-        '२' to '2',
-        '३' to '3',
-        '४' to '4',
-        '५' to '5',
-        '६' to '6',
-        '७' to '7',
-        '८' to '8',
-        '९' to '9'
-    )
-
-    private fun String.convertToEnglishNumber(): String {
-        val builder = StringBuilder(length)
-        for (char in this) {
-            builder.append(nepaliToEnglishDigits[char] ?: char)
+    fun localizeNumber(stringToLocalize: String, locale: NepaliDatePickerLang): String {
+        val script = locale.defaultDigitScript()
+        if (script == DigitScript.LATIN) return stringToLocalize
+        val table = script.digits
+        val builder = StringBuilder(stringToLocalize.length)
+        for (char in stringToLocalize) {
+            builder.append(if (char in '0'..'9') table[char - '0'] else char)
         }
         return builder.toString()
     }
