@@ -3,18 +3,51 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MyApplication</title>
+    <title>Nepali Date Picker — Live Demo</title>
+    <meta name="description"
+          content="Material3-aligned Nepali (Bikram Sambat) date picker for Kotlin Multiplatform — Android, iOS, JVM, JS, Wasm. Pick a date in the browser before adding the dependency.">
+    <meta name="theme-color" content="#4C662B">
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Nepali Date Picker — Live Demo">
+    <meta property="og:description"
+          content="Try the KMP Nepali Date Picker in your browser. Android, iOS, Desktop, Web.">
+    <meta property="og:url" content="https://shivathapaa.github.io/Nepali-Date-Picker/">
+    <meta property="og:image"
+          content="https://raw.githubusercontent.com/shivathapaa/Nepali-Date-Picker/main/.github/assets/nepaliDatePickerBanner.png">
+
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Nepali Date Picker — Live Demo">
+    <meta name="twitter:description"
+          content="Try the KMP Nepali Date Picker in your browser. Android, iOS, Desktop, Web.">
+    <meta name="twitter:image"
+          content="https://raw.githubusercontent.com/shivathapaa/Nepali-Date-Picker/main/.github/assets/nepaliDatePickerBanner.png">
+
+    <link rel="canonical" href="https://shivathapaa.github.io/Nepali-Date-Picker/">
     <link type="text/css" rel="stylesheet" href="styles.css">
 </head>
-<body style="text-align: center; align-content: center">
-<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 50 50" role="presentation">
-    <circle cx="25" cy="25" r="20" stroke="#ccc" stroke-width="4" fill="none"/>
-    <circle cx="25" cy="25" r="20" stroke="#333" stroke-width="4" fill="none" stroke-linecap="round"
-            stroke-dasharray="90 125">
-        <animateTransform attributeName="transform" type="rotate" from="0 25 25" to="360 25 25" dur="1s"
-                          repeatCount="indefinite"/>
-    </circle>
-</svg>
+<body>
+<div id="loader" role="status" aria-label="Loading">
+    <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 50 50" role="presentation">
+        <circle cx="25" cy="25" r="20" stroke="#ccc" stroke-width="4" fill="none"/>
+        <circle cx="25" cy="25" r="20" stroke="#4C662B" stroke-width="4" fill="none" stroke-linecap="round"
+                stroke-dasharray="90 125">
+            <animateTransform attributeName="transform" type="rotate" from="0 25 25" to="360 25 25" dur="1s"
+                              repeatCount="indefinite"/>
+        </circle>
+    </svg>
+    <p>Loading Nepali Date Picker…</p>
+</div>
+
+<footer id="meta">
+    Demo of <a href="https://central.sonatype.com/artifact/io.github.shivathapaa/nepali-date-picker-ui"
+               rel="noopener noreferrer">nepali-date-picker-ui</a>
+    v<span id="version">__VERSION__</span> ·
+    <a href="https://github.com/shivathapaa/Nepali-Date-Picker" rel="noopener noreferrer">Source on GitHub</a>
+</footer>
+
 <script type="application/javascript" src="composeApp.js"></script>
 </body>
 </html>

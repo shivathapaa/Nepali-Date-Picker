@@ -14,7 +14,9 @@ KMP Nepali Date Picker for both Android and/or iOS and/or KMP (JVM, JS, Wasm) wh
   <a href="https://github.com/shivathapaa/Nepali-Date-Picker/blob/main/LICENSE">
     <img alt="license" src="https://img.shields.io/github/license/shivathapaa/nepali-date-picker?labelColor=F5DDD7&color=E0BFB7"/></a>&nbsp;
   <a href="https://medium.com/@shivathapaa/nepali-date-picker-for-android-and-ios-kotlin-multiplatform-a739ea0caf47">
-    <img src="https://img.shields.io/badge/Read%20on-Medium-12100E?logo=medium" alt="Medium"/></a>
+    <img src="https://img.shields.io/badge/Read%20on-Medium-12100E?logo=medium" alt="Medium"/></a>&nbsp;
+  <a href="https://shivathapaa.github.io/Nepali-Date-Picker/">
+    <img src="https://img.shields.io/badge/Live%20demo-%E2%86%92-4C662B?labelColor=E2E3D8" alt="Live demo"/></a>
 </p>
 <br>
 <p align="center">
