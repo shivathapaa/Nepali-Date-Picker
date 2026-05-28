@@ -48,10 +48,15 @@ fun NepaliDatePickerLang.defaultDigitScript(): DigitScript = when (this) {
 }
 
 /**
- * Reverse lookup: char in any supported non-Latin digit script → Latin digit, or `null`.
- * Internal because the only public API needed is `String.toLatinDigits()`.
+ * Reverse lookup. If this char is a digit in any supported non-Latin script
+ * (Devanagari today), return the matching ASCII `'0'..'9'`. If it is already
+ * an ASCII digit, return it unchanged. Otherwise return `null`.
+ *
+ * Public because UI text-field code needs to fold input digits to a single
+ * canonical form before parsing — calling `String.toLatinDigits()` for one char
+ * would allocate.
  */
-internal fun Char.latinDigitOrNull(): Char? {
+fun Char.latinDigitOrNull(): Char? {
     if (this in '0'..'9') return this
     // DigitScript.entries[0] = LATIN; skip it.
     for (i in 1 until DigitScript.entries.size) {
