@@ -6,6 +6,7 @@ android-minSdk = "23"
 android-compileSdk = "37"
 android-targetSdk = "37"
 kotlinxDatetime = "0.8.0"
+kotlinxSerialization = "1.11.0"
 material3 = "1.9.0"
 materialIconsCore = "1.7.3"
 androidx-activityCompose = "1.13.0"
@@ -18,6 +19,8 @@ foundation = { module = "org.jetbrains.compose.foundation:foundation", version.r
 html-core = { module = "org.jetbrains.compose.html:html-core", version.ref = "compose-plugin" }
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
 kotlinx-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.ref = "kotlinxDatetime" }
+kotlinx-serialization-core = { module = "org.jetbrains.kotlinx:kotlinx-serialization-core", version.ref = "kotlinxSerialization" }
+kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinxSerialization" }
 material-icons-core = { module = "org.jetbrains.compose.material:material-icons-core", version.ref = "materialIconsCore" }
 material3 = { module = "org.jetbrains.compose.material3:material3", version.ref = "material3" }
 runtime = { module = "org.jetbrains.compose.runtime:runtime", version.ref = "compose-plugin" }
@@ -26,6 +29,7 @@ runtime = { module = "org.jetbrains.compose.runtime:runtime", version.ref = "com
 jetbrainsCompose = { id = "org.jetbrains.compose", version.ref = "compose-plugin" }
 composeCompiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 kotlinMultiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
+kotlinSerialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 mavenPublish = { id = "com.vanniktech.maven.publish", version.ref = "mavenPublish" }
 androidKotlinMultiplatformLibrary = { id = "com.android.kotlin.multiplatform.library", version.ref = "agp" }
 android-application = { id = "com.android.application", version.ref = "agp" }
