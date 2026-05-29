@@ -44,11 +44,8 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.window.DialogProperties
 import dev.shivathapaa.nepalidatepickerkmp.calendar_model.NepaliCalendarDefaults
 import dev.shivathapaa.nepalidatepickerkmp.calendar_model.NepaliCalendarModel
-import dev.shivathapaa.nepalidatepickerkmp.calendar_model.NepaliDateConverter.localizeDigits
 import dev.shivathapaa.nepalidatepickerkmp.calendar_model.NepaliDatePickerDefaults
 import dev.shivathapaa.nepalidatepickerkmp.data.CustomCalendar
-import dev.shivathapaa.nepalidatepickerkmp.data.DigitScript
-import dev.shivathapaa.nepalidatepickerkmp.data.NepaliDateFormatter
 import dev.shivathapaa.nepalidatepickerkmp.data.NepaliDateFormatter.Pattern
 import dev.shivathapaa.nepalidatepickerkmp.data.NepaliDateLocale
 import dev.shivathapaa.nepalidatepickerkmp.data.SimpleDate
@@ -146,8 +143,9 @@ fun NepaliDateTextField(
                 onValueChangeUpdated(null)
                 return@OutlinedTextField
             }
-            val rendered = formatDigits(filtered, dateFormat, DigitScript.LATIN)
-            val parsed = NepaliDateFormatter.parse(rendered, dateFormat)
+            // 8 ASCII digits in pattern order — go straight to SimpleDate without round-tripping
+            // through NepaliDateFormatter.parse (which would re-validate identical envelope rules).
+            val parsed = parseDigits(filtered, dateFormat)
             if (parsed == null || parsed.year !in yearRange) {
                 onValueChangeUpdated(null)
                 return@OutlinedTextField
@@ -288,44 +286,8 @@ fun NepaliDateField(
 
 // ── internals ──────────────────────────────────────────────────────────────
 
-/** Visual transform: insert pattern delimiters + localize digits for display. */
-private class NepaliDateMaskTransformation(
-    private val pattern: Pattern,
-    private val digitScript: DigitScript,
-) : VisualTransformation {
-
-    private val delim1: Int = if (pattern.yearFirst) 4 else 2
-    private val delim2: Int = if (pattern.yearFirst) 6 else 4
-    private val fullDigitLen = pattern.digitCount
-
-    private val offsetTranslator = object : OffsetMapping {
-        override fun originalToTransformed(offset: Int): Int = when {
-            offset <= delim1 -> offset
-            offset <= delim2 -> offset + 1
-            offset <= fullDigitLen -> offset + 2
-            else -> fullDigitLen + 2
-        }
-
-        override fun transformedToOriginal(offset: Int): Int = when {
-            offset <= delim1 -> offset
-            offset <= delim2 + 1 -> offset - 1
-            offset <= fullDigitLen + 1 -> offset - 2
-            else -> fullDigitLen
-        }
-    }
-
-    override fun filter(text: AnnotatedString): TransformedText {
-        val trimmed = if (text.text.length > fullDigitLen) text.text.substring(0, fullDigitLen) else text.text
-        val rendered = buildString(trimmed.length + 2) {
-            for ((i, ch) in trimmed.withIndex()) {
-                append(ch)
-                if (i + 1 == delim1 || i + 1 == delim2) append(pattern.delimiter)
-            }
-        }
-        val localized = formatDigits(rendered, pattern = null, digitScript)
-        return TransformedText(AnnotatedString(localized), offsetTranslator)
-    }
-}
+// NepaliDateMaskTransformation lives in its own file (same package) so
+// NepaliDateInputContent in NepaliDateInput.kt can share it.
 
 /** Sanitize input: strip non-digits, fold Devanagari → Latin, cap length. */
 private fun sanitizeDigits(raw: String, maxDigits: Int): String {
@@ -339,20 +301,11 @@ private fun sanitizeDigits(raw: String, maxDigits: Int): String {
 }
 
 /**
- * Build a `pattern`-shaped string from 8 raw digits and localize to [script].
- * When [raw] is shorter than `pattern.digitCount`, returns just [raw] localized
- * (mask transform inserts partial delimiters separately).
+ * Parse 8 ASCII digits in [pattern]'s field order into a [SimpleDate]. Envelope-only
+ * validation — month 1..12 / day 1..32. Returns `null` for partial input or bad digits.
+ * Tighter "real" totalDaysInMonth check is the caller's job, usually via the
+ * subsequent `NepaliCalendarModel.getNepaliCalendar` + `NepaliSelectableDates`.
  */
-private fun formatDigits(raw: String, pattern: Pattern?, script: DigitScript): String {
-    val latinSource = if (pattern == null || raw.length != pattern.digitCount) {
-        raw
-    } else {
-        val date = parseDigits(raw, pattern) ?: return raw.localizeDigits(script)
-        NepaliDateFormatter.format(date, pattern, DigitScript.LATIN)
-    }
-    return latinSource.localizeDigits(script)
-}
-
 private fun parseDigits(raw: String, pattern: Pattern): SimpleDate? {
     if (raw.length != pattern.digitCount) return null
     val (yyyy, mm, dd) = if (pattern.yearFirst) {
@@ -363,6 +316,7 @@ private fun parseDigits(raw: String, pattern: Pattern): SimpleDate? {
     val year = yyyy.toIntOrNull() ?: return null
     val month = mm.toIntOrNull() ?: return null
     val day = dd.toIntOrNull() ?: return null
+    if (month !in 1..12 || day !in 1..32) return null
     return SimpleDate(year, month, day)
 }
 
