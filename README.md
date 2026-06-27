@@ -21,7 +21,7 @@ KMP Nepali Date Picker for both Android and/or iOS and/or KMP (JVM, JS, Wasm) wh
 <!--     <a href="https://github.com">
     <img alt="Made for community" src="https://img.shields.io/badge/Made%20for%20community-F3FBF7" /></a>&nbsp; -->
   <a href="https://central.sonatype.com/namespace/io.github.shivathapaa">
-  <img alt="latest release" src="https://img.shields.io/maven-central/v/io.github.shivathapaa/nepali-date-picker?label=latest%20release"></a>&nbsp;
+  <img alt="latest release" src="https://img.shields.io/maven-central/v/io.github.shivathapaa/nepali-date-picker-core?label=latest%20release"></a>&nbsp;
   <a href="#screenshots">
   <img alt="See Screenshots" src="https://img.shields.io/badge/see_screenshots-blue?color=D6E6DF"></a>&nbsp;
   <a href="https://github.com/shivathapaa/Nepali-Date-Picker/releases/download/2.2.4/Nepali_Date_Picker_v2.2.4.apk">
