@@ -16,12 +16,15 @@
 
 package dev.shivathapaa.nepalidatepickerkmp
 
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -32,6 +35,9 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntRect
 import androidx.compose.ui.unit.IntSize
@@ -60,8 +66,17 @@ import kotlinx.coroutines.flow.first
  * @param modifier the [Modifier] applied to the field container.
  * @param label optional label for the text field.
  * @param placeholder optional placeholder shown when no date is selected.
+ * @param trailingIcon optional trailing content that replaces the built-in calendar button; when you
+ *   supply one, wire its own click to toggle the dropdown if you want that behavior.
+ * @param prefix optional inline content shown before the date text.
+ * @param suffix optional inline content shown after the date text.
  * @param dateFormatStyle the [NepaliDateFormatStyle] used to render the selected date in the field.
  * @param showTodayButton whether the calendar shows its `TODAY` button.
+ * @param textStyle the [TextStyle] applied to the field text.
+ * @param shape the [Shape] of the text field.
+ * @param interactionSource the [MutableInteractionSource] for the text field, or null for a remembered one.
+ * @param popupShape the [Shape] of the dropdown calendar surface.
+ * @param popupShadowElevation the shadow elevation of the dropdown calendar surface.
  * @param colors the [NepaliDatePickerColors]; its `dateTextFieldColors` theme the field.
  *
  * Example usage:
@@ -80,8 +95,16 @@ fun NepaliDatePickerDocked(
     modifier: Modifier = Modifier,
     label: (@Composable () -> Unit)? = null,
     placeholder: (@Composable () -> Unit)? = null,
+    trailingIcon: (@Composable () -> Unit)? = null,
+    prefix: (@Composable () -> Unit)? = null,
+    suffix: (@Composable () -> Unit)? = null,
     dateFormatStyle: NepaliDateFormatStyle = NepaliDateFormatStyle.MEDIUM,
     showTodayButton: Boolean = true,
+    textStyle: TextStyle = LocalTextStyle.current,
+    shape: Shape = OutlinedTextFieldDefaults.shape,
+    interactionSource: MutableInteractionSource? = null,
+    popupShape: Shape = NepaliDatePickerDefaults.shape,
+    popupShadowElevation: Dp = DockedPopupElevation,
     colors: NepaliDatePickerColors = NepaliDatePickerDefaults.colors()
 ) {
     var expanded by rememberSaveable { mutableStateOf(false) }
@@ -89,16 +112,22 @@ fun NepaliDatePickerDocked(
     val fieldLocale = remember(state.locale, dateFormatStyle) {
         state.locale.copy(dateFormat = dateFormatStyle)
     }
-    val displayText = state.selectedDate?.let { calendarModel.formatNepaliDate(it, fieldLocale) } ?: ""
+    // formatNepaliDate validates the date and can throw; fall back to empty so the field never crashes.
+    val displayText = state.selectedDate?.let {
+        runCatching { calendarModel.formatNepaliDate(it, fieldLocale) }.getOrDefault("")
+    } ?: ""
 
     Box(modifier = modifier) {
         OutlinedTextField(
             value = displayText,
             onValueChange = {},
             readOnly = true,
+            textStyle = textStyle,
             label = label,
             placeholder = placeholder,
-            trailingIcon = {
+            prefix = prefix,
+            suffix = suffix,
+            trailingIcon = trailingIcon ?: {
                 IconButton(onClick = { expanded = !expanded }) {
                     Icon(
                         imageVector = NepaliIcons.DateRange,
@@ -106,6 +135,8 @@ fun NepaliDatePickerDocked(
                     )
                 }
             },
+            shape = shape,
+            interactionSource = interactionSource,
             colors = colors.dateTextFieldColors,
             modifier = Modifier.fillMaxWidth()
         )
@@ -125,9 +156,9 @@ fun NepaliDatePickerDocked(
             ) {
                 Surface(
                     modifier = Modifier.padding(vertical = DockedPopupGap),
-                    shape = NepaliDatePickerDefaults.shape,
+                    shape = popupShape,
                     color = colors.containerColor,
-                    shadowElevation = DockedPopupElevation
+                    shadowElevation = popupShadowElevation
                 ) {
                     NepaliDatePicker(
                         state = state,

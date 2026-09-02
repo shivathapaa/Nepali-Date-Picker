@@ -45,7 +45,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -65,8 +67,8 @@ import dev.shivathapaa.nepalidatepickerkmp.data.SimpleDate
  * This is a lighter-weight alternative to the calendar-grid [NepaliDatePicker]: it is the pattern
  * users reach for when entering a birth date or a date far from today, and it is the native feel on
  * iOS. It also sidesteps the grid's heaviest paths - there is no ~1,500-item month pager and no
- * per-cell BS↔AD conversion; each column is a bounded [LazyColumn] reading the day-count table
- * directly, so the day column always shows the correct 29–32 days for the chosen month.
+ * per-cell BS to AD conversion; each column is a bounded [LazyColumn] reading the day-count table
+ * directly, so the day column always shows the correct 29 to 32 days for the chosen month.
  *
  * The composable is always in a selected state (a wheel cannot be "empty"); [onDateChange] fires
  * with the resolved [CustomCalendar] whenever the selection settles on a new date.
@@ -78,6 +80,11 @@ import dev.shivathapaa.nepalidatepickerkmp.data.SimpleDate
  * @param selectableDates consulted via [NepaliSelectableDates.isSelectableYear] to drop non-selectable
  *   years from the year wheel. Fine-grained per-day disabling is not expressed by a wheel by design.
  * @param colors the [NepaliDatePickerColors] used to theme the picker.
+ * @param itemHeight the height of each wheel row.
+ * @param visibleItemCount how many rows are visible at once; coerced to an odd number of at least 3.
+ * @param shape the [Shape] of the wheel surface.
+ * @param selectedTextStyle the [TextStyle] of the centered (selected) row.
+ * @param unselectedTextStyle the [TextStyle] of the non-centered rows.
  * @param onDateChange invoked with the resolved [CustomCalendar] when the selected date changes.
  *
  * Example usage:
@@ -99,9 +106,17 @@ fun NepaliWheelDatePicker(
     locale: NepaliDateLocale = NepaliDatePickerDefaults.DefaultLocale,
     selectableDates: NepaliSelectableDates = NepaliDatePickerDefaults.AllDates,
     colors: NepaliDatePickerColors = NepaliDatePickerDefaults.colors(),
+    itemHeight: Dp = WheelItemHeight,
+    visibleItemCount: Int = WheelVisibleCount,
+    shape: Shape = RoundedCornerShape(WheelCornerRadius),
+    selectedTextStyle: TextStyle = MaterialTheme.typography.titleMedium,
+    unselectedTextStyle: TextStyle = MaterialTheme.typography.bodyLarge,
     onDateChange: (CustomCalendar) -> Unit
 ) {
     val calendarModel = remember(locale) { NepaliCalendarModel(locale) }
+
+    // Keep an odd count of at least 3 rows so a single center row is always well-defined.
+    val visibleCount = visibleItemCount.coerceAtLeast(3).let { if (it % 2 == 0) it + 1 else it }
 
     // Year wheel entries - drop non-selectable years, but never present an empty wheel.
     val yearList = remember(yearRange, selectableDates) {
@@ -134,7 +149,7 @@ fun NepaliWheelDatePicker(
 
     Surface(
         modifier = modifier,
-        shape = RoundedCornerShape(WheelCornerRadius),
+        shape = shape,
         color = colors.containerColor
     ) {
         Box(contentAlignment = Alignment.Center) {
@@ -143,18 +158,18 @@ fun NepaliWheelDatePicker(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = WheelBandHorizontalPadding)
-                    .height(WheelItemHeight)
+                    .height(itemHeight)
                     .background(
                         color = colors.selectedDayContainerColor.copy(alpha = 0.18f),
                         shape = RoundedCornerShape(WheelBandCornerRadius)
                     )
             )
             HorizontalDivider(
-                modifier = Modifier.padding(bottom = WheelItemHeight),
+                modifier = Modifier.padding(bottom = itemHeight),
                 color = colors.dividerColor
             )
             HorizontalDivider(
-                modifier = Modifier.padding(top = WheelItemHeight),
+                modifier = Modifier.padding(top = itemHeight),
                 color = colors.dividerColor
             )
 
@@ -170,6 +185,10 @@ fun NepaliWheelDatePicker(
                         calendarModel.localizeNumber(yearList[index].toString(), locale.language)
                     },
                     colors = colors,
+                    itemHeight = itemHeight,
+                    visibleCount = visibleCount,
+                    selectedTextStyle = selectedTextStyle,
+                    unselectedTextStyle = unselectedTextStyle,
                     modifier = Modifier.weight(1.1f)
                 )
                 WheelColumn(
@@ -180,6 +199,10 @@ fun NepaliWheelDatePicker(
                         calendarModel.getNepaliMonthName(index + 1, locale.monthName, locale.language)
                     },
                     colors = colors,
+                    itemHeight = itemHeight,
+                    visibleCount = visibleCount,
+                    selectedTextStyle = selectedTextStyle,
+                    unselectedTextStyle = unselectedTextStyle,
                     modifier = Modifier.weight(1.5f)
                 )
                 WheelColumn(
@@ -190,6 +213,10 @@ fun NepaliWheelDatePicker(
                         calendarModel.localizeNumber((index + 1).toString(), locale.language)
                     },
                     colors = colors,
+                    itemHeight = itemHeight,
+                    visibleCount = visibleCount,
+                    selectedTextStyle = selectedTextStyle,
+                    unselectedTextStyle = unselectedTextStyle,
                     modifier = Modifier.weight(1f)
                 )
             }
@@ -211,6 +238,8 @@ private fun WheelColumn(
     onSelectedIndexChange: (Int) -> Unit,
     itemLabel: (Int) -> String,
     colors: NepaliDatePickerColors,
+    selectedTextStyle: TextStyle,
+    unselectedTextStyle: TextStyle,
     modifier: Modifier = Modifier,
     visibleCount: Int = WheelVisibleCount,
     itemHeight: Dp = WheelItemHeight
@@ -266,11 +295,7 @@ private fun WheelColumn(
                     } else {
                         colors.dayContentColor.copy(alpha = WheelUnselectedAlpha)
                     },
-                    style = if (selected) {
-                        MaterialTheme.typography.titleMedium
-                    } else {
-                        MaterialTheme.typography.bodyLarge
-                    }
+                    style = if (selected) selectedTextStyle else unselectedTextStyle
                 )
             }
         }

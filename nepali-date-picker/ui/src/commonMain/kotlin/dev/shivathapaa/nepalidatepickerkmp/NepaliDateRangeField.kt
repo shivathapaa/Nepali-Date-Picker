@@ -16,6 +16,7 @@
 
 package dev.shivathapaa.nepalidatepickerkmp
 
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -25,6 +26,7 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldColors
@@ -36,12 +38,15 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
 import dev.shivathapaa.nepalidatepickerkmp.annotations.ExperimentalNepaliDatePickerApi
 import dev.shivathapaa.nepalidatepickerkmp.calendar_model.NepaliCalendarDefaults
+import dev.shivathapaa.nepalidatepickerkmp.calendar_model.NepaliDateConverter
 import dev.shivathapaa.nepalidatepickerkmp.calendar_model.NepaliDatePickerDefaults
 import dev.shivathapaa.nepalidatepickerkmp.data.NepaliDateFormatter.Pattern
 import dev.shivathapaa.nepalidatepickerkmp.data.NepaliDateLocale
@@ -65,6 +70,10 @@ import dev.shivathapaa.nepalidatepickerkmp.icons.NepaliIcons
  * @param onRangeChange invoked on every keystroke. First arg is the new start
  *   (or unchanged); second is the new end. Both `null` means the user has not
  *   completed input on that side or it failed validation.
+ *
+ * Text-field appearance is customizable through [textStyle], [shape], the per-field
+ * [startPrefix] / [endPrefix], [startSuffix] / [endSuffix], and the per-field
+ * [startInteractionSource] / [endInteractionSource].
  *
  * @see NepaliDateRangeField for a combo that pairs this with the range picker dialog.
  */
@@ -93,6 +102,14 @@ fun NepaliDateRangeTextField(
     ),
     keyboardActions: KeyboardActions = KeyboardActions.Default,
     colors: TextFieldColors = OutlinedTextFieldDefaults.colors(),
+    textStyle: TextStyle = LocalTextStyle.current,
+    shape: Shape = OutlinedTextFieldDefaults.shape,
+    startPrefix: @Composable (() -> Unit)? = null,
+    endPrefix: @Composable (() -> Unit)? = null,
+    startSuffix: @Composable (() -> Unit)? = null,
+    endSuffix: @Composable (() -> Unit)? = null,
+    startInteractionSource: MutableInteractionSource? = null,
+    endInteractionSource: MutableInteractionSource? = null,
 ) {
     val onRangeChangeUpdated by rememberUpdatedState(onRangeChange)
 
@@ -120,6 +137,11 @@ fun NepaliDateRangeTextField(
                 keyboardOptions = keyboardOptions,
                 keyboardActions = keyboardActions,
                 colors = colors,
+                textStyle = textStyle,
+                shape = shape,
+                prefix = startPrefix,
+                suffix = startSuffix,
+                interactionSource = startInteractionSource,
             )
             NepaliDateTextField(
                 value = endValue,
@@ -139,6 +161,11 @@ fun NepaliDateRangeTextField(
                 keyboardOptions = keyboardOptions.copy(imeAction = ImeAction.Done),
                 keyboardActions = keyboardActions,
                 colors = colors,
+                textStyle = textStyle,
+                shape = shape,
+                prefix = endPrefix,
+                suffix = endSuffix,
+                interactionSource = endInteractionSource,
             )
         }
         if (supportingText != null) supportingText()
@@ -179,6 +206,14 @@ fun NepaliDateRangeField(
     ),
     keyboardActions: KeyboardActions = KeyboardActions.Default,
     colors: TextFieldColors = OutlinedTextFieldDefaults.colors(),
+    textStyle: TextStyle = LocalTextStyle.current,
+    shape: Shape = OutlinedTextFieldDefaults.shape,
+    startPrefix: @Composable (() -> Unit)? = null,
+    endPrefix: @Composable (() -> Unit)? = null,
+    startSuffix: @Composable (() -> Unit)? = null,
+    endSuffix: @Composable (() -> Unit)? = null,
+    startInteractionSource: MutableInteractionSource? = null,
+    endInteractionSource: MutableInteractionSource? = null,
     dialogProperties: DialogProperties = DialogProperties(),
     confirmButtonText: String = locale.language.okText,
     dismissButtonText: String = locale.language.cancelText,
@@ -207,6 +242,14 @@ fun NepaliDateRangeField(
                 keyboardOptions = keyboardOptions,
                 keyboardActions = keyboardActions,
                 colors = colors,
+                textStyle = textStyle,
+                shape = shape,
+                startPrefix = startPrefix,
+                endPrefix = endPrefix,
+                startSuffix = startSuffix,
+                endSuffix = endSuffix,
+                startInteractionSource = startInteractionSource,
+                endInteractionSource = endInteractionSource,
             )
             IconButton(onClick = { if (enabled && !readOnly) showDialog = true }) {
                 Icon(
@@ -218,9 +261,13 @@ fun NepaliDateRangeField(
     }
 
     if (showDialog) {
+        // Seed the picker only with values the state can accept. An out-of-range or otherwise
+        // invalid start/end would make rememberNepaliDateRangePickerState throw when the dialog opens.
+        val safeStart = startValue?.takeIf { it.isSeedableWithin(yearRange) }
+        val safeEnd = endValue?.takeIf { it.isSeedableWithin(yearRange) }
         val pickerState = rememberNepaliDateRangePickerState(
-            initialSelectedStartNepaliDate = startValue,
-            initialSelectedEndNepaliDate = endValue,
+            initialSelectedStartNepaliDate = safeStart,
+            initialSelectedEndNepaliDate = safeEnd,
             yearRange = yearRange,
             nepaliSelectableDates = selectableDates,
             locale = locale,
@@ -250,3 +297,10 @@ fun NepaliDateRangeField(
         }
     }
 }
+
+// A value can seed the range picker state only when its year is in range and it maps to a real
+// calendar date, so guarding here keeps opening the dialog from throwing on caller-supplied input.
+private fun SimpleDate.isSeedableWithin(yearRange: IntRange): Boolean =
+    year in yearRange && runCatching {
+        NepaliDateConverter.getNepaliCalendar(year, month, dayOfMonth)
+    }.isSuccess

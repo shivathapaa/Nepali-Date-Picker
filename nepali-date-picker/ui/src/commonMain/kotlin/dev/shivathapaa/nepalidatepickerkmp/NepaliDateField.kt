@@ -16,11 +16,13 @@
 
 package dev.shivathapaa.nepalidatepickerkmp
 
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.TextFieldColors
@@ -33,8 +35,10 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextRange
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.OffsetMapping
@@ -44,6 +48,7 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.window.DialogProperties
 import dev.shivathapaa.nepalidatepickerkmp.calendar_model.NepaliCalendarDefaults
 import dev.shivathapaa.nepalidatepickerkmp.calendar_model.NepaliCalendarModel
+import dev.shivathapaa.nepalidatepickerkmp.calendar_model.NepaliDateConverter
 import dev.shivathapaa.nepalidatepickerkmp.calendar_model.NepaliDatePickerDefaults
 import dev.shivathapaa.nepalidatepickerkmp.data.CustomCalendar
 import dev.shivathapaa.nepalidatepickerkmp.data.NepaliDateFormatter.Pattern
@@ -82,6 +87,11 @@ import dev.shivathapaa.nepalidatepickerkmp.icons.NepaliIcons
  * @param selectableDates predicate that further restricts which dates the field accepts.
  * @param locale localization for output digits + label conventions. Digit script in
  *   [locale] only affects display - input is always tolerant of both Latin and Devanagari.
+ * @param textStyle the [TextStyle] applied to the input text.
+ * @param prefix optional content shown before the input, inside the field.
+ * @param suffix optional content shown after the input, inside the field.
+ * @param shape the [Shape] of the field's outline.
+ * @param interactionSource the [MutableInteractionSource] for observing interactions, or null to create one.
  *
  * @see NepaliDateField for a combo that pairs this field with a picker dialog.
  */
@@ -108,6 +118,11 @@ fun NepaliDateTextField(
         imeAction = ImeAction.Done
     ),
     keyboardActions: KeyboardActions = KeyboardActions.Default,
+    textStyle: TextStyle = LocalTextStyle.current,
+    prefix: (@Composable () -> Unit)? = null,
+    suffix: (@Composable () -> Unit)? = null,
+    shape: Shape = OutlinedTextFieldDefaults.shape,
+    interactionSource: MutableInteractionSource? = null,
     colors: TextFieldColors = OutlinedTextFieldDefaults.colors(),
 ) {
     val onValueChangeUpdated by rememberUpdatedState(onValueChange)
@@ -166,10 +181,13 @@ fun NepaliDateTextField(
         modifier = modifier,
         enabled = enabled,
         readOnly = readOnly,
+        textStyle = textStyle,
         label = label,
         placeholder = placeholder,
         leadingIcon = leadingIcon,
         trailingIcon = trailingIcon,
+        prefix = prefix,
+        suffix = suffix,
         supportingText = supportingText,
         isError = isError,
         visualTransformation = remember(dateFormat, locale) {
@@ -178,6 +196,8 @@ fun NepaliDateTextField(
         keyboardOptions = keyboardOptions,
         keyboardActions = keyboardActions,
         singleLine = true,
+        shape = shape,
+        interactionSource = interactionSource,
         colors = colors,
     )
 }
@@ -214,6 +234,11 @@ fun NepaliDateField(
         imeAction = ImeAction.Done
     ),
     keyboardActions: KeyboardActions = KeyboardActions.Default,
+    textStyle: TextStyle = LocalTextStyle.current,
+    prefix: (@Composable () -> Unit)? = null,
+    suffix: (@Composable () -> Unit)? = null,
+    shape: Shape = OutlinedTextFieldDefaults.shape,
+    interactionSource: MutableInteractionSource? = null,
     colors: TextFieldColors = OutlinedTextFieldDefaults.colors(),
     dialogProperties: DialogProperties = DialogProperties(),
     confirmButtonText: String = locale.language.okText,
@@ -248,13 +273,28 @@ fun NepaliDateField(
             readOnly = readOnly,
             keyboardOptions = keyboardOptions,
             keyboardActions = keyboardActions,
+            textStyle = textStyle,
+            prefix = prefix,
+            suffix = suffix,
+            shape = shape,
+            interactionSource = interactionSource,
             colors = colors,
         )
     }
 
     if (showDialog) {
+        // rememberNepaliDatePickerState throws when the initial date is outside yearRange or is not a
+        // real calendar date (for example day 32 in a 31-day month), so opening the dialog from such a
+        // value would crash. Seed it only when the value is in range and round-trips cleanly.
+        val safeInitialDate = remember(value, yearRange) {
+            value?.takeIf {
+                it.year in yearRange && runCatching {
+                    NepaliDateConverter.getNepaliCalendar(it.year, it.month, it.dayOfMonth)
+                }.isSuccess
+            }
+        }
         val pickerState = rememberNepaliDatePickerState(
-            initialSelectedDate = value,
+            initialSelectedDate = safeInitialDate,
             yearRange = yearRange,
             nepaliSelectableDates = selectableDates,
             locale = locale,
