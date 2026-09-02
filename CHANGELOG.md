@@ -4,6 +4,51 @@ All notable changes to **Nepali-Date-Picker (KMP)** are documented here.
 
 The project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html). Pre-3.0 release history lives in the [GitHub Releases](https://github.com/shivathapaa/Nepali-Date-Picker/releases) page.
 
+## 3.2.0 - New picker experiences, accessibility, performance, and de-duplication
+
+Additive release. No breaking changes to existing public symbols; the new composables are opt-in.
+
+### New `:ui` composables
+
+* `NepaliWheelDatePicker()` (experimental) - a scroll/wheel picker with three snapping columns (Year, Month, Day). It reads the day-count table directly, so it has no month pager and no per-cell BS/AD conversion, and it always shows the correct 29 to 32 days for the chosen month. Best for birth dates and dates far from today.
+* `NepaliDatePickerDocked()` (experimental) - the Material3 docked pattern: a read-only outlined field with a dropdown calendar anchored below it. The dropdown closes once a date is picked. The right default for forms and desktop/web.
+* `NepaliDatePickerFullScreenDialog()` (experimental) - a full-screen host with a top bar (dismiss, title, confirm) that fits a range selection on a phone. Reuses any picker as its content.
+* `NepaliDateRangeTextField()` / `NepaliDateRangeField()` (experimental) - two stacked outlined fields for a Bikram Sambat date range with start-before-end validation; `NepaliDateRangeField` adds a calendar icon that opens the range picker dialog.
+
+### Accessibility
+
+* Every calendar day cell now exposes a `contentDescription` with its full localized date (and "today"), so screen readers announce the whole cell instead of just the number.
+* Localized content descriptions on the display-mode toggle and the previous/next month arrows (previously an unlocalized placeholder or `null`).
+* Weekday header letters map to their full weekday name via `clearAndSetSemantics`.
+* New localized strings on `NepaliDatePickerLang`: `switchToInputModeContentDescription`, `switchToCalendarModeContentDescription`, `nextMonthContentDescription`, `previousMonthContentDescription`, `selectYearContentDescription`.
+
+### Performance
+
+* `:core` now memoizes month details and computes the day offset in O(1) via a cumulative-days prefix table, instead of re-summing every year on each call. Behavior-preserving.
+* Recomposition fixes across all four pickers: `NepaliCalendarModel` and `today` are now remembered instead of rebuilt every recomposition; `derivedStateOf` over pure values replaced with plain `remember`; a per-cell `MutableState` allocation removed; day cells are keyed on the month so a reused list slot cannot serve a stale date. `NepaliCalendarModel` now reports `stable` in the Compose compiler report.
+
+### Correctness fixes
+
+* `todayNepaliCalendar` / `todayNepaliSimpleDate` / `todayEnglish*` now read the wall clock on each access. They were captured once at construction, so `today` never rolled over at midnight for the process lifetime.
+* English dates before the earliest convertible anchor (1913-04-13) now throw `IllegalArgumentException`. They previously passed the year-only range check and silently returned Nepali 1970-01-01.
+* Out-of-table years now surface a clear `IllegalArgumentException` instead of leaking the lookup map's `NoSuchElementException`.
+* `NepaliDatePickerColors.equals` / `hashCode` now include `navigationContentColor`, `dividerColor`, and `dateTextFieldColors` (previously omitted, which could cause wrong Compose skipping).
+* `weekOfMonth` uses the clamped day of month.
+
+### De-duplication and theming
+
+* All four calendar pickers now render through a single `NepaliMonth` / `NepaliDay` cell path (parameterized by day shape and an optional English day). This removes the forked `NepaliEnglishMonth` / `NepaliEnglishDay` / `NepaliEnglishMonthsNavigation` and a duplicate year-dropdown button, so the English variants inherit the same accessibility and performance work.
+* Digit localization, the Nepali day-period mapping, and the text-field input mask each collapse to a single shared implementation.
+* The dialog's hand-rolled `FlowRow` clone is replaced with the stable `androidx.compose.foundation.layout.FlowRow`.
+* `dateTextFieldColors` is now reachable through `NepaliDatePickerDefaults.colors(...)`.
+
+### Tests, docs, and build
+
+* New Compose UI test infrastructure for `:ui`, with behavioral tests for day selection, per-day accessibility descriptions, the wheel, the docked picker, and the full-screen dialog.
+* `NepaliDateConverter` is documented as the recommended facade over `NepaliCalendarModel`.
+* Opt-in Compose compiler stability and recomposability reports via `-PenableComposeReports`.
+* Toolchain: Kotlin 2.4.10, Compose 1.12.0, Material3 1.12.0-alpha03.
+
 ## 3.1.0 - Digit script, text-field input, holiday SPI, serialization artifact
 
 Five additive features in one release. No breaking changes — every existing public symbol works unchanged; new APIs are opt-in.
