@@ -121,8 +121,11 @@ fun SampleGallery(modifier: Modifier = Modifier) {
             "Date range picker",
             "Start and end selection. Months laid out vertically."
         ) {
+            // Vertical months scroll internally, so the picker needs a bounded height inside this
+            // scrolling gallery; an unbounded height would crash its inner LazyColumn.
             NepaliDateRangePicker(
                 state = rememberNepaliDateRangePickerState(),
+                modifier = Modifier.height(500.dp),
                 showMonthsVertically = true
             )
         }
