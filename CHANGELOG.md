@@ -4,9 +4,9 @@ All notable changes to **Nepali-Date-Picker (KMP)** are documented here.
 
 The project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html). Pre-3.0 release history lives in the [GitHub Releases](https://github.com/shivathapaa/Nepali-Date-Picker/releases) page.
 
-## 3.2.0 - New picker experiences, accessibility, performance, and de-duplication
+## 3.1.0 - New picker experiences, serialization, digit script, holidays, accessibility, and performance
 
-Additive release. No breaking changes to existing public symbols; the new composables are opt-in.
+Additive release. No breaking changes to existing public symbols; every prior API works unchanged and all new APIs are opt-in.
 
 ### New `:ui` composables
 
@@ -54,10 +54,6 @@ Additive release. No breaking changes to existing public symbols; the new compos
 * `NepaliDateConverter` is documented as the recommended facade over `NepaliCalendarModel`.
 * Opt-in Compose compiler stability and recomposability reports via `-PenableComposeReports`.
 * Toolchain: Kotlin 2.4.10, Compose 1.12.0, Material3 1.12.0-alpha03.
-
-## 3.1.0 - Digit script, text-field input, holiday SPI, serialization artifact
-
-Five additive features in one release. No breaking changes — every existing public symbol works unchanged; new APIs are opt-in.
 
 ### New artifact
 
