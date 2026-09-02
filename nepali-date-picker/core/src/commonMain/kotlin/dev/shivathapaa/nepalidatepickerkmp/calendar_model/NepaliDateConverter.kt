@@ -27,6 +27,7 @@ import dev.shivathapaa.nepalidatepickerkmp.data.NepaliDatePickerLang
 import dev.shivathapaa.nepalidatepickerkmp.data.NepaliMonthCalendar
 import dev.shivathapaa.nepalidatepickerkmp.data.SimpleDate
 import dev.shivathapaa.nepalidatepickerkmp.data.SimpleTime
+import dev.shivathapaa.nepalidatepickerkmp.data.nepaliDayPeriod
 import dev.shivathapaa.nepalidatepickerkmp.data.defaultDigitScript
 import dev.shivathapaa.nepalidatepickerkmp.data.latinDigitOrNull
 import kotlinx.datetime.LocalDate
@@ -851,13 +852,7 @@ object NepaliDateConverter {
      * ```
      */
     fun getFormattedTimeInNepali(simpleTime: SimpleTime, use12HourFormat: Boolean = true): String {
-        val hourOfDay =
-            when (simpleTime.hour) {
-                in 3..11 -> "बिहान"
-                in 12..16 -> "दिउँसो"
-                in 17..19 -> "साँझ"
-                else -> "राति"
-            }
+        val hourOfDay = nepaliDayPeriod(simpleTime.hour)
 
         val hour =
             if (use12HourFormat && simpleTime.hour > 12) simpleTime.hour - 12 else simpleTime.hour

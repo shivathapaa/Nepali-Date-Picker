@@ -177,3 +177,16 @@ fun CustomCalendar.toNepaliMonthCalendar(): NepaliMonthCalendar {
         daysFromStartOfWeekToFirstOfMonth = firstDayOfMonth - 1
     )
 }
+
+/**
+ * Nepali name for the period of day of a 24-hour [hour] (e.g. बिहान / दिउँसो / साँझ / राति).
+ *
+ * Single source for the mapping previously duplicated in `NepaliCalendarModel.getNepaliAmPm`
+ * and `NepaliDateConverter.getFormattedTimeInNepali`.
+ */
+internal fun nepaliDayPeriod(hour: Int): String = when (hour) {
+    in 3..11 -> "बिहान"
+    in 12..16 -> "दिउँसो"
+    in 17..19 -> "साँझ"
+    else -> "राति"
+}

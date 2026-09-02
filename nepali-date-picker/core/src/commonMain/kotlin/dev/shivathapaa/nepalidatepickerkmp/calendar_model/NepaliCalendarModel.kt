@@ -26,6 +26,7 @@ import dev.shivathapaa.nepalidatepickerkmp.data.NepaliDateLocale
 import dev.shivathapaa.nepalidatepickerkmp.data.NepaliDatePickerLang
 import dev.shivathapaa.nepalidatepickerkmp.data.NepaliMonthCalendar
 import dev.shivathapaa.nepalidatepickerkmp.data.NepaliMonthName
+import dev.shivathapaa.nepalidatepickerkmp.data.nepaliDayPeriod
 import dev.shivathapaa.nepalidatepickerkmp.data.SimpleDate
 import dev.shivathapaa.nepalidatepickerkmp.data.SimpleTime
 import dev.shivathapaa.nepalidatepickerkmp.data.toSimpleDate
@@ -705,7 +706,7 @@ class NepaliCalendarModel(val locale: NepaliDateLocale = NepaliDateLocale()) {
         val nanoStr4Digit = time.nanosecond.toString().padStart(4, '0').take(4)
 
         val amPm = when (language) {
-            NepaliDatePickerLang.NEPALI -> getNepaliAmPm(hour)
+            NepaliDatePickerLang.NEPALI -> nepaliDayPeriod(hour)
             else -> if (hour < 12) "AM" else "PM"
         }
 
@@ -784,12 +785,4 @@ class NepaliCalendarModel(val locale: NepaliDateLocale = NepaliDateLocale()) {
         }
     }
 
-    private fun getNepaliAmPm(hour: Int): String {
-        return when (hour) {
-            in 3..11 -> "बिहान"
-            in 12..16 -> "दिउँसो"
-            in 17..19 -> "साँझ"
-            else -> "राति"
-        }
-    }
 }
