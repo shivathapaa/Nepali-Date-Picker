@@ -125,6 +125,11 @@ enum class NepaliDatePickerLang {
             "Date is not allowed, please write allowed date"
         override val errorInvalidRange: String =
             "Date range input is not allowed, please write allowed dates"
+        override val switchToInputModeContentDescription: String = "Switch to text input mode"
+        override val switchToCalendarModeContentDescription: String = "Switch to calendar mode"
+        override val nextMonthContentDescription: String = "Next month"
+        override val previousMonthContentDescription: String = "Previous month"
+        override val selectYearContentDescription: String = "Select year"
     },
     NEPALI {
         override val weekdays: List<NepaliWeekdayName> = nepaliWeekdays
@@ -152,6 +157,11 @@ enum class NepaliDatePickerLang {
             "यो मिति छान्न दिइएको छैन, छान्न दिइएको मिति लेख्नुहोस्"
         override val errorInvalidRange: String =
             "यो मिति सीमा छान्न दिइएको छैन, छान्न दिइएका मितिहरू लेख्नुहोस्"
+        override val switchToInputModeContentDescription: String = "पाठ इनपुट मोडमा जानुहोस्"
+        override val switchToCalendarModeContentDescription: String = "क्यालेन्डर मोडमा जानुहोस्"
+        override val nextMonthContentDescription: String = "अर्को महिना"
+        override val previousMonthContentDescription: String = "अघिल्लो महिना"
+        override val selectYearContentDescription: String = "वर्ष चयन गर्नुहोस्"
     };
 
     abstract val weekdays: List<NepaliWeekdayName>
@@ -174,6 +184,11 @@ enum class NepaliDatePickerLang {
     abstract val errorDateOutOfYearRange: String
     abstract val errorDateNotAllowed: String
     abstract val errorInvalidRange: String
+    abstract val switchToInputModeContentDescription: String
+    abstract val switchToCalendarModeContentDescription: String
+    abstract val nextMonthContentDescription: String
+    abstract val previousMonthContentDescription: String
+    abstract val selectYearContentDescription: String
 }
 
 private val nepaliMonths = listOf(

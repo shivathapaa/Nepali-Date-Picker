@@ -108,7 +108,9 @@ class CalendarPropertiesTests {
 
     @Test
     fun nepaliMonth_yearOutsideMap_throws() {
-        assertFailsWith<NoSuchElementException> {
+        // Out-of-table years now surface a clear IllegalArgumentException instead of leaking the
+        // map's NoSuchElementException (see the day-walk boundary hardening in DateConverters).
+        assertFailsWith<IllegalArgumentException> {
             NepaliDateConverter.getTotalDaysInNepaliMonth(1500, 1)
         }
     }

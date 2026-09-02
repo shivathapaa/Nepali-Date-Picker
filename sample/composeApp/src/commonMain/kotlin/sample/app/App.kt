@@ -39,8 +39,10 @@ import dev.shivathapaa.nepalidatepickerkmp.NepaliDatePickerWithEnglishDate
 import dev.shivathapaa.nepalidatepickerkmp.NepaliDateRangePicker
 import dev.shivathapaa.nepalidatepickerkmp.NepaliDateRangePickerState
 import dev.shivathapaa.nepalidatepickerkmp.NepaliDateRangePickerWithEnglishDate
+import dev.shivathapaa.nepalidatepickerkmp.NepaliWheelDatePicker
 import dev.shivathapaa.nepalidatepickerkmp.annotations.ExperimentalNepaliDatePickerApi
 import dev.shivathapaa.nepalidatepickerkmp.calendar_model.NepaliDateConverter
+import dev.shivathapaa.nepalidatepickerkmp.data.CustomCalendar
 import dev.shivathapaa.nepalidatepickerkmp.calendar_model.NepaliDatePickerDefaults
 import dev.shivathapaa.nepalidatepickerkmp.data.NameFormat
 import dev.shivathapaa.nepalidatepickerkmp.data.NepaliDateFormatStyle
@@ -300,6 +302,20 @@ fun SamplePickers(
                 showYearPickerAndMonthNavigation = showRangePickerWithYearPickerAndNavigation
             )
         }
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+        Text("Wheel Date Picker", textAlign = TextAlign.Center)
+        var wheelSelected by remember { mutableStateOf<CustomCalendar?>(null) }
+        NepaliWheelDatePicker(onDateChange = { wheelSelected = it })
+        wheelSelected?.let { selected ->
+            Text(
+                text = "Selected: ${selected.year}/${selected.month}/${selected.dayOfMonth}",
+                textAlign = TextAlign.Center
+            )
+        }
+
+        Spacer(modifier = Modifier.height(24.dp))
     }
 }
 

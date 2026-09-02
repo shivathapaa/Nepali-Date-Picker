@@ -126,8 +126,8 @@ fun NepaliDateRangePickerWithEnglishDate(
     showYearPickerAndMonthNavigation: Boolean = true,
     colors: NepaliDatePickerColors = NepaliDatePickerDefaults.colors()
 ) {
-    val calendarModel = NepaliCalendarModel(state.locale)
-    val today = calendarModel.todayNepaliSimpleDate
+    val calendarModel = remember(state.locale) { NepaliCalendarModel(state.locale) }
+    val today = remember(calendarModel) { calendarModel.todayNepaliSimpleDate }
 
     NepaliDateEntryContainer(
         modifier = modifier,
@@ -140,6 +140,7 @@ fun NepaliDateRangePickerWithEnglishDate(
                         modifier = Modifier.padding(NepaliDatePickerModeTogglePadding),
                         displayMode = state.displayMode,
                         onDisplayModeChange = { displayMode -> state.displayMode = displayMode },
+                        language = state.locale.language
                     )
                 }
             } else {

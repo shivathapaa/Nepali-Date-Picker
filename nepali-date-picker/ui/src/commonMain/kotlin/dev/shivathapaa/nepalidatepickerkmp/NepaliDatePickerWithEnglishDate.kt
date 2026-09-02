@@ -136,9 +136,9 @@ fun NepaliDatePickerWithEnglishDate(
     showTodayButton: Boolean = true,
     colors: NepaliDatePickerColors = NepaliDatePickerDefaults.colors()
 ) {
-    val calendarModel = NepaliCalendarModel(state.locale)
-    // Because it's expensive
-    val today = calendarModel.todayNepaliSimpleDate
+    val calendarModel = remember(state.locale) { NepaliCalendarModel(state.locale) }
+    // `today` reads the wall clock; remember it so it isn't recomputed on every recomposition.
+    val today = remember(calendarModel) { calendarModel.todayNepaliSimpleDate }
 
     NepaliDateEntryContainer(
         modifier = modifier,
@@ -151,6 +151,7 @@ fun NepaliDatePickerWithEnglishDate(
                         modifier = Modifier.padding(NepaliDatePickerModeTogglePadding),
                         displayMode = state.displayMode,
                         onDisplayModeChange = { displayMode -> state.displayMode = displayMode },
+                        language = state.locale.language
                     )
                 }
             } else {

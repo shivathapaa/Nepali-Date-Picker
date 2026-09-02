@@ -154,18 +154,29 @@ class ConversionBoundaryTests {
         }
     }
 
-    // ── Suspicious silent-fallback case ──────────────────────────────────────
-    // English 1913 dates before the 1913-04-13 anchor are accepted as "in range"
-    // by isEnglishDateInConversionRange but the converter walks the diff with
-    // `repeat(negative)` which iterates zero times and silently returns
-    // Nepali 1970-1-1 — same as the anchor.  Documenting that as a loophole.
+    // ── Pre-anchor English dates are rejected (previously a silent-wrong loophole) ──
+    // English 1913 dates before the 1913-04-13 anchor have no Nepali equivalent
+    // (they would map below Nepali 1970). They used to pass the year-only range
+    // check and, because the day-walk ran `repeat(negativeDiff)` zero times,
+    // silently returned the anchor (Nepali 1970-01-01). They now throw.
 
     @Test
-    fun convertEnglishToNepali_beforeAnchorInSameYear_silentlyReturnsAnchor_DOCUMENTS_BUG() {
-        val result = NepaliDateConverter.convertEnglishToNepali(1913, 1, 1)
-        // Currently returns the anchor (1970-01-01) instead of throwing or
-        // emitting a real Nepali date. Asserted to make the surprise explicit
-        // — the converter ought to reject pre-anchor inputs.
+    fun convertEnglishToNepali_beforeAnchorInSameYear_throws() {
+        assertFailsWith<IllegalArgumentException> {
+            NepaliDateConverter.convertEnglishToNepali(1913, 1, 1)
+        }
+    }
+
+    @Test
+    fun convertEnglishToNepali_oneDayBeforeAnchor_throws() {
+        assertFailsWith<IllegalArgumentException> {
+            NepaliDateConverter.convertEnglishToNepali(1913, 4, 12)
+        }
+    }
+
+    @Test
+    fun convertEnglishToNepali_exactlyOnAnchor_stillSucceeds() {
+        val result = NepaliDateConverter.convertEnglishToNepali(1913, 4, 13)
         assertEquals(1970, result.year)
         assertEquals(1, result.month)
         assertEquals(1, result.dayOfMonth)

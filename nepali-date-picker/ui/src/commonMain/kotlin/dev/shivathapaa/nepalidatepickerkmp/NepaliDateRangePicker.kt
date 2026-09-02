@@ -139,8 +139,8 @@ fun NepaliDateRangePicker(
     showYearPickerAndMonthNavigation: Boolean = true,
     colors: NepaliDatePickerColors = NepaliDatePickerDefaults.colors()
 ) {
-    val calendarModel = NepaliCalendarModel(state.locale)
-    val today = calendarModel.todayNepaliSimpleDate
+    val calendarModel = remember(state.locale) { NepaliCalendarModel(state.locale) }
+    val today = remember(calendarModel) { calendarModel.todayNepaliSimpleDate }
 
     NepaliDateEntryContainer(
         modifier = modifier,
@@ -153,6 +153,7 @@ fun NepaliDateRangePicker(
                         modifier = Modifier.padding(NepaliDatePickerModeTogglePadding),
                         displayMode = state.displayMode,
                         onDisplayModeChange = { displayMode -> state.displayMode = displayMode },
+                        language = state.locale.language
                     )
                 }
             } else {
@@ -365,7 +366,9 @@ private fun NepaliDateRangePicker(
                     coroutineScope.launch { monthsListState.scrollToItem(initialIndex) }
                 },
                 onYearPickerButtonClicked = { yearPickerVisible = !yearPickerVisible },
-                colors = colors
+                colors = colors,
+                previousMonthContentDescription = chosenLanguage.previousMonthContentDescription,
+                nextMonthContentDescription = chosenLanguage.nextMonthContentDescription
             )
         }
 

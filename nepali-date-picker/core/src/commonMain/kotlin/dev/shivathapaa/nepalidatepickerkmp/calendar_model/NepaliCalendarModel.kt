@@ -48,8 +48,11 @@ class NepaliCalendarModel(val locale: NepaliDateLocale = NepaliDateLocale()) {
     // which don't ship the IANA tzdata bundle that named lookups need.
     private val timeZone = FixedOffsetTimeZone(UtcOffset(hours = 5, minutes = 45))
 
+    // Read the wall clock on every access so `today*` rolls over at midnight. Previously
+    // this was a `val` captured at construction; because NepaliDateConverter is an `object`
+    // holding a single model instance, that froze "today" for the whole process lifetime.
     @OptIn(ExperimentalTime::class)
-    private val localEnglishDateTime: LocalDateTime = Clock.System.now().toLocalDateTime(timeZone)
+    private fun nowLocalDateTime(): LocalDateTime = Clock.System.now().toLocalDateTime(timeZone)
 
     @Deprecated(message = "Use todayNepaliSimpleDate or todayNepaliCalendar instead")
     val today
@@ -69,18 +72,24 @@ class NepaliCalendarModel(val locale: NepaliDateLocale = NepaliDateLocale()) {
 
     @Deprecated("Use todayEnglishSimpleDate or todayEnglishCalendar")
     val todayEnglish
-        get(): SimpleDate = SimpleDate(
-            year = localEnglishDateTime.year,
-            month = localEnglishDateTime.month.number,
-            dayOfMonth = localEnglishDateTime.day
-        )
+        get(): SimpleDate {
+            val now = nowLocalDateTime()
+            return SimpleDate(
+                year = now.year,
+                month = now.month.number,
+                dayOfMonth = now.day
+            )
+        }
 
     val todayEnglishSimpleDate
-        get(): SimpleDate = SimpleDate(
-            year = localEnglishDateTime.year,
-            month = localEnglishDateTime.month.number,
-            dayOfMonth = localEnglishDateTime.day
-        )
+        get(): SimpleDate {
+            val now = nowLocalDateTime()
+            return SimpleDate(
+                year = now.year,
+                month = now.month.number,
+                dayOfMonth = now.day
+            )
+        }
 
     val todayEnglishCalendar
         get(): CustomCalendar {
@@ -106,10 +115,11 @@ class NepaliCalendarModel(val locale: NepaliDateLocale = NepaliDateLocale()) {
         }
 
     private fun getNepaliDateInstance(): CustomCalendar {
+        val now = nowLocalDateTime()
         return DateConverters.convertToNepaliCalendar(
-            englishYYYY = localEnglishDateTime.year,
-            englishMM = localEnglishDateTime.month.number,
-            englishDD = localEnglishDateTime.day
+            englishYYYY = now.year,
+            englishMM = now.month.number,
+            englishDD = now.day
         )
     }
 

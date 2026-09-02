@@ -74,7 +74,6 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.Stable
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -91,6 +90,9 @@ import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
@@ -102,6 +104,7 @@ import dev.shivathapaa.nepalidatepickerkmp.calendar_model.NepaliDatePickerColors
 import dev.shivathapaa.nepalidatepickerkmp.calendar_model.NepaliDatePickerDefaults
 import dev.shivathapaa.nepalidatepickerkmp.data.CustomCalendar
 import dev.shivathapaa.nepalidatepickerkmp.data.NameFormat
+import dev.shivathapaa.nepalidatepickerkmp.data.NepaliDateFormatStyle
 import dev.shivathapaa.nepalidatepickerkmp.data.NepaliDateLocale
 import dev.shivathapaa.nepalidatepickerkmp.data.NepaliDatePickerLang
 import dev.shivathapaa.nepalidatepickerkmp.data.NepaliMonthCalendar
@@ -162,9 +165,9 @@ fun NepaliDatePicker(
     showTodayButton: Boolean = true,
     colors: NepaliDatePickerColors = NepaliDatePickerDefaults.colors()
 ) {
-    val calendarModel = NepaliCalendarModel(state.locale)
-    // Because it's expensive
-    val today = calendarModel.todayNepaliSimpleDate
+    val calendarModel = remember(state.locale) { NepaliCalendarModel(state.locale) }
+    // `today` reads the wall clock; remember it so it isn't recomputed on every recomposition.
+    val today = remember(calendarModel) { calendarModel.todayNepaliSimpleDate }
 
     NepaliDateEntryContainer(
         modifier = modifier,
@@ -178,6 +181,7 @@ fun NepaliDatePicker(
                         modifier = Modifier.padding(NepaliDatePickerModeTogglePadding),
                         displayMode = state.displayMode,
                         onDisplayModeChange = { displayMode -> state.displayMode = displayMode },
+                        language = state.locale.language
                     )
                 }
             } else {
@@ -291,20 +295,21 @@ value class DisplayMode internal constructor(internal val value: Int) {
 internal fun NepaliDisplayModeToggleButton(
     modifier: Modifier,
     displayMode: DisplayMode,
-    onDisplayModeChange: (DisplayMode) -> Unit
+    onDisplayModeChange: (DisplayMode) -> Unit,
+    language: NepaliDatePickerLang = NepaliDatePickerLang.ENGLISH
 ) {
     if (displayMode == DisplayMode.Picker) {
         IconButton(onClick = { onDisplayModeChange(DisplayMode.Input) }, modifier = modifier) {
             Icon(
                 imageVector = NepaliIcons.Edit,
-                contentDescription = "getString(Strings.DatePickerSwitchToInputMode)"
+                contentDescription = language.switchToInputModeContentDescription
             )
         }
     } else {
         IconButton(onClick = { onDisplayModeChange(DisplayMode.Picker) }, modifier = modifier) {
             Icon(
                 imageVector = NepaliIcons.DateRange,
-                contentDescription = "getString(Strings.DatePickerSwitchToCalendarMode)"
+                contentDescription = language.switchToCalendarModeContentDescription
             )
         }
     }
@@ -431,14 +436,14 @@ private fun NepaliDatePicker(
     colors: NepaliDatePickerColors,
     today: SimpleDate
 ) {
-    val displayedMonthIndex by remember(displayedMonth) {
-        derivedStateOf { displayedMonth.indexIn(yearRange) }
+    // Plain remember: these are pure functions of their keys, not derived reads of other
+    // snapshot state, so derivedStateOf would only add a redundant observer allocation.
+    val displayedMonthIndex = remember(displayedMonth, yearRange) {
+        displayedMonth.indexIn(yearRange)
     }
     val initialIndex = today.indexIn(yearRange)
 
-    val isToday by remember(displayedMonthIndex) {
-        derivedStateOf { displayedMonthIndex == initialIndex }
-    }
+    val isToday = displayedMonthIndex == initialIndex
 
     val monthsListState = rememberLazyListState(initialFirstVisibleItemIndex = displayedMonthIndex)
     val coroutineScope = rememberCoroutineScope()
@@ -490,7 +495,9 @@ private fun NepaliDatePicker(
                 coroutineScope.launch { monthsListState.scrollToItem(initialIndex) }
             },
             onYearPickerButtonClicked = { yearPickerVisible = !yearPickerVisible },
-            colors = colors
+            colors = colors,
+            previousMonthContentDescription = chosenLanguage.previousMonthContentDescription,
+            nextMonthContentDescription = chosenLanguage.nextMonthContentDescription
         )
         Box {
             Column(modifier = Modifier.padding(horizontal = DatePickerHorizontalPadding)) {
@@ -858,7 +865,9 @@ internal fun NepaliMonthsNavigation(
     showTodayButton: Boolean,
     onTodayClicked: () -> Unit,
     onYearPickerButtonClicked: () -> Unit,
-    colors: NepaliDatePickerColors
+    colors: NepaliDatePickerColors,
+    previousMonthContentDescription: String? = null,
+    nextMonthContentDescription: String? = null
 ) {
     Row(
         modifier = modifier.fillMaxWidth().requiredHeight(MonthYearHeight),
@@ -891,13 +900,15 @@ internal fun NepaliMonthsNavigation(
 
                     IconButton(onClick = onPreviousClicked, enabled = previousAvailable) {
                         Icon(
-                            NepaliIcons.KeyboardArrowLeft, contentDescription = null
+                            NepaliIcons.KeyboardArrowLeft,
+                            contentDescription = previousMonthContentDescription
                         )
                     }
 
                     IconButton(onClick = onNextClicked, enabled = nextAvailable) {
                         Icon(
-                            NepaliIcons.KeyboardArrowRight, contentDescription = null
+                            NepaliIcons.KeyboardArrowRight,
+                            contentDescription = nextMonthContentDescription
                         )
                     }
                 }
@@ -941,8 +952,12 @@ internal fun NepaliWeekDays(
     val firstDayOfWeek = NepaliDatePickerDefaults.FIRST_DAY_OF_WEEK
     val weekdays = language.weekdays
 
+    // Pair each abbreviated label with its full weekday name so screen readers announce
+    // "Monday" instead of the single letter "M".
     val dayNames = (firstDayOfWeek..firstDayOfWeek + 6).map { dayIndex ->
-        if (weekDayFormat == NameFormat.SHORT) weekdays[dayIndex - 1].short else weekdays[dayIndex - 1].medium
+        val weekday = weekdays[dayIndex - 1]
+        val display = if (weekDayFormat == NameFormat.SHORT) weekday.short else weekday.medium
+        display to weekday.full
     }
 
     val textStyle = MaterialTheme.typography.bodyLarge
@@ -954,15 +969,16 @@ internal fun NepaliWeekDays(
         horizontalArrangement = Arrangement.SpaceEvenly,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        dayNames.fastForEach {
+        dayNames.fastForEach { (display, fullName) ->
             Box(
                 modifier = Modifier.size(
                     width = RecommendedSizeForAccessibility,
                     height = RecommendedSizeForAccessibility
-                ), contentAlignment = Alignment.Center
+                ).clearAndSetSemantics { contentDescription = fullName },
+                contentAlignment = Alignment.Center
             ) {
                 Text(
-                    text = it,
+                    text = display,
                     modifier = Modifier.wrapContentSize(),
                     color = colors.weekdayContentColor,
                     style = textStyle,
@@ -985,12 +1001,8 @@ private fun NepaliHorizontalMonthList(
     nepaliSelectableDates: NepaliSelectableDates,
     colors: NepaliDatePickerColors,
 ) {
-    val firstMonth by remember(yearRange) {
-        derivedStateOf {
-            calendarModel.getNepaliMonth(
-                nepaliYear = yearRange.first, nepaliMonth = 1
-            )
-        }
+    val firstMonth = remember(yearRange, calendarModel) {
+        calendarModel.getNepaliMonth(nepaliYear = yearRange.first, nepaliMonth = 1)
     }
     val snapFlingBehavior = rememberCustomSnapFlingBehavior(lazyListState = lazyListState)
 
@@ -1083,6 +1095,14 @@ internal fun NepaliMonth(
     var cellIndex = 0
     val daysFromStartOfWeekToFirstOfMonth = monthCalendar.daysFromStartOfWeekToFirstOfMonth
 
+    // Hoisted out of the 42-cell loop (were re-read on every cell).
+    val startingNepaliYear = NepaliCalendarDefaults.startingNepaliCalendar
+    val endingNepaliYear = NepaliCalendarDefaults.endNepaliCalendar
+    // FULL-format locale used only to build each cell's screen-reader description.
+    val a11yLocale = remember(calendarModel) {
+        calendarModel.locale.copy(dateFormat = NepaliDateFormatStyle.FULL)
+    }
+
     Column(
         modifier = Modifier.requiredHeight(RecommendedSizeForAccessibility * NepaliMaxCalendarRows)
             .then(rangeSelectionDrawModifier),
@@ -1106,47 +1126,56 @@ internal fun NepaliMonth(
                     } else {
                         val dayNumber = cellIndex - daysFromStartOfWeekToFirstOfMonth + 1
 
-                        // To tackle recompositions
-                        val currentMonthDate by remember(cellIndex, dayNumber) {
-                            derivedStateOf {
-                                calendarModel.getNepaliCalendar(
-                                    SimpleDate(
-                                        year = monthCalendar.year,
-                                        month = monthCalendar.month,
-                                        dayOfMonth = dayNumber
-                                    )
+                        // Keyed on the actual month + day so a LazyRow slot reused for a
+                        // different month can't serve a stale date (the old key was cellIndex +
+                        // dayNumber only). Plain remember — the value is a pure function of the key.
+                        val currentMonthDate = remember(
+                            monthCalendar.year, monthCalendar.month, dayNumber
+                        ) {
+                            calendarModel.getNepaliCalendar(
+                                SimpleDate(
+                                    year = monthCalendar.year,
+                                    month = monthCalendar.month,
+                                    dayOfMonth = dayNumber
                                 )
-                            }
+                            )
                         }
 
                         val isToday = todayDate == currentMonthDate.toSimpleDate()
                         val startDateSelected = startDate == currentMonthDate
                         val endDateSelected = endDate == currentMonthDate
-                        val startingNepaliYear = NepaliCalendarDefaults.startingNepaliCalendar
-                        val endingNepaliYear = NepaliCalendarDefaults.endNepaliCalendar
 
+                        // Plain computed remember (was a per-cell MutableState allocation).
                         val inRange =
                             if (nepaliSelectedRangeInfo != null) {
                                 remember(nepaliSelectedRangeInfo, currentMonthDate) {
-                                    mutableStateOf(
-                                        calendarModel.compareDates(
-                                            currentMonthDate.toSimpleDate(),
-                                            startingNepaliYear.year,
-                                            startingNepaliYear.month,
-                                            startingNepaliYear.dayOfMonth
-                                        ) >= 0 &&
-                                                calendarModel.compareDates(
-                                                    currentMonthDate.toSimpleDate(),
-                                                    endingNepaliYear.year,
-                                                    endingNepaliYear.month,
-                                                    endingNepaliYear.dayOfMonth
-                                                ) <= 0
-                                    )
+                                    calendarModel.compareDates(
+                                        currentMonthDate.toSimpleDate(),
+                                        startingNepaliYear.year,
+                                        startingNepaliYear.month,
+                                        startingNepaliYear.dayOfMonth
+                                    ) >= 0 &&
+                                            calendarModel.compareDates(
+                                                currentMonthDate.toSimpleDate(),
+                                                endingNepaliYear.year,
+                                                endingNepaliYear.month,
+                                                endingNepaliYear.dayOfMonth
+                                            ) <= 0
                                 }
-                                    .value
                             } else {
                                 false
                             }
+
+                        // Full localized date (+ "today") read by screen readers for this cell.
+                        val dayContentDescription = remember(currentMonthDate, isToday) {
+                            buildString {
+                                append(calendarModel.formatNepaliDate(currentMonthDate, a11yLocale))
+                                if (isToday) {
+                                    append(", ")
+                                    append(calendarModel.locale.language.today)
+                                }
+                            }
+                        }
 
                         NepaliDay(
                             modifier = Modifier,
@@ -1164,7 +1193,8 @@ internal fun NepaliMonth(
                             },
                             today = isToday,
                             colors = colors,
-                            inRange = inRange
+                            inRange = inRange,
+                            dateContentDescription = dayContentDescription
                         ) {
                             Text(
                                 modifier = Modifier,
@@ -1194,12 +1224,19 @@ private fun NepaliDay(
     today: Boolean,
     colors: NepaliDatePickerColors,
     inRange: Boolean = false,
+    dateContentDescription: String? = null,
     content: @Composable () -> Unit
 ) {
     Surface(
         selected = selected,
         onClick = onClick,
-        modifier = modifier,
+        // Surface already contributes selected/disabled state to semantics; the description adds
+        // the full localized date so a screen reader announces the whole cell, not just the number.
+        modifier = if (dateContentDescription != null) {
+            modifier.semantics { contentDescription = dateContentDescription }
+        } else {
+            modifier
+        },
         enabled = enabled,
         shape = CircleShape,
         color = colors.dayContainerColor(
