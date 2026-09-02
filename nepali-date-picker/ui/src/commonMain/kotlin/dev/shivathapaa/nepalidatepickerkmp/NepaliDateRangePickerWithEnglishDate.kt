@@ -30,6 +30,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ProvideTextStyle
@@ -282,6 +283,8 @@ private fun NepaliEnglishDateRangePicker(
                 yearPickerVisible = yearPickerVisible,
                 yearPickerText = formattedMonthYear,
                 englishMonthYearText = formattedEnglishMonthYear,
+                previousMonthContentDescription = chosenLanguage.previousMonthContentDescription,
+                nextMonthContentDescription = chosenLanguage.nextMonthContentDescription,
                 showTodayButton = showTodayButton,
                 onNextClicked = {
                     coroutineScope.launch {
@@ -506,7 +509,7 @@ private fun HorizontalNepaliEnglishMonthView(
                         null
                     }
 
-                NepaliEnglishMonth(
+                NepaliMonth(
                     monthCalendar = monthCalendar,
                     onDateSelectionChange = onDateSelectionChange,
                     todayDate = today,
@@ -515,8 +518,9 @@ private fun HorizontalNepaliEnglishMonthView(
                     calendarModel = calendarModel,
                     nepaliSelectedRangeInfo = nepaliRangeSelectionInfo,
                     nepaliSelectableDates = nepaliSelectableDates,
-                    englishDateLanguage = englishDateLanguage,
-                    colors = colors
+                    colors = colors,
+                    dayShape = RoundedCornerShape(4.dp),
+                    englishDateLanguage = englishDateLanguage
                 )
             }
         }
@@ -579,7 +583,7 @@ private fun VerticalNepaliEnglishMonthView(
                         null
                     }
 
-                NepaliEnglishMonth(
+                NepaliMonth(
                     monthCalendar = monthCalendar,
                     onDateSelectionChange = onDateSelectionChange,
                     englishDateLanguage = englishDateLanguage,
@@ -589,7 +593,8 @@ private fun VerticalNepaliEnglishMonthView(
                     calendarModel = calendarModel,
                     nepaliSelectedRangeInfo = nepaliRangeSelectionInfo,
                     nepaliSelectableDates = nepaliSelectableDates,
-                    colors = colors
+                    colors = colors,
+                    dayShape = RoundedCornerShape(4.dp)
                 )
             }
         }

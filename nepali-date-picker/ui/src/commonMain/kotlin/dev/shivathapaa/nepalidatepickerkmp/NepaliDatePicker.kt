@@ -43,6 +43,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.defaultMinSize
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeight
@@ -85,10 +86,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
@@ -97,6 +100,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.util.fastForEach
 import dev.shivathapaa.nepalidatepickerkmp.calendar_model.NepaliCalendarDefaults
 import dev.shivathapaa.nepalidatepickerkmp.calendar_model.NepaliCalendarModel
@@ -1077,7 +1081,10 @@ internal fun NepaliMonth(
     nepaliSelectableDates: NepaliSelectableDates,
     onDateSelectionChange: (CustomCalendar) -> Unit,
     colors: NepaliDatePickerColors,
-    nepaliSelectedRangeInfo: NepaliSelectedRangeInfo? = null
+    nepaliSelectedRangeInfo: NepaliSelectedRangeInfo? = null,
+    dayShape: Shape = CircleShape,
+    // When non-null, each cell also renders the corresponding English day-of-month (dual-date cell).
+    englishDateLanguage: NepaliDatePickerLang? = null
 ) {
     val rangeSelectionDrawModifier =
         if (nepaliSelectedRangeInfo != null) {
@@ -1177,6 +1184,19 @@ internal fun NepaliMonth(
                             }
                         }
 
+                        // Only computed for the dual English+Nepali cell variant.
+                        val currentEnglishDay: Int? = if (englishDateLanguage != null) {
+                            remember(currentMonthDate) {
+                                calendarModel.convertToEnglishDate(
+                                    currentMonthDate.year,
+                                    currentMonthDate.month,
+                                    currentMonthDate.dayOfMonth
+                                ).dayOfMonth
+                            }
+                        } else {
+                            null
+                        }
+
                         NepaliDay(
                             modifier = Modifier,
                             selected = startDateSelected || endDateSelected,
@@ -1194,17 +1214,43 @@ internal fun NepaliMonth(
                             today = isToday,
                             colors = colors,
                             inRange = inRange,
-                            dateContentDescription = dayContentDescription
+                            dateContentDescription = dayContentDescription,
+                            shape = dayShape
                         ) {
-                            Text(
-                                modifier = Modifier,
-                                textAlign = TextAlign.Center,
-                                text = calendarModel.localizeNumber(
-                                    stringToLocalize = dayNumber.toString(),
-                                    locale = calendarModel.locale.language
-                                ),
-                                style = MaterialTheme.typography.bodyLarge
-                            )
+                            if (englishDateLanguage != null && currentEnglishDay != null) {
+                                // Dual-date cell: large Nepali number, small English day-of-month.
+                                Box(modifier = Modifier.fillMaxSize()) {
+                                    Text(
+                                        modifier = Modifier.align(Alignment.Center)
+                                            .padding(bottom = 4.dp, end = 2.dp),
+                                        textAlign = TextAlign.Center,
+                                        text = calendarModel.localizeNumber(
+                                            stringToLocalize = dayNumber.toString(),
+                                            locale = calendarModel.locale.language
+                                        ),
+                                        style = MaterialTheme.typography.bodyLarge.copy(fontSize = 16.5.sp)
+                                    )
+                                    Text(
+                                        modifier = Modifier.align(Alignment.BottomEnd)
+                                            .padding(end = 2.dp).alpha(0.75f),
+                                        text = calendarModel.localizeNumber(
+                                            stringToLocalize = currentEnglishDay.toString(),
+                                            locale = englishDateLanguage
+                                        ),
+                                        style = MaterialTheme.typography.labelSmall.copy(fontSize = 8.sp)
+                                    )
+                                }
+                            } else {
+                                Text(
+                                    modifier = Modifier,
+                                    textAlign = TextAlign.Center,
+                                    text = calendarModel.localizeNumber(
+                                        stringToLocalize = dayNumber.toString(),
+                                        locale = calendarModel.locale.language
+                                    ),
+                                    style = MaterialTheme.typography.bodyLarge
+                                )
+                            }
                         }
                     }
                     cellIndex++
@@ -1225,6 +1271,7 @@ private fun NepaliDay(
     colors: NepaliDatePickerColors,
     inRange: Boolean = false,
     dateContentDescription: String? = null,
+    shape: Shape = CircleShape,
     content: @Composable () -> Unit
 ) {
     Surface(
@@ -1238,7 +1285,7 @@ private fun NepaliDay(
             modifier
         },
         enabled = enabled,
-        shape = CircleShape,
+        shape = shape,
         color = colors.dayContainerColor(
             selected = selected, enabled = enabled, animate = animateChecked
         ).value,
