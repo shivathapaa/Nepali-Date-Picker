@@ -81,7 +81,7 @@ data class SimpleTime(
  * @property dayOfWeek The day of the week (1-7, e.g., 1 for Sunday). Defaults to -1 if not applicable.
  * @property dayOfYear The day of the year (1-366). Defaults to -1 if not applicable.
  * @property weekOfMonth The week of the month (1-5). Defaults to -1 if not applicable.
- * @property weekOfYear The week of the year (1-53). Defaults to -1 if not applicable.
+ * @property weekOfYear The week of the year (1-54). Defaults to -1 if not applicable.
  */
 @Immutable
 data class CustomCalendar(
