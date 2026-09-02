@@ -38,6 +38,7 @@ import dev.shivathapaa.nepalidatepickerkmp.NepaliDatePickerState
 import dev.shivathapaa.nepalidatepickerkmp.NepaliDatePickerWithEnglishDate
 import dev.shivathapaa.nepalidatepickerkmp.NepaliDateRangePicker
 import dev.shivathapaa.nepalidatepickerkmp.NepaliDateRangePickerState
+import dev.shivathapaa.nepalidatepickerkmp.NepaliDatePickerDocked
 import dev.shivathapaa.nepalidatepickerkmp.NepaliDatePickerFullScreenDialog
 import dev.shivathapaa.nepalidatepickerkmp.NepaliDateRangePickerWithEnglishDate
 import dev.shivathapaa.nepalidatepickerkmp.NepaliWheelDatePicker
@@ -343,6 +344,18 @@ fun SamplePickers(
                 NepaliDateRangePicker(state = fullScreenRangeState, showMonthsVertically = true)
             }
         }
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+        Text("Docked Date Picker", textAlign = TextAlign.Center)
+        val dockedState = rememberNepaliDatePickerState(
+            locale = NepaliDateLocale(dateFormat = NepaliDateFormatStyle.MEDIUM)
+        )
+        NepaliDatePickerDocked(
+            state = dockedState,
+            modifier = Modifier.padding(horizontal = 16.dp),
+            label = { Text("Date") }
+        )
 
         Spacer(modifier = Modifier.height(24.dp))
     }
