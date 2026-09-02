@@ -162,6 +162,9 @@ fun NepaliDatePickerDocked(
                 ) {
                     NepaliDatePicker(
                         state = state,
+                        // With no title the month header would otherwise sit flush against the
+                        // dropdown's top edge; a little top padding gives it breathing room.
+                        modifier = Modifier.padding(top = DockedPopupContentTopPadding),
                         title = null,
                         showModeToggle = false,
                         showTodayButton = showTodayButton,
@@ -196,3 +199,4 @@ private val DropdownBelowAnchor = object : PopupPositionProvider {
 
 private val DockedPopupGap = 4.dp
 private val DockedPopupElevation = 6.dp
+private val DockedPopupContentTopPadding = 8.dp
