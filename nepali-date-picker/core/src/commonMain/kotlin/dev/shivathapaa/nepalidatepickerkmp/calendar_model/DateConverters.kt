@@ -381,9 +381,6 @@ internal object DateConverters {
         dayOfMonth: Int,
         adjustMonth: Boolean
     ): CustomCalendar {
-        // Normalize the month and adjust the year accordingly
-//        val (newYear, newMonth) = adjustYearAndMonth(year, month)
-
         val newMonthDetails = calculateNepaliMonthDetails(year, month)
 
         // Adjust the day of the month if it exceeds the total days in the new month
