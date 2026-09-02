@@ -593,8 +593,9 @@ interface NepaliDatePickerState {
  * @param locale an instance of [NepaliDateLocale] that is used to localize the date picker. It holds
  * the preference for the date picker formatted date and the language of the date picker.
  *
- * @throws [IllegalArgumentException] if the initial selected date or displayed month represent a
- *   year that is out of the year range.
+ * Out-of-range or invalid initial values are coerced rather than rejected: the displayed month is
+ * clamped into [yearRange], and an out-of-range or non-existent initial selected date resolves to
+ * no selection.
  *
  * Example usage:
  * ```
@@ -688,8 +689,9 @@ fun rememberNepaliDatePickerState(
  * @param locale an instance of [NepaliDateLocale] that is used to localize the date picker. It holds
  * the preference for the date picker formatted date and the language of the date picker.
  *
- * @throws [IllegalArgumentException] if the initial selected date or displayed month represent a
- *   year that is out of the year range.
+ * Out-of-range or invalid initial values are coerced rather than rejected: the displayed month is
+ * clamped into [yearRange], and an out-of-range or non-existent initial selected date resolves to
+ * no selection.
  *
  * @see rememberNepaliDatePickerState
  */
@@ -721,8 +723,9 @@ fun NepaliDatePickerState(
  * @param nepaliSelectableDates a [NepaliSelectableDates] that is consulted to check if a date is allowed.
  * In case a date is not allowed to be selected, it will appear disabled in the UI.
  * @see rememberNepaliDatePickerState
- * @throws [IllegalArgumentException] if the initial selected date or displayed month represent
- * a year that is out of the year range.
+ * Out-of-range or invalid initial values are coerced rather than rejected: the displayed month is
+ * clamped into [yearRange], and an out-of-range or non-existent initial selected date resolves to
+ * no selection.
  */
 @Stable
 internal abstract class BaseNepaliDatePickerStateImpl(
@@ -736,34 +739,37 @@ internal abstract class BaseNepaliDatePickerStateImpl(
 
     private var _displayedMonth = mutableStateOf(
         if (initialDisplayedMonth != null) {
-            val month = calendarModel.getNepaliMonth(
-                nepaliYear = initialDisplayedMonth.year, nepaliMonth = initialDisplayedMonth.month
-            )
-            require(yearRange.contains(month.year)) {
-                "The initial display month's year (${month.year}) is out of the years range of $yearRange."
-            }
-            month
+            coerceDisplayedMonth(initialDisplayedMonth)
         } else {
-            // Set the displayed month to the current one.
             calendarModel.todayNepaliCalendar.toNepaliMonthCalendar()
         })
 
     var displayedMonth: NepaliMonthCalendar
         get() = _displayedMonth.value
         set(month) {
-            require(yearRange.contains(month.year)) {
-                "The display month's year (${month.year}) is out of the years range of $yearRange."
+            _displayedMonth.value = if (yearRange.contains(month.year)) {
+                month
+            } else {
+                coerceDisplayedMonth(SimpleDate(month.year, month.month))
             }
-            _displayedMonth.value = month
         }
+
+    // The displayed month drives the month pager, so an out-of-range year would crash on scroll.
+    // Clamp the year into range and the month to 1..12 instead of throwing.
+    private fun coerceDisplayedMonth(date: SimpleDate): NepaliMonthCalendar =
+        calendarModel.getNepaliMonth(
+            nepaliYear = date.year.coerceIn(yearRange.first, yearRange.last),
+            nepaliMonth = date.month.coerceIn(1, 12)
+        )
 }
 
 /**
  * A default implementation of the [NepaliDatePickerState]. See [rememberNepaliDatePickerState].
  *
  * @see rememberNepaliDatePickerState
- * @throws [IllegalArgumentException] if the initial selected date or displayed month represent
- * a year that is out of the year range.
+ * Out-of-range or invalid initial values are coerced rather than rejected: the displayed month is
+ * clamped into [yearRange], and an out-of-range or non-existent initial selected date resolves to
+ * no selection.
  */
 @Stable
 private class NepaliDatePickerStateImpl(
@@ -783,29 +789,20 @@ private class NepaliDatePickerStateImpl(
     /**
      * A mutable state of [CustomCalendar] that represents a selected date.
      */
+    // Drop an out-of-range or unparseable initial date to "no selection" instead of crashing.
     private var _selectedDate = mutableStateOf(
-        if (initialSelectedDate != null) {
-            val date = calendarModel.getNepaliCalendar(simpleNepaliDate = initialSelectedDate)
-            require(yearRange.contains(date.year)) {
-                "The provided initial date's year (${date.year}) is out of the years range of $yearRange."
-            }
-            date
-        } else {
-            null
+        initialSelectedDate?.let {
+            runCatching { calendarModel.getNepaliCalendar(simpleNepaliDate = it) }
+                .getOrNull()
+                ?.takeIf { date -> yearRange.contains(date.year) }
         })
 
     override var selectedDate: CustomCalendar?
         get() = _selectedDate.value
+        // Keep only an in-range date; anything else clears the selection so the headline and pager
+        // never receive a value they cannot render.
         set(customCalendar) {
-            if (customCalendar != null) {
-                // Validate that the give date is within the valid years range.
-                require(yearRange.contains(customCalendar.year)) {
-                    "The provided date's year (${customCalendar.year}) is out of the years range of $yearRange."
-                }
-                _selectedDate.value = customCalendar
-            } else {
-                _selectedDate.value = null
-            }
+            _selectedDate.value = customCalendar?.takeIf { yearRange.contains(it.year) }
         }
 
     override val selectedEnglishDate: CustomCalendar?

@@ -683,8 +683,9 @@ interface NepaliDateRangePickerState {
  * @param locale an instance of [NepaliDateLocale] that is used to localize the date picker. It holds
  * the preference for the date picker formatted date and the language of the date picker.
  *
- * @throws [IllegalArgumentException] if the initial selected date or displayed month represent a
- *   year that is out of the year range.
+ * Out-of-range or invalid initial values are coerced rather than rejected: the displayed month is
+ * clamped into [yearRange], and out-of-range or non-existent initial start/end dates resolve to no
+ * selection.
  *
  * @see rememberNepaliDatePickerState
  */
@@ -736,8 +737,9 @@ fun rememberNepaliDateRangePickerState(
  * @param locale an instance of [NepaliDateLocale] that is used to localize the date picker. It holds
  * the preference for the date picker formatted date and the language of the date picker.
  *
- * @throws [IllegalArgumentException] if the initial selected date or displayed month represent a
- *   year that is out of the year range.
+ * Out-of-range or invalid initial values are coerced rather than rejected: the displayed month is
+ * clamped into [yearRange], and out-of-range or non-existent initial start/end dates resolve to no
+ * selection.
  *
  * @see rememberNepaliDateRangePickerState
  */
@@ -782,12 +784,14 @@ private class NepaliDateRangePickerStateImpl(
     private var _selectedEndEnglishDate = mutableStateOf<CustomCalendar?>(null)
 
     init {
+        // Resolve initial dates defensively: an unparseable date becomes null and setSelection
+        // then coerces the rest, so construction never throws.
         setSelection(
             startNepaliDate = initialSelectedStartNepaliDate?.let {
-                calendarModel.getNepaliCalendar(initialSelectedStartNepaliDate)
+                runCatching { calendarModel.getNepaliCalendar(it) }.getOrNull()
             },
             endNepaliDate = initialSelectedEndNepaliDate?.let {
-                calendarModel.getNepaliCalendar(initialSelectedEndNepaliDate)
+                runCatching { calendarModel.getNepaliCalendar(it) }.getOrNull()
             }
         )
     }
@@ -818,55 +822,26 @@ private class NepaliDateRangePickerStateImpl(
     override fun setSelection(
         startNepaliDate: CustomCalendar?, endNepaliDate: CustomCalendar?
     ) {
-        val startNepaliCalendar = if (startNepaliDate != null) {
-            require(yearRange.contains(startNepaliDate.year)) {
-                "The provided initial date's year (${startNepaliDate.year}) is out of the years range of $yearRange."
-            }
-            startNepaliDate
-        } else {
-            null
-        }
+        // Coerce instead of throwing so bad input can never crash the picker or a caller: drop
+        // out-of-range dates, and discard an end that lacks a start or precedes its start.
+        val startNepaliCalendar = startNepaliDate?.takeIf { yearRange.contains(it.year) }
+        var endNepaliCalendar = endNepaliDate?.takeIf { yearRange.contains(it.year) }
 
-        val endNepaliCalendar = if (endNepaliDate != null) {
-            require(yearRange.contains(endNepaliDate.year)) {
-                "The provided initial date's year (${endNepaliDate.year}) is out of the years range of $yearRange."
-            }
-            endNepaliDate
-        } else {
-            null
-        }
-
-        if (endNepaliCalendar != null) {
-            requireNotNull(startNepaliCalendar) { "An end date was provided without a start date." }
-            // Validate that the end date appears on or after the start date.
-            require(
-                calendarModel.compareDates(
-                    startNepaliCalendar,
-                    endNepaliCalendar.year,
-                    endNepaliCalendar.month,
-                    endNepaliCalendar.dayOfMonth
-                ) < 0
-            ) {
-                "The provided end date appears before the start date."
-            }
+        val end = endNepaliCalendar
+        if (end != null && (startNepaliCalendar == null ||
+                calendarModel.compareDates(startNepaliCalendar, end.year, end.month, end.dayOfMonth) > 0)
+        ) {
+            endNepaliCalendar = null
         }
 
         _selectedStartNepaliDate.value = startNepaliCalendar
         _selectedEndNepaliDate.value = endNepaliCalendar
 
-        _selectedStartEnglishDate.value = if (startNepaliCalendar != null) {
-            calendarModel.convertToEnglishDate(
-                startNepaliCalendar.year, startNepaliCalendar.month, startNepaliCalendar.dayOfMonth
-            )
-        } else {
-            null
+        _selectedStartEnglishDate.value = startNepaliCalendar?.let {
+            runCatching { calendarModel.convertToEnglishDate(it.year, it.month, it.dayOfMonth) }.getOrNull()
         }
-        _selectedEndEnglishDate.value = if (endNepaliCalendar != null) {
-            calendarModel.convertToEnglishDate(
-                endNepaliCalendar.year, endNepaliCalendar.month, endNepaliCalendar.dayOfMonth
-            )
-        } else {
-            null
+        _selectedEndEnglishDate.value = endNepaliCalendar?.let {
+            runCatching { calendarModel.convertToEnglishDate(it.year, it.month, it.dayOfMonth) }.getOrNull()
         }
     }
 
