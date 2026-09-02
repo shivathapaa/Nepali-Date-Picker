@@ -53,7 +53,7 @@ import dev.shivathapaa.nepalidatepickerkmp.icons.NepaliIcons
  * Two stacked [NepaliDateTextField]s editing a Bikram Sambat date range.
  *
  * Validation per keystroke is identical to [NepaliDateTextField] for each side,
- * plus a cross-field rule: a parsed `endValue < startValue` is rejected — the
+ * plus a cross-field rule: a parsed `endValue < startValue` is rejected - the
  * field emits the offending side as `null` and surfaces `isError = true` to the
  * caller via [isStartError] / [isEndError].
  *
@@ -146,7 +146,7 @@ fun NepaliDateRangeTextField(
 }
 
 /**
- * Material3-style range field — [NepaliDateRangeTextField] with a trailing calendar
+ * Material3-style range field - [NepaliDateRangeTextField] with a trailing calendar
  * icon that opens [NepaliDatePickerDialog] hosting [NepaliDateRangePicker].
  *
  * Same params as [NepaliDateRangeTextField] plus dialog [properties]. Dialog

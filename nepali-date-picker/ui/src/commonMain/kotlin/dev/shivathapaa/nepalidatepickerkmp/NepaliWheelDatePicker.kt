@@ -60,11 +60,11 @@ import dev.shivathapaa.nepalidatepickerkmp.data.NepaliDateLocale
 import dev.shivathapaa.nepalidatepickerkmp.data.SimpleDate
 
 /**
- * A wheel / scroll date picker for Bikram Sambat dates — three snapping columns (Year · Month · Day).
+ * A wheel / scroll date picker for Bikram Sambat dates - three snapping columns (Year, Month, Day).
  *
  * This is a lighter-weight alternative to the calendar-grid [NepaliDatePicker]: it is the pattern
  * users reach for when entering a birth date or a date far from today, and it is the native feel on
- * iOS. It also sidesteps the grid's heaviest paths — there is no ~1,500-item month pager and no
+ * iOS. It also sidesteps the grid's heaviest paths - there is no ~1,500-item month pager and no
  * per-cell BS↔AD conversion; each column is a bounded [LazyColumn] reading the day-count table
  * directly, so the day column always shows the correct 29–32 days for the chosen month.
  *
@@ -103,7 +103,7 @@ fun NepaliWheelDatePicker(
 ) {
     val calendarModel = remember(locale) { NepaliCalendarModel(locale) }
 
-    // Year wheel entries — drop non-selectable years, but never present an empty wheel.
+    // Year wheel entries - drop non-selectable years, but never present an empty wheel.
     val yearList = remember(yearRange, selectableDates) {
         yearRange.filter { selectableDates.isSelectableYear(it) }.ifEmpty { yearRange.toList() }
     }

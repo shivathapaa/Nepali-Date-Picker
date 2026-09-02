@@ -42,7 +42,7 @@ class HolidayProviderTests {
         override fun holidays(year: Int): Set<HolidayEntry> = byYear[year].orEmpty()
     }
 
-    // ── NoOpHolidayProvider ────────────────────────────────────────────────
+    // NoOpHolidayProvider
 
     @Test
     fun noOp_neverFlagsHoliday() {
@@ -50,7 +50,7 @@ class HolidayProviderTests {
         assertEquals(emptySet(), NoOpHolidayProvider.holidays(2082))
     }
 
-    // ── NepaliSelectableDates wrappers ─────────────────────────────────────
+    // NepaliSelectableDates wrappers
 
     @Test
     fun excludingHolidays_rejectsHolidayDate_keepsRest() {
@@ -105,7 +105,7 @@ class HolidayProviderTests {
         }
     }
 
-    // ── workingDaysBetween ─────────────────────────────────────────────────
+    // workingDaysBetween
 
     @Test
     fun workingDaysBetween_emptyRange_returnsZero() {
@@ -127,7 +127,7 @@ class HolidayProviderTests {
     @Test
     fun workingDaysBetween_noHolidaysNoWeekends_equalsRawSpan() {
         val start = SimpleDate(2082, 1, 1)
-        val end = SimpleDate(2082, 1, 11) // exclusive — 10 days
+        val end = SimpleDate(2082, 1, 11) // exclusive - 10 days
         val span = NepaliDateConverter.getNepaliDaysInBetween(start, end)
         val working = NepaliDateConverter.workingDaysBetween(start, end, NoOpHolidayProvider, weekend = emptySet())
         assertEquals(span, working)
@@ -137,7 +137,7 @@ class HolidayProviderTests {
     @Test
     fun workingDaysBetween_defaultWeekend_skipsOneSaturdayPerWeek() {
         val start = SimpleDate(2082, 1, 1)
-        // 14 days span, default weekend (Sat only) — should skip 2 Saturdays.
+        // 14 days span, default weekend (Sat only) - should skip 2 Saturdays.
         val end = NepaliDateConverter.getNepaliCalendarAfterAdditionOrSubtraction(2082, 1, 1, 14).let {
             SimpleDate(it.year, it.month, it.dayOfMonth)
         }
@@ -167,7 +167,7 @@ class HolidayProviderTests {
     fun workingDaysBetween_holidayOnWeekend_notDoubleCounted() {
         val start = SimpleDate(2082, 1, 1)
         val end = SimpleDate(2082, 1, 15)
-        // Find a Saturday in the window and mark it as a holiday — should not change count.
+        // Find a Saturday in the window and mark it as a holiday - should not change count.
         var saturday: SimpleDate? = null
         for (offset in 0 until 14) {
             val cal = NepaliDateConverter.getNepaliCalendarAfterAdditionOrSubtraction(2082, 1, 1, offset)
@@ -184,7 +184,7 @@ class HolidayProviderTests {
 
     @Test
     fun workingDaysBetween_crossingYearBoundary() {
-        // 2081/12/25 → 2082/01/15 — spans year boundary.
+        // 2081/12/25 → 2082/01/15 - spans year boundary.
         val start = SimpleDate(2081, 12, 25)
         val endCal = NepaliDateConverter.getNepaliCalendarAfterAdditionOrSubtraction(
             2081, 12, 25, 20
@@ -196,7 +196,7 @@ class HolidayProviderTests {
         assertEquals(20, working) // 20-day span, no weekends, no holidays
     }
 
-    // ── nextWorkingDay ─────────────────────────────────────────────────────
+    // nextWorkingDay
 
     @Test
     fun nextWorkingDay_alreadyWorking_returnsSame() {
@@ -235,7 +235,7 @@ class HolidayProviderTests {
 
     @Test
     fun nextWorkingDay_allMarkedHoliday_throws() {
-        // Pathological provider that flags every date as a holiday — confirms the
+        // Pathological provider that flags every date as a holiday - confirms the
         // scan limit kicks in. Tests the contract that providers may override
         // isHoliday alone without populating holidays(year).
         val alwaysHoliday = object : NepaliHolidayProvider {
@@ -247,7 +247,7 @@ class HolidayProviderTests {
         }
     }
 
-    // ── addWorkingDays ─────────────────────────────────────────────────────
+    // addWorkingDays
 
     @Test
     fun addWorkingDays_zero_returnsSame() {
@@ -289,7 +289,7 @@ class HolidayProviderTests {
         val nextDay = NepaliDateConverter.getNepaliCalendarAfterAdditionOrSubtraction(2082, 1, 1, 1).let {
             SimpleDate(it.year, it.month, it.dayOfMonth)
         }
-        // Mark nextDay as a holiday (assume it's a weekday — if it's Saturday, this asserts the skip still works since both rules apply).
+        // Mark nextDay as a holiday (assume it's a weekday - if it's Saturday, this asserts the skip still works since both rules apply).
         val provider = FakeHolidayProvider(setOf(nextDay))
         val target = NepaliDateConverter.addWorkingDays(from, 1, provider, weekend = emptySet())
         assertTrue(target > nextDay, "should skip the holiday at nextDay")

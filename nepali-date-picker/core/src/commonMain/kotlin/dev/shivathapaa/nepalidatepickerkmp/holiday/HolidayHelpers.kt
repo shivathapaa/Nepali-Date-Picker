@@ -21,13 +21,13 @@ import dev.shivathapaa.nepalidatepickerkmp.calendar_model.NepaliDateConverter
 import dev.shivathapaa.nepalidatepickerkmp.data.CustomCalendar
 import dev.shivathapaa.nepalidatepickerkmp.data.SimpleDate
 
-// ── NepaliSelectableDates wrappers ─────────────────────────────────────────
+// NepaliSelectableDates wrappers
 
 /**
  * Returns a [NepaliSelectableDates] that delegates to this one but **additionally**
  * rejects any date marked as a holiday by [provider].
  *
- * Year-level rejection in this wrapper still defers to the wrapped predicate — holiday
+ * Year-level rejection in this wrapper still defers to the wrapped predicate - holiday
  * data is per-date, not per-year. To also gray out entire holiday-heavy years, compose
  * a custom predicate.
  */
@@ -49,7 +49,7 @@ fun NepaliSelectableDates.excludingHolidays(
  * Returns a [NepaliSelectableDates] that delegates to this one but **additionally**
  * rejects weekend days as defined by [weekend] (default: Saturday only).
  *
- * The library uses 1-based-Sunday day-of-week numbering throughout — Sunday = 1,
+ * The library uses 1-based-Sunday day-of-week numbering throughout - Sunday = 1,
  * …, Saturday = 7. Pass `setOf(6, 7)` for a Friday-and-Saturday weekend, or
  * `setOf(1, 7)` for Sunday-and-Saturday.
  */
@@ -67,13 +67,13 @@ fun NepaliSelectableDates.excludingWeekends(
     }
 }
 
-// ── Working-day arithmetic ─────────────────────────────────────────────────
+// Working-day arithmetic
 
 /**
  * Number of working days in the half-open range `[start, end)`, skipping both
  * [weekend] days and dates flagged by [provider].
  *
- * Mirrors the existing `getNepaliDaysInBetween` convention — [end] is **exclusive**.
+ * Mirrors the existing `getNepaliDaysInBetween` convention - [end] is **exclusive**.
  * To make it inclusive, add 1 to the result if [end] itself is a working day.
  *
  * Requires `start <= end`. Returns 0 when `start == end`.
@@ -107,7 +107,7 @@ fun NepaliDateConverter.workingDaysBetween(
  * flagged by [provider].
  *
  * If [from] is itself a working day, returns [from] unchanged. Otherwise scans
- * forward day by day. Bounded scan — gives up after a year to avoid pathological
+ * forward day by day. Bounded scan - gives up after a year to avoid pathological
  * provider implementations that mark every day as a holiday.
  *
  * @throws IllegalStateException if no working day is found within 366 days of [from].
@@ -126,7 +126,7 @@ fun NepaliDateConverter.nextWorkingDay(
         if (cal.dayOfWeek !in weekend && !provider.isHoliday(simple)) return simple
         offset++
     }
-    error("nextWorkingDay: no working day found within 366 days of $from — check your NepaliHolidayProvider and weekend set")
+    error("nextWorkingDay: no working day found within 366 days of $from - check your NepaliHolidayProvider and weekend set")
 }
 
 /**
@@ -138,7 +138,7 @@ fun NepaliDateConverter.nextWorkingDay(
  *   - `days < 0` returns the |[days]|-th working day *strictly before* [from].
  *
  * Note that this means `addWorkingDays(from, 0)` is **not** the same as
- * `nextWorkingDay(from)` — use the latter explicitly if you want adjustment.
+ * `nextWorkingDay(from)` - use the latter explicitly if you want adjustment.
  *
  * @throws IllegalStateException if more than ~2 years of scanning fails to find the
  *   requested day (defends against pathological providers).
@@ -174,19 +174,19 @@ fun NepaliDateConverter.addWorkingDays(
     return SimpleDate(final.year, final.month, final.dayOfMonth)
 }
 
-// ── internals ──────────────────────────────────────────────────────────────
+// internals
 
 /**
  * Helpers call [NepaliHolidayProvider.isHoliday] directly per date rather than
  * caching `provider.holidays(year)` themselves. Reasons:
- *   - Providers can override either method (or both) — caching the year set silently
+ *   - Providers can override either method (or both) - caching the year set silently
  *     bypasses providers that only implement `isHoliday`, which is a contract-supported
  *     shape.
  *   - Real implementations almost always memoize their own data (static map, in-memory
  *     CMS cache). A redundant cache layer here adds little.
  *
  * If a profile shows `provider.isHoliday` is the bottleneck for a particular workload,
- * the provider should memoize — the contract documents this expectation.
+ * the provider should memoize - the contract documents this expectation.
  */
 
 /** Local helper to avoid a public extension just for the wrapper's needs. */

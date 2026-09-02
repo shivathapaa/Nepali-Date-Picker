@@ -8,7 +8,7 @@
  *  http://mozilla.org/MPL/2.0/
  */
 
-@file:Suppress("DEPRECATION") // intentionally exercises the deprecated convertTo*Number / localizeNumber alias — see DigitScriptTests for new API coverage
+@file:Suppress("DEPRECATION") // intentionally exercises the deprecated convertTo*Number / localizeNumber alias - see DigitScriptTests for new API coverage
 
 package dev.shivathapaa.nepalidatepickerkmp
 
@@ -29,7 +29,7 @@ class ParseAndLocaleTests {
 
     private val model = NepaliCalendarModel()
 
-    // ── NepaliCalendarModel.parse ────────────────────────────────────────────
+    // NepaliCalendarModel.parse
 
     @Test
     fun parse_validEightCharDateString_returnsCalendar() {
@@ -79,7 +79,7 @@ class ParseAndLocaleTests {
         assertEquals(-1, cal.firstDayOfMonth)
     }
 
-    // ── Number localisation ──────────────────────────────────────────────────
+    // Number localisation
 
     @Test
     fun convertToNepaliNumber_emptyString_returnsEmpty() {
@@ -135,7 +135,7 @@ class ParseAndLocaleTests {
         assertEquals(original, back)
     }
 
-    // ── getWeekdayName ───────────────────────────────────────────────────────
+    // getWeekdayName
 
     @Test
     fun getWeekdayName_eachDayEnglishFull() {
@@ -180,7 +180,7 @@ class ParseAndLocaleTests {
         }
     }
 
-    // ── getMonthName (Nepali months) ─────────────────────────────────────────
+    // getMonthName (Nepali months)
 
     @Test
     fun getMonthName_allTwelveInEnglish() {
@@ -224,7 +224,7 @@ class ParseAndLocaleTests {
         }
     }
 
-    // ── getEnglishMonthName ──────────────────────────────────────────────────
+    // getEnglishMonthName
 
     @Test
     fun getEnglishMonthName_allTwelveInEnglish() {
@@ -260,7 +260,7 @@ class ParseAndLocaleTests {
         }
     }
 
-    // ── replaceDelimiter ─────────────────────────────────────────────────────
+    // replaceDelimiter
 
     @Test
     fun replaceDelimiter_emptyString_returnsEmpty() {

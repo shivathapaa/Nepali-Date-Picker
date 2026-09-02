@@ -1207,7 +1207,7 @@ object NepaliDateConverter {
      * Non-digit characters and digits already outside ASCII 0-9 are kept verbatim.
      * For [DigitScript.LATIN] this is a no-op and returns the original string instance.
      *
-     * Example — `"2082/02/14".localizeDigits(DigitScript.DEVANAGARI)` → `"२०८२/०२/१४"`.
+     * Example - `"2082/02/14".localizeDigits(DigitScript.DEVANAGARI)` → `"२०८२/०२/१४"`.
      */
     fun String.localizeDigits(script: DigitScript): String = script.localize(this)
 
@@ -1228,7 +1228,7 @@ object NepaliDateConverter {
      * Currently handles [DigitScript.DEVANAGARI]; other scripts added to [DigitScript]
      * are picked up automatically without changes here.
      *
-     * Example — `"२०८२/०२/१४".toLatinDigits()` → `"2082/02/14"`.
+     * Example - `"२०८२/०२/१४".toLatinDigits()` → `"2082/02/14"`.
      */
     fun String.toLatinDigits(): String {
         var anyConverted = false
@@ -1272,7 +1272,7 @@ object NepaliDateConverter {
      * This function converts [String] to English, i.e. converts nepali numbers of string to english numbers.
      */
     @Deprecated(
-        message = "Use toLatinDigits() — converts digits from any supported non-Latin script back to ASCII 0-9.",
+        message = "Use toLatinDigits() - converts digits from any supported non-Latin script back to ASCII 0-9.",
         replaceWith = ReplaceWith(expression = "toLatinDigits()")
     )
     fun String.convertToEnglishNumber(): String = toLatinDigits()

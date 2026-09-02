@@ -33,7 +33,7 @@ import kotlin.time.ExperimentalTime
  */
 class TodayFreshnessTests {
 
-    // Nepal Standard Time — fixed +05:45, matching NepaliCalendarModel.
+    // Nepal Standard Time - fixed +05:45, matching NepaliCalendarModel.
     private val nepalOffset = FixedOffsetTimeZone(UtcOffset(hours = 5, minutes = 45))
 
     @Test

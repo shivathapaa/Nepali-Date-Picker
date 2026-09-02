@@ -29,7 +29,7 @@ import dev.shivathapaa.nepalidatepickerkmp.annotation.Immutable
  * @property weekDayName The format for displaying weekday names (FULL, MEDIUM, or SHORT). Defaults to FULL.
  * @property monthName The format for displaying month names (FULL, MEDIUM, or SHORT). Defaults to FULL.
  * @property digitScript Explicit numeral script for digits. `null` (the default) means
- *   "follow the [language]" — see [defaultDigitScript]. Set this to render Nepali month
+ *   "follow the [language]" - see [defaultDigitScript]. Set this to render Nepali month
  *   names with Latin digits, or English month names with Devanagari digits.
  */
 @Immutable

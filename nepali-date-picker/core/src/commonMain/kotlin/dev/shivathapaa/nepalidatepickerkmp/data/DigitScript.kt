@@ -25,7 +25,7 @@ package dev.shivathapaa.nepalidatepickerkmp.data
  * to go the other way.
  *
  * Devanagari is shared by Nepali, Hindi, Marathi, Maithili, Bhojpuri, and
- * Newari — picking [DEVANAGARI] is enough for all of those locales.
+ * Newari - picking [DEVANAGARI] is enough for all of those locales.
  */
 enum class DigitScript(internal val digits: CharArray) {
     /** ASCII `0123456789`. Default for `NepaliDatePickerLang.ENGLISH`. */
@@ -70,7 +70,7 @@ fun NepaliDatePickerLang.defaultDigitScript(): DigitScript = when (this) {
  * an ASCII digit, return it unchanged. Otherwise return `null`.
  *
  * Public because UI text-field code needs to fold input digits to a single
- * canonical form before parsing — calling `String.toLatinDigits()` for one char
+ * canonical form before parsing - calling `String.toLatinDigits()` for one char
  * would allocate.
  */
 fun Char.latinDigitOrNull(): Char? {

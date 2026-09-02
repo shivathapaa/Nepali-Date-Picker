@@ -21,7 +21,7 @@ import kotlin.test.assertTrue
 
 class IsoAndTimeFormatTests {
 
-    // ── ISO formatting ───────────────────────────────────────────────────────
+    // ISO formatting
 
     @Test
     fun formatNepaliDateTimeToIso_kathmanduTimeZone_shiftsTo_UTC() {
@@ -112,7 +112,7 @@ class IsoAndTimeFormatTests {
         assertEquals(time.second, recovered.simpleTime.second)
     }
 
-    // ── 12-hour / 24-hour formatting ─────────────────────────────────────────
+    // 12-hour / 24-hour formatting
 
     @Test
     fun getFormattedTimeInEnglish_midnight12HourFormat_returnsTwelveAM() {
@@ -176,7 +176,7 @@ class IsoAndTimeFormatTests {
             NepaliDateConverter.getFormattedTimeInNepali(time, use12HourFormat = false))
     }
 
-    // ── formatTimeByUnicodePattern edge cases ────────────────────────────────
+    // formatTimeByUnicodePattern edge cases
 
     @Test
     fun formatTimeByUnicodePattern_midnightTokens_returnPaddedZero() {

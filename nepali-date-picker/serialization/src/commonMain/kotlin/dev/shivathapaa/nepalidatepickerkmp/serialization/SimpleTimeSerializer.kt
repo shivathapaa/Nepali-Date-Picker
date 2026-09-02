@@ -20,7 +20,7 @@ import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
 
 /**
- * Default [KSerializer] for [SimpleTime] — encodes as the string
+ * Default [KSerializer] for [SimpleTime] - encodes as the string
  * `"HH:mm:ss.NNNNNNNNN"`, always in Asia/Kathmandu (the timezone all `SimpleTime`s
  * in this library are anchored to). The nanosecond fractional part is omitted when
  * `nanosecond == 0` to keep wire payloads small.
@@ -50,14 +50,14 @@ object SimpleTimeSerializer : KSerializer<SimpleTime> {
         }
         val parts = timePart.split(':')
         if (parts.size != 3) {
-            throw SerializationException("Invalid SimpleTime '$raw' — expected 'HH:mm:ss[.nnnnnnnnn]'")
+            throw SerializationException("Invalid SimpleTime '$raw' - expected 'HH:mm:ss[.nnnnnnnnn]'")
         }
         val hour = parts[0].toIntOrNull()
         val minute = parts[1].toIntOrNull()
         val second = parts[2].toIntOrNull()
         val nanosecond = nanoStr.toIntOrNull()
         if (hour == null || minute == null || second == null || nanosecond == null) {
-            throw SerializationException("Invalid SimpleTime '$raw' — non-numeric component")
+            throw SerializationException("Invalid SimpleTime '$raw' - non-numeric component")
         }
         if (hour !in 0..23) throw SerializationException("SimpleTime.hour out of 0..23: $hour")
         if (minute !in 0..59) throw SerializationException("SimpleTime.minute out of 0..59: $minute")

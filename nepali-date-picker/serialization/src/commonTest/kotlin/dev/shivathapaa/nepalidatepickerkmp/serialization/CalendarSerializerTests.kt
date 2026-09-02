@@ -23,7 +23,7 @@ class CalendarSerializerTests {
 
     private val json = Json
 
-    // ── CustomCalendar ─────────────────────────────────────────────────────
+    // CustomCalendar
 
     @Test
     fun customCalendar_roundTrip_fullData() {
@@ -35,7 +35,7 @@ class CalendarSerializerTests {
 
     @Test
     fun customCalendar_roundTrip_minimalPayloadUsesDefaults() {
-        // Only the 7 required fields — optional fields should default to -1.
+        // Only the 7 required fields - optional fields should default to -1.
         val payload = """
             {
               "year": 2082, "month": 2, "dayOfMonth": 14, "era": 2,
@@ -53,7 +53,7 @@ class CalendarSerializerTests {
 
     @Test
     fun customCalendar_deserialize_rejectsMissingRequiredField() {
-        // Missing `totalDaysInMonth` — bit 6.
+        // Missing `totalDaysInMonth` - bit 6.
         val payload = """
             {
               "year": 2082, "month": 2, "dayOfMonth": 14, "era": 2,
@@ -65,7 +65,7 @@ class CalendarSerializerTests {
         }
     }
 
-    // ── NepaliMonthCalendar ────────────────────────────────────────────────
+    // NepaliMonthCalendar
 
     @Test
     fun monthCalendar_roundTrip() {
@@ -80,7 +80,7 @@ class CalendarSerializerTests {
 
     @Test
     fun monthCalendar_deserialize_defaultDaysFromStartIsFirstDayMinusOne() {
-        // `daysFromStartOfWeekToFirstOfMonth` omitted — defaults to firstDayOfMonth - 1.
+        // `daysFromStartOfWeekToFirstOfMonth` omitted - defaults to firstDayOfMonth - 1.
         val payload = """
             {
               "year": 2082, "month": 2, "totalDaysInMonth": 31,

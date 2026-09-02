@@ -29,7 +29,7 @@ import kotlinx.serialization.encoding.decodeStructure
 import kotlinx.serialization.encoding.encodeStructure
 
 /**
- * Default [KSerializer] for [SimpleDate] — encodes as the string `"YYYY-MM-DD"`.
+ * Default [KSerializer] for [SimpleDate] - encodes as the string `"YYYY-MM-DD"`.
  *
  * Wire format example: `"2082-02-14"`.
  *
@@ -37,7 +37,7 @@ import kotlinx.serialization.encoding.encodeStructure
  * the way back in (so historical Bikram Sambat years that take 4 digits, plus any
  * one-off `"99-01-01"` test fixture, all round-trip).
  *
- * The date is always interpreted as Bikram Sambat — no era tag in the wire form
+ * The date is always interpreted as Bikram Sambat - no era tag in the wire form
  * because the library doesn't model AD dates as `SimpleDate`.
  *
  * @see SimpleDateStructSerializer for a `{year, month, dayOfMonth}` JSON-object form.
@@ -54,7 +54,7 @@ object SimpleDateSerializer : KSerializer<SimpleDate> {
         val raw = decoder.decodeString()
         return parseIso(raw)
             ?: throw SerializationException(
-                "Invalid SimpleDate '$raw' — expected 'YYYY-MM-DD' with month in 1..12 and day in 1..32"
+                "Invalid SimpleDate '$raw' - expected 'YYYY-MM-DD' with month in 1..12 and day in 1..32"
             )
     }
 
@@ -77,7 +77,7 @@ object SimpleDateSerializer : KSerializer<SimpleDate> {
 }
 
 /**
- * Alternative [KSerializer] for [SimpleDate] — encodes as a JSON object
+ * Alternative [KSerializer] for [SimpleDate] - encodes as a JSON object
  * `{"year": …, "month": …, "dayOfMonth": …}`.
  *
  * Use this when downstream tooling (JSON Schema, BigQuery, GraphQL codegen, …) prefers
@@ -129,7 +129,7 @@ object SimpleDateStructSerializer : KSerializer<SimpleDate> {
     }
 }
 
-// element<T> helper for buildClassSerialDescriptor — pulled out for readability.
+// element<T> helper for buildClassSerialDescriptor - pulled out for readability.
 private inline fun <reified T> kotlinx.serialization.descriptors.ClassSerialDescriptorBuilder.element(
     name: String,
 ) = element(name, kotlinx.serialization.serializer<T>().descriptor)

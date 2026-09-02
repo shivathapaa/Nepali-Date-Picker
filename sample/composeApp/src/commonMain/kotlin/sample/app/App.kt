@@ -95,7 +95,7 @@ fun SampleGallery(modifier: Modifier = Modifier) {
             textAlign = TextAlign.Center
         )
 
-        // ── Calendar-grid pickers ────────────────────────────────────────────
+        // Calendar-grid pickers
         Section(
             "Date picker",
             "Single BS date. Toggle the pencil icon for text-input mode."
@@ -137,7 +137,7 @@ fun SampleGallery(modifier: Modifier = Modifier) {
             )
         }
 
-        // ── Alternative experiences ──────────────────────────────────────────
+        // Alternative experiences
         Section(
             "Wheel picker",
             "Three snapping columns. Best for birth dates and dates far from today."
@@ -157,12 +157,12 @@ fun SampleGallery(modifier: Modifier = Modifier) {
             )
         }
 
-        // ── Dialogs ──────────────────────────────────────────────────────────
+        // Dialogs
         Section("Dialogs", "Modal and full-screen hosts.") {
             DialogDemos()
         }
 
-        // ── Text fields ──────────────────────────────────────────────────────
+        // Text fields
         Section(
             "Text fields",
             "Type a date directly. Accepts Latin and Devanagari digits."
@@ -170,7 +170,7 @@ fun SampleGallery(modifier: Modifier = Modifier) {
             TextFieldDemos()
         }
 
-        // ── Core utilities (no UI needed) ────────────────────────────────────
+        // Core utilities (no UI needed)
         Section(
             "Core utilities",
             "NepaliDateConverter works without any Compose dependency."

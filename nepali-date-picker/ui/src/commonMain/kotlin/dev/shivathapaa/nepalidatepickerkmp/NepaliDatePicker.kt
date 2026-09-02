@@ -1153,7 +1153,7 @@ internal fun NepaliMonth(
 
                         // Keyed on the actual month + day so a LazyRow slot reused for a
                         // different month can't serve a stale date (the old key was cellIndex +
-                        // dayNumber only). Plain remember — the value is a pure function of the key.
+                        // dayNumber only). Plain remember - the value is a pure function of the key.
                         val currentMonthDate = remember(
                             monthCalendar.year, monthCalendar.month, dayNumber
                         ) {

@@ -52,7 +52,7 @@ import kotlinx.coroutines.flow.first
  * A docked / compact Nepali date picker: a read-only text field showing the selected date, with a
  * trailing calendar button that opens the [NepaliDatePicker] in a dropdown anchored to the field.
  *
- * This is the Material 3 "docked" pattern — the right default for forms and desktop / web, where a
+ * This is the Material 3 "docked" pattern - the right default for forms and desktop / web, where a
  * full modal dialog is heavier than needed. Picking a date fills the field and closes the dropdown.
  *
  * @param state the [NepaliDatePickerState] driving the field and the calendar. See

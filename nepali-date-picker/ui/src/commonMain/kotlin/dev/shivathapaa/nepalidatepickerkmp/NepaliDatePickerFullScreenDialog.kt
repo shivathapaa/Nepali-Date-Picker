@@ -42,7 +42,7 @@ import dev.shivathapaa.nepalidatepickerkmp.calendar_model.NepaliDatePickerDefaul
  * A full-screen dialog host for the Nepali date/range pickers.
  *
  * Where [NepaliDatePickerDialog] is a centered modal with a fixed width, this fills the whole screen
- * — the Material 3 pattern that fits a **range** selection on a phone, or any picker on a small
+ * - the Material 3 pattern that fits a **range** selection on a phone, or any picker on a small
  * screen where the 360dp modal would be cramped. The top bar carries the dismiss and confirm slots;
  * the picker goes in [content] and takes the remaining height (its own month list scrolls inside).
  *
@@ -53,7 +53,7 @@ import dev.shivathapaa.nepalidatepickerkmp.calendar_model.NepaliDatePickerDefaul
  * @param title an optional centered title in the top bar.
  * @param colors the [NepaliDatePickerColors] used for the surface and divider.
  * @param properties the [DialogProperties]; defaults to non-platform width so the surface fills the screen.
- * @param content the picker to host — typically [NepaliDatePicker], [NepaliDateRangePicker], or an
+ * @param content the picker to host - typically [NepaliDatePicker], [NepaliDateRangePicker], or an
  *   English-date variant. Receives a [ColumnScope].
  *
  * Example usage:

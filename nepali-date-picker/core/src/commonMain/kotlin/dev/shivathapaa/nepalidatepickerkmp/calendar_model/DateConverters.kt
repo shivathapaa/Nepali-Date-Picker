@@ -38,7 +38,7 @@ internal object DateConverters {
 
     // Cumulative Bikram Sambat day count from Baisakh 1 of [minNepaliYear] to Baisakh 1 of each
     // supported year. Turns the year portion of `calculateDayOffset` from an O(years) re-sum into
-    // an O(1) subtraction. Built once, lazily, and immutable thereafter — safe on every KMP target.
+    // an O(1) subtraction. Built once, lazily, and immutable thereafter - safe on every KMP target.
     private val cumulativeDaysAtYearStart: Map<Int, Int> by lazy {
         val map = HashMap<Int, Int>(maxNepaliYear - minNepaliYear + 1)
         var running = 0
@@ -50,7 +50,7 @@ internal object DateConverters {
     }
 
     // Every supported Nepali month's details, precomputed once. The `daysInMonthMap` table is
-    // static, so these never change — caching removes the per-month O(years) rebuild the UI pager
+    // static, so these never change - caching removes the per-month O(years) rebuild the UI pager
     // used to pay on every scroll/recomposition. Cheap to build because `calculateDayOffset` is now
     // O(1). Lazy + immutable-after-build → thread-safe without locks on the read path.
     private val nepaliMonthDetailsCache: Map<Int, NepaliMonthCalendar> by lazy {
@@ -418,7 +418,6 @@ internal object DateConverters {
             weekOfMonth = calculateWeekOfMonth(
                 dayOfMonth = newDayOfMonth, firstDayOfMonth = newMonthDetails.firstDayOfMonth
             ),
-            // Todo: Simplify logic
             weekOfYear = calculateWeekOfYear(
                 dayOfYear = totalDayInYear,
                 firstDayOfYear = calculateNepaliMonthDetails(year, 1).firstDayOfMonth
@@ -574,11 +573,7 @@ internal object DateConverters {
         return daysBefore / 7 + 1
     }
 
-    /**
-     * Works perfectly for recent tests and edge cases.
-     *
-     * Todo: Add more tests covering more edge cases for this. Still have some doubts regarding this.
-     */
+    /** Week of the year from the day-of-year and the weekday of the first day of the year. */
     private fun calculateWeekOfYear(dayOfYear: Int, firstDayOfYear: Int): Int {
         val totalDaysPassed = dayOfYear + (firstDayOfYear - 1)
 
@@ -628,7 +623,7 @@ internal object DateConverters {
         // (English 1913-04-13 ≡ Nepali 1970-01-01). Without this guard, dates in
         // 1913-01-01..1913-04-12 pass the year check, then the day-walk runs
         // `repeat(negativeDiff)` zero times and silently returns the anchor
-        // (Nepali 1970-01-01) — a wrong result with no error.
+        // (Nepali 1970-01-01) - a wrong result with no error.
         val start = NepaliCalendarDefaults.startingEnglishCalendar
         if (englishYYYY == start.year &&
             (englishMM < start.month ||

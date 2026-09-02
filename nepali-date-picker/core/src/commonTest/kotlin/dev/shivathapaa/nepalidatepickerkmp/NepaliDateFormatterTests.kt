@@ -23,7 +23,7 @@ class NepaliDateFormatterTests {
 
     private val sample = SimpleDate(2082, 2, 14)
 
-    // ── format ──────────────────────────────────────────────────────────────
+    // format
 
     @Test
     fun format_yyyySlashLatin() {
@@ -59,7 +59,7 @@ class NepaliDateFormatterTests {
         assertEquals("2082/01/05", NepaliDateFormatter.format(d, Pattern.YYYY_SLASH_MM_SLASH_DD))
     }
 
-    // ── parse — happy path ─────────────────────────────────────────────────
+    // parse - happy path
 
     @Test
     fun parse_yyyySlashLatin_roundTrip() {
@@ -97,7 +97,7 @@ class NepaliDateFormatterTests {
         assertEquals(sample, NepaliDateFormatter.parse("2082/०२/14", Pattern.YYYY_SLASH_MM_SLASH_DD))
     }
 
-    // ── parse — rejection ──────────────────────────────────────────────────
+    // parse - rejection
 
     @Test
     fun parse_partialInput_returnsNull() {
@@ -142,7 +142,7 @@ class NepaliDateFormatterTests {
         assertNull(NepaliDateFormatter.parse("2082/02/14 ", Pattern.YYYY_SLASH_MM_SLASH_DD))
     }
 
-    // ── round-trip across all patterns ─────────────────────────────────────
+    // round-trip across all patterns
 
     @Test
     fun formatAndParse_roundTripAllPatterns() {

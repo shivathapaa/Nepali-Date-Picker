@@ -23,7 +23,7 @@ import dev.shivathapaa.nepalidatepickerkmp.annotation.Immutable
  *
  * Use this when you have a raw `YYYY/MM/DD`-style string from a `TextField` and need a
  * [SimpleDate] (or vice versa). For locale-aware long-form output ("Asar 21, 2082"),
- * use `NepaliDateConverter.formatNepaliDate(...)` instead — this formatter is the
+ * use `NepaliDateConverter.formatNepaliDate(...)` instead - this formatter is the
  * primitive that backs `NepaliDateTextField` / `NepaliDateField`.
  *
  * Supported [Pattern]s are limited on purpose. A free-form `DateTimeFormatter`-style
@@ -35,29 +35,29 @@ object NepaliDateFormatter {
 
     /** Supported text-field input/output patterns. */
     enum class Pattern(val literal: String, val delimiter: Char, val yearFirst: Boolean) {
-        /** `YYYY/MM/DD` — e.g. `2082/02/14`. */
+        /** `YYYY/MM/DD` - e.g. `2082/02/14`. */
         YYYY_SLASH_MM_SLASH_DD("YYYY/MM/DD", '/', yearFirst = true),
 
-        /** `YYYY-MM-DD` — ISO-like, e.g. `2082-02-14`. */
+        /** `YYYY-MM-DD` - ISO-like, e.g. `2082-02-14`. */
         YYYY_DASH_MM_DASH_DD("YYYY-MM-DD", '-', yearFirst = true),
 
-        /** `DD/MM/YYYY` — day-first, e.g. `14/02/2082`. */
+        /** `DD/MM/YYYY` - day-first, e.g. `14/02/2082`. */
         DD_SLASH_MM_SLASH_YYYY("DD/MM/YYYY", '/', yearFirst = false),
 
-        /** `DD-MM-YYYY` — day-first dashed, e.g. `14-02-2082`. */
+        /** `DD-MM-YYYY` - day-first dashed, e.g. `14-02-2082`. */
         DD_DASH_MM_DASH_YYYY("DD-MM-YYYY", '-', yearFirst = false);
 
         /** Total visible character count when the field is full (always 10). */
         val length: Int get() = literal.length
 
-        /** Number of ASCII digit characters expected (always 8 — `YYYY` + `MM` + `DD`). */
+        /** Number of ASCII digit characters expected (always 8 - `YYYY` + `MM` + `DD`). */
         val digitCount: Int get() = 8
     }
 
     /**
      * Format [date] as a `Pattern.literal`-shaped string with digits in the given [script].
      *
-     * No range or selectable-date checks — pass any [SimpleDate]; the result will reflect it.
+     * No range or selectable-date checks - pass any [SimpleDate]; the result will reflect it.
      */
     fun format(date: SimpleDate, pattern: Pattern, script: DigitScript = DigitScript.LATIN): String {
         val year = date.year.toString().padStart(4, '0')
@@ -81,10 +81,10 @@ object NepaliDateFormatter {
      * - month is not in 1..12,
      * - dayOfMonth is not in 1..32 (32 is allowed because some BS months have 32 days;
      *   tighter "real" validation that hits the converter and reports total days in month
-     *   is the caller's job — usually via `NepaliSelectableDates` + `NepaliCalendarModel`).
+     *   is the caller's job - usually via `NepaliSelectableDates` + `NepaliCalendarModel`).
      *
      * Delimiters must match `pattern.delimiter` exactly. Trailing/leading whitespace is
-     * NOT trimmed — text fields should call `String.trim()` first if they care.
+     * NOT trimmed - text fields should call `String.trim()` first if they care.
      */
     fun parse(input: String, pattern: Pattern): SimpleDate? {
         if (input.length != pattern.length) return null

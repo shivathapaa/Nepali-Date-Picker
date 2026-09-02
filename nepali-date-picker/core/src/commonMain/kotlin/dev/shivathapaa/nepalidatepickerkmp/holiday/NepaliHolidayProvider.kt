@@ -24,7 +24,7 @@ import dev.shivathapaa.nepalidatepickerkmp.data.SimpleDate
  * Categorization for [HolidayEntry]. Use this to filter or style holidays in your UI
  * (e.g. render `GovernmentPublic` in red, `Observance` in muted gray).
  *
- * Open-ended on purpose — adding more cases here is a breaking change, so the set is
+ * Open-ended on purpose - adding more cases here is a breaking change, so the set is
  * deliberately narrow. If your taxonomy needs more granularity, store extra fields on
  * a wrapper type alongside [HolidayEntry].
  */
@@ -32,13 +32,13 @@ enum class HolidayKind {
     /** Bank / government office is closed. Sarkari bida. */
     GovernmentPublic,
 
-    /** Religious or cultural holiday — Dashain, Tihar, Holi, Id, Christmas, etc. */
+    /** Religious or cultural holiday - Dashain, Tihar, Holi, Id, Christmas, etc. */
     Religious,
 
     /** Province- or district-level holiday, not nationally observed. */
     Regional,
 
-    /** Observance — recognized day but offices remain open (Constitution Day in some renderings, World Health Day, etc.). */
+    /** Observance - recognized day but offices remain open (Constitution Day in some renderings, World Health Day, etc.). */
     Observance,
 }
 
@@ -46,8 +46,8 @@ enum class HolidayKind {
  * A single holiday in the Nepali (Bikram Sambat) calendar.
  *
  * @property date Bikram Sambat date of the holiday.
- * @property name Display name (e.g. "Dashain — Vijaya Dashami").
- * @property kind Category — see [HolidayKind].
+ * @property name Display name (e.g. "Dashain - Vijaya Dashami").
+ * @property kind Category - see [HolidayKind].
  */
 @Immutable
 data class HolidayEntry(
@@ -59,7 +59,7 @@ data class HolidayEntry(
 /**
  * Service-provider interface for supplying holiday data to the picker.
  *
- * This library ships **no holiday data** by design — Nepali public, religious, and
+ * This library ships **no holiday data** by design - Nepali public, religious, and
  * regional holiday lists change year to year, and we don't want consumers stuck on
  * stale data baked into the library. Implement this interface with your own source
  * (a static map, a CMS, an HR API, the Patro paid catalog, …) and pass it to the
@@ -97,7 +97,7 @@ interface NepaliHolidayProvider {
     fun holidays(year: Int): Set<HolidayEntry>
 
     /**
-     * Convenience — true if any entry returned by [holidays] for `date.year` falls on [date].
+     * Convenience - true if any entry returned by [holidays] for `date.year` falls on [date].
      *
      * Default implementation re-queries [holidays] on every call. Override with a memoized
      * implementation if you call this in tight loops; the working-day helpers in
@@ -119,7 +119,7 @@ object NoOpHolidayProvider : NepaliHolidayProvider {
 /**
  * Day-of-week conventions.
  *
- * The library uses a 1-based-Sunday convention everywhere — Sunday = 1, Monday = 2,
+ * The library uses a 1-based-Sunday convention everywhere - Sunday = 1, Monday = 2,
  * …, Saturday = 7. See [dev.shivathapaa.nepalidatepickerkmp.calendar_model.NepaliCalendarDefaults.FIRST_DAY_OF_WEEK].
  */
 object NepaliWeekend {

@@ -22,7 +22,7 @@ import kotlin.test.assertTrue
  *
  * The (CustomCalendar, SimpleDate) and (CustomCalendar, CustomCalendar) overloads
  * defined in NepaliDateConverter currently forward `dateToCompareFrom.month` and
- * `dateToCompareFrom.dayOfMonth` to the underlying model — comparing the calendar
+ * `dateToCompareFrom.dayOfMonth` to the underlying model - comparing the calendar
  * with itself for month/day and only honouring the year. The tests below assert
  * the corrected behaviour and will fail until those two overloads are fixed.
  */
@@ -30,7 +30,7 @@ class CompareDatesTests {
 
     private val model = NepaliCalendarModel()
 
-    // ── SimpleDate / year-month-day overload (model-level, correct) ──────────
+    // SimpleDate / year-month-day overload (model-level, correct)
 
     @Test
     fun model_compareDates_simpleDateVsTargetTuple_sameDate_returnsZero() {
@@ -76,7 +76,7 @@ class CompareDatesTests {
         assertTrue(model.compareDates(cal, 2080, 12, 30) > 0)
     }
 
-    // ── NepaliDateConverter facade overloads (currently buggy) ───────────────
+    // NepaliDateConverter facade overloads (currently buggy)
 
     @Test
     fun converter_compareDates_calendarVsSimpleDate_sameDate_returnsZero() {
@@ -94,9 +94,9 @@ class CompareDatesTests {
         // Currently both return 0 because the facade forwards calendar's own
         // month/dayOfMonth instead of the target's.
         assertTrue(NepaliDateConverter.compareDates(cal, laterSameMonth) < 0,
-            "Expected negative for same-month later day — currently broken")
+            "Expected negative for same-month later day - currently broken")
         assertTrue(NepaliDateConverter.compareDates(cal, laterDifferentMonth) < 0,
-            "Expected negative for later month — currently broken")
+            "Expected negative for later month - currently broken")
     }
 
     @Test
@@ -105,9 +105,9 @@ class CompareDatesTests {
         val earlierSameMonth = SimpleDate(2081, 5, 1)
         val earlierDifferentMonth = SimpleDate(2081, 4, 30)
         assertTrue(NepaliDateConverter.compareDates(cal, earlierSameMonth) > 0,
-            "Expected positive for earlier same-month day — currently broken")
+            "Expected positive for earlier same-month day - currently broken")
         assertTrue(NepaliDateConverter.compareDates(cal, earlierDifferentMonth) > 0,
-            "Expected positive for earlier month — currently broken")
+            "Expected positive for earlier month - currently broken")
     }
 
     @Test
@@ -125,9 +125,9 @@ class CompareDatesTests {
         val earlier = NepaliDateConverter.getNepaliCalendar(2081, 3, 15)
         val later = NepaliDateConverter.getNepaliCalendar(2081, 7, 15)
         assertTrue(NepaliDateConverter.compareDates(earlier, later) < 0,
-            "Expected negative for earlier month — currently broken")
+            "Expected negative for earlier month - currently broken")
         assertTrue(NepaliDateConverter.compareDates(later, earlier) > 0,
-            "Expected positive for later month — currently broken")
+            "Expected positive for later month - currently broken")
     }
 
     @Test

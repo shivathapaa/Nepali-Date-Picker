@@ -19,7 +19,7 @@ import kotlin.test.assertTrue
 
 class ConversionBoundaryTests {
 
-    // ── Anchor boundary (Nepali 1970-1-1 ⇔ English 1913-4-13) ─────────────────
+    // Anchor boundary (Nepali 1970-1-1 ⇔ English 1913-4-13)
 
     @Test
     fun convertNepaliToEnglish_minNepaliAnchor_returnsMinEnglishAnchor() {
@@ -47,7 +47,7 @@ class ConversionBoundaryTests {
         assertEquals(14, result.dayOfMonth)
     }
 
-    // ── Year range boundaries ─────────────────────────────────────────────────
+    // Year range boundaries
 
     @Test
     fun nepaliYearRange_constantsMatchExpected() {
@@ -66,7 +66,7 @@ class ConversionBoundaryTests {
         assertEquals(1, NepaliCalendarDefaults.FIRST_DAY_OF_WEEK)
     }
 
-    // ── Out-of-range Nepali year throws ───────────────────────────────────────
+    // Out-of-range Nepali year throws
 
     @Test
     fun convertNepaliToEnglish_yearBelowRange_throws() {
@@ -110,7 +110,7 @@ class ConversionBoundaryTests {
         }
     }
 
-    // ── Out-of-range English year throws ──────────────────────────────────────
+    // Out-of-range English year throws
 
     @Test
     fun convertEnglishToNepali_yearBelowRange_throws() {
@@ -154,7 +154,7 @@ class ConversionBoundaryTests {
         }
     }
 
-    // ── Pre-anchor English dates are rejected (previously a silent-wrong loophole) ──
+    // Pre-anchor English dates are rejected (previously a silent-wrong loophole)
     // English 1913 dates before the 1913-04-13 anchor have no Nepali equivalent
     // (they would map below Nepali 1970). They used to pass the year-only range
     // check and, because the day-walk ran `repeat(negativeDiff)` zero times,
@@ -182,7 +182,7 @@ class ConversionBoundaryTests {
         assertEquals(1, result.dayOfMonth)
     }
 
-    // ── Round trip ────────────────────────────────────────────────────────────
+    // Round trip
 
     @Test
     fun roundTrip_englishToNepaliAndBack_returnsOriginal_yearStart() {

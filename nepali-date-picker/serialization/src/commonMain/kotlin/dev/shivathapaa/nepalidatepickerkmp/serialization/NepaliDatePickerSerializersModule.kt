@@ -19,7 +19,7 @@ import kotlinx.serialization.modules.SerializersModule
 /**
  * Ready-to-register [SerializersModule] for all four data types.
  *
- * Wires the default serializers — [SimpleDateSerializer] (string form),
+ * Wires the default serializers - [SimpleDateSerializer] (string form),
  * [SimpleTimeSerializer], [CustomCalendarSerializer], [NepaliMonthCalendarSerializer].
  *
  * Usage with kotlinx-serialization-json:

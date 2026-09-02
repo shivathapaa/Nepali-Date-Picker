@@ -23,12 +23,12 @@ import kotlinx.serialization.encoding.decodeStructure
 import kotlinx.serialization.encoding.encodeStructure
 
 /**
- * [KSerializer] for [CustomCalendar] — full struct form. All eleven fields are
+ * [KSerializer] for [CustomCalendar] - full struct form. All eleven fields are
  * serialized; defaults from the data class are honored on the way back in so older
  * payloads missing `dayOfWeekInMonth` / `dayOfWeek` / `dayOfYear` / `weekOfMonth` /
  * `weekOfYear` still decode (those fields default to -1).
  *
- * No string form is provided — [CustomCalendar] is a fully-detailed calendar record,
+ * No string form is provided - [CustomCalendar] is a fully-detailed calendar record,
  * not just a date. Use [SimpleDateSerializer] if you only need year/month/day.
  */
 object CustomCalendarSerializer : KSerializer<CustomCalendar> {
@@ -92,7 +92,7 @@ object CustomCalendarSerializer : KSerializer<CustomCalendar> {
                 }
             }
         }
-        // Seven required fields — bits 0..6.
+        // Seven required fields - bits 0..6.
         if (bits != 0b111_1111) {
             throw SerializationException(
                 "CustomCalendar missing required fields (got bitmask 0b${bits.toString(2)}; expected 0b1111111 for year, month, dayOfMonth, era, firstDayOfMonth, lastDayOfMonth, totalDaysInMonth)"
@@ -116,7 +116,7 @@ object CustomCalendarSerializer : KSerializer<CustomCalendar> {
 }
 
 /**
- * [KSerializer] for [NepaliMonthCalendar] — struct form with five required fields
+ * [KSerializer] for [NepaliMonthCalendar] - struct form with five required fields
  * and one optional (`daysFromStartOfWeekToFirstOfMonth`, which defaults to
  * `firstDayOfMonth - 1`).
  */

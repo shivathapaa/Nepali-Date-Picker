@@ -21,7 +21,7 @@ class SimpleDateSerializerTests {
 
     private val json = Json
 
-    // ── String form (default) ──────────────────────────────────────────────
+    // String form (default)
 
     @Test
     fun string_serialize() {
@@ -78,7 +78,7 @@ class SimpleDateSerializerTests {
         assertEquals(SimpleDate(2082, 2, 32), parsed)
     }
 
-    // ── Struct form ────────────────────────────────────────────────────────
+    // Struct form
 
     @Test
     fun struct_serialize() {
@@ -97,7 +97,7 @@ class SimpleDateSerializerTests {
     @Test
     fun struct_deserialize_rejectsMissingField() {
         assertFailsWith<SerializationException> {
-            // Lenient enough that this throws — required fields must all be present.
+            // Lenient enough that this throws - required fields must all be present.
             Json { isLenient = true }.decodeFromString(
                 SimpleDateStructSerializer,
                 """{"year":2082,"month":2}"""

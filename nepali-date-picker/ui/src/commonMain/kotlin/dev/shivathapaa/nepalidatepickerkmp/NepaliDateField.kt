@@ -58,7 +58,7 @@ import dev.shivathapaa.nepalidatepickerkmp.icons.NepaliIcons
  *
  * The field accepts both Latin (`2082/02/14`) and Devanagari (`२०८२/०२/१४`) digit
  * input regardless of [locale]; output digit script always follows
- * [NepaliDateLocale.resolvedDigitScript]. Users type digits only — separators are
+ * [NepaliDateLocale.resolvedDigitScript]. Users type digits only - separators are
  * inserted by a [VisualTransformation], so the underlying state holds 8 ASCII digits.
  *
  * Validation pipeline (runs on every keystroke):
@@ -69,7 +69,7 @@ import dev.shivathapaa.nepalidatepickerkmp.icons.NepaliIcons
  *   4. `selectableDates.isSelectableYear` or `isSelectableDate` rejects → emit `null`, error surfaced.
  *   5. All checks pass → emit the [SimpleDate]; no error.
  *
- * The composable does NOT paint its own error indicator — pass [isError] to control
+ * The composable does NOT paint its own error indicator - pass [isError] to control
  * the field's error state; consult the `onValueChange` callback for the resolved
  * [SimpleDate]?. When the caller wants to display per-rule error messages, wire
  * [supportingText] yourself based on the surface API exposed by your form layer.
@@ -81,7 +81,7 @@ import dev.shivathapaa.nepalidatepickerkmp.icons.NepaliIcons
  * @param yearRange BS year range the field will accept. Out-of-range parses emit null.
  * @param selectableDates predicate that further restricts which dates the field accepts.
  * @param locale localization for output digits + label conventions. Digit script in
- *   [locale] only affects display — input is always tolerant of both Latin and Devanagari.
+ *   [locale] only affects display - input is always tolerant of both Latin and Devanagari.
  *
  * @see NepaliDateField for a combo that pairs this field with a picker dialog.
  */
@@ -129,7 +129,7 @@ fun NepaliDateTextField(
         value = text,
         onValueChange = { input ->
             val filtered = sanitizeDigits(input.text, maxDigits = dateFormat.digitCount)
-            // Preserve cursor at end after filtering — keystrokes are append-mostly.
+            // Preserve cursor at end after filtering - keystrokes are append-mostly.
             val newSelection = if (input.selection.collapsed && input.selection.end == input.text.length) {
                 TextRange(filtered.length)
             } else {
@@ -143,7 +143,7 @@ fun NepaliDateTextField(
                 onValueChangeUpdated(null)
                 return@OutlinedTextField
             }
-            // 8 ASCII digits in pattern order — go straight to SimpleDate without round-tripping
+            // 8 ASCII digits in pattern order - go straight to SimpleDate without round-tripping
             // through NepaliDateFormatter.parse (which would re-validate identical envelope rules).
             val parsed = parseDigits(filtered, dateFormat)
             if (parsed == null || parsed.year !in yearRange) {
@@ -183,7 +183,7 @@ fun NepaliDateTextField(
 }
 
 /**
- * Material3-style date field — [NepaliDateTextField] with a trailing calendar icon
+ * Material3-style date field - [NepaliDateTextField] with a trailing calendar icon
  * that opens [NepaliDatePickerDialog].
  *
  * Same params as [NepaliDateTextField]. The picker dialog respects [yearRange],
@@ -284,7 +284,7 @@ fun NepaliDateField(
     }
 }
 
-// ── internals ──────────────────────────────────────────────────────────────
+// internals
 
 // NepaliDateMaskTransformation lives in its own file (same package) so
 // NepaliDateInputContent in NepaliDateInput.kt can share it.
@@ -302,7 +302,7 @@ private fun sanitizeDigits(raw: String, maxDigits: Int): String {
 
 /**
  * Parse 8 ASCII digits in [pattern]'s field order into a [SimpleDate]. Envelope-only
- * validation — month 1..12 / day 1..32. Returns `null` for partial input or bad digits.
+ * validation - month 1..12 / day 1..32. Returns `null` for partial input or bad digits.
  * Tighter "real" totalDaysInMonth check is the caller's job, usually via the
  * subsequent `NepaliCalendarModel.getNepaliCalendar` + `NepaliSelectableDates`.
  */
@@ -327,7 +327,7 @@ private fun SimpleDate.toDigitString(pattern: Pattern): String {
     return if (pattern.yearFirst) "$yyyy$mm$dd" else "$dd$mm$yyyy"
 }
 
-/** Singleton converter — avoids creating a new [NepaliCalendarModel] per recomposition. */
+/** Singleton converter - avoids creating a new [NepaliCalendarModel] per recomposition. */
 private object NepaliCalendarModelHolder {
     val model: NepaliCalendarModel = NepaliCalendarModel()
 }
