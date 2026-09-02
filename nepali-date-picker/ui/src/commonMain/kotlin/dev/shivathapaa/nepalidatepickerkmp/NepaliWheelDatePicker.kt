@@ -17,6 +17,7 @@
 package dev.shivathapaa.nepalidatepickerkmp
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.gestures.snapping.rememberSnapFlingBehavior
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -30,7 +31,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -153,7 +153,8 @@ fun NepaliWheelDatePicker(
         color = colors.containerColor
     ) {
         Box(contentAlignment = Alignment.Center) {
-            // Center selection band drawn behind the wheels.
+            // Center selection band drawn behind the wheels. A soft inset border defines the selected
+            // row without full-width rules, which would overshoot the rounded band and read as clutter.
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -163,14 +164,11 @@ fun NepaliWheelDatePicker(
                         color = colors.selectedDayContainerColor.copy(alpha = 0.18f),
                         shape = RoundedCornerShape(WheelBandCornerRadius)
                     )
-            )
-            HorizontalDivider(
-                modifier = Modifier.padding(bottom = itemHeight),
-                color = colors.dividerColor
-            )
-            HorizontalDivider(
-                modifier = Modifier.padding(top = itemHeight),
-                color = colors.dividerColor
+                    .border(
+                        width = 1.dp,
+                        color = colors.dividerColor,
+                        shape = RoundedCornerShape(WheelBandCornerRadius)
+                    )
             )
 
             Row(
