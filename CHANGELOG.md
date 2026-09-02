@@ -15,6 +15,12 @@ Additive release. No breaking changes to existing public symbols; the new compos
 * `NepaliDatePickerFullScreenDialog()` (experimental) - a full-screen host with a top bar (dismiss, title, confirm) that fits a range selection on a phone. Reuses any picker as its content.
 * `NepaliDateRangeTextField()` / `NepaliDateRangeField()` (experimental) - two stacked outlined fields for a Bikram Sambat date range with start-before-end validation; `NepaliDateRangeField` adds a calendar icon that opens the range picker dialog.
 
+### Customization and robustness
+
+* The text-field composables (`NepaliDateTextField`, `NepaliDateField`, `NepaliDateRangeTextField`, `NepaliDateRangeField`) and `NepaliDatePickerDocked` now expose the full Material3 surface: `shape`, `textStyle`, `prefix`, `suffix`, and `interactionSource` (plus a `trailingIcon` and dropdown `popupShape` / `popupShadowElevation` on the docked field).
+* `NepaliWheelDatePicker` exposes `itemHeight`, `visibleItemCount` (coerced to an odd number), `shape`, and per-row `selectedTextStyle` / `unselectedTextStyle`.
+* The pickers no longer crash on bad input. `rememberNepaliDatePickerState` / `rememberNepaliDateRangePickerState` (and the state setters) coerce instead of throwing: the displayed month is clamped into `yearRange`, and an out-of-range or non-existent initial selected date resolves to no selection. The field composables likewise seed their dialog state defensively.
+
 ### Accessibility
 
 * Every calendar day cell now exposes a `contentDescription` with its full localized date (and "today"), so screen readers announce the whole cell instead of just the number.
