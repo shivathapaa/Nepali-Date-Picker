@@ -40,6 +40,15 @@ import kotlin.time.Clock
 import kotlin.time.ExperimentalTime
 import kotlin.time.Instant
 
+/**
+ * Locale-aware engine behind the pickers: BS↔AD conversion, month details, formatting, and date
+ * comparison. This is the workhorse the `:ui` composables construct and pass down internally.
+ *
+ * For application code, prefer the [NepaliDateConverter] object facade — it exposes the same
+ * conversion / formatting / comparison utilities as ready-to-call functions, so you don't need to
+ * construct (and thread) a model instance. Reach for [NepaliCalendarModel] directly only when you
+ * want a single instance pinned to one [locale].
+ */
 @Immutable
 class NepaliCalendarModel(val locale: NepaliDateLocale = NepaliDateLocale()) {
     // Nepal Time is a fixed +05:45 offset with no DST and no historical transitions, so a
