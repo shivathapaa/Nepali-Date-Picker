@@ -1,26 +1,27 @@
+/*
+ * Copyright © 2024 Shiva Thapa (@shivathapaa). All rights reserved.
+ *
+ * Licensed under the Mozilla Public License, Version 2.0 (the "License").
+ */
+
 package sample.app
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Clear
-import androidx.compose.material.icons.filled.Done
 import androidx.compose.material3.Button
-import androidx.compose.material3.FilterChip
-import androidx.compose.material3.FilterChipDefaults
-import androidx.compose.material3.Icon
+import androidx.compose.material3.Card
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -29,444 +30,199 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import dev.shivathapaa.nepalidatepickerkmp.DisplayMode
+import dev.shivathapaa.nepalidatepickerkmp.NepaliDateField
 import dev.shivathapaa.nepalidatepickerkmp.NepaliDatePicker
 import dev.shivathapaa.nepalidatepickerkmp.NepaliDatePickerDialog
-import dev.shivathapaa.nepalidatepickerkmp.NepaliDatePickerState
-import dev.shivathapaa.nepalidatepickerkmp.NepaliDatePickerWithEnglishDate
-import dev.shivathapaa.nepalidatepickerkmp.NepaliDateRangePicker
-import dev.shivathapaa.nepalidatepickerkmp.NepaliDateRangePickerState
 import dev.shivathapaa.nepalidatepickerkmp.NepaliDatePickerDocked
 import dev.shivathapaa.nepalidatepickerkmp.NepaliDatePickerFullScreenDialog
+import dev.shivathapaa.nepalidatepickerkmp.NepaliDatePickerWithEnglishDate
+import dev.shivathapaa.nepalidatepickerkmp.NepaliDateRangeField
+import dev.shivathapaa.nepalidatepickerkmp.NepaliDateRangePicker
 import dev.shivathapaa.nepalidatepickerkmp.NepaliDateRangePickerWithEnglishDate
+import dev.shivathapaa.nepalidatepickerkmp.NepaliDateRangeTextField
+import dev.shivathapaa.nepalidatepickerkmp.NepaliDateTextField
 import dev.shivathapaa.nepalidatepickerkmp.NepaliWheelDatePicker
 import dev.shivathapaa.nepalidatepickerkmp.annotations.ExperimentalNepaliDatePickerApi
 import dev.shivathapaa.nepalidatepickerkmp.calendar_model.NepaliDateConverter
-import dev.shivathapaa.nepalidatepickerkmp.data.CustomCalendar
 import dev.shivathapaa.nepalidatepickerkmp.calendar_model.NepaliDatePickerDefaults
-import dev.shivathapaa.nepalidatepickerkmp.data.NameFormat
 import dev.shivathapaa.nepalidatepickerkmp.data.NepaliDateFormatStyle
 import dev.shivathapaa.nepalidatepickerkmp.data.NepaliDateLocale
 import dev.shivathapaa.nepalidatepickerkmp.data.NepaliDatePickerLang
 import dev.shivathapaa.nepalidatepickerkmp.data.SimpleDate
 import dev.shivathapaa.nepalidatepickerkmp.data.toSimpleDate
+import dev.shivathapaa.nepalidatepickerkmp.holiday.NepaliWeekend
+import dev.shivathapaa.nepalidatepickerkmp.holiday.NoOpHolidayProvider
+import dev.shivathapaa.nepalidatepickerkmp.holiday.addWorkingDays
+import dev.shivathapaa.nepalidatepickerkmp.holiday.nextWorkingDay
 import dev.shivathapaa.nepalidatepickerkmp.rememberNepaliDatePickerState
 import dev.shivathapaa.nepalidatepickerkmp.rememberNepaliDateRangePickerState
 
+private val NepaliLocale = NepaliDateLocale(language = NepaliDatePickerLang.NEPALI)
+
 @Composable
 fun App() {
-    Scaffold { paddingValues ->
-        SamplePickers(modifier = Modifier.padding(paddingValues))
+    MaterialTheme {
+        Scaffold { padding ->
+            SampleGallery(modifier = Modifier.padding(padding))
+        }
+    }
+}
+
+/**
+ * A single scrollable gallery that exercises every public composable and the core utilities, so the
+ * sample doubles as living documentation for the library.
+ */
+@OptIn(ExperimentalNepaliDatePickerApi::class)
+@Composable
+fun SampleGallery(modifier: Modifier = Modifier) {
+    Column(
+        modifier = modifier.fillMaxSize().verticalScroll(rememberScrollState()),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(20.dp)
+    ) {
+        Spacer(Modifier.height(8.dp))
+        Text(
+            "Nepali Date Picker",
+            style = MaterialTheme.typography.headlineMedium,
+            fontWeight = FontWeight.Bold
+        )
+        Text(
+            "Every picker, field, and core utility in one gallery.",
+            style = MaterialTheme.typography.bodyMedium,
+            textAlign = TextAlign.Center
+        )
+
+        // ── Calendar-grid pickers ────────────────────────────────────────────
+        Section(
+            "Date picker",
+            "Single BS date. Toggle the pencil icon for text-input mode."
+        ) {
+            NepaliDatePicker(state = rememberNepaliDatePickerState())
+        }
+
+        Section(
+            "Date picker in Nepali",
+            "Same picker, Nepali language + Devanagari digits."
+        ) {
+            NepaliDatePicker(state = rememberNepaliDatePickerState(locale = NepaliLocale))
+        }
+
+        Section(
+            "Date picker with English date",
+            "Each cell shows the Nepali day with its Gregorian day."
+        ) {
+            NepaliDatePickerWithEnglishDate(state = rememberNepaliDatePickerState())
+        }
+
+        Section(
+            "Date range picker",
+            "Start and end selection. Months laid out vertically."
+        ) {
+            NepaliDateRangePicker(
+                state = rememberNepaliDateRangePickerState(),
+                showMonthsVertically = true
+            )
+        }
+
+        Section(
+            "Date range picker with English date",
+            "Dual BS + AD range selection."
+        ) {
+            NepaliDateRangePickerWithEnglishDate(
+                state = rememberNepaliDateRangePickerState(),
+                showMonthsVertically = false
+            )
+        }
+
+        // ── Alternative experiences ──────────────────────────────────────────
+        Section(
+            "Wheel picker",
+            "Three snapping columns. Best for birth dates and dates far from today."
+        ) {
+            var selected by remember { mutableStateOf<SimpleDate?>(null) }
+            NepaliWheelDatePicker(onDateChange = { selected = it.toSimpleDate() })
+            SelectedDateText(selected)
+        }
+
+        Section(
+            "Docked picker",
+            "Compact field with a dropdown calendar. The Material3 forms pattern."
+        ) {
+            NepaliDatePickerDocked(
+                state = rememberNepaliDatePickerState(),
+                label = { Text("Pick a date") }
+            )
+        }
+
+        // ── Dialogs ──────────────────────────────────────────────────────────
+        Section("Dialogs", "Modal and full-screen hosts.") {
+            DialogDemos()
+        }
+
+        // ── Text fields ──────────────────────────────────────────────────────
+        Section(
+            "Text fields",
+            "Type a date directly. Accepts Latin and Devanagari digits."
+        ) {
+            TextFieldDemos()
+        }
+
+        // ── Core utilities (no UI needed) ────────────────────────────────────
+        Section(
+            "Core utilities",
+            "NepaliDateConverter works without any Compose dependency."
+        ) {
+            UtilitiesPanel()
+        }
+
+        Spacer(Modifier.height(32.dp))
     }
 }
 
 @OptIn(ExperimentalNepaliDatePickerApi::class)
 @Composable
-fun SamplePickers(
-    modifier: Modifier = Modifier
-) {
-    var showMonthVerticallyInRangePicker by rememberSaveable { mutableStateOf(true) }
-
-    var showTodayButton by rememberSaveable { mutableStateOf(true) }
-    var showRangePickerWithYearPickerAndNavigation by rememberSaveable { mutableStateOf(true) }
-    val layoutSimpleState = rememberNepaliDatePickerState(
-        locale = NepaliDateLocale(dateFormat = NepaliDateFormatStyle.MEDIUM)
-    )
-    val layoutSimpleStateWithEnglish = rememberNepaliDatePickerState(
-        locale = NepaliDateLocale(
-            dateFormat = NepaliDateFormatStyle.FULL,
-            weekDayName = NameFormat.MEDIUM
-        )
-    )
-    val layoutRangeSimpleState = rememberNepaliDateRangePickerState(
-        locale = NepaliDateLocale(
-            dateFormat = NepaliDateFormatStyle.SHORT_MDY
-        )
-    )
-    val layoutRangeSimpleStateWithEnglish = rememberNepaliDateRangePickerState()
-
+private fun DialogDemos() {
     Column(
-        modifier = modifier.fillMaxSize()
-            .verticalScroll(rememberScrollState()),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterVertically)
+        verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        val englishValLocale = when (4) {
-            1 -> NepaliDateLocale(
-                dateFormat = NepaliDateFormatStyle.COMPACT_MDY,
-                weekDayName = NameFormat.SHORT,
-                monthName = NameFormat.FULL
-            )
-
-            2 -> NepaliDateLocale(
-                dateFormat = NepaliDateFormatStyle.SHORT_YMD,
-                weekDayName = NameFormat.MEDIUM,
-            )
-
-            3 -> NepaliDateLocale(
-                dateFormat = NepaliDateFormatStyle.MEDIUM,
-                weekDayName = NameFormat.FULL,
-                monthName = NameFormat.FULL
-            )
-
-            4 -> NepaliDateLocale(
-                dateFormat = NepaliDateFormatStyle.LONG,
-                weekDayName = NameFormat.SHORT
-            )
-
-            5 -> NepaliDateLocale(
-                dateFormat = NepaliDateFormatStyle.FULL,
-                weekDayName = NameFormat.FULL,
-                monthName = NameFormat.FULL
-            )
-
-            else -> NepaliDatePickerDefaults.DefaultLocale
-        }
-
-        val firstState = if (true) rememberNepaliDatePickerState(
-            yearRange = IntRange(2079, 2084),
-            locale = englishValLocale
-        ) else rememberNepaliDatePickerState(locale = englishValLocale)
-
-        NepaliDatePickerForScreenShots(
-            modifier = Modifier,
-            localeInt = 4,
-            withYearRange = true,
-            showTodayButton = true,
-            firstState
-        )
-        val englishLocale = when (5) {
-            1 -> NepaliDateLocale(
-                language = NepaliDatePickerLang.NEPALI,
-                dateFormat = NepaliDateFormatStyle.COMPACT_MDY,
-                weekDayName = NameFormat.SHORT,
-                monthName = NameFormat.FULL
-            )
-
-            2 -> NepaliDateLocale(
-                language = NepaliDatePickerLang.NEPALI,
-                dateFormat = NepaliDateFormatStyle.SHORT_YMD,
-                weekDayName = NameFormat.MEDIUM,
-            )
-
-            3 -> NepaliDateLocale(
-                language = NepaliDatePickerLang.NEPALI,
-                dateFormat = NepaliDateFormatStyle.MEDIUM,
-                weekDayName = NameFormat.FULL,
-                monthName = NameFormat.SHORT
-            )
-
-            4 -> NepaliDateLocale(
-                language = NepaliDatePickerLang.NEPALI,
-                dateFormat = NepaliDateFormatStyle.LONG,
-                weekDayName = NameFormat.SHORT
-            )
-
-            5 -> NepaliDateLocale(
-                language = NepaliDatePickerLang.NEPALI,
-                dateFormat = NepaliDateFormatStyle.FULL,
-                weekDayName = NameFormat.SHORT,
-                monthName = NameFormat.FULL
-            )
-
-            else -> NepaliDateLocale(
-                language = NepaliDatePickerLang.NEPALI
-            )
-        }
-
-        val state = if (true) rememberNepaliDatePickerState(
-            nepaliSelectableDates = NepaliDateConverter.DateRangeSelectable(
-                SimpleDate(2079, 3, 21),
-                SimpleDate(2084, 5, 5)
-            ),
-            locale = englishLocale
-        ) else rememberNepaliDatePickerState(locale = englishLocale)
-
-        NepaliDatePickerForNepaliScreenShots(
-            modifier = Modifier,
-            localeInt = 5,
-            withSelectables = true,
-            showTodayButton = true,
-            state = state
-        )
-
-        val todayDate = NepaliDateConverter.todayNepaliCalendar
-
-        val nepaliDateLocale = NepaliDateLocale(
-            language = NepaliDatePickerLang.NEPALI,
-            dateFormat = NepaliDateFormatStyle.MEDIUM
-        )
-
-        val englishDateLocale = NepaliDateLocale(
-            language = NepaliDatePickerLang.ENGLISH,
-            dateFormat = NepaliDateFormatStyle.SHORT_MDY,
-            monthName = NameFormat.SHORT,
-            weekDayName = NameFormat.SHORT
-        )
-
-        val nepaliDatePickerState = rememberNepaliDatePickerState(
-            nepaliSelectableDates = NepaliDateConverter.BeforeDateSelectable(todayDate.toSimpleDate()),
-            initialDisplayedMonth = SimpleDate(2081, 7),
-            locale = nepaliDateLocale
-        )
-
-        val englishDatePickerState = rememberNepaliDatePickerState(
-            nepaliSelectableDates = NepaliDateConverter.DateRangeSelectable(
-                SimpleDate(2079, 2, 11),
-                SimpleDate(2086, 7, 22)
-            ),
-            locale = englishDateLocale
-        )
-
-        DialogsOfDatePickerWithEnglishDate(
-            modifier = Modifier,
-            nepaliDatePickerState, englishDatePickerState
-        )
-
-        val defaultState = rememberNepaliDateRangePickerState()
-        val defaultStateWithNepali =
-            rememberNepaliDateRangePickerState(
-                locale = NepaliDatePickerDefaults.DefaultRangePickerLocale.copy(
-                    language = NepaliDatePickerLang.NEPALI,
-                    dateFormat = NepaliDateFormatStyle.SHORT_YMD
-                )
-            )
-
-        val secondState =
-            rememberNepaliDateRangePickerState()
-        val secondStateWithNepali =
-            rememberNepaliDateRangePickerState(
-                locale = NepaliDatePickerDefaults.DefaultRangePickerLocale.copy(
-                    language = NepaliDatePickerLang.NEPALI
-                ),
-                initialDisplayMode = DisplayMode.Input
-            )
-        FilterChipForToggle(
-            isSelected = showMonthVerticallyInRangePicker,
-            onClick = { showMonthVerticallyInRangePicker = !showMonthVerticallyInRangePicker },
-            text = "Show months vertically in Range Picker"
-        )
-
-        FilterChipForToggle(
-            isSelected = showTodayButton,
-            onClick = { showTodayButton = !showTodayButton },
-            text = "Show Today Button in Range Picker"
-        )
-        FilterChipForToggle(
-            isSelected = showRangePickerWithYearPickerAndNavigation, onClick = {
-                showRangePickerWithYearPickerAndNavigation =
-                    !showRangePickerWithYearPickerAndNavigation
-            }, text = "Show year picker & month navigation in Range Picker"
-        )
-
-        NepaliDateRangePickerDialogs(
-            modifier = Modifier,
-            monthsVertically = showMonthVerticallyInRangePicker,
-            showTodayButton = showTodayButton,
-            showRangePickerWithYearPickerAndNavigation = showRangePickerWithYearPickerAndNavigation,
-            defaultState,
-            defaultStateWithNepali,
-            secondState,
-            secondStateWithNepali
-        )
-
-        Spacer(modifier = Modifier.height(24.dp))
-
-        NepaliDatePicker(state = layoutSimpleState)
-
-        Spacer(modifier = Modifier.height(24.dp))
-
-        NepaliDatePickerWithEnglishDate(layoutSimpleStateWithEnglish)
-
-        Spacer(modifier = Modifier.height(24.dp))
-
-        val colors = NepaliDatePickerDefaults.colors()
-        Box(Modifier.background(colors.containerColor)) {
-            NepaliDateRangePicker(
-                colors = colors,
-                state = layoutRangeSimpleState,
-                showMonthsVertically = false,
-                showTodayButton = showTodayButton,
-                showYearPickerAndMonthNavigation = showRangePickerWithYearPickerAndNavigation
-            )
-        }
-
-        Spacer(modifier = Modifier.height(24.dp))
-
-        Box(Modifier.background(colors.containerColor)) {
-            NepaliDateRangePickerWithEnglishDate(
-                colors = colors,
-                state = layoutRangeSimpleStateWithEnglish,
-                showMonthsVertically = false,
-                showTodayButton = showTodayButton,
-                showYearPickerAndMonthNavigation = showRangePickerWithYearPickerAndNavigation
-            )
-        }
-
-        Spacer(modifier = Modifier.height(24.dp))
-
-        Text("Wheel Date Picker", textAlign = TextAlign.Center)
-        var wheelSelected by remember { mutableStateOf<CustomCalendar?>(null) }
-        NepaliWheelDatePicker(onDateChange = { wheelSelected = it })
-        wheelSelected?.let { selected ->
-            Text(
-                text = "Selected: ${selected.year}/${selected.month}/${selected.dayOfMonth}",
-                textAlign = TextAlign.Center
-            )
-        }
-
-        Spacer(modifier = Modifier.height(24.dp))
-
+        var showModal by rememberSaveable { mutableStateOf(false) }
         var showFullScreen by rememberSaveable { mutableStateOf(false) }
-        val fullScreenRangeState = rememberNepaliDateRangePickerState()
-        Button(onClick = { showFullScreen = true }) {
-            Text("Full-screen Range Picker")
+        val singleState = rememberNepaliDatePickerState()
+        val rangeState = rememberNepaliDateRangePickerState()
+
+        Button(onClick = { showModal = true }) { Text("Modal date dialog") }
+        Button(onClick = { showFullScreen = true }) { Text("Full-screen range dialog") }
+
+        if (showModal) {
+            NepaliDatePickerDialog(
+                onDismissRequest = { showModal = false },
+                confirmButton = {
+                    NepaliDatePickerDefaults.DialogButton("OK", { showModal = false })
+                },
+                dismissButton = {
+                    NepaliDatePickerDefaults.DialogButton("Cancel", { showModal = false })
+                }
+            ) {
+                NepaliDatePicker(state = singleState)
+            }
         }
+
         if (showFullScreen) {
             NepaliDatePickerFullScreenDialog(
                 onDismissRequest = { showFullScreen = false },
                 confirmButton = {
-                    NepaliDatePickerDefaults.DialogButton(
-                        text = "OK",
-                        onButtonClick = { showFullScreen = false }
-                    )
+                    NepaliDatePickerDefaults.DialogButton("OK", { showFullScreen = false })
                 },
                 dismissButton = {
-                    NepaliDatePickerDefaults.DialogButton(
-                        text = "Cancel",
-                        onButtonClick = { showFullScreen = false }
-                    )
+                    NepaliDatePickerDefaults.DialogButton("Cancel", { showFullScreen = false })
                 },
-                title = { Text("Select range") }
+                title = { Text("Select a range") }
             ) {
-                NepaliDateRangePicker(state = fullScreenRangeState, showMonthsVertically = true)
-            }
-        }
-
-        Spacer(modifier = Modifier.height(24.dp))
-
-        Text("Docked Date Picker", textAlign = TextAlign.Center)
-        val dockedState = rememberNepaliDatePickerState(
-            locale = NepaliDateLocale(dateFormat = NepaliDateFormatStyle.MEDIUM)
-        )
-        NepaliDatePickerDocked(
-            state = dockedState,
-            modifier = Modifier.padding(horizontal = 16.dp),
-            label = { Text("Date") }
-        )
-
-        Spacer(modifier = Modifier.height(24.dp))
-    }
-}
-
-@Composable
-private fun FilterChipForToggle(
-    modifier: Modifier = Modifier, isSelected: Boolean, onClick: () -> Unit, text: String
-) {
-    FilterChip(
-        modifier = modifier.padding(horizontal = 16.dp),
-        selected = isSelected,
-        onClick = onClick,
-        label = { Text(text, textAlign = TextAlign.Center) },
-        trailingIcon = if (isSelected) {
-            {
-                Icon(
-                    imageVector = Icons.Filled.Done,
-                    contentDescription = null,
-                    modifier = Modifier.size(FilterChipDefaults.IconSize)
-                )
-            }
-        } else {
-            {
-                Icon(
-                    imageVector = Icons.Filled.Clear,
-                    contentDescription = null,
-                    modifier = Modifier.size(FilterChipDefaults.IconSize)
-                )
-            }
-        }
-    )
-}
-
-@OptIn(ExperimentalNepaliDatePickerApi::class)
-@Composable
-fun DialogsOfDatePickerWithEnglishDate(
-    modifier: Modifier = Modifier,
-    nepaliDatePickerState: NepaliDatePickerState,
-    englishDatePickerState: NepaliDatePickerState
-) {
-    var showNepaliDialog by rememberSaveable { mutableStateOf(false) }
-    var showEnglishDialog by rememberSaveable { mutableStateOf(false) }
-
-    Column(
-        modifier = modifier
-            .fillMaxSize(),
-        verticalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterVertically),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Button(onClick = { showEnglishDialog = true }) {
-            Text("Select date with EngNe")
-        }
-
-        Button(onClick = { showNepaliDialog = true }) {
-            Text("मिति छान्नुहोस् with EngNe")
-        }
-
-        if (showNepaliDialog) {
-            NepaliDatePickerDialog(
-                onDismissRequest = { showNepaliDialog = false },
-                confirmButton = {
-                    NepaliDatePickerDefaults.DialogButton(
-                        text = "ठीक छ",
-                        onButtonClick = { showNepaliDialog = false }
-                    )
-                },
-                dismissButton = {
-                    NepaliDatePickerDefaults.DialogButton(
-                        text = "रद्द गर्नुहोस्",
-                        onButtonClick = { showNepaliDialog = false }
-                    )
-                }
-            ) {
-                NepaliDatePickerWithEnglishDate(
-                    englishDateLocale = NepaliDateLocale(
-                        language = NepaliDatePickerLang.NEPALI,
-                        dateFormat = NepaliDateFormatStyle.FULL,
-                        weekDayName = NameFormat.FULL,
-                        monthName = NameFormat.MEDIUM
-                    ),
-                    showTodayButton = true,
-                    state = nepaliDatePickerState
-                )
-            }
-        }
-
-        if (showEnglishDialog) {
-            NepaliDatePickerDialog(
-                onDismissRequest = { showEnglishDialog = false },
-                confirmButton = {
-                    NepaliDatePickerDefaults.DialogButton(
-                        text = "OK",
-                        onButtonClick = { showEnglishDialog = false }
-                    )
-                },
-                dismissButton = {
-                    NepaliDatePickerDefaults.DialogButton(
-                        text = "Cancel",
-                        onButtonClick = { showEnglishDialog = false }
-                    )
-                }
-            ) {
-                NepaliDatePickerWithEnglishDate(
-                    englishDateLocale = NepaliDateLocale(
-                        language = NepaliDatePickerLang.ENGLISH,
-                        dateFormat = NepaliDateFormatStyle.LONG
-                    ),
-                    showTodayButton = true,
-                    state = englishDatePickerState
-                )
+                NepaliDateRangePicker(state = rangeState, showMonthsVertically = true)
             }
         }
     }
@@ -474,209 +230,121 @@ fun DialogsOfDatePickerWithEnglishDate(
 
 @OptIn(ExperimentalNepaliDatePickerApi::class)
 @Composable
-fun NepaliDateRangePickerDialogs(
-    modifier: Modifier = Modifier,
-    monthsVertically: Boolean,
-    showTodayButton: Boolean,
-    showRangePickerWithYearPickerAndNavigation: Boolean,
-    defaultState: NepaliDateRangePickerState,
-    defaultStateWithNepali: NepaliDateRangePickerState,
-    secondState: NepaliDateRangePickerState,
-    secondStateWithNepali: NepaliDateRangePickerState
-) {
-    var showDateRangePickerDialogWithEnglish by rememberSaveable { mutableStateOf(false) }
-    var showDateRangePickerDialogWithEnglishInNepali by rememberSaveable { mutableStateOf(false) }
+private fun TextFieldDemos() {
+    Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+        var single by rememberSaveable(stateSaver = SimpleDateSaver) { mutableStateOf<SimpleDate?>(null) }
+        NepaliDateTextField(
+            value = single,
+            onValueChange = { single = it },
+            modifier = Modifier.fillMaxWidth(),
+            label = { Text("Date (text only)") }
+        )
 
-    var showSimpleDateRangePickerDialog by rememberSaveable { mutableStateOf(false) }
-    var showSimpleDateRangePickerDialogWithNepali by rememberSaveable { mutableStateOf(false) }
+        var withPicker by rememberSaveable(stateSaver = SimpleDateSaver) { mutableStateOf<SimpleDate?>(null) }
+        NepaliDateField(
+            value = withPicker,
+            onValueChange = { withPicker = it },
+            modifier = Modifier.fillMaxWidth(),
+            label = { Text("Date (text + calendar icon)") }
+        )
 
-    Column(
-        modifier = modifier
-            .fillMaxSize(),
-        verticalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterVertically),
-        horizontalAlignment = Alignment.CenterHorizontally
+        var start by rememberSaveable(stateSaver = SimpleDateSaver) { mutableStateOf<SimpleDate?>(null) }
+        var end by rememberSaveable(stateSaver = SimpleDateSaver) { mutableStateOf<SimpleDate?>(null) }
+        NepaliDateRangeField(
+            startValue = start,
+            endValue = end,
+            onRangeChange = { s, e -> start = s; end = e },
+            modifier = Modifier.fillMaxWidth()
+        )
+    }
+}
+
+@Composable
+private fun UtilitiesPanel() {
+    val lines = remember {
+        val todayBs = NepaliDateConverter.todayNepaliCalendar
+        val todayAd = NepaliDateConverter.todayEnglishSimpleDate
+        val fullLocale = NepaliDateLocale(dateFormat = NepaliDateFormatStyle.FULL)
+        val nepaliFull = NepaliDateConverter.formatNepaliDate(
+            todayBs, fullLocale.copy(language = NepaliDatePickerLang.NEPALI)
+        )
+        val converted = NepaliDateConverter.convertEnglishToNepali(2024, 3, 21)
+        val daysBetween = NepaliDateConverter.getNepaliDaysInBetween(
+            SimpleDate(2081, 1, 1), SimpleDate(2081, 12, 30)
+        )
+        val nextWork = NepaliDateConverter.nextWorkingDay(
+            todayBs.toSimpleDate(), NoOpHolidayProvider, NepaliWeekend.Default
+        )
+        val plusTen = NepaliDateConverter.addWorkingDays(
+            todayBs.toSimpleDate(), 10, NoOpHolidayProvider, NepaliWeekend.Default
+        )
+        val time = NepaliDateConverter.currentTime
+        val iso = NepaliDateConverter.formatNepaliDateTimeToIsoFormat(todayBs.toSimpleDate(), time)
+
+        listOf(
+            "Today (BS)" to "${todayBs.year}/${todayBs.month}/${todayBs.dayOfMonth}",
+            "Today (AD)" to "${todayAd.year}/${todayAd.month}/${todayAd.dayOfMonth}",
+            "Formatted (Nepali, full)" to nepaliFull,
+            "2024-03-21 AD in BS" to "${converted.year}/${converted.month}/${converted.dayOfMonth}",
+            "Days in BS 2081" to daysBetween.toString(),
+            "Next working day" to "${nextWork.year}/${nextWork.month}/${nextWork.dayOfMonth}",
+            "+10 working days" to "${plusTen.year}/${plusTen.month}/${plusTen.dayOfMonth}",
+            "Time (Nepali)" to NepaliDateConverter.getFormattedTimeInNepali(time),
+            "ISO 8601" to iso
+        )
+    }
+    Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+        lines.forEach { (label, value) ->
+            Row(label = label, value = value)
+        }
+    }
+}
+
+@Composable
+private fun Row(label: String, value: String) {
+    androidx.compose.foundation.layout.Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween
     ) {
-        Button(onClick = { showSimpleDateRangePickerDialog = true }) {
-            Text("Simple Nepali Date Range Picker")
-        }
-        Button(onClick = { showSimpleDateRangePickerDialogWithNepali = true }) {
-            Text(
-                "Simple Nepali Date Range Picker in Nepali\n(Short format)",
-                textAlign = TextAlign.Center
-            )
-        }
-
-        Button(onClick = { showDateRangePickerDialogWithEnglish = true }) {
-            Text("Nepali Date Range Picker with English")
-        }
-
-        Button(onClick = { showDateRangePickerDialogWithEnglishInNepali = true }) {
-            Text("Nepali Date Range Picker with English in Nepali")
-        }
-
-        if (showSimpleDateRangePickerDialog) {
-            NepaliDatePickerDialog(
-                onDismissRequest = { showSimpleDateRangePickerDialog = false },
-                confirmButton = {
-                    NepaliDatePickerDefaults.DialogButton(
-                        "OK",
-                        onButtonClick = { showSimpleDateRangePickerDialog = false })
-                },
-                dismissButton = {
-                    NepaliDatePickerDefaults.DialogButton(
-                        "Cancel",
-                        onButtonClick = { showSimpleDateRangePickerDialog = false }
-                    )
-                }
-            ) {
-                NepaliDateRangePicker(
-                    defaultState,
-                    showMonthsVertically = monthsVertically,
-                    showYearPickerAndMonthNavigation = showRangePickerWithYearPickerAndNavigation,
-                    showTodayButton = showTodayButton
-                )
-            }
-        }
-
-        if (showSimpleDateRangePickerDialogWithNepali) {
-            NepaliDatePickerDialog(
-                onDismissRequest = { showSimpleDateRangePickerDialogWithNepali = false },
-                confirmButton = {
-                    NepaliDatePickerDefaults.DialogButton(
-                        "OK",
-                        onButtonClick = { showSimpleDateRangePickerDialogWithNepali = false })
-                },
-                dismissButton = {
-                    NepaliDatePickerDefaults.DialogButton(
-                        "Cancel",
-                        onButtonClick = { showSimpleDateRangePickerDialogWithNepali = false }
-                    )
-                }
-            ) {
-                NepaliDateRangePicker(
-                    defaultStateWithNepali,
-                    showMonthsVertically = monthsVertically,
-                    showYearPickerAndMonthNavigation = showRangePickerWithYearPickerAndNavigation,
-                    showTodayButton = showTodayButton
-                )
-            }
-        }
-
-        if (showDateRangePickerDialogWithEnglish) {
-            NepaliDatePickerDialog(
-                onDismissRequest = { showDateRangePickerDialogWithEnglish = false },
-                confirmButton = {
-                    NepaliDatePickerDefaults.DialogButton(
-                        "OK",
-                        onButtonClick = { showDateRangePickerDialogWithEnglish = false })
-                },
-                dismissButton = {
-                    NepaliDatePickerDefaults.DialogButton(
-                        "Cancel",
-                        onButtonClick = { showDateRangePickerDialogWithEnglish = false }
-                    )
-                }
-            ) {
-                NepaliDateRangePickerWithEnglishDate(
-                    secondState,
-                    showMonthsVertically = monthsVertically,
-                    showYearPickerAndMonthNavigation = showRangePickerWithYearPickerAndNavigation,
-                    showTodayButton = showTodayButton
-                )
-            }
-        }
-        if (showDateRangePickerDialogWithEnglishInNepali) {
-            NepaliDatePickerDialog(
-                onDismissRequest = { showDateRangePickerDialogWithEnglishInNepali = false },
-                confirmButton = {
-                    NepaliDatePickerDefaults.DialogButton(
-                        "OK",
-                        onButtonClick = { showDateRangePickerDialogWithEnglishInNepali = false })
-                },
-                dismissButton = {
-                    NepaliDatePickerDefaults.DialogButton(
-                        "Cancel",
-                        onButtonClick = { showDateRangePickerDialogWithEnglishInNepali = false }
-                    )
-                }
-            ) {
-                NepaliDateRangePickerWithEnglishDate(
-                    secondStateWithNepali,
-                    showMonthsVertically = monthsVertically,
-                    showYearPickerAndMonthNavigation = showRangePickerWithYearPickerAndNavigation,
-                    showTodayButton = showTodayButton,
-                    englishDateLocale = NepaliDatePickerDefaults.DefaultRangePickerLocale.copy(
-                        language = NepaliDatePickerLang.NEPALI
-                    )
-                )
-            }
-        }
+        Text(label, style = MaterialTheme.typography.bodySmall, fontWeight = FontWeight.Medium)
+        Text(value, style = MaterialTheme.typography.bodySmall)
     }
 }
 
 @Composable
-fun NepaliDatePickerForScreenShots(
-    modifier: Modifier = Modifier,
-    localeInt: Int,
-    withYearRange: Boolean = false,
-    showTodayButton: Boolean = true,
-    state: NepaliDatePickerState,
-) {
-    var showNepaliDatePickerDialog by remember { mutableStateOf(false) }
-
-    Column(modifier = modifier) {
-
-
-        Button({ showNepaliDatePickerDialog = true }) {
-            Text("Select date")
-        }
-
-        if (showNepaliDatePickerDialog) {
-            NepaliDatePickerDialog(confirmButton = {
-                TextButton(onClick = { showNepaliDatePickerDialog = false }) {
-                    Text(text = "OK")
-                }
-            }, dismissButton = {
-                TextButton(onClick = { showNepaliDatePickerDialog = false }) {
-                    Text(text = "Cancel")
-                }
-            }, onDismissRequest = { showNepaliDatePickerDialog = false }) {
-                NepaliDatePicker(state = state, showTodayButton = showTodayButton)
-            }
-        }
+private fun SelectedDateText(date: SimpleDate?) {
+    date?.let {
+        Text(
+            "Selected: ${it.year}/${it.month}/${it.dayOfMonth}",
+            style = MaterialTheme.typography.bodyMedium
+        )
     }
 }
 
 @Composable
-fun NepaliDatePickerForNepaliScreenShots(
-    modifier: Modifier = Modifier,
-    localeInt: Int,
-    withSelectables: Boolean = false,
-    showTodayButton: Boolean = true,
-    state: NepaliDatePickerState
-) {
-    var showNepaliDatePickerDialog by remember { mutableStateOf(false) }
-
-    Column(modifier = modifier) {
-
-
-        Button({ showNepaliDatePickerDialog = true }) {
-            Text("क्यालेन्डरबाट मिति छान्नुहोस्")
-        }
-
-
-        if (showNepaliDatePickerDialog) {
-            NepaliDatePickerDialog(confirmButton = {
-                TextButton(onClick = { showNepaliDatePickerDialog = false }) {
-                    Text(text = "ठीक छ")
-                }
-            }, dismissButton = {
-                TextButton(onClick = { showNepaliDatePickerDialog = false }) {
-                    Text(text = "रद्द गर्नुहोस्")
-                }
-            }, onDismissRequest = { showNepaliDatePickerDialog = false }) {
-                NepaliDatePicker(state = state, showTodayButton = showTodayButton)
+private fun Section(title: String, subtitle: String? = null, content: @Composable () -> Unit) {
+    Card(modifier = Modifier.widthIn(max = 420.dp).padding(horizontal = 12.dp)) {
+        Column(
+            modifier = Modifier.fillMaxWidth().padding(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            Text(title, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
+            if (subtitle != null) {
+                Text(subtitle, style = MaterialTheme.typography.bodySmall, textAlign = TextAlign.Center)
             }
+            HorizontalDivider()
+            content()
         }
     }
 }
+
+/** Saves a nullable [SimpleDate] as "y,m,d" (or empty) across configuration changes. */
+private val SimpleDateSaver = androidx.compose.runtime.saveable.Saver<SimpleDate?, String>(
+    save = { it?.let { d -> "${d.year},${d.month},${d.dayOfMonth}" } ?: "" },
+    restore = { s ->
+        s.split(",").takeIf { it.size == 3 }?.let {
+            runCatching { SimpleDate(it[0].toInt(), it[1].toInt(), it[2].toInt()) }.getOrNull()
+        }
+    }
+)
