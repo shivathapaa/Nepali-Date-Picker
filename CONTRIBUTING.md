@@ -26,9 +26,9 @@ git checkout -b bugfix/your-bug-fix-name
 ```
 4. Make your changes: Follow the guidelines below for contributing.
 5. Ensure all commits are signed using GPG. Unsigned commits will not be accepted. Learn how to [sign commits](https://docs.github.com/en/authentication/managing-commit-signature-verification/signing-commits).
-6. Commit your changes:
+6. Commit your changes following the [commit message convention](#commit-messages):
 ```bash
-git commit -m "Describe your changes"
+git commit -m "feat(ui): add wheel date picker"
 ```
 7. Push your branch:
 ```bash
@@ -70,6 +70,30 @@ When you're ready to submit a pull request:
 3. Ensure all tests pass.
 4. Update the documentation as needed.
 5. Open a pull request with a clear description of what you've done and why.
+
+### Commit messages
+
+This project follows [Conventional Commits](https://www.conventionalcommits.org/). Keep the subject to a single line in the imperative mood, and do not add trailing sign-off or co-author lines.
+
+```
+type(scope): short summary
+```
+
+**Types:** `feat` (new user-facing capability), `fix` (bug fix), `perf` (performance), `refactor` (behavior-preserving cleanup), `docs`, `test`, `build` (Gradle / dependencies / packaging), `ci`, `style`, `chore`.
+
+**Scope** (optional): the primary area the change touches - `core`, `ui`, `sample`, `serialization`, `build`, `ci`. Omit it when a change genuinely spans many areas.
+
+Examples:
+
+```
+feat(ui): add wheel date picker
+fix(core): reject pre-anchor English dates instead of returning the anchor
+perf(core): make day-offset math O(1) with a cumulative-days prefix
+refactor(ui): share one date-cell path across all pickers
+docs: document NepaliDateConverter as the recommended facade
+test(ui): add Compose UI behavioral tests
+build: bump Kotlin, Compose, and Material3
+```
 
 ### Running tests locally
 
