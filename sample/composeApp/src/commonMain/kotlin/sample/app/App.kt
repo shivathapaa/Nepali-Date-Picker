@@ -38,6 +38,7 @@ import dev.shivathapaa.nepalidatepickerkmp.NepaliDatePickerState
 import dev.shivathapaa.nepalidatepickerkmp.NepaliDatePickerWithEnglishDate
 import dev.shivathapaa.nepalidatepickerkmp.NepaliDateRangePicker
 import dev.shivathapaa.nepalidatepickerkmp.NepaliDateRangePickerState
+import dev.shivathapaa.nepalidatepickerkmp.NepaliDatePickerFullScreenDialog
 import dev.shivathapaa.nepalidatepickerkmp.NepaliDateRangePickerWithEnglishDate
 import dev.shivathapaa.nepalidatepickerkmp.NepaliWheelDatePicker
 import dev.shivathapaa.nepalidatepickerkmp.annotations.ExperimentalNepaliDatePickerApi
@@ -313,6 +314,34 @@ fun SamplePickers(
                 text = "Selected: ${selected.year}/${selected.month}/${selected.dayOfMonth}",
                 textAlign = TextAlign.Center
             )
+        }
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+        var showFullScreen by rememberSaveable { mutableStateOf(false) }
+        val fullScreenRangeState = rememberNepaliDateRangePickerState()
+        Button(onClick = { showFullScreen = true }) {
+            Text("Full-screen Range Picker")
+        }
+        if (showFullScreen) {
+            NepaliDatePickerFullScreenDialog(
+                onDismissRequest = { showFullScreen = false },
+                confirmButton = {
+                    NepaliDatePickerDefaults.DialogButton(
+                        text = "OK",
+                        onButtonClick = { showFullScreen = false }
+                    )
+                },
+                dismissButton = {
+                    NepaliDatePickerDefaults.DialogButton(
+                        text = "Cancel",
+                        onButtonClick = { showFullScreen = false }
+                    )
+                },
+                title = { Text("Select range") }
+            ) {
+                NepaliDateRangePicker(state = fullScreenRangeState, showMonthsVertically = true)
+            }
         }
 
         Spacer(modifier = Modifier.height(24.dp))
