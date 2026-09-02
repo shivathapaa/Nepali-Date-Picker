@@ -20,12 +20,16 @@ import dev.shivathapaa.nepalidatepickerkmp.NepaliSelectableDates
 import dev.shivathapaa.nepalidatepickerkmp.annotation.Immutable
 import dev.shivathapaa.nepalidatepickerkmp.data.CustomCalendar
 import dev.shivathapaa.nepalidatepickerkmp.data.CustomDateTime
+import dev.shivathapaa.nepalidatepickerkmp.data.DigitScript
 import dev.shivathapaa.nepalidatepickerkmp.data.NameFormat
 import dev.shivathapaa.nepalidatepickerkmp.data.NepaliDateLocale
 import dev.shivathapaa.nepalidatepickerkmp.data.NepaliDatePickerLang
 import dev.shivathapaa.nepalidatepickerkmp.data.NepaliMonthCalendar
 import dev.shivathapaa.nepalidatepickerkmp.data.SimpleDate
 import dev.shivathapaa.nepalidatepickerkmp.data.SimpleTime
+import dev.shivathapaa.nepalidatepickerkmp.data.nepaliDayPeriod
+import dev.shivathapaa.nepalidatepickerkmp.data.defaultDigitScript
+import dev.shivathapaa.nepalidatepickerkmp.data.latinDigitOrNull
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.daysUntil
 
@@ -848,13 +852,7 @@ object NepaliDateConverter {
      * ```
      */
     fun getFormattedTimeInNepali(simpleTime: SimpleTime, use12HourFormat: Boolean = true): String {
-        val hourOfDay =
-            when (simpleTime.hour) {
-                in 3..11 -> "बिहान"
-                in 12..16 -> "दिउँसो"
-                in 17..19 -> "साँझ"
-                else -> "राति"
-            }
+        val hourOfDay = nepaliDayPeriod(simpleTime.hour)
 
         val hour =
             if (use12HourFormat && simpleTime.hour > 12) simpleTime.hour - 12 else simpleTime.hour
@@ -862,10 +860,10 @@ object NepaliDateConverter {
 
         return if (use12HourFormat) {
             "$hourOfDay ${
-                formattedHour.toString().convertToNepaliNumber()
-            } : ${simpleTime.minute.toString().padStart(2, '0').convertToNepaliNumber()}"
-        } else "${formattedHour.toString().convertToNepaliNumber()} : ${
-            simpleTime.minute.toString().padStart(2, '0').convertToNepaliNumber()
+                formattedHour.toString().localizeDigits(DigitScript.DEVANAGARI)
+            } : ${simpleTime.minute.toString().padStart(2, '0').localizeDigits(DigitScript.DEVANAGARI)}"
+        } else "${formattedHour.toString().localizeDigits(DigitScript.DEVANAGARI)} : ${
+            simpleTime.minute.toString().padStart(2, '0').localizeDigits(DigitScript.DEVANAGARI)
         }"
     }
 
@@ -1204,6 +1202,50 @@ object NepaliDateConverter {
     }
 
     /**
+     * Localize Latin digits in this string to the given [script].
+     *
+     * Non-digit characters and digits already outside ASCII 0-9 are kept verbatim.
+     * For [DigitScript.LATIN] this is a no-op and returns the original string instance.
+     *
+     * Example - `"2082/02/14".localizeDigits(DigitScript.DEVANAGARI)` → `"२०८२/०२/१४"`.
+     */
+    fun String.localizeDigits(script: DigitScript): String = script.localize(this)
+
+    /**
+     * Localize Latin digits in this string to the digit script implied by [locale].
+     *
+     * Reads [NepaliDateLocale.resolvedDigitScript], so explicit overrides on the locale
+     * are respected. Use this overload in UI code that already has a [NepaliDateLocale]
+     * in scope.
+     */
+    fun String.localizeDigits(locale: NepaliDateLocale): String =
+        localizeDigits(locale.resolvedDigitScript)
+
+    /**
+     * Inverse of [localizeDigits]. Convert digits in any supported non-Latin script
+     * back to ASCII 0-9. Non-digit characters pass through unchanged.
+     *
+     * Currently handles [DigitScript.DEVANAGARI]; other scripts added to [DigitScript]
+     * are picked up automatically without changes here.
+     *
+     * Example - `"२०८२/०२/१४".toLatinDigits()` → `"2082/02/14"`.
+     */
+    fun String.toLatinDigits(): String {
+        var anyConverted = false
+        val builder = StringBuilder(length)
+        for (char in this) {
+            val latin = char.latinDigitOrNull()
+            if (latin != null && latin != char) {
+                anyConverted = true
+                builder.append(latin)
+            } else {
+                builder.append(char)
+            }
+        }
+        return if (anyConverted) builder.toString() else this
+    }
+
+    /**
      * This function localizes [String] to either English or Nepali, i.e.
      * converts english numbers of string to nepali numbers, and vice versa.
      *
@@ -1212,18 +1254,27 @@ object NepaliDateConverter {
      * @return [String] with English numbers converted to Nepali numbers, or vice versa.
      */
     fun String.localizeNumber(locale: NepaliDatePickerLang): String =
-        calendarModel.localizeNumber(stringToLocalize = this, locale = locale)
+        localizeDigits(locale.defaultDigitScript())
 
     /**
      * This function converts [String] to Nepali, i.e. converts english numbers of string to nepali numbers.
      */
-    fun String.convertToNepaliNumber(): String =
-        calendarModel.localizeNumbersToNepali(englishString = this)
+    @Deprecated(
+        message = "Use localizeDigits(DigitScript.DEVANAGARI) for clarity and to allow other digit scripts.",
+        replaceWith = ReplaceWith(
+            expression = "localizeDigits(DigitScript.DEVANAGARI)",
+            imports = ["dev.shivathapaa.nepalidatepickerkmp.data.DigitScript"]
+        )
+    )
+    fun String.convertToNepaliNumber(): String = localizeDigits(DigitScript.DEVANAGARI)
 
     /**
      * This function converts [String] to English, i.e. converts nepali numbers of string to english numbers.
      */
-    fun String.convertToEnglishNumber(): String =
-        calendarModel.localizeNumberToEnglish(nepaliString = this)
+    @Deprecated(
+        message = "Use toLatinDigits() - converts digits from any supported non-Latin script back to ASCII 0-9.",
+        replaceWith = ReplaceWith(expression = "toLatinDigits()")
+    )
+    fun String.convertToEnglishNumber(): String = toLatinDigits()
 
 }

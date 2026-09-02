@@ -121,7 +121,8 @@ object NepaliDatePickerDefaults {
         todayDateBorderColor: Color = Color.Unspecified,
         dayInSelectionRangeContentColor: Color = Color.Unspecified,
         dayInSelectionRangeContainerColor: Color = Color.Unspecified,
-        dividerColor: Color = Color.Unspecified
+        dividerColor: Color = Color.Unspecified,
+        dateTextFieldColors: TextFieldColors? = null
     ): NepaliDatePickerColors = defaultDatePickerColors.copy(
         containerColor = containerColor,
         titleContentColor = titleContentColor,
@@ -146,7 +147,8 @@ object NepaliDatePickerDefaults {
         todayDateBorderColor = todayDateBorderColor,
         dayInSelectionRangeContentColor = dayInSelectionRangeContentColor,
         dayInSelectionRangeContainerColor = dayInSelectionRangeContainerColor,
-        dividerColor = dividerColor
+        dividerColor = dividerColor,
+        dateTextFieldColors = dateTextFieldColors
     )
 
     private val defaultDatePickerColors: NepaliDatePickerColors
@@ -722,6 +724,7 @@ class NepaliDatePickerColors(
         if (headlineContentColor != other.headlineContentColor) return false
         if (weekdayContentColor != other.weekdayContentColor) return false
         if (subheadContentColor != other.subheadContentColor) return false
+        if (navigationContentColor != other.navigationContentColor) return false
         if (yearContentColor != other.yearContentColor) return false
         if (disabledYearContentColor != other.disabledYearContentColor) return false
         if (currentYearContentColor != other.currentYearContentColor) return false
@@ -743,6 +746,8 @@ class NepaliDatePickerColors(
             return false
         }
         if (dayInSelectionRangeContentColor != other.dayInSelectionRangeContentColor) return false
+        if (dividerColor != other.dividerColor) return false
+        if (dateTextFieldColors != other.dateTextFieldColors) return false
 
         return true
     }
@@ -753,6 +758,7 @@ class NepaliDatePickerColors(
         result = 31 * result + headlineContentColor.hashCode()
         result = 31 * result + weekdayContentColor.hashCode()
         result = 31 * result + subheadContentColor.hashCode()
+        result = 31 * result + navigationContentColor.hashCode()
         result = 31 * result + yearContentColor.hashCode()
         result = 31 * result + disabledYearContentColor.hashCode()
         result = 31 * result + currentYearContentColor.hashCode()
@@ -770,6 +776,8 @@ class NepaliDatePickerColors(
         result = 31 * result + todayDateBorderColor.hashCode()
         result = 31 * result + dayInSelectionRangeContainerColor.hashCode()
         result = 31 * result + dayInSelectionRangeContentColor.hashCode()
+        result = 31 * result + dividerColor.hashCode()
+        result = 31 * result + dateTextFieldColors.hashCode()
         return result
     }
 }

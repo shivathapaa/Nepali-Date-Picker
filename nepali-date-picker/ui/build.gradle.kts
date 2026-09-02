@@ -24,6 +24,16 @@ kotlin {
             api(projects.nepaliDatePicker.core)
         }
 
+        commonTest.dependencies {
+            implementation(libs.kotlin.test)
+            @OptIn(org.jetbrains.compose.ExperimentalComposeLibrary::class)
+            implementation(compose.uiTest)
+        }
+
+        jvmTest.dependencies {
+            implementation(compose.desktop.currentOs)
+        }
+
         jsMain.dependencies {
             implementation(libs.html.core)
         }

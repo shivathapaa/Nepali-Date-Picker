@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+@file:Suppress("DEPRECATION") // helper expressions still use convertToNepaliNumber to build expected strings - non-blocking until tests get rewritten on the new localizeDigits API
+
 package dev.shivathapaa.nepalidatepickerkmp
 
 import dev.shivathapaa.nepalidatepickerkmp.calendar_model.NepaliDateConverter

@@ -21,6 +21,7 @@ rootProject.name = "NepaliDatePickerKmp"
 
 include(":nepali-date-picker:core")
 include(":nepali-date-picker:ui")
+include(":nepali-date-picker:serialization")
 
 include(":sample:androidApp")
 include(":sample:composeApp")

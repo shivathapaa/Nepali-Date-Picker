@@ -31,20 +31,18 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.input.OffsetMapping
 import androidx.compose.ui.text.input.TextFieldValue
-import androidx.compose.ui.text.input.TransformedText
-import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import dev.shivathapaa.nepalidatepickerkmp.calendar_model.NepaliCalendarModel
 import dev.shivathapaa.nepalidatepickerkmp.calendar_model.NepaliDateConverter.compareDates
 import dev.shivathapaa.nepalidatepickerkmp.calendar_model.NepaliDatePickerColors
 import dev.shivathapaa.nepalidatepickerkmp.data.CustomCalendar
+import dev.shivathapaa.nepalidatepickerkmp.data.NepaliDateFormatter
 import dev.shivathapaa.nepalidatepickerkmp.data.NepaliDatePickerLang
+import dev.shivathapaa.nepalidatepickerkmp.data.defaultDigitScript
 import dev.shivathapaa.nepalidatepickerkmp.data.toSimpleDate
 import kotlin.jvm.JvmInline
 
@@ -174,7 +172,10 @@ internal fun NepaliDateInputTextField(
         placeholder = placeholder,
         supportingText = { if (errorText.value.isNotBlank()) Text(errorText.value) },
         isError = errorText.value.isNotBlank(),
-        visualTransformation = DateVisualTransformation(language, calendarModel::localizeNumber),
+        visualTransformation = NepaliDateMaskTransformation(
+            pattern = NepaliDateFormatter.Pattern.YYYY_SLASH_MM_SLASH_DD,
+            digitScript = language.defaultDigitScript(),
+        ),
         keyboardOptions =
             KeyboardOptions(
                 autoCorrectEnabled = false,
@@ -269,57 +270,6 @@ internal value class NepaliDateInputIdentifier internal constructor(internal val
             EndDateInput -> "EndDateInput"
             else -> "Unknown"
         }
-}
-
-private class DateVisualTransformation(
-    private val language: NepaliDatePickerLang,
-    private val localizeNumber: (String, NepaliDatePickerLang) -> String
-) : VisualTransformation {
-    private val firstDelimiterOffset: Int = 4 // Index of first delimiter (/)
-    private val secondDelimiterOffset: Int = 7 // Index of second delimiter (/)
-    private val dateFormatLength: Int = LengthOfCharOfFormattedInputDate
-
-    private val dateOffsetTranslator =
-        object : OffsetMapping {
-
-            override fun originalToTransformed(offset: Int): Int {
-                return when {
-                    offset < firstDelimiterOffset -> offset
-                    offset < secondDelimiterOffset -> offset + 1
-                    offset <= dateFormatLength -> offset + 2
-                    else -> dateFormatLength + 2 // 10
-                }
-            }
-
-            override fun transformedToOriginal(offset: Int): Int {
-                return when {
-                    offset <= firstDelimiterOffset - 1 -> offset
-                    offset <= secondDelimiterOffset - 1 -> offset - 1
-                    offset <= dateFormatLength + 1 -> offset - 2
-                    else -> dateFormatLength // 8
-                }
-            }
-        }
-
-    override fun filter(text: AnnotatedString): TransformedText {
-        val trimmedText =
-            if (text.text.length > dateFormatLength) {
-                text.text.substring(0 until dateFormatLength)
-            } else {
-                text.text
-            }
-        var transformedText = ""
-        trimmedText.forEachIndexed { index, char ->
-            transformedText += char
-            if (index + 1 == firstDelimiterOffset || index + 2 == secondDelimiterOffset) {
-                transformedText += "/" // Add delimiter
-            }
-        }
-
-        val localizedString = localizeNumber(transformedText, language)
-
-        return TransformedText(AnnotatedString(localizedString), dateOffsetTranslator)
-    }
 }
 
 internal const val PatternFormat = "YYYY/MM/DD"

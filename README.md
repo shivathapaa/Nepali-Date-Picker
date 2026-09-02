@@ -14,7 +14,9 @@ KMP Nepali Date Picker for both Android and/or iOS and/or KMP (JVM, JS, Wasm) wh
   <a href="https://github.com/shivathapaa/Nepali-Date-Picker/blob/main/LICENSE">
     <img alt="license" src="https://img.shields.io/github/license/shivathapaa/nepali-date-picker?labelColor=F5DDD7&color=E0BFB7"/></a>&nbsp;
   <a href="https://medium.com/@shivathapaa/nepali-date-picker-for-android-and-ios-kotlin-multiplatform-a739ea0caf47">
-    <img src="https://img.shields.io/badge/Read%20on-Medium-12100E?logo=medium" alt="Medium"/></a>
+    <img src="https://img.shields.io/badge/Read%20on-Medium-12100E?logo=medium" alt="Medium"/></a>&nbsp;
+  <a href="https://shivathapaa.github.io/Nepali-Date-Picker/">
+    <img src="https://img.shields.io/badge/Live%20demo-%E2%86%92-4C662B?labelColor=E2E3D8" alt="Live demo"/></a>
 </p>
 <br>
 <p align="center">
@@ -76,13 +78,29 @@ Few of them are listed below:
 - `NepaliDatePickerColors` - Takes `Material3` ?: **Material** colors by **default**. All the colors it uses are taken from your app colors if you've defined Material colors in your project. Also, there's always `.copy()` to modify the color.
 
 Core UI specific,
-- `NepaliDatePicker()` - Lets you pick a Nepali date via a calendar UI which displays Nepali dates.
-- `NepaliDatePickerWithEnglishDate()` - Nepali date picker lets you pick a Nepali date via a calendar UI which displays both Nepali and English dates.
-- `NepaliDateRangePicker()` - Nepali date picker lets you pick Nepali dates (range) via a calendar UI which displays Nepali dates.
-- `NepaliDateRangePickerWithEnglishDate()` - Nepali date picker lets you pick Nepali dates (range) via a calendar UI which displays both Nepali and English dates.
-- `rememberNepaliDatePickerState()` - To read, write, and manage state of the **date picker** i.e., NepaliDatePicker()_ and NepaliDatePickerWithEnglishDate()_.
-- `rememberNepaliDateRangePickerState()` - To read, write, and manage state of the **date range picker** i.e., _NepaliDateRangePicker()_ and _NepaliDateRangePickerWithEnglishDate()_.
-- `NepaliDatePickerDialog()` - A dialog for displaying all four types of date and date range pickers. (or, you can directly use in the layout.)
+
+Calendar-grid pickers:
+- `NepaliDatePicker()` - Pick a Nepali date via a calendar UI which displays Nepali dates.
+- `NepaliDatePickerWithEnglishDate()` - Calendar UI which displays both the Nepali and the English day per cell.
+- `NepaliDateRangePicker()` - Pick a Nepali date range. Months can be laid out vertically or horizontally. _(experimental)_
+- `NepaliDateRangePickerWithEnglishDate()` - Range picker which displays both Nepali and English dates. _(experimental)_
+
+Alternative experiences:
+- `NepaliWheelDatePicker()` - Scroll/wheel picker with three snapping columns (Year, Month, Day). Great for birth dates and dates far from today. _(experimental)_
+- `NepaliDatePickerDocked()` - Compact read-only field with a dropdown calendar. The Material3 "docked" pattern for forms. _(experimental)_
+
+Dialogs / hosts:
+- `NepaliDatePickerDialog()` - Centered modal host for any of the pickers above.
+- `NepaliDatePickerFullScreenDialog()` - Full-screen host with a top bar. Fits a range selection on a phone. _(experimental)_
+
+Text-field entry:
+- `NepaliDateTextField()` / `NepaliDateField()` - Outlined text field editing a `SimpleDate` (accepts Latin and Devanagari digits, four patterns). `NepaliDateField` adds a trailing calendar icon that opens the dialog.
+- `NepaliDateRangeTextField()` / `NepaliDateRangeField()` - Two stacked fields for a date range with start <= end validation. _(experimental)_
+
+State:
+- `rememberNepaliDatePickerState()` / `rememberNepaliDateRangePickerState()` - Read, write, and manage the picker state; saved across configuration changes.
+
+> Newer additions marked _(experimental)_ require `@OptIn(ExperimentalNepaliDatePickerApi::class)` and may change in a future release.
 
 ## Using in your projects
 
@@ -152,7 +170,7 @@ To add the nepali-date-picker library to your Android project, include the follo
 [versions]
 # ...
 kotlin = "2.1.20"
-nepaliDatePicker = "3.0.0" // Check for latest release
+nepaliDatePicker = "3.1.0" // Check for latest release
 
 [libraries]
 nepali-date-picker-ui = { module = "io.github.shivathapaa:nepali-date-picker-ui", version.ref = "nepaliDatePicker" }

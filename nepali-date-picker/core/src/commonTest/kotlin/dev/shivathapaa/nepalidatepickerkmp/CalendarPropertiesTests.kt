@@ -18,7 +18,7 @@ import kotlin.test.assertTrue
 
 class CalendarPropertiesTests {
 
-    // ── getTotalDaysInEnglishMonth: Gregorian leap-year rule ─────────────────
+    // getTotalDaysInEnglishMonth: Gregorian leap-year rule
 
     @Test
     fun englishMonth_february_commonYear_has28Days() {
@@ -67,7 +67,7 @@ class CalendarPropertiesTests {
         }
     }
 
-    // ── getTotalDaysInNepaliMonth: BS month length table ─────────────────────
+    // getTotalDaysInNepaliMonth: BS month length table
 
     @Test
     fun nepaliMonth_min_returnsMappedValue() {
@@ -92,7 +92,7 @@ class CalendarPropertiesTests {
             for (month in 1..12) {
                 val days = NepaliDateConverter.getTotalDaysInNepaliMonth(year, month)
                 assertTrue(days in 29..32,
-                    "Year $year month $month has $days days — outside 29..32")
+                    "Year $year month $month has $days days - outside 29..32")
             }
         }
     }
@@ -102,18 +102,20 @@ class CalendarPropertiesTests {
         for (year in 1970..2100) {
             val total = (1..12).sumOf { NepaliDateConverter.getTotalDaysInNepaliMonth(year, it) }
             assertTrue(total in 364..367,
-                "Year $year total days = $total — expected 364..367")
+                "Year $year total days = $total - expected 364..367")
         }
     }
 
     @Test
     fun nepaliMonth_yearOutsideMap_throws() {
-        assertFailsWith<NoSuchElementException> {
+        // Out-of-table years now surface a clear IllegalArgumentException instead of leaking the
+        // map's NoSuchElementException (see the day-walk boundary hardening in DateConverters).
+        assertFailsWith<IllegalArgumentException> {
             NepaliDateConverter.getTotalDaysInNepaliMonth(1500, 1)
         }
     }
 
-    // ── getNepaliMonthCalendar ────────────────────────────────────────────────
+    // getNepaliMonthCalendar
 
     @Test
     fun getNepaliMonthCalendar_matchesGetNepaliCalendarFirstDay() {
@@ -153,7 +155,7 @@ class CalendarPropertiesTests {
         }
     }
 
-    // ── getNepaliCalendar / dayOfWeek / dayOfYear ────────────────────────────
+    // getNepaliCalendar / dayOfWeek / dayOfYear
 
     @Test
     fun getNepaliCalendar_firstDayOfYear_dayOfYearIsOne() {

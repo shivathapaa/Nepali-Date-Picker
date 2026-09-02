@@ -43,7 +43,9 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.defaultMinSize
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.layout.requiredSize
@@ -74,7 +76,6 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.Stable
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -86,15 +87,21 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.util.fastForEach
 import dev.shivathapaa.nepalidatepickerkmp.calendar_model.NepaliCalendarDefaults
 import dev.shivathapaa.nepalidatepickerkmp.calendar_model.NepaliCalendarModel
@@ -102,6 +109,7 @@ import dev.shivathapaa.nepalidatepickerkmp.calendar_model.NepaliDatePickerColors
 import dev.shivathapaa.nepalidatepickerkmp.calendar_model.NepaliDatePickerDefaults
 import dev.shivathapaa.nepalidatepickerkmp.data.CustomCalendar
 import dev.shivathapaa.nepalidatepickerkmp.data.NameFormat
+import dev.shivathapaa.nepalidatepickerkmp.data.NepaliDateFormatStyle
 import dev.shivathapaa.nepalidatepickerkmp.data.NepaliDateLocale
 import dev.shivathapaa.nepalidatepickerkmp.data.NepaliDatePickerLang
 import dev.shivathapaa.nepalidatepickerkmp.data.NepaliMonthCalendar
@@ -162,9 +170,9 @@ fun NepaliDatePicker(
     showTodayButton: Boolean = true,
     colors: NepaliDatePickerColors = NepaliDatePickerDefaults.colors()
 ) {
-    val calendarModel = NepaliCalendarModel(state.locale)
-    // Because it's expensive
-    val today = calendarModel.todayNepaliSimpleDate
+    val calendarModel = remember(state.locale) { NepaliCalendarModel(state.locale) }
+    // `today` reads the wall clock; remember it so it isn't recomputed on every recomposition.
+    val today = remember(calendarModel) { calendarModel.todayNepaliSimpleDate }
 
     NepaliDateEntryContainer(
         modifier = modifier,
@@ -178,6 +186,7 @@ fun NepaliDatePicker(
                         modifier = Modifier.padding(NepaliDatePickerModeTogglePadding),
                         displayMode = state.displayMode,
                         onDisplayModeChange = { displayMode -> state.displayMode = displayMode },
+                        language = state.locale.language
                     )
                 }
             } else {
@@ -291,20 +300,21 @@ value class DisplayMode internal constructor(internal val value: Int) {
 internal fun NepaliDisplayModeToggleButton(
     modifier: Modifier,
     displayMode: DisplayMode,
-    onDisplayModeChange: (DisplayMode) -> Unit
+    onDisplayModeChange: (DisplayMode) -> Unit,
+    language: NepaliDatePickerLang = NepaliDatePickerLang.ENGLISH
 ) {
     if (displayMode == DisplayMode.Picker) {
         IconButton(onClick = { onDisplayModeChange(DisplayMode.Input) }, modifier = modifier) {
             Icon(
                 imageVector = NepaliIcons.Edit,
-                contentDescription = "getString(Strings.DatePickerSwitchToInputMode)"
+                contentDescription = language.switchToInputModeContentDescription
             )
         }
     } else {
         IconButton(onClick = { onDisplayModeChange(DisplayMode.Picker) }, modifier = modifier) {
             Icon(
                 imageVector = NepaliIcons.DateRange,
-                contentDescription = "getString(Strings.DatePickerSwitchToCalendarMode)"
+                contentDescription = language.switchToCalendarModeContentDescription
             )
         }
     }
@@ -431,14 +441,14 @@ private fun NepaliDatePicker(
     colors: NepaliDatePickerColors,
     today: SimpleDate
 ) {
-    val displayedMonthIndex by remember(displayedMonth) {
-        derivedStateOf { displayedMonth.indexIn(yearRange) }
+    // Plain remember: these are pure functions of their keys, not derived reads of other
+    // snapshot state, so derivedStateOf would only add a redundant observer allocation.
+    val displayedMonthIndex = remember(displayedMonth, yearRange) {
+        displayedMonth.indexIn(yearRange)
     }
     val initialIndex = today.indexIn(yearRange)
 
-    val isToday by remember(displayedMonthIndex) {
-        derivedStateOf { displayedMonthIndex == initialIndex }
-    }
+    val isToday = displayedMonthIndex == initialIndex
 
     val monthsListState = rememberLazyListState(initialFirstVisibleItemIndex = displayedMonthIndex)
     val coroutineScope = rememberCoroutineScope()
@@ -490,7 +500,9 @@ private fun NepaliDatePicker(
                 coroutineScope.launch { monthsListState.scrollToItem(initialIndex) }
             },
             onYearPickerButtonClicked = { yearPickerVisible = !yearPickerVisible },
-            colors = colors
+            colors = colors,
+            previousMonthContentDescription = chosenLanguage.previousMonthContentDescription,
+            nextMonthContentDescription = chosenLanguage.nextMonthContentDescription
         )
         Box {
             Column(modifier = Modifier.padding(horizontal = DatePickerHorizontalPadding)) {
@@ -581,8 +593,9 @@ interface NepaliDatePickerState {
  * @param locale an instance of [NepaliDateLocale] that is used to localize the date picker. It holds
  * the preference for the date picker formatted date and the language of the date picker.
  *
- * @throws [IllegalArgumentException] if the initial selected date or displayed month represent a
- *   year that is out of the year range.
+ * Out-of-range or invalid initial values are coerced rather than rejected: the displayed month is
+ * clamped into [yearRange], and an out-of-range or non-existent initial selected date resolves to
+ * no selection.
  *
  * Example usage:
  * ```
@@ -676,8 +689,9 @@ fun rememberNepaliDatePickerState(
  * @param locale an instance of [NepaliDateLocale] that is used to localize the date picker. It holds
  * the preference for the date picker formatted date and the language of the date picker.
  *
- * @throws [IllegalArgumentException] if the initial selected date or displayed month represent a
- *   year that is out of the year range.
+ * Out-of-range or invalid initial values are coerced rather than rejected: the displayed month is
+ * clamped into [yearRange], and an out-of-range or non-existent initial selected date resolves to
+ * no selection.
  *
  * @see rememberNepaliDatePickerState
  */
@@ -709,8 +723,9 @@ fun NepaliDatePickerState(
  * @param nepaliSelectableDates a [NepaliSelectableDates] that is consulted to check if a date is allowed.
  * In case a date is not allowed to be selected, it will appear disabled in the UI.
  * @see rememberNepaliDatePickerState
- * @throws [IllegalArgumentException] if the initial selected date or displayed month represent
- * a year that is out of the year range.
+ * Out-of-range or invalid initial values are coerced rather than rejected: the displayed month is
+ * clamped into [yearRange], and an out-of-range or non-existent initial selected date resolves to
+ * no selection.
  */
 @Stable
 internal abstract class BaseNepaliDatePickerStateImpl(
@@ -724,34 +739,37 @@ internal abstract class BaseNepaliDatePickerStateImpl(
 
     private var _displayedMonth = mutableStateOf(
         if (initialDisplayedMonth != null) {
-            val month = calendarModel.getNepaliMonth(
-                nepaliYear = initialDisplayedMonth.year, nepaliMonth = initialDisplayedMonth.month
-            )
-            require(yearRange.contains(month.year)) {
-                "The initial display month's year (${month.year}) is out of the years range of $yearRange."
-            }
-            month
+            coerceDisplayedMonth(initialDisplayedMonth)
         } else {
-            // Set the displayed month to the current one.
             calendarModel.todayNepaliCalendar.toNepaliMonthCalendar()
         })
 
     var displayedMonth: NepaliMonthCalendar
         get() = _displayedMonth.value
         set(month) {
-            require(yearRange.contains(month.year)) {
-                "The display month's year (${month.year}) is out of the years range of $yearRange."
+            _displayedMonth.value = if (yearRange.contains(month.year)) {
+                month
+            } else {
+                coerceDisplayedMonth(SimpleDate(month.year, month.month))
             }
-            _displayedMonth.value = month
         }
+
+    // The displayed month drives the month pager, so an out-of-range year would crash on scroll.
+    // Clamp the year into range and the month to 1..12 instead of throwing.
+    private fun coerceDisplayedMonth(date: SimpleDate): NepaliMonthCalendar =
+        calendarModel.getNepaliMonth(
+            nepaliYear = date.year.coerceIn(yearRange.first, yearRange.last),
+            nepaliMonth = date.month.coerceIn(1, 12)
+        )
 }
 
 /**
  * A default implementation of the [NepaliDatePickerState]. See [rememberNepaliDatePickerState].
  *
  * @see rememberNepaliDatePickerState
- * @throws [IllegalArgumentException] if the initial selected date or displayed month represent
- * a year that is out of the year range.
+ * Out-of-range or invalid initial values are coerced rather than rejected: the displayed month is
+ * clamped into [yearRange], and an out-of-range or non-existent initial selected date resolves to
+ * no selection.
  */
 @Stable
 private class NepaliDatePickerStateImpl(
@@ -771,29 +789,20 @@ private class NepaliDatePickerStateImpl(
     /**
      * A mutable state of [CustomCalendar] that represents a selected date.
      */
+    // Drop an out-of-range or unparseable initial date to "no selection" instead of crashing.
     private var _selectedDate = mutableStateOf(
-        if (initialSelectedDate != null) {
-            val date = calendarModel.getNepaliCalendar(simpleNepaliDate = initialSelectedDate)
-            require(yearRange.contains(date.year)) {
-                "The provided initial date's year (${date.year}) is out of the years range of $yearRange."
-            }
-            date
-        } else {
-            null
+        initialSelectedDate?.let {
+            runCatching { calendarModel.getNepaliCalendar(simpleNepaliDate = it) }
+                .getOrNull()
+                ?.takeIf { date -> yearRange.contains(date.year) }
         })
 
     override var selectedDate: CustomCalendar?
         get() = _selectedDate.value
+        // Keep only an in-range date; anything else clears the selection so the headline and pager
+        // never receive a value they cannot render.
         set(customCalendar) {
-            if (customCalendar != null) {
-                // Validate that the give date is within the valid years range.
-                require(yearRange.contains(customCalendar.year)) {
-                    "The provided date's year (${customCalendar.year}) is out of the years range of $yearRange."
-                }
-                _selectedDate.value = customCalendar
-            } else {
-                _selectedDate.value = null
-            }
+            _selectedDate.value = customCalendar?.takeIf { yearRange.contains(it.year) }
         }
 
     override val selectedEnglishDate: CustomCalendar?
@@ -858,10 +867,15 @@ internal fun NepaliMonthsNavigation(
     showTodayButton: Boolean,
     onTodayClicked: () -> Unit,
     onYearPickerButtonClicked: () -> Unit,
-    colors: NepaliDatePickerColors
+    colors: NepaliDatePickerColors,
+    previousMonthContentDescription: String? = null,
+    nextMonthContentDescription: String? = null,
+    // When non-null, a smaller second line under the year label (the English month/year in the
+    // dual-date pickers). The row grows to fit it via heightIn instead of a fixed requiredHeight.
+    yearPickerSubtitle: String? = null
 ) {
     Row(
-        modifier = modifier.fillMaxWidth().requiredHeight(MonthYearHeight),
+        modifier = modifier.fillMaxWidth().heightIn(min = MonthYearHeight),
         horizontalArrangement = if (yearPickerVisible) {
             Arrangement.Start
         } else {
@@ -874,11 +888,25 @@ internal fun NepaliMonthsNavigation(
             NepaliYearPickerMenuButton(
                 onClick = onYearPickerButtonClicked, expanded = yearPickerVisible
             ) {
-                Text(
-                    text = yearPickerText,
-                    modifier = Modifier,
-                    style = MaterialTheme.typography.bodyLarge
-                )
+                if (yearPickerSubtitle != null) {
+                    Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                        Text(
+                            text = yearPickerText,
+                            style = MaterialTheme.typography.bodyLarge
+                        )
+                        Text(
+                            text = yearPickerSubtitle,
+                            modifier = Modifier.alpha(0.75f),
+                            style = MaterialTheme.typography.bodySmall.copy(fontSize = 11.sp)
+                        )
+                    }
+                } else {
+                    Text(
+                        text = yearPickerText,
+                        modifier = Modifier,
+                        style = MaterialTheme.typography.bodyLarge
+                    )
+                }
             }
             // Show arrows for traversing months (only visible when the year selection is off)
             if (!yearPickerVisible) {
@@ -891,13 +919,15 @@ internal fun NepaliMonthsNavigation(
 
                     IconButton(onClick = onPreviousClicked, enabled = previousAvailable) {
                         Icon(
-                            NepaliIcons.KeyboardArrowLeft, contentDescription = null
+                            NepaliIcons.KeyboardArrowLeft,
+                            contentDescription = previousMonthContentDescription
                         )
                     }
 
                     IconButton(onClick = onNextClicked, enabled = nextAvailable) {
                         Icon(
-                            NepaliIcons.KeyboardArrowRight, contentDescription = null
+                            NepaliIcons.KeyboardArrowRight,
+                            contentDescription = nextMonthContentDescription
                         )
                     }
                 }
@@ -941,8 +971,12 @@ internal fun NepaliWeekDays(
     val firstDayOfWeek = NepaliDatePickerDefaults.FIRST_DAY_OF_WEEK
     val weekdays = language.weekdays
 
+    // Pair each abbreviated label with its full weekday name so screen readers announce
+    // "Monday" instead of the single letter "M".
     val dayNames = (firstDayOfWeek..firstDayOfWeek + 6).map { dayIndex ->
-        if (weekDayFormat == NameFormat.SHORT) weekdays[dayIndex - 1].short else weekdays[dayIndex - 1].medium
+        val weekday = weekdays[dayIndex - 1]
+        val display = if (weekDayFormat == NameFormat.SHORT) weekday.short else weekday.medium
+        display to weekday.full
     }
 
     val textStyle = MaterialTheme.typography.bodyLarge
@@ -954,15 +988,16 @@ internal fun NepaliWeekDays(
         horizontalArrangement = Arrangement.SpaceEvenly,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        dayNames.fastForEach {
+        dayNames.fastForEach { (display, fullName) ->
             Box(
                 modifier = Modifier.size(
                     width = RecommendedSizeForAccessibility,
                     height = RecommendedSizeForAccessibility
-                ), contentAlignment = Alignment.Center
+                ).clearAndSetSemantics { contentDescription = fullName },
+                contentAlignment = Alignment.Center
             ) {
                 Text(
-                    text = it,
+                    text = display,
                     modifier = Modifier.wrapContentSize(),
                     color = colors.weekdayContentColor,
                     style = textStyle,
@@ -985,12 +1020,8 @@ private fun NepaliHorizontalMonthList(
     nepaliSelectableDates: NepaliSelectableDates,
     colors: NepaliDatePickerColors,
 ) {
-    val firstMonth by remember(yearRange) {
-        derivedStateOf {
-            calendarModel.getNepaliMonth(
-                nepaliYear = yearRange.first, nepaliMonth = 1
-            )
-        }
+    val firstMonth = remember(yearRange, calendarModel) {
+        calendarModel.getNepaliMonth(nepaliYear = yearRange.first, nepaliMonth = 1)
     }
     val snapFlingBehavior = rememberCustomSnapFlingBehavior(lazyListState = lazyListState)
 
@@ -1065,7 +1096,10 @@ internal fun NepaliMonth(
     nepaliSelectableDates: NepaliSelectableDates,
     onDateSelectionChange: (CustomCalendar) -> Unit,
     colors: NepaliDatePickerColors,
-    nepaliSelectedRangeInfo: NepaliSelectedRangeInfo? = null
+    nepaliSelectedRangeInfo: NepaliSelectedRangeInfo? = null,
+    dayShape: Shape = CircleShape,
+    // When non-null, each cell also renders the corresponding English day-of-month (dual-date cell).
+    englishDateLanguage: NepaliDatePickerLang? = null
 ) {
     val rangeSelectionDrawModifier =
         if (nepaliSelectedRangeInfo != null) {
@@ -1082,6 +1116,14 @@ internal fun NepaliMonth(
 
     var cellIndex = 0
     val daysFromStartOfWeekToFirstOfMonth = monthCalendar.daysFromStartOfWeekToFirstOfMonth
+
+    // Hoisted out of the 42-cell loop (were re-read on every cell).
+    val startingNepaliYear = NepaliCalendarDefaults.startingNepaliCalendar
+    val endingNepaliYear = NepaliCalendarDefaults.endNepaliCalendar
+    // FULL-format locale used only to build each cell's screen-reader description.
+    val a11yLocale = remember(calendarModel) {
+        calendarModel.locale.copy(dateFormat = NepaliDateFormatStyle.FULL)
+    }
 
     Column(
         modifier = Modifier.requiredHeight(RecommendedSizeForAccessibility * NepaliMaxCalendarRows)
@@ -1106,47 +1148,69 @@ internal fun NepaliMonth(
                     } else {
                         val dayNumber = cellIndex - daysFromStartOfWeekToFirstOfMonth + 1
 
-                        // To tackle recompositions
-                        val currentMonthDate by remember(cellIndex, dayNumber) {
-                            derivedStateOf {
-                                calendarModel.getNepaliCalendar(
-                                    SimpleDate(
-                                        year = monthCalendar.year,
-                                        month = monthCalendar.month,
-                                        dayOfMonth = dayNumber
-                                    )
+                        // Keyed on the actual month + day so a LazyRow slot reused for a
+                        // different month can't serve a stale date (the old key was cellIndex +
+                        // dayNumber only). Plain remember - the value is a pure function of the key.
+                        val currentMonthDate = remember(
+                            monthCalendar.year, monthCalendar.month, dayNumber
+                        ) {
+                            calendarModel.getNepaliCalendar(
+                                SimpleDate(
+                                    year = monthCalendar.year,
+                                    month = monthCalendar.month,
+                                    dayOfMonth = dayNumber
                                 )
-                            }
+                            )
                         }
 
                         val isToday = todayDate == currentMonthDate.toSimpleDate()
                         val startDateSelected = startDate == currentMonthDate
                         val endDateSelected = endDate == currentMonthDate
-                        val startingNepaliYear = NepaliCalendarDefaults.startingNepaliCalendar
-                        val endingNepaliYear = NepaliCalendarDefaults.endNepaliCalendar
 
+                        // Plain computed remember (was a per-cell MutableState allocation).
                         val inRange =
                             if (nepaliSelectedRangeInfo != null) {
                                 remember(nepaliSelectedRangeInfo, currentMonthDate) {
-                                    mutableStateOf(
-                                        calendarModel.compareDates(
-                                            currentMonthDate.toSimpleDate(),
-                                            startingNepaliYear.year,
-                                            startingNepaliYear.month,
-                                            startingNepaliYear.dayOfMonth
-                                        ) >= 0 &&
-                                                calendarModel.compareDates(
-                                                    currentMonthDate.toSimpleDate(),
-                                                    endingNepaliYear.year,
-                                                    endingNepaliYear.month,
-                                                    endingNepaliYear.dayOfMonth
-                                                ) <= 0
-                                    )
+                                    calendarModel.compareDates(
+                                        currentMonthDate.toSimpleDate(),
+                                        startingNepaliYear.year,
+                                        startingNepaliYear.month,
+                                        startingNepaliYear.dayOfMonth
+                                    ) >= 0 &&
+                                            calendarModel.compareDates(
+                                                currentMonthDate.toSimpleDate(),
+                                                endingNepaliYear.year,
+                                                endingNepaliYear.month,
+                                                endingNepaliYear.dayOfMonth
+                                            ) <= 0
                                 }
-                                    .value
                             } else {
                                 false
                             }
+
+                        // Full localized date (+ "today") read by screen readers for this cell.
+                        val dayContentDescription = remember(currentMonthDate, isToday) {
+                            buildString {
+                                append(calendarModel.formatNepaliDate(currentMonthDate, a11yLocale))
+                                if (isToday) {
+                                    append(", ")
+                                    append(calendarModel.locale.language.today)
+                                }
+                            }
+                        }
+
+                        // Only computed for the dual English+Nepali cell variant.
+                        val currentEnglishDay: Int? = if (englishDateLanguage != null) {
+                            remember(currentMonthDate) {
+                                calendarModel.convertToEnglishDate(
+                                    currentMonthDate.year,
+                                    currentMonthDate.month,
+                                    currentMonthDate.dayOfMonth
+                                ).dayOfMonth
+                            }
+                        } else {
+                            null
+                        }
 
                         NepaliDay(
                             modifier = Modifier,
@@ -1164,17 +1228,44 @@ internal fun NepaliMonth(
                             },
                             today = isToday,
                             colors = colors,
-                            inRange = inRange
+                            inRange = inRange,
+                            dateContentDescription = dayContentDescription,
+                            shape = dayShape
                         ) {
-                            Text(
-                                modifier = Modifier,
-                                textAlign = TextAlign.Center,
-                                text = calendarModel.localizeNumber(
-                                    stringToLocalize = dayNumber.toString(),
-                                    locale = calendarModel.locale.language
-                                ),
-                                style = MaterialTheme.typography.bodyLarge
-                            )
+                            if (englishDateLanguage != null && currentEnglishDay != null) {
+                                // Dual-date cell: large Nepali number, small English day-of-month.
+                                Box(modifier = Modifier.fillMaxSize()) {
+                                    Text(
+                                        modifier = Modifier.align(Alignment.Center)
+                                            .padding(bottom = 4.dp, end = 2.dp),
+                                        textAlign = TextAlign.Center,
+                                        text = calendarModel.localizeNumber(
+                                            stringToLocalize = dayNumber.toString(),
+                                            locale = calendarModel.locale.language
+                                        ),
+                                        style = MaterialTheme.typography.bodyLarge.copy(fontSize = 16.5.sp)
+                                    )
+                                    Text(
+                                        modifier = Modifier.align(Alignment.BottomEnd)
+                                            .padding(end = 2.dp).alpha(0.75f),
+                                        text = calendarModel.localizeNumber(
+                                            stringToLocalize = currentEnglishDay.toString(),
+                                            locale = englishDateLanguage
+                                        ),
+                                        style = MaterialTheme.typography.labelSmall.copy(fontSize = 8.sp)
+                                    )
+                                }
+                            } else {
+                                Text(
+                                    modifier = Modifier,
+                                    textAlign = TextAlign.Center,
+                                    text = calendarModel.localizeNumber(
+                                        stringToLocalize = dayNumber.toString(),
+                                        locale = calendarModel.locale.language
+                                    ),
+                                    style = MaterialTheme.typography.bodyLarge
+                                )
+                            }
                         }
                     }
                     cellIndex++
@@ -1194,14 +1285,22 @@ private fun NepaliDay(
     today: Boolean,
     colors: NepaliDatePickerColors,
     inRange: Boolean = false,
+    dateContentDescription: String? = null,
+    shape: Shape = CircleShape,
     content: @Composable () -> Unit
 ) {
     Surface(
         selected = selected,
         onClick = onClick,
-        modifier = modifier,
+        // Surface already contributes selected/disabled state to semantics; the description adds
+        // the full localized date so a screen reader announces the whole cell, not just the number.
+        modifier = if (dateContentDescription != null) {
+            modifier.semantics { contentDescription = dateContentDescription }
+        } else {
+            modifier
+        },
         enabled = enabled,
-        shape = CircleShape,
+        shape = shape,
         color = colors.dayContainerColor(
             selected = selected, enabled = enabled, animate = animateChecked
         ).value,

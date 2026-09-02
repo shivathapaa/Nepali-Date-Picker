@@ -8,7 +8,7 @@ import java.awt.Dimension
 
 fun main() = application {
     Window(
-        title = "sample",
+        title = "Nepali Date Picker Sample",
         state = rememberWindowState(width = 800.dp, height = 600.dp),
         onCloseRequest = ::exitApplication,
     ) {

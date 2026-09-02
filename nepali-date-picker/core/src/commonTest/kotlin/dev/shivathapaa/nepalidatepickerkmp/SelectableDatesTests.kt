@@ -27,7 +27,7 @@ class SelectableDatesTests {
     private val differentYearEarlier = NepaliDateConverter.getNepaliCalendar(2080, 1, 1)
     private val differentYearLater = NepaliDateConverter.getNepaliCalendar(2082, 1, 1)
 
-    // ── BeforeDateSelectable ─────────────────────────────────────────────────
+    // BeforeDateSelectable
 
     @Test
     fun beforeDateSelectable_excludeAnchor_dayBeforeIsSelectable() {
@@ -62,7 +62,7 @@ class SelectableDatesTests {
         assertFalse(selectable.isSelectableYear(2082))
     }
 
-    // ── AfterDateSelectable ──────────────────────────────────────────────────
+    // AfterDateSelectable
 
     @Test
     fun afterDateSelectable_excludeAnchor_dayAfterIsSelectable() {
@@ -97,7 +97,7 @@ class SelectableDatesTests {
         assertFalse(selectable.isSelectableYear(2080))
     }
 
-    // ── DateRangeSelectable ──────────────────────────────────────────────────
+    // DateRangeSelectable
 
     @Test
     fun dateRangeSelectable_excludeBothEnds_onlyInteriorSelectable() {

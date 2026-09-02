@@ -30,6 +30,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ProvideTextStyle
@@ -126,8 +127,8 @@ fun NepaliDateRangePickerWithEnglishDate(
     showYearPickerAndMonthNavigation: Boolean = true,
     colors: NepaliDatePickerColors = NepaliDatePickerDefaults.colors()
 ) {
-    val calendarModel = NepaliCalendarModel(state.locale)
-    val today = calendarModel.todayNepaliSimpleDate
+    val calendarModel = remember(state.locale) { NepaliCalendarModel(state.locale) }
+    val today = remember(calendarModel) { calendarModel.todayNepaliSimpleDate }
 
     NepaliDateEntryContainer(
         modifier = modifier,
@@ -140,6 +141,7 @@ fun NepaliDateRangePickerWithEnglishDate(
                         modifier = Modifier.padding(NepaliDatePickerModeTogglePadding),
                         displayMode = state.displayMode,
                         onDisplayModeChange = { displayMode -> state.displayMode = displayMode },
+                        language = state.locale.language
                     )
                 }
             } else {
@@ -272,7 +274,7 @@ private fun NepaliEnglishDateRangePicker(
 
     Column {
         if (showYearPickerAndMonthNavigation) {
-            NepaliEnglishMonthsNavigation(
+            NepaliMonthsNavigation(
                 modifier = Modifier.padding(horizontal = DatePickerHorizontalPadding),
                 isToday = isToday,
                 todayText = chosenLanguage.today,
@@ -280,7 +282,9 @@ private fun NepaliEnglishDateRangePicker(
                 previousAvailable = monthsListState.canScrollBackward,
                 yearPickerVisible = yearPickerVisible,
                 yearPickerText = formattedMonthYear,
-                englishMonthYearText = formattedEnglishMonthYear,
+                yearPickerSubtitle = formattedEnglishMonthYear,
+                previousMonthContentDescription = chosenLanguage.previousMonthContentDescription,
+                nextMonthContentDescription = chosenLanguage.nextMonthContentDescription,
                 showTodayButton = showTodayButton,
                 onNextClicked = {
                     coroutineScope.launch {
@@ -505,7 +509,7 @@ private fun HorizontalNepaliEnglishMonthView(
                         null
                     }
 
-                NepaliEnglishMonth(
+                NepaliMonth(
                     monthCalendar = monthCalendar,
                     onDateSelectionChange = onDateSelectionChange,
                     todayDate = today,
@@ -514,8 +518,9 @@ private fun HorizontalNepaliEnglishMonthView(
                     calendarModel = calendarModel,
                     nepaliSelectedRangeInfo = nepaliRangeSelectionInfo,
                     nepaliSelectableDates = nepaliSelectableDates,
-                    englishDateLanguage = englishDateLanguage,
-                    colors = colors
+                    colors = colors,
+                    dayShape = RoundedCornerShape(4.dp),
+                    englishDateLanguage = englishDateLanguage
                 )
             }
         }
@@ -578,7 +583,7 @@ private fun VerticalNepaliEnglishMonthView(
                         null
                     }
 
-                NepaliEnglishMonth(
+                NepaliMonth(
                     monthCalendar = monthCalendar,
                     onDateSelectionChange = onDateSelectionChange,
                     englishDateLanguage = englishDateLanguage,
@@ -588,7 +593,8 @@ private fun VerticalNepaliEnglishMonthView(
                     calendarModel = calendarModel,
                     nepaliSelectedRangeInfo = nepaliRangeSelectionInfo,
                     nepaliSelectableDates = nepaliSelectableDates,
-                    colors = colors
+                    colors = colors,
+                    dayShape = RoundedCornerShape(4.dp)
                 )
             }
         }

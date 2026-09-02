@@ -20,37 +20,20 @@ import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
-import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeight
-import androidx.compose.foundation.layout.requiredSize
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import dev.shivathapaa.nepalidatepickerkmp.icons.NepaliIcons
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.LocalContentColor
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -61,13 +44,8 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clipToBounds
-import androidx.compose.ui.draw.drawWithContent
-import androidx.compose.ui.draw.rotate
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import dev.shivathapaa.nepalidatepickerkmp.calendar_model.NepaliCalendarDefaults
 import dev.shivathapaa.nepalidatepickerkmp.calendar_model.NepaliCalendarModel
 import dev.shivathapaa.nepalidatepickerkmp.calendar_model.NepaliDatePickerColors
@@ -78,7 +56,6 @@ import dev.shivathapaa.nepalidatepickerkmp.data.NepaliDateLocale
 import dev.shivathapaa.nepalidatepickerkmp.data.NepaliDatePickerLang
 import dev.shivathapaa.nepalidatepickerkmp.data.NepaliMonthCalendar
 import dev.shivathapaa.nepalidatepickerkmp.data.SimpleDate
-import dev.shivathapaa.nepalidatepickerkmp.data.toSimpleDate
 import kotlinx.coroutines.launch
 
 /**
@@ -136,9 +113,9 @@ fun NepaliDatePickerWithEnglishDate(
     showTodayButton: Boolean = true,
     colors: NepaliDatePickerColors = NepaliDatePickerDefaults.colors()
 ) {
-    val calendarModel = NepaliCalendarModel(state.locale)
-    // Because it's expensive
-    val today = calendarModel.todayNepaliSimpleDate
+    val calendarModel = remember(state.locale) { NepaliCalendarModel(state.locale) }
+    // `today` reads the wall clock; remember it so it isn't recomputed on every recomposition.
+    val today = remember(calendarModel) { calendarModel.todayNepaliSimpleDate }
 
     NepaliDateEntryContainer(
         modifier = modifier,
@@ -151,6 +128,7 @@ fun NepaliDatePickerWithEnglishDate(
                         modifier = Modifier.padding(NepaliDatePickerModeTogglePadding),
                         displayMode = state.displayMode,
                         onDisplayModeChange = { displayMode -> state.displayMode = displayMode },
+                        language = state.locale.language
                     )
                 }
             } else {
@@ -255,7 +233,7 @@ private fun NepaliDatePicker(
     val formattedEnglishMonthYear = "$currentEnglishMonthName/$nextMonthName $fullEnglishYear"
 
     Column {
-        NepaliEnglishMonthsNavigation(
+        NepaliMonthsNavigation(
             modifier = Modifier.padding(horizontal = DatePickerHorizontalPadding),
             isToday = isToday,
             todayText = chosenLanguage.today,
@@ -263,7 +241,9 @@ private fun NepaliDatePicker(
             previousAvailable = monthsListState.canScrollBackward,
             yearPickerVisible = yearPickerVisible,
             yearPickerText = formattedMonthYear,
-            englishMonthYearText = formattedEnglishMonthYear,
+            yearPickerSubtitle = formattedEnglishMonthYear,
+            previousMonthContentDescription = chosenLanguage.previousMonthContentDescription,
+            nextMonthContentDescription = chosenLanguage.nextMonthContentDescription,
             showTodayButton = showTodayButton,
             onNextClicked = {
                 coroutineScope.launch {
@@ -356,106 +336,6 @@ private fun NepaliDatePicker(
     }
 }
 
-/**
- * A composable that shows a year menu button and a couple of buttons that enable navigation between
- * displayed months.
- */
-@Composable
-internal fun NepaliEnglishMonthsNavigation(
-    modifier: Modifier,
-    nextAvailable: Boolean,
-    isToday: Boolean,
-    todayText: String,
-    previousAvailable: Boolean,
-    yearPickerVisible: Boolean,
-    yearPickerText: String,
-    englishMonthYearText: String,
-    onNextClicked: () -> Unit,
-    onPreviousClicked: () -> Unit,
-    showTodayButton: Boolean,
-    onTodayClicked: () -> Unit,
-    onYearPickerButtonClicked: () -> Unit,
-    colors: NepaliDatePickerColors
-) {
-    Row(
-        modifier = modifier.fillMaxWidth().heightIn(min = MonthYearHeight),
-        horizontalArrangement = if (yearPickerVisible) {
-            Arrangement.Start
-        } else {
-            Arrangement.SpaceBetween
-        },
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        CompositionLocalProvider(LocalContentColor provides colors.navigationContentColor) {
-            // A menu button for selecting a year.
-            NepaliYearPickerMenuButton(
-                onClick = onYearPickerButtonClicked, expanded = yearPickerVisible
-            ) {
-                Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                    Text(
-                        text = yearPickerText,
-                        modifier = Modifier,
-                        style = MaterialTheme.typography.bodyLarge
-                    )
-
-                    Text(
-                        text = englishMonthYearText,
-                        modifier = Modifier.alpha(0.75f),
-                        style = MaterialTheme.typography.bodySmall.copy(fontSize = 11.sp)
-                    )
-                }
-            }
-            // Show arrows for traversing months (only visible when the year selection is off)
-            if (!yearPickerVisible) {
-                Row {
-                    if (showTodayButton) {
-                        TextButton(onTodayClicked, enabled = !isToday) {
-                            Text(text = todayText, style = MaterialTheme.typography.labelLarge)
-                        }
-                    }
-
-                    IconButton(onClick = onPreviousClicked, enabled = previousAvailable) {
-                        Icon(
-                            NepaliIcons.KeyboardArrowLeft, contentDescription = null
-                        )
-                    }
-
-                    IconButton(onClick = onNextClicked, enabled = nextAvailable) {
-                        Icon(
-                            NepaliIcons.KeyboardArrowRight, contentDescription = null
-                        )
-                    }
-                }
-            }
-        }
-    }
-}
-
-@Composable
-private fun NepaliYearPickerMenuButton(
-    onClick: () -> Unit,
-    expanded: Boolean,
-    modifier: Modifier = Modifier,
-    content: @Composable () -> Unit
-) {
-    TextButton(
-        onClick = onClick,
-        modifier = modifier,
-        shape = CircleShape,
-        colors = ButtonDefaults.textButtonColors(contentColor = LocalContentColor.current),
-        elevation = null,
-        border = null,
-    ) {
-        content()
-        Spacer(Modifier.size(ButtonDefaults.IconSpacing))
-        Icon(
-            imageVector = NepaliIcons.ArrowDropDown,
-            contentDescription = null,
-            modifier = Modifier.rotate(if (expanded) 180f else 0f)
-        )
-    }
-}
-
 @Composable
 private fun NepaliHorizontalMonthList(
     today: SimpleDate,
@@ -492,7 +372,7 @@ private fun NepaliHorizontalMonthList(
             Box(
                 modifier = Modifier.fillParentMaxWidth()
             ) {
-                NepaliEnglishMonth(
+                NepaliMonth(
                     monthCalendar = monthCalendar,
                     todayDate = today,
                     startDate = selectedDate,
@@ -500,8 +380,9 @@ private fun NepaliHorizontalMonthList(
                     calendarModel = calendarModel,
                     onDateSelectionChange = onDateSelectionChange,
                     nepaliSelectableDates = nepaliSelectableDates,
-                    englishDateLanguage = englishDateLanguage,
-                    colors = colors
+                    colors = colors,
+                    dayShape = RoundedCornerShape(4.dp),
+                    englishDateLanguage = englishDateLanguage
                 )
             }
         }
@@ -514,205 +395,6 @@ private fun NepaliHorizontalMonthList(
             onDisplayedMonthChange = onDisplayedMonthChange,
             yearRange = yearRange
         )
-    }
-}
-
-@Composable
-internal fun NepaliEnglishMonth(
-    monthCalendar: NepaliMonthCalendar,
-    todayDate: SimpleDate,
-    startDate: CustomCalendar?,
-    endDate: CustomCalendar?,
-    calendarModel: NepaliCalendarModel,
-    nepaliSelectableDates: NepaliSelectableDates,
-    onDateSelectionChange: (CustomCalendar) -> Unit,
-    englishDateLanguage: NepaliDatePickerLang,
-    colors: NepaliDatePickerColors,
-    nepaliSelectedRangeInfo: NepaliSelectedRangeInfo? = null
-) {
-    val rangeSelectionDrawModifier =
-        if (nepaliSelectedRangeInfo != null) {
-            Modifier.drawWithContent {
-                drawRangeBackground(
-                    nepaliSelectedRangeInfo,
-                    colors.dayInSelectionRangeContainerColor
-                )
-                drawContent()
-            }
-        } else {
-            Modifier
-        }
-
-    var cellIndex = 0
-    val daysFromStartOfWeekToFirstOfMonth = monthCalendar.daysFromStartOfWeekToFirstOfMonth
-
-    Column(
-        modifier = Modifier.requiredHeight(RecommendedSizeForAccessibility * NepaliMaxCalendarRows)
-            .then(rangeSelectionDrawModifier),
-        verticalArrangement = Arrangement.SpaceEvenly
-    ) {
-        for (weekIndex in 0 until NepaliMaxCalendarRows) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceEvenly,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                for (dayIndex in 0 until NepaliDaysInWeek) {
-                    if (cellIndex < daysFromStartOfWeekToFirstOfMonth || cellIndex >= (daysFromStartOfWeekToFirstOfMonth + monthCalendar.totalDaysInMonth)) {
-                        // Empty cell
-                        Spacer(
-                            modifier = Modifier.requiredSize(
-                                width = RecommendedSizeForAccessibility,
-                                height = RecommendedSizeForAccessibility
-                            )
-                        )
-                    } else {
-                        val dayNumber = cellIndex - daysFromStartOfWeekToFirstOfMonth + 1
-
-                        // To tackle recompositions
-                        val currentMonthDate by remember(cellIndex, dayNumber) {
-                            derivedStateOf {
-                                calendarModel.getNepaliCalendar(
-                                    SimpleDate(
-                                        year = monthCalendar.year,
-                                        month = monthCalendar.month,
-                                        dayOfMonth = dayNumber
-                                    )
-                                )
-                            }
-                        }
-
-                        val currentEnglishMonth by remember(currentMonthDate) {
-                            derivedStateOf {
-                                calendarModel.convertToEnglishDate(
-                                    currentMonthDate.year,
-                                    currentMonthDate.month,
-                                    currentMonthDate.dayOfMonth
-                                )
-                            }
-                        }
-
-                        val isToday = todayDate == currentMonthDate.toSimpleDate()
-                        val startDateSelected = startDate == currentMonthDate
-                        val endDateSelected = endDate == currentMonthDate
-                        val startingNepaliYear = NepaliCalendarDefaults.startingNepaliCalendar
-                        val endingNepaliYear = NepaliCalendarDefaults.endNepaliCalendar
-
-                        val inRange =
-                            if (nepaliSelectedRangeInfo != null) {
-                                remember(nepaliSelectedRangeInfo, currentMonthDate) {
-                                    mutableStateOf(
-                                        calendarModel.compareDates(
-                                            currentMonthDate.toSimpleDate(),
-                                            startingNepaliYear.year,
-                                            startingNepaliYear.month,
-                                            startingNepaliYear.dayOfMonth
-                                        ) >= 0 &&
-                                                calendarModel.compareDates(
-                                                    currentMonthDate.toSimpleDate(),
-                                                    endingNepaliYear.year,
-                                                    endingNepaliYear.month,
-                                                    endingNepaliYear.dayOfMonth
-                                                ) <= 0
-                                    )
-                                }
-                                    .value
-                            } else {
-                                false
-                            }
-
-
-                        NepaliEnglishDay(
-                            modifier = Modifier,
-                            selected = startDateSelected || endDateSelected,
-                            onClick = { onDateSelectionChange(currentMonthDate) },
-                            animateChecked = startDateSelected,
-                            enabled = remember(currentMonthDate) {
-                                // Disabled a day in case its year is not selectable, or the
-                                // date itself is specifically not allowed by the state's
-                                // SelectableDates.
-                                with(nepaliSelectableDates) {
-                                    isSelectableYear(monthCalendar.year)
-                                            && isSelectableDate(currentMonthDate)
-                                }
-                            },
-                            today = isToday,
-                            inRange = inRange,
-                            colors = colors
-                        ) {
-                            Box(modifier = Modifier.fillMaxSize()) {
-                                Text(
-                                    modifier = Modifier.align(Alignment.Center)
-                                        .padding(bottom = 4.dp, end = 2.dp),
-                                    textAlign = TextAlign.Center,
-                                    text = calendarModel.localizeNumber(
-                                        stringToLocalize = dayNumber.toString(),
-                                        locale = calendarModel.locale.language
-                                    ),
-                                    style = MaterialTheme.typography.bodyLarge.copy(fontSize = 16.5.sp)
-                                )
-
-                                Text(
-                                    modifier = Modifier.align(Alignment.BottomEnd)
-                                        .padding(end = 2.dp).alpha(0.75f),
-                                    text = calendarModel.localizeNumber(
-                                        stringToLocalize = currentEnglishMonth.dayOfMonth.toString(),
-                                        locale = englishDateLanguage
-                                    ),
-                                    style = MaterialTheme.typography.labelSmall.copy(fontSize = 8.sp),
-                                )
-                            }
-                        }
-                    }
-                    cellIndex++
-                }
-            }
-        }
-    }
-}
-
-@Composable
-private fun NepaliEnglishDay(
-    modifier: Modifier,
-    selected: Boolean,
-    onClick: () -> Unit,
-    animateChecked: Boolean,
-    enabled: Boolean,
-    today: Boolean,
-    inRange: Boolean,
-    colors: NepaliDatePickerColors,
-    content: @Composable () -> Unit
-) {
-    Surface(
-        selected = selected,
-        onClick = onClick,
-        modifier = modifier,
-        enabled = enabled,
-        shape = RoundedCornerShape(4.dp),
-        color = colors.dayContainerColor(
-            selected = selected, enabled = enabled, animate = animateChecked
-        ).value,
-        contentColor = colors.dayContentColor(
-            isToday = today,
-            selected = selected,
-            inRange = inRange,
-            enabled = enabled,
-        ).value,
-        border = if (today && !selected) {
-            BorderStroke(
-                DateTodayContainerOutlineWidth, colors.todayDateBorderColor
-            )
-        } else {
-            null
-        }
-    ) {
-        Box(
-            modifier = Modifier.requiredSize(
-                DateStateLayerWidth, DateStateLayerHeight
-            ), contentAlignment = Alignment.Center
-        ) {
-            content()
-        }
     }
 }
 

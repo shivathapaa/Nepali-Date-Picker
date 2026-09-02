@@ -81,7 +81,7 @@ data class SimpleTime(
  * @property dayOfWeek The day of the week (1-7, e.g., 1 for Sunday). Defaults to -1 if not applicable.
  * @property dayOfYear The day of the year (1-366). Defaults to -1 if not applicable.
  * @property weekOfMonth The week of the month (1-5). Defaults to -1 if not applicable.
- * @property weekOfYear The week of the year (1-53). Defaults to -1 if not applicable.
+ * @property weekOfYear The week of the year (1-54). Defaults to -1 if not applicable.
  */
 @Immutable
 data class CustomCalendar(
@@ -176,4 +176,17 @@ fun CustomCalendar.toNepaliMonthCalendar(): NepaliMonthCalendar {
         lastDayOfMonth = lastDayOfMonth,
         daysFromStartOfWeekToFirstOfMonth = firstDayOfMonth - 1
     )
+}
+
+/**
+ * Nepali name for the period of day of a 24-hour [hour] (e.g. बिहान / दिउँसो / साँझ / राति).
+ *
+ * Single source for the mapping previously duplicated in `NepaliCalendarModel.getNepaliAmPm`
+ * and `NepaliDateConverter.getFormattedTimeInNepali`.
+ */
+internal fun nepaliDayPeriod(hour: Int): String = when (hour) {
+    in 3..11 -> "बिहान"
+    in 12..16 -> "दिउँसो"
+    in 17..19 -> "साँझ"
+    else -> "राति"
 }

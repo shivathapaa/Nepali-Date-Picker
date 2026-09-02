@@ -34,12 +34,53 @@ internal object DateConverters {
     private val minEnglishYear = NepaliCalendarDefaults.EnglishYearRange.first
     private val maxEnglishYear = NepaliCalendarDefaults.EnglishYearRange.last
 
+    private fun monthKey(year: Int, month: Int): Int = year * 12 + month
+
+    // Cumulative Bikram Sambat day count from Baisakh 1 of [minNepaliYear] to Baisakh 1 of each
+    // supported year. Turns the year portion of `calculateDayOffset` from an O(years) re-sum into
+    // an O(1) subtraction. Built once, lazily, and immutable thereafter - safe on every KMP target.
+    private val cumulativeDaysAtYearStart: Map<Int, Int> by lazy {
+        val map = HashMap<Int, Int>(maxNepaliYear - minNepaliYear + 1)
+        var running = 0
+        for (year in minNepaliYear..maxNepaliYear) {
+            map[year] = running
+            running += daysInMonthMap[year]?.sum() ?: 0
+        }
+        map
+    }
+
+    // Every supported Nepali month's details, precomputed once. The `daysInMonthMap` table is
+    // static, so these never change - caching removes the per-month O(years) rebuild the UI pager
+    // used to pay on every scroll/recomposition. Cheap to build because `calculateDayOffset` is now
+    // O(1). Lazy + immutable-after-build → thread-safe without locks on the read path.
+    private val nepaliMonthDetailsCache: Map<Int, NepaliMonthCalendar> by lazy {
+        val map = HashMap<Int, NepaliMonthCalendar>((maxNepaliYear - minNepaliYear + 1) * 12)
+        for (year in minNepaliYear..maxNepaliYear) {
+            for (month in 1..12) {
+                map[monthKey(year, month)] = computeNepaliMonthDetails(year, month)
+            }
+        }
+        map
+    }
+
     fun getTotalDaysInNepaliMonth(nepaliYYYY: Int, nepaliMM: Int): Int {
         require(nepaliMM in 1..12) {
             "Invalid month: $nepaliMM. Must be between 1 and 12."
         }
-        return daysInMonthMap.getValue(nepaliYYYY)[nepaliMM]
+        return nepaliDaysInMonthArray(nepaliYYYY)[nepaliMM]
     }
+
+    /**
+     * Returns the `[0, m1..m12]` day-count array for [year], throwing a clear
+     * [IllegalArgumentException] (rather than leaking the map's
+     * `NoSuchElementException`) when the year falls outside the supported table.
+     * Guards the day-walk converters against rolling a year past the table edge.
+     */
+    private fun nepaliDaysInMonthArray(year: Int): IntArray =
+        daysInMonthMap[year] ?: throw IllegalArgumentException(
+            "Out of Range: Nepali year $year is out of the supported range " +
+                    "$minNepaliYear..$maxNepaliYear."
+        )
 
     fun convertToNepaliCalendar(
         englishYYYY: Int,
@@ -87,7 +128,7 @@ internal object DateConverters {
         var firstDayOfMonth: Int = startingNepaliCalendar.firstDayOfMonth
         var lastDayOfMonth: Int = startingNepaliCalendar.lastDayOfMonth
 
-        var totalDaysInMonth = daysInMonthMap.getValue(nepaliYYYY)[nepaliMM]
+        var totalDaysInMonth = nepaliDaysInMonthArray(nepaliYYYY)[nepaliMM]
 
         // Loop through the days to calculate the corresponding Nepali date
         repeat(totalDaysDifference) {
@@ -115,7 +156,7 @@ internal object DateConverters {
                 }
 
                 weekOfMonth = 1 // Reset week of month for a new month
-                totalDaysInMonth = daysInMonthMap.getValue(nepaliYYYY)[nepaliMM]
+                totalDaysInMonth = nepaliDaysInMonthArray(nepaliYYYY)[nepaliMM]
                 firstDayOfMonth = dayOfWeek // The first day of the new month
             }
 
@@ -257,7 +298,7 @@ internal object DateConverters {
 
         // Add days for full years between the starting year and the target year
         for (year in startingNepaliCalendar.year until nepaliYYYY) {
-            val daysInYear = daysInMonthMap.getValue(year)
+            val daysInYear = nepaliDaysInMonthArray(year)
             for (month in 1..12) {
                 totalNepDaysCount += daysInYear[month]
             }
@@ -265,7 +306,7 @@ internal object DateConverters {
 
         // Add days for each month in the target year up to the target month
         for (month in startingNepaliCalendar.month until nepaliMM) {
-            totalNepDaysCount += daysInMonthMap.getValue(nepaliYYYY)[month]
+            totalNepDaysCount += nepaliDaysInMonthArray(nepaliYYYY)[month]
         }
 
         // Add the remaining days in the target month
@@ -340,9 +381,6 @@ internal object DateConverters {
         dayOfMonth: Int,
         adjustMonth: Boolean
     ): CustomCalendar {
-        // Normalize the month and adjust the year accordingly
-//        val (newYear, newMonth) = adjustYearAndMonth(year, month)
-
         val newMonthDetails = calculateNepaliMonthDetails(year, month)
 
         // Adjust the day of the month if it exceeds the total days in the new month
@@ -375,9 +413,8 @@ internal object DateConverters {
             era = 2,
             dayOfYear = totalDayInYear,
             weekOfMonth = calculateWeekOfMonth(
-                dayOfMonth = dayOfMonth, firstDayOfMonth = newMonthDetails.firstDayOfMonth
+                dayOfMonth = newDayOfMonth, firstDayOfMonth = newMonthDetails.firstDayOfMonth
             ),
-            // Todo: Simplify logic
             weekOfYear = calculateWeekOfYear(
                 dayOfYear = totalDayInYear,
                 firstDayOfYear = calculateNepaliMonthDetails(year, 1).firstDayOfMonth
@@ -448,7 +485,9 @@ internal object DateConverters {
     }
 
     /**
-     * Calculate the first and last day of a given Nepali month
+     * Calculate the first and last day of a given Nepali month.
+     *
+     * Backed by [nepaliMonthDetailsCache]; the underlying table is static so results never change.
      */
     fun calculateNepaliMonthDetails(
         nepaliYear: Int, nepaliMonth: Int
@@ -456,6 +495,13 @@ internal object DateConverters {
         require(nepaliMonth in 1..12) {
             "Invalid month: $nepaliMonth. Must be between 1 and 12."
         }
+        return nepaliMonthDetailsCache[monthKey(nepaliYear, nepaliMonth)]
+            ?: throw IllegalArgumentException("Invalid year $nepaliYear or month provided $nepaliMonth.")
+    }
+
+    private fun computeNepaliMonthDetails(
+        nepaliYear: Int, nepaliMonth: Int
+    ): NepaliMonthCalendar {
         val totalDaysInMonth = daysInMonthMap[nepaliYear]?.get(nepaliMonth)
             ?: throw IllegalArgumentException("Invalid year $nepaliYear or month provided $nepaliMonth.")
 
@@ -490,12 +536,12 @@ internal object DateConverters {
     private fun calculateDayOffset(
         startingYear: Int, targetYear: Int, targetMonth: Int
     ): Int {
-        // Calculate the offset for years
-        val yearOffset = (startingYear until targetYear).sumOf {
-            daysInMonthMap[it]?.sum() ?: 0
-        }
+        // Offset for whole years: an O(1) prefix subtraction instead of re-summing every year's
+        // 12-month array. Equivalent to `(startingYear until targetYear).sumOf { daysInMonthMap[it].sum() }`.
+        val yearOffset =
+            (cumulativeDaysAtYearStart[targetYear] ?: 0) - (cumulativeDaysAtYearStart[startingYear] ?: 0)
 
-        // Calculate the offset for months in the target year
+        // Offset for months in the target year (bounded to at most 11 additions).
         val monthOffset = (1 until targetMonth).sumOf {
             daysInMonthMap[targetYear]?.get(it) ?: 0
         }
@@ -524,11 +570,7 @@ internal object DateConverters {
         return daysBefore / 7 + 1
     }
 
-    /**
-     * Works perfectly for recent tests and edge cases.
-     *
-     * Todo: Add more tests covering more edge cases for this. Still have some doubts regarding this.
-     */
+    /** Week of the year from the day-of-year and the weekday of the first day of the year. */
     private fun calculateWeekOfYear(dayOfYear: Int, firstDayOfYear: Int): Int {
         val totalDaysPassed = dayOfYear + (firstDayOfYear - 1)
 
@@ -571,7 +613,21 @@ internal object DateConverters {
     private fun isEnglishDateInConversionRange(
         englishYYYY: Int, englishMM: Int, englishDD: Int
     ): Boolean {
-        return englishYYYY in minEnglishYear..maxEnglishYear && englishMM in 1..12 && englishDD in 1..31
+        if (englishYYYY !in minEnglishYear..maxEnglishYear) return false
+        if (englishMM !in 1..12 || englishDD !in 1..31) return false
+
+        // Reject English dates that fall before the earliest convertible anchor
+        // (English 1913-04-13 ≡ Nepali 1970-01-01). Without this guard, dates in
+        // 1913-01-01..1913-04-12 pass the year check, then the day-walk runs
+        // `repeat(negativeDiff)` zero times and silently returns the anchor
+        // (Nepali 1970-01-01) - a wrong result with no error.
+        val start = NepaliCalendarDefaults.startingEnglishCalendar
+        if (englishYYYY == start.year &&
+            (englishMM < start.month ||
+                    (englishMM == start.month && englishDD < start.dayOfMonth))
+        ) return false
+
+        return true
     }
 
     /**

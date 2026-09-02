@@ -23,7 +23,7 @@ class DateArithmeticTests {
 
     private val calendarModel = NepaliCalendarModel()
 
-    // ── getNepaliCalendarAfterAdditionOrSubtraction ───────────────────────────
+    // getNepaliCalendarAfterAdditionOrSubtraction
 
     @Test
     fun addZeroDays_returnsSameCalendar() {
@@ -132,7 +132,7 @@ class DateArithmeticTests {
         }
     }
 
-    // ── plus / minus months ──────────────────────────────────────────────────
+    // plus / minus months
 
     @Test
     fun plusNepaliMonths_zeroMonths_returnsSameMonth() {
@@ -173,7 +173,7 @@ class DateArithmeticTests {
         assertEquals(viaMinus, viaPlus)
     }
 
-    // ── days between ─────────────────────────────────────────────────────────
+    // days between
 
     @Test
     fun nepaliDaysInBetween_sameDay_returnsZero() {

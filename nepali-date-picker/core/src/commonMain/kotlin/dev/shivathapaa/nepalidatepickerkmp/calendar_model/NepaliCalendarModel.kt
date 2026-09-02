@@ -19,12 +19,14 @@ package dev.shivathapaa.nepalidatepickerkmp.calendar_model
 import dev.shivathapaa.nepalidatepickerkmp.annotation.Immutable
 import dev.shivathapaa.nepalidatepickerkmp.data.CustomCalendar
 import dev.shivathapaa.nepalidatepickerkmp.data.CustomDateTime
+import dev.shivathapaa.nepalidatepickerkmp.data.defaultDigitScript
 import dev.shivathapaa.nepalidatepickerkmp.data.NameFormat
 import dev.shivathapaa.nepalidatepickerkmp.data.NepaliDateFormatStyle
 import dev.shivathapaa.nepalidatepickerkmp.data.NepaliDateLocale
 import dev.shivathapaa.nepalidatepickerkmp.data.NepaliDatePickerLang
 import dev.shivathapaa.nepalidatepickerkmp.data.NepaliMonthCalendar
 import dev.shivathapaa.nepalidatepickerkmp.data.NepaliMonthName
+import dev.shivathapaa.nepalidatepickerkmp.data.nepaliDayPeriod
 import dev.shivathapaa.nepalidatepickerkmp.data.SimpleDate
 import dev.shivathapaa.nepalidatepickerkmp.data.SimpleTime
 import dev.shivathapaa.nepalidatepickerkmp.data.toSimpleDate
@@ -38,16 +40,28 @@ import kotlin.time.Clock
 import kotlin.time.ExperimentalTime
 import kotlin.time.Instant
 
+/**
+ * Locale-aware engine behind the pickers: BS↔AD conversion, month details, formatting, and date
+ * comparison. This is the workhorse the `:ui` composables construct and pass down internally.
+ *
+ * For application code, prefer the [NepaliDateConverter] object facade - it exposes the same
+ * conversion / formatting / comparison utilities as ready-to-call functions, so you don't need to
+ * construct (and thread) a model instance. Reach for [NepaliCalendarModel] directly only when you
+ * want a single instance pinned to one [locale].
+ */
 @Immutable
 class NepaliCalendarModel(val locale: NepaliDateLocale = NepaliDateLocale()) {
     // Nepal Time is a fixed +05:45 offset with no DST and no historical transitions, so a
     // FixedOffsetTimeZone gives the same answers as TimeZone.of("Asia/Kathmandu") while
-    // working on every Kotlin target — including mingwX64 (Windows native) and wasmWasi,
+    // working on every Kotlin target - including mingwX64 (Windows native) and wasmWasi,
     // which don't ship the IANA tzdata bundle that named lookups need.
     private val timeZone = FixedOffsetTimeZone(UtcOffset(hours = 5, minutes = 45))
 
+    // Read the wall clock on every access so `today*` rolls over at midnight. Previously
+    // this was a `val` captured at construction; because NepaliDateConverter is an `object`
+    // holding a single model instance, that froze "today" for the whole process lifetime.
     @OptIn(ExperimentalTime::class)
-    private val localEnglishDateTime: LocalDateTime = Clock.System.now().toLocalDateTime(timeZone)
+    private fun nowLocalDateTime(): LocalDateTime = Clock.System.now().toLocalDateTime(timeZone)
 
     @Deprecated(message = "Use todayNepaliSimpleDate or todayNepaliCalendar instead")
     val today
@@ -67,18 +81,24 @@ class NepaliCalendarModel(val locale: NepaliDateLocale = NepaliDateLocale()) {
 
     @Deprecated("Use todayEnglishSimpleDate or todayEnglishCalendar")
     val todayEnglish
-        get(): SimpleDate = SimpleDate(
-            year = localEnglishDateTime.year,
-            month = localEnglishDateTime.month.number,
-            dayOfMonth = localEnglishDateTime.day
-        )
+        get(): SimpleDate {
+            val now = nowLocalDateTime()
+            return SimpleDate(
+                year = now.year,
+                month = now.month.number,
+                dayOfMonth = now.day
+            )
+        }
 
     val todayEnglishSimpleDate
-        get(): SimpleDate = SimpleDate(
-            year = localEnglishDateTime.year,
-            month = localEnglishDateTime.month.number,
-            dayOfMonth = localEnglishDateTime.day
-        )
+        get(): SimpleDate {
+            val now = nowLocalDateTime()
+            return SimpleDate(
+                year = now.year,
+                month = now.month.number,
+                dayOfMonth = now.day
+            )
+        }
 
     val todayEnglishCalendar
         get(): CustomCalendar {
@@ -104,10 +124,11 @@ class NepaliCalendarModel(val locale: NepaliDateLocale = NepaliDateLocale()) {
         }
 
     private fun getNepaliDateInstance(): CustomCalendar {
+        val now = nowLocalDateTime()
         return DateConverters.convertToNepaliCalendar(
-            englishYYYY = localEnglishDateTime.year,
-            englishMM = localEnglishDateTime.month.number,
-            englishDD = localEnglishDateTime.day
+            englishYYYY = now.year,
+            englishMM = now.month.number,
+            englishDD = now.day
         )
     }
 
@@ -667,44 +688,7 @@ class NepaliCalendarModel(val locale: NepaliDateLocale = NepaliDateLocale()) {
     }
 
     fun localizeNumber(stringToLocalize: String, locale: NepaliDatePickerLang): String =
-        if (locale == NepaliDatePickerLang.ENGLISH) stringToLocalize else stringToLocalize.convertToNepaliNumber()
-
-    fun localizeNumbersToNepali(englishString: String): String =
-        englishString.convertToNepaliNumber()
-
-    fun localizeNumberToEnglish(nepaliString: String): String =
-        nepaliString.convertToEnglishNumber()
-
-    private val nepaliDigits = charArrayOf('०', '१', '२', '३', '४', '५', '६', '७', '८', '९')
-
-    private fun String.convertToNepaliNumber(): String {
-        val builder = StringBuilder(length)
-        for (char in this) {
-            builder.append(if (char in '0'..'9') nepaliDigits[char - '0'] else char)
-        }
-        return builder.toString()
-    }
-
-    private val nepaliToEnglishDigits = mapOf(
-        '०' to '0',
-        '१' to '1',
-        '२' to '2',
-        '३' to '3',
-        '४' to '4',
-        '५' to '5',
-        '६' to '6',
-        '७' to '7',
-        '८' to '8',
-        '९' to '9'
-    )
-
-    private fun String.convertToEnglishNumber(): String {
-        val builder = StringBuilder(length)
-        for (char in this) {
-            builder.append(nepaliToEnglishDigits[char] ?: char)
-        }
-        return builder.toString()
-    }
+        locale.defaultDigitScript().localize(stringToLocalize)
 
     private fun getTimeFormatReplacements(
         time: SimpleTime,
@@ -731,7 +715,7 @@ class NepaliCalendarModel(val locale: NepaliDateLocale = NepaliDateLocale()) {
         val nanoStr4Digit = time.nanosecond.toString().padStart(4, '0').take(4)
 
         val amPm = when (language) {
-            NepaliDatePickerLang.NEPALI -> getNepaliAmPm(hour)
+            NepaliDatePickerLang.NEPALI -> nepaliDayPeriod(hour)
             else -> if (hour < 12) "AM" else "PM"
         }
 
@@ -810,12 +794,4 @@ class NepaliCalendarModel(val locale: NepaliDateLocale = NepaliDateLocale()) {
         }
     }
 
-    private fun getNepaliAmPm(hour: Int): String {
-        return when (hour) {
-            in 3..11 -> "बिहान"
-            in 12..16 -> "दिउँसो"
-            in 17..19 -> "साँझ"
-            else -> "राति"
-        }
-    }
 }
