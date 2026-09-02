@@ -68,13 +68,7 @@ object NepaliDateFormatter {
         } else {
             "$day${pattern.delimiter}$month${pattern.delimiter}$year"
         }
-        if (script == DigitScript.LATIN) return raw
-        val table = script.digits
-        val builder = StringBuilder(raw.length)
-        for (char in raw) {
-            builder.append(if (char in '0'..'9') table[char - '0'] else char)
-        }
-        return builder.toString()
+        return script.localize(raw)
     }
 
     /**

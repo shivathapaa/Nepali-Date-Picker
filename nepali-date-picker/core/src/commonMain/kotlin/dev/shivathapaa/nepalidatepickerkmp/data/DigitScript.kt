@@ -33,6 +33,23 @@ enum class DigitScript(internal val digits: CharArray) {
 
     /** Devanagari `०१२३४५६७८९` (U+0966..U+096F). Default for `NepaliDatePickerLang.NEPALI`. */
     DEVANAGARI(charArrayOf('०', '१', '२', '३', '४', '५', '६', '७', '८', '९'));
+
+    /**
+     * Map every ASCII digit in [input] to this script's numeral, leaving all other
+     * characters untouched. [LATIN] is a no-op that returns the original instance.
+     *
+     * Single source for the digit-localization loop that previously lived (identically)
+     * in `NepaliCalendarModel.localizeNumber`, `NepaliDateConverter.localizeDigits`, and
+     * `NepaliDateFormatter.format`.
+     */
+    internal fun localize(input: String): String {
+        if (this == LATIN) return input
+        val builder = StringBuilder(input.length)
+        for (char in input) {
+            builder.append(if (char in '0'..'9') digits[char - '0'] else char)
+        }
+        return builder.toString()
+    }
 }
 
 /**

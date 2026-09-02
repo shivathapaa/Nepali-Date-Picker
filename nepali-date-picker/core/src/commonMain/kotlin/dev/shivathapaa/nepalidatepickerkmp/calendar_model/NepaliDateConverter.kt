@@ -1214,15 +1214,7 @@ object NepaliDateConverter {
      *
      * Example — `"2082/02/14".localizeDigits(DigitScript.DEVANAGARI)` → `"२०८२/०२/१४"`.
      */
-    fun String.localizeDigits(script: DigitScript): String {
-        if (script == DigitScript.LATIN) return this
-        val table = script.digits
-        val builder = StringBuilder(length)
-        for (char in this) {
-            builder.append(if (char in '0'..'9') table[char - '0'] else char)
-        }
-        return builder.toString()
-    }
+    fun String.localizeDigits(script: DigitScript): String = script.localize(this)
 
     /**
      * Localize Latin digits in this string to the digit script implied by [locale].

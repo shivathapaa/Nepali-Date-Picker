@@ -45,6 +45,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.layout.requiredSize
@@ -871,10 +872,13 @@ internal fun NepaliMonthsNavigation(
     onYearPickerButtonClicked: () -> Unit,
     colors: NepaliDatePickerColors,
     previousMonthContentDescription: String? = null,
-    nextMonthContentDescription: String? = null
+    nextMonthContentDescription: String? = null,
+    // When non-null, a smaller second line under the year label (the English month/year in the
+    // dual-date pickers). The row grows to fit it via heightIn instead of a fixed requiredHeight.
+    yearPickerSubtitle: String? = null
 ) {
     Row(
-        modifier = modifier.fillMaxWidth().requiredHeight(MonthYearHeight),
+        modifier = modifier.fillMaxWidth().heightIn(min = MonthYearHeight),
         horizontalArrangement = if (yearPickerVisible) {
             Arrangement.Start
         } else {
@@ -887,11 +891,25 @@ internal fun NepaliMonthsNavigation(
             NepaliYearPickerMenuButton(
                 onClick = onYearPickerButtonClicked, expanded = yearPickerVisible
             ) {
-                Text(
-                    text = yearPickerText,
-                    modifier = Modifier,
-                    style = MaterialTheme.typography.bodyLarge
-                )
+                if (yearPickerSubtitle != null) {
+                    Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                        Text(
+                            text = yearPickerText,
+                            style = MaterialTheme.typography.bodyLarge
+                        )
+                        Text(
+                            text = yearPickerSubtitle,
+                            modifier = Modifier.alpha(0.75f),
+                            style = MaterialTheme.typography.bodySmall.copy(fontSize = 11.sp)
+                        )
+                    }
+                } else {
+                    Text(
+                        text = yearPickerText,
+                        modifier = Modifier,
+                        style = MaterialTheme.typography.bodyLarge
+                    )
+                }
             }
             // Show arrows for traversing months (only visible when the year selection is off)
             if (!yearPickerVisible) {

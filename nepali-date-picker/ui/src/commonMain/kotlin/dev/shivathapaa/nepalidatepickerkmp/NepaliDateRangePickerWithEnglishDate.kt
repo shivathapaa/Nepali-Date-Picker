@@ -274,7 +274,7 @@ private fun NepaliEnglishDateRangePicker(
 
     Column {
         if (showYearPickerAndMonthNavigation) {
-            NepaliEnglishMonthsNavigation(
+            NepaliMonthsNavigation(
                 modifier = Modifier.padding(horizontal = DatePickerHorizontalPadding),
                 isToday = isToday,
                 todayText = chosenLanguage.today,
@@ -282,7 +282,7 @@ private fun NepaliEnglishDateRangePicker(
                 previousAvailable = monthsListState.canScrollBackward,
                 yearPickerVisible = yearPickerVisible,
                 yearPickerText = formattedMonthYear,
-                englishMonthYearText = formattedEnglishMonthYear,
+                yearPickerSubtitle = formattedEnglishMonthYear,
                 previousMonthContentDescription = chosenLanguage.previousMonthContentDescription,
                 nextMonthContentDescription = chosenLanguage.nextMonthContentDescription,
                 showTodayButton = showTodayButton,

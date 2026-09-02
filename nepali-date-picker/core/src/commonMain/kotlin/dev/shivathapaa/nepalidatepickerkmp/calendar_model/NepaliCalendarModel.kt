@@ -19,7 +19,6 @@ package dev.shivathapaa.nepalidatepickerkmp.calendar_model
 import dev.shivathapaa.nepalidatepickerkmp.annotation.Immutable
 import dev.shivathapaa.nepalidatepickerkmp.data.CustomCalendar
 import dev.shivathapaa.nepalidatepickerkmp.data.CustomDateTime
-import dev.shivathapaa.nepalidatepickerkmp.data.DigitScript
 import dev.shivathapaa.nepalidatepickerkmp.data.defaultDigitScript
 import dev.shivathapaa.nepalidatepickerkmp.data.NameFormat
 import dev.shivathapaa.nepalidatepickerkmp.data.NepaliDateFormatStyle
@@ -678,16 +677,8 @@ class NepaliCalendarModel(val locale: NepaliDateLocale = NepaliDateLocale()) {
         return patternWithDelimiters
     }
 
-    fun localizeNumber(stringToLocalize: String, locale: NepaliDatePickerLang): String {
-        val script = locale.defaultDigitScript()
-        if (script == DigitScript.LATIN) return stringToLocalize
-        val table = script.digits
-        val builder = StringBuilder(stringToLocalize.length)
-        for (char in stringToLocalize) {
-            builder.append(if (char in '0'..'9') table[char - '0'] else char)
-        }
-        return builder.toString()
-    }
+    fun localizeNumber(stringToLocalize: String, locale: NepaliDatePickerLang): String =
+        locale.defaultDigitScript().localize(stringToLocalize)
 
     private fun getTimeFormatReplacements(
         time: SimpleTime,

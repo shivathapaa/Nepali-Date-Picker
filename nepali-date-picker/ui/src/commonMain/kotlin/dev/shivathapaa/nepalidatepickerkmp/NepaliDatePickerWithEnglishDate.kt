@@ -20,33 +20,20 @@ import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeight
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import dev.shivathapaa.nepalidatepickerkmp.icons.NepaliIcons
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.LocalContentColor
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -57,11 +44,8 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clipToBounds
-import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import dev.shivathapaa.nepalidatepickerkmp.calendar_model.NepaliCalendarDefaults
 import dev.shivathapaa.nepalidatepickerkmp.calendar_model.NepaliCalendarModel
 import dev.shivathapaa.nepalidatepickerkmp.calendar_model.NepaliDatePickerColors
@@ -249,7 +233,7 @@ private fun NepaliDatePicker(
     val formattedEnglishMonthYear = "$currentEnglishMonthName/$nextMonthName $fullEnglishYear"
 
     Column {
-        NepaliEnglishMonthsNavigation(
+        NepaliMonthsNavigation(
             modifier = Modifier.padding(horizontal = DatePickerHorizontalPadding),
             isToday = isToday,
             todayText = chosenLanguage.today,
@@ -257,7 +241,7 @@ private fun NepaliDatePicker(
             previousAvailable = monthsListState.canScrollBackward,
             yearPickerVisible = yearPickerVisible,
             yearPickerText = formattedMonthYear,
-            englishMonthYearText = formattedEnglishMonthYear,
+            yearPickerSubtitle = formattedEnglishMonthYear,
             previousMonthContentDescription = chosenLanguage.previousMonthContentDescription,
             nextMonthContentDescription = chosenLanguage.nextMonthContentDescription,
             showTodayButton = showTodayButton,
@@ -349,110 +333,6 @@ private fun NepaliDatePicker(
                 }
             }
         }
-    }
-}
-
-/**
- * A composable that shows a year menu button and a couple of buttons that enable navigation between
- * displayed months.
- */
-@Composable
-internal fun NepaliEnglishMonthsNavigation(
-    modifier: Modifier,
-    nextAvailable: Boolean,
-    isToday: Boolean,
-    todayText: String,
-    previousAvailable: Boolean,
-    yearPickerVisible: Boolean,
-    yearPickerText: String,
-    englishMonthYearText: String,
-    onNextClicked: () -> Unit,
-    onPreviousClicked: () -> Unit,
-    showTodayButton: Boolean,
-    onTodayClicked: () -> Unit,
-    onYearPickerButtonClicked: () -> Unit,
-    colors: NepaliDatePickerColors,
-    previousMonthContentDescription: String? = null,
-    nextMonthContentDescription: String? = null
-) {
-    Row(
-        modifier = modifier.fillMaxWidth().heightIn(min = MonthYearHeight),
-        horizontalArrangement = if (yearPickerVisible) {
-            Arrangement.Start
-        } else {
-            Arrangement.SpaceBetween
-        },
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        CompositionLocalProvider(LocalContentColor provides colors.navigationContentColor) {
-            // A menu button for selecting a year.
-            NepaliYearPickerMenuButton(
-                onClick = onYearPickerButtonClicked, expanded = yearPickerVisible
-            ) {
-                Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                    Text(
-                        text = yearPickerText,
-                        modifier = Modifier,
-                        style = MaterialTheme.typography.bodyLarge
-                    )
-
-                    Text(
-                        text = englishMonthYearText,
-                        modifier = Modifier.alpha(0.75f),
-                        style = MaterialTheme.typography.bodySmall.copy(fontSize = 11.sp)
-                    )
-                }
-            }
-            // Show arrows for traversing months (only visible when the year selection is off)
-            if (!yearPickerVisible) {
-                Row {
-                    if (showTodayButton) {
-                        TextButton(onTodayClicked, enabled = !isToday) {
-                            Text(text = todayText, style = MaterialTheme.typography.labelLarge)
-                        }
-                    }
-
-                    IconButton(onClick = onPreviousClicked, enabled = previousAvailable) {
-                        Icon(
-                            NepaliIcons.KeyboardArrowLeft,
-                            contentDescription = previousMonthContentDescription
-                        )
-                    }
-
-                    IconButton(onClick = onNextClicked, enabled = nextAvailable) {
-                        Icon(
-                            NepaliIcons.KeyboardArrowRight,
-                            contentDescription = nextMonthContentDescription
-                        )
-                    }
-                }
-            }
-        }
-    }
-}
-
-@Composable
-private fun NepaliYearPickerMenuButton(
-    onClick: () -> Unit,
-    expanded: Boolean,
-    modifier: Modifier = Modifier,
-    content: @Composable () -> Unit
-) {
-    TextButton(
-        onClick = onClick,
-        modifier = modifier,
-        shape = CircleShape,
-        colors = ButtonDefaults.textButtonColors(contentColor = LocalContentColor.current),
-        elevation = null,
-        border = null,
-    ) {
-        content()
-        Spacer(Modifier.size(ButtonDefaults.IconSpacing))
-        Icon(
-            imageVector = NepaliIcons.ArrowDropDown,
-            contentDescription = null,
-            modifier = Modifier.rotate(if (expanded) 180f else 0f)
-        )
     }
 }
 

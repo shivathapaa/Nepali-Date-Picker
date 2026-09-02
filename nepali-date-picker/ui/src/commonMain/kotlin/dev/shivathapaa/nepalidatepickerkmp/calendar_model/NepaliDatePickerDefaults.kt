@@ -121,7 +121,8 @@ object NepaliDatePickerDefaults {
         todayDateBorderColor: Color = Color.Unspecified,
         dayInSelectionRangeContentColor: Color = Color.Unspecified,
         dayInSelectionRangeContainerColor: Color = Color.Unspecified,
-        dividerColor: Color = Color.Unspecified
+        dividerColor: Color = Color.Unspecified,
+        dateTextFieldColors: TextFieldColors? = null
     ): NepaliDatePickerColors = defaultDatePickerColors.copy(
         containerColor = containerColor,
         titleContentColor = titleContentColor,
@@ -146,7 +147,8 @@ object NepaliDatePickerDefaults {
         todayDateBorderColor = todayDateBorderColor,
         dayInSelectionRangeContentColor = dayInSelectionRangeContentColor,
         dayInSelectionRangeContainerColor = dayInSelectionRangeContainerColor,
-        dividerColor = dividerColor
+        dividerColor = dividerColor,
+        dateTextFieldColors = dateTextFieldColors
     )
 
     private val defaultDatePickerColors: NepaliDatePickerColors
