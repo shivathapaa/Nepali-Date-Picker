@@ -16,15 +16,18 @@ import androidx.compose.material3.Text
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.onAllNodesWithContentDescription
+import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.runComposeUiTest
 import dev.shivathapaa.nepalidatepickerkmp.annotations.ExperimentalNepaliDatePickerApi
+import dev.shivathapaa.nepalidatepickerkmp.calendar_model.NepaliCalendarDefaults
 import dev.shivathapaa.nepalidatepickerkmp.data.NepaliDateLocale
 import dev.shivathapaa.nepalidatepickerkmp.data.NepaliDatePickerLang
 import dev.shivathapaa.nepalidatepickerkmp.data.SimpleDate
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 private val EnglishLocale = NepaliDateLocale(language = NepaliDatePickerLang.ENGLISH)
@@ -103,5 +106,40 @@ class NepaliDatePickerFullScreenDialogTest {
         onNodeWithText("OK").assertExists()
         onNodeWithText("Cancel").assertExists()
         onNodeWithText("PICKER_CONTENT").assertExists()
+    }
+}
+
+class NepaliDatePickerRobustnessTest {
+
+    /** An out-of-range or invalid initial date must coerce, not crash. */
+    @Test
+    fun datePicker_outOfRangeInitial_coercesAndDoesNotCrash() = runComposeUiTest {
+        lateinit var state: NepaliDatePickerState
+        setContent {
+            state = rememberNepaliDatePickerState(
+                initialSelectedDate = SimpleDate(1500, 1, 1),
+                initialDisplayedMonth = SimpleDate(3000, 13, 40),
+                locale = EnglishLocale
+            )
+            NepaliDatePicker(state = state)
+        }
+        runOnIdle {
+            assertNull(state.selectedDate)
+            assertTrue(state.displayedMonth.year in NepaliCalendarDefaults.NepaliYearRange)
+        }
+    }
+
+    /** Opening the picker from a field seeded with an out-of-range value must not crash. */
+    @Test
+    fun dateField_outOfRangeValue_opensPickerWithoutCrash() = runComposeUiTest {
+        setContent {
+            NepaliDateField(
+                value = SimpleDate(1500, 1, 1),
+                onValueChange = {},
+                locale = EnglishLocale
+            )
+        }
+        onNodeWithContentDescription(NepaliDatePickerLang.ENGLISH.selectDateText).performClick()
+        onNodeWithText("15").assertExists()
     }
 }
