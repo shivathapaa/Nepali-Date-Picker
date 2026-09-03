@@ -76,6 +76,10 @@ Few of them are listed below:
 - `NepaliDateConverter` - Provides utilities for date conversions (english to nepali and vice versa), get formatted date(6), get time, get date-time in ISO 8601 format, calculate days in between two date, and many more.
 - `NepaliSelectableDates` - To control selectable dates i.e. enable/disable certain dates.
 - `NepaliDatePickerColors` - Takes `Material3` ?: **Material** colors by **default**. All the colors it uses are taken from your app colors if you've defined Material colors in your project. Also, there's always `.copy()` to modify the color.
+- `DigitScript` - `{ LATIN, DEVANAGARI }`. Decouples numeral script from language, so locales that share the Devanagari digits (Maithili, Newari, Hindi, Marathi, Bhojpuri) reuse the same rendering. Comes with `String.localizeDigits(...)` / `String.toLatinDigits()`. _(3.1.0)_
+- `NepaliDateFormatter` - Text-field parse/format primitive with slash and dash patterns (`YYYY_...`, `DD_...`) that accepts both Latin and Devanagari input. _(3.1.0)_
+- Holiday provider SPI (`holiday` package) - `NepaliHolidayProvider`, `HolidayEntry` / `HolidayKind`, `NepaliWeekend`, plus `workingDaysBetween`, `nextWorkingDay`, and `addWorkingDays` (Excel `WORKDAY` semantics). No holiday data ships by design. _(3.1.0)_
+- `kotlinx-serialization` support - optional `nepali-date-picker-serialization` artifact provides `KSerializer`s for the Nepali date types. _(3.1.0)_
 
 Core UI specific,
 
@@ -113,12 +117,13 @@ The library is published to [Maven Central. You can find all artifacts here.](ht
 
 ### Artifacts (3.0.0+)
 
-Starting with **3.0.0** the library ships as **two artifacts** instead of one umbrella:
+Starting with **3.0.0** the library ships as separate artifacts instead of one umbrella. **3.1.0** adds an optional `-serialization` artifact:
 
 | Artifact | Contents | When to depend on it |
 | --- | --- | --- |
-| `io.github.shivathapaa:nepali-date-picker-core` | `NepaliDateConverter`, `NepaliCalendarModel`, `CustomCalendar`, `NepaliCalendarDefaults`, `NepaliSelectableDates` and other data utilities. Pure Kotlin + `kotlinx-datetime`. **Zero Compose / UI dependencies** - `@Immutable` / `@Stable` are expect-annotations that alias to `androidx.compose.runtime.*` only on Compose-supported targets. | Backend / CLI / embedded modules that only need date conversion, or any non-Compose Kotlin target. |
-| `io.github.shivathapaa:nepali-date-picker-ui` | All composables - `NepaliDatePicker`, `NepaliDatePickerDialog`, `NepaliDateRangePicker`, `NepaliDateInput`, `NepaliDatePickerDefaults`, etc. Transitively brings in `-core`. | Any module that renders the picker UI. |
+| `io.github.shivathapaa:nepali-date-picker-core` | `NepaliDateConverter`, `NepaliCalendarModel`, `CustomCalendar`, `NepaliCalendarDefaults`, `NepaliSelectableDates`, `DigitScript`, `NepaliDateFormatter`, the `holiday` SPI, and other data utilities. Pure Kotlin + `kotlinx-datetime`. **Zero Compose / UI dependencies** - `@Immutable` / `@Stable` are expect-annotations that alias to `androidx.compose.runtime.*` only on Compose-supported targets. | Backend / CLI / embedded modules that only need date conversion, or any non-Compose Kotlin target. |
+| `io.github.shivathapaa:nepali-date-picker-ui` | All composables - `NepaliDatePicker`, `NepaliDatePickerDialog`, `NepaliDateRangePicker`, `NepaliDateInput`, `NepaliWheelDatePicker`, `NepaliDatePickerDocked`, `NepaliDateTextField`, `NepaliDatePickerDefaults`, etc. Transitively brings in `-core`. | Any module that renders the picker UI. |
+| `io.github.shivathapaa:nepali-date-picker-serialization` _(3.1.0+, optional)_ | `kotlinx-serialization` `KSerializer`s for `SimpleDate`, `SimpleTime`, `CustomCalendar`, and `NepaliMonthCalendar` in string and struct flavors, registered together by `NepaliDatePickerSerializersModule`. Ships the full `-core` target matrix. The `-core` POM stays annotation-free, so nothing leaks into projects that don't depend on this. | Modules that serialize Nepali date types over JSON / Protobuf / CBOR (Ktor, Room `TypeConverter`, DataStore, etc.). |
 
 #### Supported KMP targets
 
@@ -154,6 +159,9 @@ kotlin {
 
                 // Or, if you only need the date converter / calendar utilities (no UI):
                 // implementation("io.github.shivathapaa:nepali-date-picker-core:<latest-version>")
+
+                // Optional kotlinx-serialization support for the Nepali date types (3.1.0+):
+                // implementation("io.github.shivathapaa:nepali-date-picker-serialization:<latest-version>")
             }
         }
     }
@@ -169,7 +177,7 @@ To add the nepali-date-picker library to your Android project, include the follo
 // Add the Compose compiler Gradle plugin to the Gradle version catalog
 [versions]
 # ...
-kotlin = "2.1.20"
+kotlin = "2.4.10"
 nepaliDatePicker = "3.1.0" // Check for latest release
 
 [libraries]
@@ -937,14 +945,44 @@ val result = NepaliDateConverter.formatEnglishDateTimeByUnicodePattern(
 ) // result: "2025 May 24, Monday 02:45:15 PM"
 ```
 
-#### Localize strings to English or Nepali
+#### Localize digits to Latin or Devanagari (3.1.0)
 ```kotlin
-// Localize strings to English or Nepali
-val nepaliString = "Today is 2024".convertToNepaliNumber() // returns "Today is २०२४"
-val nepaliStringOnlyDigits = "2024".convertToNepaliNumber() // returns "२०२४"
-val englishString = "२०२४ सोमबार".convertToEnglishNumber() // returns "2024 सोमबार"
+// Localize digits via DigitScript (numeral script is now independent of language)
+val nepaliString = "Today is 2024".localizeDigits(DigitScript.DEVANAGARI) // returns "Today is २०२४"
+val nepaliStringOnlyDigits = "2024".localizeDigits(DigitScript.DEVANAGARI) // returns "२०२४"
+val englishString = "२०२४ सोमबार".toLatinDigits() // returns "2024 सोमबार"
 
-val localizeString = "Today is 2024".localizeNumber(NepaliDatePickerLang.NEPALI) // returns "Today is २०२४"
+// Or resolve the script from a locale
+val localizeString = "Today is 2024".localizeDigits(NepaliDateLocale(language = NepaliDatePickerLang.NEPALI)) // returns "Today is २०२४"
+
+// Deprecated (still functional, with ReplaceWith):
+// "Today is 2024".convertToNepaliNumber()  ->  localizeDigits(DigitScript.DEVANAGARI)
+// "२०२४".convertToEnglishNumber()          ->  toLatinDigits()
+```
+
+#### Working days and holidays (3.1.0)
+```kotlin
+// Plug in your own holiday source; the library ships no holiday data by design.
+val holidayProvider: NepaliHolidayProvider = NoOpHolidayProvider // or your own implementation
+
+// Count working days between two dates (exclusive of end, matching getNepaliDaysInBetween)
+val workingDays = NepaliDateConverter.workingDaysBetween(
+    start = SimpleDate(2082, 1, 1),
+    end = SimpleDate(2082, 2, 1),
+    provider = holidayProvider,
+    weekend = NepaliWeekend.Default // Saturday only
+) // returns Int
+
+// Next working day (inclusive of `from`)
+val next = NepaliDateConverter.nextWorkingDay(SimpleDate(2082, 1, 1), holidayProvider, NepaliWeekend.Default)
+
+// Add/subtract working days (Excel WORKDAY semantics)
+val later = NepaliDateConverter.addWorkingDays(SimpleDate(2082, 1, 1), 10, holidayProvider, NepaliWeekend.Default)
+
+// Chainable selectable-date filters for the pickers
+val selectable = NepaliDatePickerDefaults.AllDates
+    .excludingWeekends(NepaliWeekend.Default)
+    .excludingHolidays(holidayProvider)
 ```
 
 #### Replace delimiter for displaying or saving as you prefer
