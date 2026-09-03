@@ -4,7 +4,11 @@ build/
 
 # Kotlin
 .kotlin
-kotlin-js-store/
+kotlin-js-store/*
+!kotlin-js-store/yarn.lock
+!kotlin-js-store/wasm/
+kotlin-js-store/wasm/*
+!kotlin-js-store/wasm/yarn.lock
 
 # Local configuration file (sdk path, etc)
 local.properties
