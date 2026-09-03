@@ -3,6 +3,7 @@ import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
 plugins {
     id("picker.kotlinMultiplatform")
     id("picker.mavenPublish")
+    id("picker.dokka")
     alias(libs.plugins.kotlinSerialization)
 }
 

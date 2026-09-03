@@ -10,6 +10,7 @@ dependencies {
     compileOnly(libs.plugins.jetbrainsCompose.toDep())
     compileOnly(libs.plugins.composeCompiler.toDep())
     compileOnly(libs.plugins.mavenPublish.toDep())
+    compileOnly(libs.plugins.dokka.toDep())
 }
 
 fun Provider<PluginDependency>.toDep() = map {
@@ -29,6 +30,10 @@ gradlePlugin {
         register("mavenPublish") {
             id = "picker.mavenPublish"
             implementationClass = "MavenPublishConventionPlugin"
+        }
+        register("dokka") {
+            id = "picker.dokka"
+            implementationClass = "DokkaConventionPlugin"
         }
     }
 }

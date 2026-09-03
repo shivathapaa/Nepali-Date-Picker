@@ -4,6 +4,7 @@ plugins {
     id("picker.kotlinMultiplatform")
     id("picker.composeMultiplatform")
     id("picker.mavenPublish")
+    id("picker.dokka")
 }
 
 kotlin {

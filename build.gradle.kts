@@ -7,6 +7,26 @@ plugins {
     alias(libs.plugins.android.application).apply(false)
     alias(libs.plugins.androidKotlinMultiplatformLibrary).apply(false)
     alias(libs.plugins.mavenPublish).apply(false)
+    alias(libs.plugins.dokka).apply(false)
+}
+
+// Dokka multi-module aggregation. The root project is the aggregator: it applies Dokka and pulls
+// each documented module in through the `dokka` configuration, producing one combined HTML site at
+// `build/dokka/html`. Per-module settings (source links, visibility, kotlinx cross-links) live in
+// the `picker.dokka` convention plugin; only the site-wide identity is set here.
+//
+// `apply false` above keeps Dokka's classes on every subproject's classpath so the convention
+// plugin can apply it to the leaves; the root then applies it imperatively to act as aggregator.
+apply(plugin = "org.jetbrains.dokka")
+
+dependencies {
+    "dokka"(project(":nepali-date-picker:core"))
+    "dokka"(project(":nepali-date-picker:ui"))
+    "dokka"(project(":nepali-date-picker:serialization"))
+}
+
+extensions.configure<org.jetbrains.dokka.gradle.DokkaExtension> {
+    moduleName.set("Nepali Date Picker")
 }
 
 /**

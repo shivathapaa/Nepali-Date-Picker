@@ -176,7 +176,7 @@ fun NepaliDateRangeTextField(
  * Material3-style range field - [NepaliDateRangeTextField] with a trailing calendar
  * icon that opens [NepaliDatePickerDialog] hosting [NepaliDateRangePicker].
  *
- * Same params as [NepaliDateRangeTextField] plus dialog [properties]. Dialog
+ * Same params as [NepaliDateRangeTextField] plus dialog properties. Dialog
  * respects the same [yearRange], [selectableDates], and [locale] so the two
  * surfaces stay in sync. Confirming in the dialog fires [onRangeChange] once
  * with the picked range. Dismiss does not change either value.

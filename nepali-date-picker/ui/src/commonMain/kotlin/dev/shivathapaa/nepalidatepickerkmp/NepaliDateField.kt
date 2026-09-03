@@ -68,7 +68,7 @@ import dev.shivathapaa.nepalidatepickerkmp.icons.NepaliIcons
  *
  * Validation pipeline (runs on every keystroke):
  *   1. Length < 8 digits → emit `null`, [isError] stays as the caller passed it.
- *   2. Length == 8 → parse with [NepaliDateFormatter]. Parse failure → emit `null`
+ *   2. Length == 8 → parse with [dev.shivathapaa.nepalidatepickerkmp.data.NepaliDateFormatter]. Parse failure → emit `null`
  *      with a non-empty error surfaced to the caller via the supplied [isError].
  *   3. Year outside [yearRange] → emit `null`, error surfaced.
  *   4. `selectableDates.isSelectableYear` or `isSelectableDate` rejects → emit `null`, error surfaced.

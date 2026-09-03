@@ -1,7 +1,12 @@
-name: Deploy live demo to Pages
+name: Deploy demo and API docs to Pages
 
-# Builds the wasmJs sample on every push to main and publishes it to
-# https://shivathapaa.github.io/Nepali-Date-Picker/.
+# Builds the wasmJs sample and the Dokka API reference on every push to main and
+# publishes them together to a single Pages site:
+#   https://shivathapaa.github.io/Nepali-Date-Picker/      -> live demo
+#   https://shivathapaa.github.io/Nepali-Date-Picker/api/  -> API reference
+#
+# Pages has one live environment per repo, so both share a single artifact: the
+# demo sits at the site root and the Dokka HTML is nested under api/.
 #
 # PRs do NOT trigger this — Pages has a single live environment and PR
 # previews would either burn quota or fight for the deploy lock. PR
@@ -63,6 +68,9 @@ jobs:
       - name: Build wasmJs production bundle
         run: ./gradlew :sample:composeApp:wasmJsBrowserDistribution --stacktrace
 
+      - name: Generate API docs (Dokka multi-module HTML)
+        run: ./gradlew :dokkaGeneratePublicationHtml --stacktrace
+
       - name: Substitute version banner
         run: |
           dist=sample/composeApp/build/dist/wasmJs/productionExecutable
@@ -72,6 +80,12 @@ jobs:
         run: |
           dist=sample/composeApp/build/dist/wasmJs/productionExecutable
           rm -f "$dist/composeApp.js.map"
+
+      - name: Nest API docs under /api of the demo bundle
+        run: |
+          dist=sample/composeApp/build/dist/wasmJs/productionExecutable
+          mkdir -p "$dist/api"
+          cp -r build/dokka/html/. "$dist/api/"
 
       - name: Report bundle size
         run: |

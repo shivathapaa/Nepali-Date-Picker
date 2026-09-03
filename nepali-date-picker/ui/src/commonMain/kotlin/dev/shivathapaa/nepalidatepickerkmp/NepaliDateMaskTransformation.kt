@@ -26,7 +26,7 @@ import dev.shivathapaa.nepalidatepickerkmp.data.NepaliDateFormatter.Pattern
 
 /**
  * Visual transformation that takes the raw 8-digit text-field state (`20820214`)
- * and renders it with the supplied [pattern]'s delimiters and digit [script]
+ * and renders it with the supplied [pattern]'s delimiters and digit script
  * (`2082/02/14` or `२०८२/०२/१४`).
  *
  * Shared between [NepaliDateTextField] / [NepaliDateField] and the legacy
