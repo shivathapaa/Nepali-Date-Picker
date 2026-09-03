@@ -1,0 +1,113 @@
+name: Publish npm
+
+on:
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Preview only (npm publish --dry-run), do not actually publish'
+        type: boolean
+        default: false
+  release:
+    types: [released, prereleased]
+
+concurrency:
+  group: publish-npm-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  id-token: write # required for npm provenance
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+jobs:
+  validate-wrapper:
+    name: Validate Gradle wrapper
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v5
+      - uses: gradle/actions/wrapper-validation@v4
+
+  test:
+    needs: validate-wrapper
+    uses: ./.github/workflows/_test.yml
+
+  publish:
+    name: Publish to npm
+    needs: test
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    environment: npm
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v5
+        with:
+          distribution: 'zulu'
+          java-version: 21
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Set up Node 24
+        uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          registry-url: 'https://registry.npmjs.org'
+          cache: npm
+          cache-dependency-path: js/package-lock.json
+
+      - name: Resolve and verify version
+        id: v
+        run: |
+          set -euo pipefail
+          if [ "${{ github.event_name }}" = "release" ]; then
+            target="${{ github.event.release.tag_name }}"
+            target="${target#v}"
+          else
+            target=$(node -p "require('./js/packages/core/package.json').version")
+          fi
+          core=$(node -p "require('./js/packages/core/package.json').version")
+          web=$(node -p "require('./js/packages/web-component/package.json').version")
+          if [ "$core" != "$target" ] || [ "$web" != "$target" ]; then
+            echo "::error::Version mismatch (target=$target core=$core web=$web). Bump both package.json versions to the same value."
+            exit 1
+          fi
+          if [ "${{ github.event.inputs.dry_run }}" = "true" ]; then
+            echo "flags=--dry-run --access public" >> "$GITHUB_OUTPUT"
+            echo "Running in DRY-RUN mode for version $target."
+          else
+            echo "flags=--provenance --access public" >> "$GITHUB_OUTPUT"
+          fi
+          echo "target=$target" >> "$GITHUB_OUTPUT"
+
+      - name: Compile the Kotlin/JS engine
+        run: ./gradlew :nepali-date-picker:core:packJsCore --stacktrace
+
+      - name: Install and build the web component
+        working-directory: js
+        run: |
+          npm ci
+          npm run --workspace @nepali-date-picker/web-component build
+
+      - name: Publish @nepali-date-picker/core
+        working-directory: js/packages/core
+        run: npm publish ${{ steps.v.outputs.flags }}
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Publish @nepali-date-picker/web-component
+        working-directory: js/packages/web-component
+        run: npm publish ${{ steps.v.outputs.flags }}
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Summary
+        run: |
+          echo "### npm publish (${{ steps.v.outputs.target }})" >> "$GITHUB_STEP_SUMMARY"
+          echo "- @nepali-date-picker/core" >> "$GITHUB_STEP_SUMMARY"
+          echo "- @nepali-date-picker/web-component" >> "$GITHUB_STEP_SUMMARY"
+          echo "flags: \`${{ steps.v.outputs.flags }}\`" >> "$GITHUB_STEP_SUMMARY"

@@ -35,6 +35,8 @@ KMP Nepali Date Picker for both Android and/or iOS and/or KMP (JVM, JS, Wasm) wh
 
 > **Note:** If you also want to implement date utilities and converters in your backend or Python project, the package is available on PyPI as _**nepali_calendar_utils**_. Similar to this library, [nepali_calendar_utils](https://github.com/shivathapaa/nepali_calendar_utils) Python package provides a collection of utilities for working with Nepali Dates, offering seamless conversion and integration between the Nepali Calendar and the Gregorian Calendar.
 
+> **Note:** Building for the **web or JavaScript/TypeScript**? The same engine and picker UI are on npm: [`@nepali-date-picker/core`](https://www.npmjs.com/package/@nepali-date-picker/core) (zero-dependency BS↔AD engine with TypeScript types) and [`@nepali-date-picker/web-component`](https://www.npmjs.com/package/@nepali-date-picker/web-component) (a framework-agnostic `<nepali-date-picker>` suite for React, Vue, Angular, Svelte, and plain HTML). All three languages (Python, Kotlin/Android, JS) share the same calendar tables, so results match. See the [live web-component demo](https://shivathapaa.github.io/Nepali-Date-Picker/demo/).
+
 <br>
 
 <details>
@@ -116,6 +118,30 @@ The library is published to [Maven Central. You can find all artifacts here.](ht
 > - **_Recommended:_** Update your JetBrains Compose or Android Compose version to `1.7.0 or later` to resolve the conflict.
     For more details on this release, check [this release](https://github.com/shivathapaa/Nepali-Date-Picker/releases/tag/2.0.0-rc01).
 > - Use an earlier version of the Nepali-Date-Picker library (`2.0.0-beta06 or before`) if stability is required and your project is using a lower version of JetBrains Compose or Android Compose.
+
+### JavaScript / Web (npm)
+
+For the web platform there are two npm packages, both generated from this same Kotlin `:core` module,
+so their BS↔AD tables and formatting match the Kotlin, Android, and Python builds exactly.
+
+| Package | Contents | When to depend on it |
+| --- | --- | --- |
+| [`@nepali-date-picker/core`](js/packages/core) | The conversion and formatting engine (`convertAdToBs`, `formatBsDateByPattern`, `getTodayBs`, …), compiled from Kotlin. Zero runtime dependencies, ships TypeScript types. | Node / browser code that needs BS↔AD conversion without any UI. |
+| [`@nepali-date-picker/web-component`](js/packages/web-component) | A framework-agnostic `<nepali-date-picker>` calendar element (Lit) that works in React, Vue, Angular, Svelte, and plain HTML. | Rendering a Nepali date picker on the web. |
+
+```bash
+npm install @nepali-date-picker/web-component   # UI + engine
+npm install @nepali-date-picker/core            # engine only
+```
+
+```html
+<script type="module">import '@nepali-date-picker/web-component';</script>
+<nepali-date-picker value="2081-05-24" language="ne"></nepali-date-picker>
+```
+
+The web component ships every variant (inline, dialog, docked, range, field, range-field, wheel). See
+the [live showcase](https://shivathapaa.github.io/Nepali-Date-Picker/demo/); build, test, and
+publishing details live in [`js/README.md`](js/README.md).
 
 ### Artifacts (3.0.0+)
 

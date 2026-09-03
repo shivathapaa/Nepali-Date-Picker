@@ -23,6 +23,12 @@ kotlin {
         }
     }
 
+    // Emit `.d.ts` alongside the JS library so the npm package (`@nepali-date-picker/core`) ships
+    // TypeScript types. Only `@JsExport` declarations (the `js` package wrapper) are described.
+    js {
+        generateTypeScriptDefinitions()
+    }
+
     // Backend / native-only targets in addition to the Compose-supported set defined by the
     // `picker.kotlinMultiplatform` convention. These targets are pure kotlinx-datetime + stdlib
     // consumers (server, CLI, embedded, Apple wearables / TV, Apple x86_64 simulators, wasmWasi),
@@ -82,12 +88,35 @@ kotlin {
             sourceSet.get().dependsOn(composeTargetsMain)
         }
 
-        jsMain.dependencies {
-            implementation(npm("@js-joda/timezone", "2.25.0"))
-        }
-
+        // The `js` target resolves time zones through the platform `Intl` API (kotlinx-datetime
+        // 0.8.0), so it needs no `@js-joda/*` runtime dependency; the published npm package ships
+        // with zero dependencies. `wasmJs` still relies on `@js-joda/timezone` for zone data.
         wasmJsMain.dependencies {
             implementation(npm("@js-joda/timezone", "2.25.0"))
         }
     }
+}
+
+// Stages the compiled JS library (ESM `.mjs` + generated `.d.ts`) into the npm package directory
+// consumed by the `js/` workspace. The package manifest at `js/packages/core/package.json` is
+// source-controlled and stable; this task only refreshes the generated `dist/` payload. Kotlin's
+// own generated `package.json` is excluded so it never shadows the curated one.
+tasks.register<Sync>("packJsCore") {
+    group = "publishing"
+    description = "Copies the compiled Kotlin/JS library into js/packages/core/dist for npm packaging."
+    dependsOn("jsBrowserProductionLibraryDistribution")
+    from(layout.buildDirectory.dir("dist/js/productionLibrary")) {
+        // Drop Kotlin's own package.json (the curated one is source-controlled) and the source maps,
+        // which point at Kotlin sources not shipped to npm and only add weight for JS consumers.
+        exclude("package.json")
+        exclude("*.mjs.map")
+        // The Compose runtime modules ship only because `:core`'s jsMain aliases the @Immutable /
+        // @Stable stability annotations to `androidx.compose.runtime` (see composeTargetsMain). Those
+        // annotations have no runtime footprint, so the JS entry never imports these files; excluding
+        // them keeps the npm package lean without affecting the Kotlin build or `:ui`'s stability.
+        exclude("*compose-runtime*.mjs")
+        // Strip the now-dangling `sourceMappingURL` comment so tools do not look for the removed maps.
+        filter { line -> if (line.startsWith("//# sourceMappingURL=")) "" else line }
+    }
+    into(rootProject.layout.projectDirectory.dir("js/packages/core/dist"))
 }

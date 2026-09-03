@@ -1,12 +1,13 @@
 name: Deploy demo and API docs to Pages
 
-# Builds the wasmJs sample and the Dokka API reference on every push to main and
-# publishes them together to a single Pages site:
-#   https://shivathapaa.github.io/Nepali-Date-Picker/      -> live demo
-#   https://shivathapaa.github.io/Nepali-Date-Picker/api/  -> API reference
+# Builds the wasmJs sample, the web-component showcase, and the Dokka API reference on every push to
+# main and publishes them together to a single Pages site:
+#   https://shivathapaa.github.io/Nepali-Date-Picker/       -> Compose (wasm) demo
+#   https://shivathapaa.github.io/Nepali-Date-Picker/demo/  -> web-component showcase
+#   https://shivathapaa.github.io/Nepali-Date-Picker/api/   -> API reference
 #
-# Pages has one live environment per repo, so both share a single artifact: the
-# demo sits at the site root and the Dokka HTML is nested under api/.
+# Pages has one live environment per repo, so all three share a single artifact: the Compose demo
+# sits at the site root, the web-component showcase under demo/, and the Dokka HTML under api/.
 #
 # PRs do NOT trigger this — Pages has a single live environment and PR
 # previews would either burn quota or fight for the deploy lock. PR
@@ -58,6 +59,13 @@ jobs:
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v4
 
+      - name: Set up Node 24
+        uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: js/package-lock.json
+
       - name: Read VERSION_NAME
         id: version
         run: |
@@ -86,6 +94,18 @@ jobs:
           dist=sample/composeApp/build/dist/wasmJs/productionExecutable
           mkdir -p "$dist/api"
           cp -r build/dokka/html/. "$dist/api/"
+
+      - name: Build the web-component showcase
+        working-directory: js
+        run: |
+          npm ci
+          npm run build:examples
+
+      - name: Nest the web-component showcase under /demo
+        run: |
+          dist=sample/composeApp/build/dist/wasmJs/productionExecutable
+          mkdir -p "$dist/demo"
+          cp -r js/examples/dist/. "$dist/demo/"
 
       - name: Report bundle size
         run: |

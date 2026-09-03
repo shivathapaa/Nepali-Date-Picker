@@ -1,0 +1,278 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Nepali Date Picker - Web Components</title>
+    <meta
+      name="description"
+      content="Live showcase of the framework-agnostic Nepali (Bikram Sambat) date picker web components."
+    />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body data-theme="light">
+    <header class="site">
+      <h1>Nepali Date Picker - Web Components</h1>
+      <p>
+        Framework-agnostic Bikram Sambat (Nepali) date pickers as native custom elements. Every
+        variant below is the same one you can drop into React, Vue, Angular, Svelte, or plain HTML.
+        Calendar math comes from the Kotlin-compiled engine, so dates match the Android and Python
+        builds exactly.
+      </p>
+      <nav class="links">
+        <a href="https://www.npmjs.com/package/@nepali-date-picker/web-component">npm: web-component</a>
+        <a href="https://www.npmjs.com/package/@nepali-date-picker/core">npm: core</a>
+        <a href="https://github.com/shivathapaa/Nepali-Date-Picker">GitHub</a>
+        <a href="../api/">API reference</a>
+        <a href="../">Compose (wasm) demo</a>
+      </nav>
+    </header>
+
+    <div class="toolbar">
+      <label>
+        Language
+        <select id="global-language">
+          <option value="en">English</option>
+          <option value="ne">नेपाली</option>
+        </select>
+      </label>
+      <label>
+        Theme
+        <select id="global-theme">
+          <option value="light">Light</option>
+          <option value="dark">Dark</option>
+          <option value="brand">Brand</option>
+        </select>
+      </label>
+      <span style="color: var(--muted); font-size: 0.8rem">Controls apply to every picker below.</span>
+    </div>
+
+    <main>
+      <div class="sections">
+        <!-- Inline -->
+        <section class="card" id="inline">
+          <span class="tag">&lt;nepali-date-picker&gt;</span>
+          <h2>Inline calendar</h2>
+          <p class="desc">The core inline month calendar with keyboard navigation and localization.</p>
+          <div class="demo-row">
+            <div class="demo-item">
+              <span class="caption">Default</span>
+              <nepali-date-picker class="sync" value="2081-05-24"></nepali-date-picker>
+            </div>
+            <div class="demo-item">
+              <span class="caption">With English date + range limits (Baisakh–Chaitra 2081)</span>
+              <nepali-date-picker
+                class="sync"
+                value="2081-05-24"
+                min="2081-01-01"
+                max="2081-12-30"
+                show-english
+              ></nepali-date-picker>
+            </div>
+            <div class="demo-item">
+              <span class="caption">Disabled</span>
+              <nepali-date-picker class="sync" value="2081-05-24" disabled></nepali-date-picker>
+            </div>
+          </div>
+          <details>
+            <summary>HTML</summary>
+            <pre><code>&lt;script type="module"&gt;import '@nepali-date-picker/web-component';&lt;/script&gt;
+
+&lt;nepali-date-picker value="2081-05-24" show-english&gt;&lt;/nepali-date-picker&gt;
+&lt;script&gt;
+  document.querySelector('nepali-date-picker')
+    .addEventListener('change', (e) =&gt; console.log(e.detail));
+&lt;/script&gt;</code></pre>
+          </details>
+        </section>
+
+        <!-- Dialog -->
+        <section class="card" id="dialog">
+          <span class="tag">&lt;nepali-date-picker-dialog&gt;</span>
+          <h2>Dialog</h2>
+          <p class="desc">A modal picker with confirm / cancel. Add <code>fullscreen</code> for the full-screen variant.</p>
+          <div class="demo-row">
+            <button class="action" id="open-dialog">Open dialog</button>
+            <button class="action" id="open-dialog-fs">Open full-screen</button>
+          </div>
+          <nepali-date-picker-dialog class="sync" id="dialog-el" value="2081-05-24" show-english></nepali-date-picker-dialog>
+          <nepali-date-picker-dialog class="sync" id="dialog-fs" value="2081-05-24" fullscreen></nepali-date-picker-dialog>
+          <details>
+            <summary>HTML</summary>
+            <pre><code>&lt;button onclick="dlg.show()"&gt;Pick a date&lt;/button&gt;
+&lt;nepali-date-picker-dialog id="dlg" value="2081-05-24"&gt;&lt;/nepali-date-picker-dialog&gt;
+&lt;script&gt;dlg.addEventListener('change', (e) =&gt; console.log(e.detail));&lt;/script&gt;</code></pre>
+          </details>
+        </section>
+
+        <!-- Docked -->
+        <section class="card" id="docked">
+          <span class="tag">&lt;nepali-date-picker-docked&gt;</span>
+          <h2>Docked (field + popover)</h2>
+          <p class="desc">Type a date or open the calendar in an anchored popover.</p>
+          <div class="demo-row">
+            <nepali-date-picker-docked class="sync" label="Appointment date" value="2081-05-24"></nepali-date-picker-docked>
+          </div>
+          <details>
+            <summary>HTML</summary>
+            <pre><code>&lt;nepali-date-picker-docked label="Appointment date"&gt;&lt;/nepali-date-picker-docked&gt;</code></pre>
+          </details>
+        </section>
+
+        <!-- Range -->
+        <section class="card" id="range">
+          <span class="tag">&lt;nepali-date-range-picker&gt;</span>
+          <h2>Range picker</h2>
+          <p class="desc">Pick a start then an end; the span between is shaded.</p>
+          <div class="demo-row">
+            <nepali-date-range-picker class="sync" start="2081-05-10" end="2081-05-18" show-english></nepali-date-range-picker>
+          </div>
+          <details>
+            <summary>HTML</summary>
+            <pre><code>&lt;nepali-date-range-picker start="2081-05-10" end="2081-05-18"&gt;&lt;/nepali-date-range-picker&gt;
+&lt;script&gt;
+  document.querySelector('nepali-date-range-picker')
+    .addEventListener('change', (e) =&gt; console.log(e.detail.startBsIso, e.detail.endBsIso));
+&lt;/script&gt;</code></pre>
+          </details>
+        </section>
+
+        <!-- Field -->
+        <section class="card" id="field">
+          <span class="tag">&lt;nepali-date-field&gt;</span>
+          <h2>Text field</h2>
+          <p class="desc">Type a date (<code>YYYY/MM/DD</code>, Devanagari digits accepted) with inline validation. No calendar, so it drops into forms.</p>
+          <div class="demo-row">
+            <form id="demo-form" class="demo-item">
+              <nepali-date-field class="sync" label="Date of birth" value="2050-04-12"></nepali-date-field>
+              <button class="action" type="submit" style="margin-top: 12px; align-self: flex-start">Submit form</button>
+            </form>
+          </div>
+          <details>
+            <summary>HTML</summary>
+            <pre><code>&lt;nepali-date-field label="Date of birth"&gt;&lt;/nepali-date-field&gt;
+&lt;script&gt;
+  field.addEventListener('change', (e) =&gt; console.log('valid', e.detail.bsIso));
+  field.addEventListener('invalid', (e) =&gt; console.log('invalid', e.detail.message));
+&lt;/script&gt;</code></pre>
+          </details>
+        </section>
+
+        <!-- Range field -->
+        <section class="card" id="range-field">
+          <span class="tag">&lt;nepali-date-range-field&gt;</span>
+          <h2>Range text fields</h2>
+          <p class="desc">Two validated fields with a start ≤ end check.</p>
+          <div class="demo-row">
+            <nepali-date-range-field class="sync" start="2081-05-10" end="2081-05-20"></nepali-date-range-field>
+          </div>
+          <details>
+            <summary>HTML</summary>
+            <pre><code>&lt;nepali-date-range-field&gt;&lt;/nepali-date-range-field&gt;</code></pre>
+          </details>
+        </section>
+
+        <!-- Wheel -->
+        <section class="card" id="wheel">
+          <span class="tag">&lt;nepali-wheel-date-picker&gt;</span>
+          <h2>Wheel picker</h2>
+          <p class="desc">Three scrolling columns; the day column resizes to the month. Scroll, click, or use the arrow keys.</p>
+          <div class="demo-row">
+            <nepali-wheel-date-picker class="sync" value="2081-05-24"></nepali-wheel-date-picker>
+          </div>
+          <details>
+            <summary>HTML</summary>
+            <pre><code>&lt;nepali-wheel-date-picker value="2081-05-24"&gt;&lt;/nepali-wheel-date-picker&gt;</code></pre>
+          </details>
+        </section>
+
+        <!-- Engine -->
+        <section class="card" id="engine">
+          <span class="tag">@nepali-date-picker/core</span>
+          <h2>Conversion engine (no UI)</h2>
+          <p class="desc">The same package powering the pickers, usable directly in Node or the browser.</p>
+          <div class="engine-grid">
+            <div>Today (BS): <span class="result" id="today-bs">-</span></div>
+            <div>Today (AD): <span class="result" id="today-ad">-</span></div>
+          </div>
+          <div class="engine-grid" style="margin-top: 16px">
+            <label>AD date <input type="date" id="ad-input" /></label>
+            <span>→ BS: <span class="result" id="ad-to-bs">-</span></span>
+          </div>
+          <details>
+            <summary>JavaScript</summary>
+            <pre><code>import { convertAdToBs, getTodayBs } from '@nepali-date-picker/core';
+
+getTodayBs();               // { year: 2081, month: 5, dayOfMonth: 24, ... }
+convertAdToBs(2024, 9, 9);  // { year: 2081, month: 5, dayOfMonth: 24, ... }</code></pre>
+          </details>
+        </section>
+
+        <!-- Frameworks -->
+        <section class="card" id="frameworks">
+          <span class="tag">integration</span>
+          <h2>Use it in any framework</h2>
+          <p class="desc">Custom elements are standard DOM, so every framework can render them.</p>
+          <div class="tabs" role="tablist">
+            <button class="tab" role="tab" data-tab="vanilla" aria-selected="true">Vanilla</button>
+            <button class="tab" role="tab" data-tab="react" aria-selected="false">React</button>
+            <button class="tab" role="tab" data-tab="vue" aria-selected="false">Vue</button>
+            <button class="tab" role="tab" data-tab="angular" aria-selected="false">Angular</button>
+            <button class="tab" role="tab" data-tab="svelte" aria-selected="false">Svelte</button>
+          </div>
+          <div class="tabpanel" data-tab="vanilla" data-active>
+            <pre><code>import '@nepali-date-picker/web-component';
+
+&lt;nepali-date-picker value="2081-05-24"&gt;&lt;/nepali-date-picker&gt;</code></pre>
+          </div>
+          <div class="tabpanel" data-tab="react">
+            <pre><code>import '@nepali-date-picker/web-component';
+
+export function Picker() {
+  return (
+    &lt;nepali-date-picker
+      value="2081-05-24"
+      onChange={(e) =&gt; console.log(e.detail)}
+    /&gt;
+  );
+}
+// React 19 sets properties and forwards events natively.</code></pre>
+          </div>
+          <div class="tabpanel" data-tab="vue">
+            <pre><code>// vite.config.js: mark the tag as a custom element
+vue({ template: { compilerOptions: { isCustomElement: (t) =&gt; t === 'nepali-date-picker' } } })
+
+&lt;script setup&gt;import '@nepali-date-picker/web-component';&lt;/script&gt;
+&lt;template&gt;
+  &lt;nepali-date-picker value="2081-05-24" @change="(e) =&gt; console.log(e.detail)" /&gt;
+&lt;/template&gt;</code></pre>
+          </div>
+          <div class="tabpanel" data-tab="angular">
+            <pre><code>// Add CUSTOM_ELEMENTS_SCHEMA to the module/component, then:
+import '@nepali-date-picker/web-component';
+
+&lt;nepali-date-picker [attr.value]="value" (change)="onChange($event)"&gt;&lt;/nepali-date-picker&gt;</code></pre>
+          </div>
+          <div class="tabpanel" data-tab="svelte">
+            <pre><code>&lt;script&gt;import '@nepali-date-picker/web-component';&lt;/script&gt;
+
+&lt;nepali-date-picker value="2081-05-24" on:change={(e) =&gt; console.log(e.detail)} /&gt;</code></pre>
+          </div>
+        </section>
+      </div>
+
+      <aside class="output">
+        <h3>Event log</h3>
+        <div class="log" id="log">
+          <div class="log-entry"><span class="name">ready</span> - interact with any picker above.</div>
+        </div>
+      </aside>
+    </main>
+
+    <footer>
+      MPL-2.0 © Shiva Thapa. Built from the Kotlin Multiplatform <code>:core</code> module.
+    </footer>
+
+    <script type="module" src="./src/main.ts"></script>
+  </body>
+</html>

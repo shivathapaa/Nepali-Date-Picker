@@ -1,0 +1,99 @@
+{
+  "name": "@nepali-date-picker/web-component",
+  "version": "3.1.0",
+  "description": "Framework-agnostic <nepali-date-picker> custom element: a Bikram Sambat (Nepali) calendar date picker that works in React, Vue, Angular, Svelte, and plain HTML.",
+  "type": "module",
+  "license": "MPL-2.0",
+  "author": "Shiva Thapa (@shivathapaa)",
+  "homepage": "https://github.com/shivathapaa/Nepali-Date-Picker",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/shivathapaa/Nepali-Date-Picker.git",
+    "directory": "js/packages/web-component"
+  },
+  "bugs": {
+    "url": "https://github.com/shivathapaa/Nepali-Date-Picker/issues"
+  },
+  "keywords": [
+    "nepali",
+    "date-picker",
+    "datepicker",
+    "bikram-sambat",
+    "calendar",
+    "web-component",
+    "custom-element",
+    "lit",
+    "react",
+    "vue",
+    "angular",
+    "svelte"
+  ],
+  "sideEffects": [
+    "./dist/index.js",
+    "./dist/nepali-date-picker.js",
+    "./dist/nepali-date-range-picker.js",
+    "./dist/nepali-date-picker-dialog.js",
+    "./dist/nepali-date-picker-docked.js",
+    "./dist/nepali-date-field.js",
+    "./dist/nepali-date-range-field.js",
+    "./dist/nepali-wheel-date-picker.js"
+  ],
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./nepali-date-picker": {
+      "types": "./dist/nepali-date-picker.d.ts",
+      "import": "./dist/nepali-date-picker.js"
+    },
+    "./nepali-date-range-picker": {
+      "types": "./dist/nepali-date-range-picker.d.ts",
+      "import": "./dist/nepali-date-range-picker.js"
+    },
+    "./nepali-date-picker-dialog": {
+      "types": "./dist/nepali-date-picker-dialog.d.ts",
+      "import": "./dist/nepali-date-picker-dialog.js"
+    },
+    "./nepali-date-picker-docked": {
+      "types": "./dist/nepali-date-picker-docked.d.ts",
+      "import": "./dist/nepali-date-picker-docked.js"
+    },
+    "./nepali-date-field": {
+      "types": "./dist/nepali-date-field.d.ts",
+      "import": "./dist/nepali-date-field.js"
+    },
+    "./nepali-date-range-field": {
+      "types": "./dist/nepali-date-range-field.d.ts",
+      "import": "./dist/nepali-date-range-field.js"
+    },
+    "./nepali-wheel-date-picker": {
+      "types": "./dist/nepali-wheel-date-picker.d.ts",
+      "import": "./dist/nepali-wheel-date-picker.js"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build && tsc --emitDeclarationOnly --outDir dist",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@nepali-date-picker/core": "3.1.0",
+    "lit": "^3.2.0"
+  },
+  "devDependencies": {
+    "jsdom": "^25.0.0",
+    "typescript": "^5.6.0",
+    "vite": "^5.4.0",
+    "vitest": "^2.1.0"
+  }
+}

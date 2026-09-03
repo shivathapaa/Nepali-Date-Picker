@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>&lt;nepali-date-picker&gt; demo</title>
+    <style>
+      body {
+        font-family: system-ui, sans-serif;
+        margin: 0;
+        padding: 32px;
+        background: #f4f5f7;
+        color: #1b1b1f;
+      }
+      h1 {
+        font-size: 1.25rem;
+      }
+      .controls {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 16px;
+        margin-bottom: 24px;
+      }
+      label {
+        display: flex;
+        flex-direction: column;
+        font-size: 0.8rem;
+        gap: 4px;
+      }
+      .layout {
+        display: flex;
+        gap: 32px;
+        flex-wrap: wrap;
+        align-items: flex-start;
+      }
+      pre {
+        background: #1b1b1f;
+        color: #d6e2ff;
+        padding: 16px;
+        border-radius: 12px;
+        min-width: 280px;
+      }
+      /* The picker is themed entirely through CSS custom properties. */
+      nepali-date-picker.brand {
+        --ndp-accent: #d6336c;
+        --ndp-today-ring: #d6336c;
+        --ndp-hover: rgba(214, 51, 108, 0.12);
+      }
+    </style>
+  </head>
+  <body>
+    <h1>&lt;nepali-date-picker&gt; demo</h1>
+
+    <div class="controls">
+      <label>
+        Language
+        <select id="language">
+          <option value="en">English</option>
+          <option value="ne">नेपाली</option>
+        </select>
+      </label>
+      <label>
+        Min (BS)
+        <input id="min" placeholder="2081-01-10" />
+      </label>
+      <label>
+        Max (BS)
+        <input id="max" placeholder="2081-12-30" />
+      </label>
+      <label>
+        Theme
+        <select id="theme">
+          <option value="">Default (blue)</option>
+          <option value="brand">Brand (pink)</option>
+        </select>
+      </label>
+    </div>
+
+    <div class="layout">
+      <nepali-date-picker id="picker" value="2081-05-24"></nepali-date-picker>
+      <pre id="output">Pick a date…</pre>
+    </div>
+
+    <script type="module">
+      import './src/index.ts';
+
+      const picker = document.getElementById('picker');
+      const output = document.getElementById('output');
+
+      picker.addEventListener('change', (event) => {
+        output.textContent = JSON.stringify(event.detail, null, 2);
+      });
+
+      document.getElementById('language').addEventListener('change', (e) => {
+        picker.language = e.target.value;
+      });
+      document.getElementById('min').addEventListener('input', (e) => {
+        picker.min = e.target.value;
+      });
+      document.getElementById('max').addEventListener('input', (e) => {
+        picker.max = e.target.value;
+      });
+      document.getElementById('theme').addEventListener('change', (e) => {
+        picker.className = e.target.value;
+      });
+    </script>
+  </body>
+</html>
