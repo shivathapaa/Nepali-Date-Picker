@@ -10,20 +10,20 @@ import { css } from 'lit';
 /** Themeable design tokens. Every element exposes the same `--ndp-*` custom properties. */
 export const tokens = css`
   :host {
-    --ndp-font: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
-    --ndp-bg: #ffffff;
-    --ndp-text: #1b1b1f;
-    --ndp-muted: #6b6b70;
-    --ndp-accent: #2f6fed;
-    --ndp-on-accent: #ffffff;
-    --ndp-hover: rgba(47, 111, 237, 0.12);
-    --ndp-in-range: rgba(47, 111, 237, 0.14);
-    --ndp-today-ring: #2f6fed;
-    --ndp-border: #d3d4d8;
-    --ndp-error: #ba1a1a;
-    --ndp-radius: 12px;
-    font-family: var(--ndp-font);
-    color: var(--ndp-text);
+    --_ndp-font: var(--ndp-font, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif);
+    --_ndp-bg: var(--ndp-bg, #ffffff);
+    --_ndp-text: var(--ndp-text, #1b1b1f);
+    --_ndp-muted: var(--ndp-muted, #6b6b70);
+    --_ndp-accent: var(--ndp-accent, #2f6fed);
+    --_ndp-on-accent: var(--ndp-on-accent, #ffffff);
+    --_ndp-hover: var(--ndp-hover, rgba(47, 111, 237, 0.12));
+    --_ndp-in-range: var(--ndp-in-range, rgba(47, 111, 237, 0.14));
+    --_ndp-today-ring: var(--ndp-today-ring, #2f6fed);
+    --_ndp-border: var(--ndp-border, #d3d4d8);
+    --_ndp-error: var(--ndp-error, #ba1a1a);
+    --_ndp-radius: var(--ndp-radius, 12px);
+    font-family: var(--_ndp-font);
+    color: var(--_ndp-text);
     box-sizing: border-box;
   }
   *,
@@ -36,8 +36,8 @@ export const tokens = css`
 /** The month calendar (header, weekday row, day grid, footer). Shared by every calendar-based element. */
 export const calendarStyles = css`
   .surface {
-    background: var(--ndp-bg);
-    border-radius: var(--ndp-radius);
+    background: var(--_ndp-bg);
+    border-radius: var(--_ndp-radius);
     padding: 12px;
     user-select: none;
   }
@@ -67,7 +67,7 @@ export const calendarStyles = css`
     font: inherit;
     color: inherit;
     background: transparent;
-    border: 1px solid var(--ndp-border);
+    border: 1px solid var(--_ndp-border);
     border-radius: 8px;
     padding: 2px 4px;
     cursor: pointer;
@@ -82,13 +82,18 @@ export const calendarStyles = css`
     line-height: 1;
   }
   .nav:hover:not(:disabled) {
-    background: var(--ndp-hover);
+    background: var(--_ndp-hover);
   }
   .nav:disabled {
     opacity: 0.35;
     cursor: default;
   }
   [role='grid'] {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  [role='grid'] [role='row'] {
     display: grid;
     grid-template-columns: repeat(7, 1fr);
     gap: 2px;
@@ -97,7 +102,7 @@ export const calendarStyles = css`
     text-align: center;
     font-size: 0.72rem;
     font-weight: 600;
-    color: var(--ndp-muted);
+    color: var(--_ndp-muted);
     padding: 4px 0;
   }
   .day {
@@ -111,28 +116,28 @@ export const calendarStyles = css`
     position: relative;
   }
   .day:hover:not([aria-disabled='true']) {
-    background: var(--ndp-hover);
+    background: var(--_ndp-hover);
   }
   .day:focus-visible {
-    outline: 2px solid var(--ndp-accent);
+    outline: 2px solid var(--_ndp-accent);
     outline-offset: 1px;
   }
   .day[aria-disabled='true'] {
-    color: var(--ndp-muted);
+    color: var(--_ndp-muted);
     opacity: 0.4;
     cursor: default;
   }
   .day.today {
-    box-shadow: inset 0 0 0 1.5px var(--ndp-today-ring);
+    box-shadow: inset 0 0 0 1.5px var(--_ndp-today-ring);
   }
   .day.selected,
   .day.range-start,
   .day.range-end {
-    background: var(--ndp-accent);
-    color: var(--ndp-on-accent);
+    background: var(--_ndp-accent);
+    color: var(--_ndp-on-accent);
   }
   .day.in-range:not(.range-start):not(.range-end) {
-    background: var(--ndp-in-range);
+    background: var(--_ndp-in-range);
     border-radius: 0;
   }
   .blank {
@@ -146,17 +151,17 @@ export const calendarStyles = css`
     gap: 8px;
   }
   .english {
-    color: var(--ndp-muted);
+    color: var(--_ndp-muted);
     font-size: 0.78rem;
   }
   .link {
     padding: 4px 10px;
-    color: var(--ndp-accent);
+    color: var(--_ndp-accent);
     font-weight: 600;
     font-size: 0.85rem;
   }
   .link:hover {
-    background: var(--ndp-hover);
+    background: var(--_ndp-hover);
   }
 `;
 
@@ -169,7 +174,7 @@ export const fieldStyles = css`
   }
   .field label {
     font-size: 0.78rem;
-    color: var(--ndp-muted);
+    color: var(--_ndp-muted);
   }
   .row {
     display: inline-flex;
@@ -178,23 +183,23 @@ export const fieldStyles = css`
   }
   input {
     font: inherit;
-    color: var(--ndp-text);
-    background: var(--ndp-bg);
-    border: 1px solid var(--ndp-border);
+    color: var(--_ndp-text);
+    background: var(--_ndp-bg);
+    border: 1px solid var(--_ndp-border);
     border-radius: 8px;
     padding: 8px 10px;
     min-width: 9.5rem;
   }
   input:focus-visible {
-    outline: 2px solid var(--ndp-accent);
+    outline: 2px solid var(--_ndp-accent);
     outline-offset: 0;
-    border-color: var(--ndp-accent);
+    border-color: var(--_ndp-accent);
   }
   .invalid input {
-    border-color: var(--ndp-error);
+    border-color: var(--_ndp-error);
   }
   .error {
-    color: var(--ndp-error);
+    color: var(--_ndp-error);
     font-size: 0.75rem;
     min-height: 1em;
   }
@@ -204,14 +209,14 @@ export const fieldStyles = css`
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    border: 1px solid var(--ndp-border);
+    border: 1px solid var(--_ndp-border);
     border-radius: 8px;
-    background: var(--ndp-bg);
+    background: var(--_ndp-bg);
     cursor: pointer;
-    color: var(--ndp-text);
+    color: var(--_ndp-text);
   }
   .icon-button:hover {
-    background: var(--ndp-hover);
+    background: var(--_ndp-hover);
   }
 `;
 
@@ -228,8 +233,8 @@ export const overlayStyles = css`
     z-index: 1000;
   }
   .dialog {
-    background: var(--ndp-bg);
-    border-radius: calc(var(--ndp-radius) + 4px);
+    background: var(--_ndp-bg);
+    border-radius: calc(var(--_ndp-radius) + 4px);
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.24);
     max-width: 360px;
     width: 100%;
@@ -242,10 +247,23 @@ export const overlayStyles = css`
     border-radius: 0;
     display: flex;
     flex-direction: column;
+    align-items: center;
+  }
+  .dialog.fullscreen .dialog-title,
+  .dialog.fullscreen .dialog-headline,
+  .dialog.fullscreen .header,
+  .dialog.fullscreen [role='grid'],
+  .dialog.fullscreen .footer,
+  .dialog.fullscreen .actions {
+    width: 100%;
+    max-width: 360px;
+  }
+  .dialog.fullscreen .actions {
+    margin-top: auto;
   }
   .dialog-title {
     font-size: 0.8rem;
-    color: var(--ndp-muted);
+    color: var(--_ndp-muted);
   }
   .dialog-headline {
     font-size: 1.5rem;
@@ -260,7 +278,7 @@ export const overlayStyles = css`
   }
   .actions button {
     padding: 8px 14px;
-    color: var(--ndp-accent);
+    color: var(--_ndp-accent);
     font-weight: 600;
     border-radius: 8px;
     background: transparent;
@@ -269,10 +287,10 @@ export const overlayStyles = css`
     font: inherit;
   }
   .actions button:hover:not(:disabled) {
-    background: var(--ndp-hover);
+    background: var(--_ndp-hover);
   }
   .actions button:disabled {
-    color: var(--ndp-muted);
+    color: var(--_ndp-muted);
     cursor: default;
   }
   .anchor {
@@ -284,8 +302,8 @@ export const overlayStyles = css`
     top: calc(100% + 4px);
     left: 0;
     z-index: 900;
-    background: var(--ndp-bg);
-    border-radius: var(--ndp-radius);
+    background: var(--_ndp-bg);
+    border-radius: var(--_ndp-radius);
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.18);
   }
 `;
