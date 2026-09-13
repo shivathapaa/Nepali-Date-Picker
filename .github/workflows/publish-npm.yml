@@ -93,6 +93,10 @@ jobs:
           npm ci
           npm run --workspace @nepali-date-picker/web-component build
 
+      - name: Verify the packed artifacts install in a fresh consumer
+        working-directory: js
+        run: npm run verify:pack
+
       - name: Publish @nepali-date-picker/core
         working-directory: js/packages/core
         run: npm publish ${{ steps.v.outputs.flags }}
