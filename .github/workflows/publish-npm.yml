@@ -16,7 +16,7 @@ concurrency:
 
 permissions:
   contents: read
-  id-token: write # required for npm provenance
+  id-token: write
 
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
@@ -60,6 +60,9 @@ jobs:
           cache: npm
           cache-dependency-path: js/package-lock.json
 
+      - name: Ensure npm supports trusted publishing
+        run: npm install -g npm@latest
+
       - name: Resolve and verify version
         id: v
         run: |
@@ -80,7 +83,7 @@ jobs:
             echo "flags=--dry-run --access public" >> "$GITHUB_OUTPUT"
             echo "Running in DRY-RUN mode for version $target."
           else
-            echo "flags=--provenance --access public" >> "$GITHUB_OUTPUT"
+            echo "flags=--access public" >> "$GITHUB_OUTPUT"
           fi
           echo "target=$target" >> "$GITHUB_OUTPUT"
 
@@ -100,14 +103,10 @@ jobs:
       - name: Publish @nepali-date-picker/core
         working-directory: js/packages/core
         run: npm publish ${{ steps.v.outputs.flags }}
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Publish @nepali-date-picker/web-component
         working-directory: js/packages/web-component
         run: npm publish ${{ steps.v.outputs.flags }}
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Summary
         run: |
