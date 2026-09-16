@@ -61,7 +61,8 @@ jobs:
           cache-dependency-path: js/package-lock.json
 
       - name: Ensure npm supports trusted publishing
-        run: npm install -g npm@latest
+        # Pin to 11.5.1+: trusted publishing requires it, and npm 12 disables install scripts by default.
+        run: npm install -g npm@12
 
       - name: Resolve and verify version
         id: v
