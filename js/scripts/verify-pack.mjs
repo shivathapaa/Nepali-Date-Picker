@@ -29,7 +29,15 @@ function pack(dir, dest) {
     cwd: dir,
     encoding: 'utf8',
   });
-  return join(dest, JSON.parse(out)[0].filename);
+  // npm 11 reports an array of packed entries, npm 12 an object keyed by package name. Reading only
+  // one of those shapes fails inside the publish workflow, which is the single place that installs a
+  // newer npm than the one Node ships with.
+  const parsed = JSON.parse(out);
+  const entry = Array.isArray(parsed) ? parsed[0] : Object.values(parsed)[0];
+  if (!entry?.filename) {
+    throw new Error(`npm pack --json returned an unrecognised shape: ${out.slice(0, 200)}`);
+  }
+  return join(dest, entry.filename);
 }
 
 try {
