@@ -1,0 +1,1757 @@
+{
+  "schemaVersion": "1.0.0",
+  "readme": "",
+  "modules": [
+    {
+      "kind": "javascript-module",
+      "path": "src/index.ts",
+      "declarations": [],
+      "exports": [
+        {
+          "kind": "js",
+          "name": "NepaliDatePicker",
+          "declaration": {
+            "name": "NepaliDatePicker",
+            "module": "./nepali-date-picker.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "NepaliDateRangePicker",
+          "declaration": {
+            "name": "NepaliDateRangePicker",
+            "module": "./nepali-date-range-picker.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "NepaliDatePickerDialog",
+          "declaration": {
+            "name": "NepaliDatePickerDialog",
+            "module": "./nepali-date-picker-dialog.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "NepaliDatePickerDocked",
+          "declaration": {
+            "name": "NepaliDatePickerDocked",
+            "module": "./nepali-date-picker-docked.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "NepaliDateField",
+          "declaration": {
+            "name": "NepaliDateField",
+            "module": "./nepali-date-field.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "NepaliDateRangeField",
+          "declaration": {
+            "name": "NepaliDateRangeField",
+            "module": "./nepali-date-range-field.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "NepaliWheelDatePicker",
+          "declaration": {
+            "name": "NepaliWheelDatePicker",
+            "module": "./nepali-wheel-date-picker.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "CalendarDate",
+          "declaration": {
+            "name": "CalendarDate",
+            "module": "./types.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "NepaliLanguage",
+          "declaration": {
+            "name": "NepaliLanguage",
+            "module": "./types.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "NepaliDateFieldInvalidDetail",
+          "declaration": {
+            "name": "NepaliDateFieldInvalidDetail",
+            "module": "./types.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "NepaliDateFieldInvalidEvent",
+          "declaration": {
+            "name": "NepaliDateFieldInvalidEvent",
+            "module": "./types.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "NepaliDatePickerChangeDetail",
+          "declaration": {
+            "name": "NepaliDatePickerChangeDetail",
+            "module": "./types.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "NepaliDatePickerChangeEvent",
+          "declaration": {
+            "name": "NepaliDatePickerChangeEvent",
+            "module": "./types.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "NepaliDateRangeChangeDetail",
+          "declaration": {
+            "name": "NepaliDateRangeChangeDetail",
+            "module": "./types.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "NepaliDateRangeChangeEvent",
+          "declaration": {
+            "name": "NepaliDateRangeChangeEvent",
+            "module": "./types.js"
+          }
+        }
+      ]
+    },
+    {
+      "kind": "javascript-module",
+      "path": "src/nepali-date-field.ts",
+      "declarations": [
+        {
+          "kind": "class",
+          "description": "A text field for typing a Bikram Sambat date (`YYYY/MM/DD`) with inline validation and localized\nerror messages. Devanagari digits are accepted. No calendar UI, so it is ideal inside forms.",
+          "name": "NepaliDateField",
+          "cssProperties": [
+            {
+              "description": "Font family for the label, input and message.",
+              "name": "--ndp-font"
+            },
+            {
+              "description": "Input background.",
+              "name": "--ndp-bg"
+            },
+            {
+              "description": "Typed text color.",
+              "name": "--ndp-text"
+            },
+            {
+              "description": "Label color.",
+              "name": "--ndp-muted"
+            },
+            {
+              "description": "Focus outline color.",
+              "name": "--ndp-accent"
+            },
+            {
+              "description": "Input border color.",
+              "name": "--ndp-border"
+            },
+            {
+              "description": "Border and message color when the typed date is rejected.",
+              "name": "--ndp-error"
+            }
+          ],
+          "members": [
+            {
+              "kind": "field",
+              "name": "value",
+              "privacy": "public",
+              "type": {
+                "text": "string"
+              },
+              "default": "''",
+              "attribute": "value"
+            },
+            {
+              "kind": "field",
+              "name": "language",
+              "privacy": "public",
+              "type": {
+                "text": "NepaliLanguage"
+              },
+              "default": "'en'",
+              "attribute": "language"
+            },
+            {
+              "kind": "field",
+              "name": "min",
+              "privacy": "public",
+              "type": {
+                "text": "string"
+              },
+              "default": "''",
+              "attribute": "min"
+            },
+            {
+              "kind": "field",
+              "name": "max",
+              "privacy": "public",
+              "type": {
+                "text": "string"
+              },
+              "default": "''",
+              "attribute": "max"
+            },
+            {
+              "kind": "field",
+              "name": "disabled",
+              "privacy": "public",
+              "type": {
+                "text": "boolean"
+              },
+              "default": "false",
+              "attribute": "disabled",
+              "reflects": true
+            },
+            {
+              "kind": "field",
+              "name": "label",
+              "privacy": "public",
+              "type": {
+                "text": "string"
+              },
+              "default": "''",
+              "attribute": "label"
+            }
+          ],
+          "events": [
+            {
+              "name": "change",
+              "type": {
+                "text": "CustomEvent<NepaliDatePickerChangeDetail>"
+              },
+              "description": "Dispatched when the typed date becomes valid."
+            },
+            {
+              "name": "invalid",
+              "type": {
+                "text": "CustomEvent<NepaliDateFieldInvalidDetail>"
+              },
+              "description": "Dispatched when the typed date is rejected. React does not deliver this event to an `onInvalid` prop, so use `addEventListener`."
+            }
+          ],
+          "attributes": [
+            {
+              "name": "value",
+              "type": {
+                "text": "string"
+              },
+              "default": "''",
+              "fieldName": "value"
+            },
+            {
+              "name": "language",
+              "type": {
+                "text": "NepaliLanguage"
+              },
+              "default": "'en'",
+              "fieldName": "language"
+            },
+            {
+              "name": "min",
+              "type": {
+                "text": "string"
+              },
+              "default": "''",
+              "fieldName": "min"
+            },
+            {
+              "name": "max",
+              "type": {
+                "text": "string"
+              },
+              "default": "''",
+              "fieldName": "max"
+            },
+            {
+              "name": "disabled",
+              "type": {
+                "text": "boolean"
+              },
+              "default": "false",
+              "fieldName": "disabled"
+            },
+            {
+              "name": "label",
+              "type": {
+                "text": "string"
+              },
+              "default": "''",
+              "fieldName": "label"
+            }
+          ],
+          "superclass": {
+            "name": "LitElement",
+            "package": "lit"
+          },
+          "tagName": "nepali-date-field",
+          "customElement": true
+        },
+        {
+          "kind": "variable",
+          "name": "year"
+        },
+        {
+          "kind": "variable",
+          "name": "month"
+        }
+      ],
+      "exports": [
+        {
+          "kind": "js",
+          "name": "NepaliDateField",
+          "declaration": {
+            "name": "NepaliDateField",
+            "module": "src/nepali-date-field.ts"
+          }
+        },
+        {
+          "kind": "custom-element-definition",
+          "name": "nepali-date-field",
+          "declaration": {
+            "name": "NepaliDateField",
+            "module": "src/nepali-date-field.ts"
+          }
+        }
+      ]
+    },
+    {
+      "kind": "javascript-module",
+      "path": "src/nepali-date-picker-dialog.ts",
+      "declarations": [
+        {
+          "kind": "class",
+          "description": "A modal Bikram Sambat date picker dialog with a headline and confirm / cancel actions. Set\n`fullscreen` for the full-screen variant.",
+          "name": "NepaliDatePickerDialog",
+          "cssProperties": [
+            {
+              "description": "Font family for the whole element.",
+              "name": "--ndp-font"
+            },
+            {
+              "description": "Dialog and calendar surface background.",
+              "name": "--ndp-bg"
+            },
+            {
+              "description": "Primary text color.",
+              "name": "--ndp-text"
+            },
+            {
+              "description": "Secondary text, weekday headers and out-of-month days.",
+              "name": "--ndp-muted"
+            },
+            {
+              "description": "Selection background and the confirm action color.",
+              "name": "--ndp-accent"
+            },
+            {
+              "description": "Text color on top of the accent.",
+              "name": "--ndp-on-accent"
+            },
+            {
+              "description": "Hover wash over a day or an action.",
+              "name": "--ndp-hover"
+            },
+            {
+              "description": "Ring color marking today.",
+              "name": "--ndp-today-ring"
+            },
+            {
+              "description": "Divider and outline color.",
+              "name": "--ndp-border"
+            },
+            {
+              "description": "Corner radius of the dialog, surface and day cells.",
+              "name": "--ndp-radius"
+            }
+          ],
+          "members": [
+            {
+              "kind": "field",
+              "name": "open",
+              "privacy": "public",
+              "type": {
+                "text": "boolean"
+              },
+              "description": "Whether the dialog is shown.",
+              "default": "false",
+              "attribute": "open",
+              "reflects": true
+            },
+            {
+              "kind": "field",
+              "name": "value",
+              "privacy": "public",
+              "type": {
+                "text": "string"
+              },
+              "description": "Selected / initial date as a `YYYY-MM-DD` Bikram Sambat string.",
+              "default": "''",
+              "attribute": "value"
+            },
+            {
+              "kind": "field",
+              "name": "language",
+              "privacy": "public",
+              "type": {
+                "text": "NepaliLanguage"
+              },
+              "default": "'en'",
+              "attribute": "language"
+            },
+            {
+              "kind": "field",
+              "name": "min",
+              "privacy": "public",
+              "type": {
+                "text": "string"
+              },
+              "default": "''",
+              "attribute": "min"
+            },
+            {
+              "kind": "field",
+              "name": "max",
+              "privacy": "public",
+              "type": {
+                "text": "string"
+              },
+              "default": "''",
+              "attribute": "max"
+            },
+            {
+              "kind": "field",
+              "name": "fullscreen",
+              "privacy": "public",
+              "type": {
+                "text": "boolean"
+              },
+              "description": "Render as a full-screen dialog instead of a centered card.",
+              "default": "false",
+              "attribute": "fullscreen"
+            },
+            {
+              "kind": "field",
+              "name": "showEnglish",
+              "privacy": "public",
+              "type": {
+                "text": "boolean"
+              },
+              "default": "false",
+              "attribute": "show-english"
+            },
+            {
+              "kind": "field",
+              "name": "heading",
+              "privacy": "public",
+              "type": {
+                "text": "string"
+              },
+              "description": "Dialog heading; defaults to a localized \"Select Nepali Date\".",
+              "default": "''",
+              "attribute": "heading"
+            },
+            {
+              "kind": "method",
+              "name": "show",
+              "return": {
+                "type": {
+                  "text": "void"
+                }
+              },
+              "description": "Open the dialog."
+            },
+            {
+              "kind": "method",
+              "name": "close",
+              "return": {
+                "type": {
+                  "text": "void"
+                }
+              },
+              "description": "Close the dialog without emitting a selection."
+            }
+          ],
+          "events": [
+            {
+              "name": "change",
+              "type": {
+                "text": "CustomEvent<NepaliDatePickerChangeDetail>"
+              },
+              "description": "Dispatched when the user confirms a date."
+            },
+            {
+              "name": "cancel",
+              "type": {
+                "text": "CustomEvent"
+              },
+              "description": "Dispatched, with no detail, when the user dismisses the dialog without confirming."
+            }
+          ],
+          "attributes": [
+            {
+              "name": "open",
+              "type": {
+                "text": "boolean"
+              },
+              "description": "Whether the dialog is shown.",
+              "default": "false",
+              "fieldName": "open"
+            },
+            {
+              "name": "value",
+              "type": {
+                "text": "string"
+              },
+              "description": "Selected / initial date as a `YYYY-MM-DD` Bikram Sambat string.",
+              "default": "''",
+              "fieldName": "value"
+            },
+            {
+              "name": "language",
+              "type": {
+                "text": "NepaliLanguage"
+              },
+              "default": "'en'",
+              "fieldName": "language"
+            },
+            {
+              "name": "min",
+              "type": {
+                "text": "string"
+              },
+              "default": "''",
+              "fieldName": "min"
+            },
+            {
+              "name": "max",
+              "type": {
+                "text": "string"
+              },
+              "default": "''",
+              "fieldName": "max"
+            },
+            {
+              "name": "fullscreen",
+              "type": {
+                "text": "boolean"
+              },
+              "description": "Render as a full-screen dialog instead of a centered card.",
+              "default": "false",
+              "fieldName": "fullscreen"
+            },
+            {
+              "name": "show-english",
+              "type": {
+                "text": "boolean"
+              },
+              "default": "false",
+              "fieldName": "showEnglish"
+            },
+            {
+              "name": "heading",
+              "type": {
+                "text": "string"
+              },
+              "description": "Dialog heading; defaults to a localized \"Select Nepali Date\".",
+              "default": "''",
+              "fieldName": "heading"
+            }
+          ],
+          "superclass": {
+            "name": "LitElement",
+            "package": "lit"
+          },
+          "tagName": "nepali-date-picker-dialog",
+          "customElement": true
+        }
+      ],
+      "exports": [
+        {
+          "kind": "js",
+          "name": "NepaliDatePickerDialog",
+          "declaration": {
+            "name": "NepaliDatePickerDialog",
+            "module": "src/nepali-date-picker-dialog.ts"
+          }
+        },
+        {
+          "kind": "custom-element-definition",
+          "name": "nepali-date-picker-dialog",
+          "declaration": {
+            "name": "NepaliDatePickerDialog",
+            "module": "src/nepali-date-picker-dialog.ts"
+          }
+        }
+      ]
+    },
+    {
+      "kind": "javascript-module",
+      "path": "src/nepali-date-picker-docked.ts",
+      "declarations": [
+        {
+          "kind": "class",
+          "description": "A docked Bikram Sambat date picker: a text field the user can type into, plus a calendar button\nthat opens the month grid in an anchored popover.",
+          "name": "NepaliDatePickerDocked",
+          "cssProperties": [
+            {
+              "description": "Font family for the whole element.",
+              "name": "--ndp-font"
+            },
+            {
+              "description": "Field and popover background.",
+              "name": "--ndp-bg"
+            },
+            {
+              "description": "Primary text color.",
+              "name": "--ndp-text"
+            },
+            {
+              "description": "Label, weekday headers and out-of-month days.",
+              "name": "--ndp-muted"
+            },
+            {
+              "description": "Selection background and the field focus outline.",
+              "name": "--ndp-accent"
+            },
+            {
+              "description": "Text color on top of the accent.",
+              "name": "--ndp-on-accent"
+            },
+            {
+              "description": "Hover wash over a selectable day.",
+              "name": "--ndp-hover"
+            },
+            {
+              "description": "Ring color marking today.",
+              "name": "--ndp-today-ring"
+            },
+            {
+              "description": "Field border, divider and outline color.",
+              "name": "--ndp-border"
+            },
+            {
+              "description": "Border and message color when the typed date is rejected.",
+              "name": "--ndp-error"
+            },
+            {
+              "description": "Corner radius of the popover, surface and day cells.",
+              "name": "--ndp-radius"
+            }
+          ],
+          "members": [
+            {
+              "kind": "field",
+              "name": "value",
+              "privacy": "public",
+              "type": {
+                "text": "string"
+              },
+              "default": "''",
+              "attribute": "value"
+            },
+            {
+              "kind": "field",
+              "name": "language",
+              "privacy": "public",
+              "type": {
+                "text": "NepaliLanguage"
+              },
+              "default": "'en'",
+              "attribute": "language"
+            },
+            {
+              "kind": "field",
+              "name": "min",
+              "privacy": "public",
+              "type": {
+                "text": "string"
+              },
+              "default": "''",
+              "attribute": "min"
+            },
+            {
+              "kind": "field",
+              "name": "max",
+              "privacy": "public",
+              "type": {
+                "text": "string"
+              },
+              "default": "''",
+              "attribute": "max"
+            },
+            {
+              "kind": "field",
+              "name": "disabled",
+              "privacy": "public",
+              "type": {
+                "text": "boolean"
+              },
+              "default": "false",
+              "attribute": "disabled",
+              "reflects": true
+            },
+            {
+              "kind": "field",
+              "name": "showEnglish",
+              "privacy": "public",
+              "type": {
+                "text": "boolean"
+              },
+              "default": "false",
+              "attribute": "show-english"
+            },
+            {
+              "kind": "field",
+              "name": "label",
+              "privacy": "public",
+              "type": {
+                "text": "string"
+              },
+              "description": "Optional field label.",
+              "default": "''",
+              "attribute": "label"
+            }
+          ],
+          "events": [
+            {
+              "name": "change",
+              "type": {
+                "text": "CustomEvent<NepaliDatePickerChangeDetail>"
+              },
+              "description": "Dispatched when a valid date is chosen by typing or clicking."
+            }
+          ],
+          "attributes": [
+            {
+              "name": "value",
+              "type": {
+                "text": "string"
+              },
+              "default": "''",
+              "fieldName": "value"
+            },
+            {
+              "name": "language",
+              "type": {
+                "text": "NepaliLanguage"
+              },
+              "default": "'en'",
+              "fieldName": "language"
+            },
+            {
+              "name": "min",
+              "type": {
+                "text": "string"
+              },
+              "default": "''",
+              "fieldName": "min"
+            },
+            {
+              "name": "max",
+              "type": {
+                "text": "string"
+              },
+              "default": "''",
+              "fieldName": "max"
+            },
+            {
+              "name": "disabled",
+              "type": {
+                "text": "boolean"
+              },
+              "default": "false",
+              "fieldName": "disabled"
+            },
+            {
+              "name": "show-english",
+              "type": {
+                "text": "boolean"
+              },
+              "default": "false",
+              "fieldName": "showEnglish"
+            },
+            {
+              "name": "label",
+              "type": {
+                "text": "string"
+              },
+              "description": "Optional field label.",
+              "default": "''",
+              "fieldName": "label"
+            }
+          ],
+          "superclass": {
+            "name": "LitElement",
+            "package": "lit"
+          },
+          "tagName": "nepali-date-picker-docked",
+          "customElement": true
+        }
+      ],
+      "exports": [
+        {
+          "kind": "js",
+          "name": "NepaliDatePickerDocked",
+          "declaration": {
+            "name": "NepaliDatePickerDocked",
+            "module": "src/nepali-date-picker-docked.ts"
+          }
+        },
+        {
+          "kind": "custom-element-definition",
+          "name": "nepali-date-picker-docked",
+          "declaration": {
+            "name": "NepaliDatePickerDocked",
+            "module": "src/nepali-date-picker-docked.ts"
+          }
+        }
+      ]
+    },
+    {
+      "kind": "javascript-module",
+      "path": "src/nepali-date-picker.ts",
+      "declarations": [
+        {
+          "kind": "class",
+          "description": "An inline Bikram Sambat (Nepali) calendar date picker rendered as native DOM, so it works in\nReact, Vue, Angular, Svelte, and plain HTML.\n\nAll calendar math comes from `@nepali-date-picker/core`, the same engine used by the Kotlin,\nAndroid, and Python builds, so dates always agree across platforms.",
+          "name": "NepaliDatePicker",
+          "cssProperties": [
+            {
+              "description": "Font family for the whole element.",
+              "name": "--ndp-font"
+            },
+            {
+              "description": "Calendar surface background.",
+              "name": "--ndp-bg"
+            },
+            {
+              "description": "Primary text color.",
+              "name": "--ndp-text"
+            },
+            {
+              "description": "Secondary text, weekday headers and out-of-month days.",
+              "name": "--ndp-muted"
+            },
+            {
+              "description": "Selection background and focus color.",
+              "name": "--ndp-accent"
+            },
+            {
+              "description": "Text color on top of the accent.",
+              "name": "--ndp-on-accent"
+            },
+            {
+              "description": "Hover wash over a selectable day.",
+              "name": "--ndp-hover"
+            },
+            {
+              "description": "Ring color marking today.",
+              "name": "--ndp-today-ring"
+            },
+            {
+              "description": "Divider and outline color.",
+              "name": "--ndp-border"
+            },
+            {
+              "description": "Corner radius of the surface and day cells.",
+              "name": "--ndp-radius"
+            }
+          ],
+          "members": [
+            {
+              "kind": "field",
+              "name": "value",
+              "privacy": "public",
+              "type": {
+                "text": "string"
+              },
+              "description": "Selected Bikram Sambat date as a `YYYY-MM-DD` string. Empty when nothing is selected.",
+              "default": "''",
+              "attribute": "value"
+            },
+            {
+              "kind": "field",
+              "name": "language",
+              "privacy": "public",
+              "type": {
+                "text": "NepaliLanguage"
+              },
+              "description": "Display language, `en` (English + Latin digits) or `ne` (Nepali + Devanagari digits).",
+              "default": "'en'",
+              "attribute": "language"
+            },
+            {
+              "kind": "field",
+              "name": "min",
+              "privacy": "public",
+              "type": {
+                "text": "string"
+              },
+              "description": "Earliest selectable Bikram Sambat date as `YYYY-MM-DD`, or empty for no lower bound.",
+              "default": "''",
+              "attribute": "min"
+            },
+            {
+              "kind": "field",
+              "name": "max",
+              "privacy": "public",
+              "type": {
+                "text": "string"
+              },
+              "description": "Latest selectable Bikram Sambat date as `YYYY-MM-DD`, or empty for no upper bound.",
+              "default": "''",
+              "attribute": "max"
+            },
+            {
+              "kind": "field",
+              "name": "disabled",
+              "privacy": "public",
+              "type": {
+                "text": "boolean"
+              },
+              "description": "When set, the picker is read-only and dims itself.",
+              "default": "false",
+              "attribute": "disabled",
+              "reflects": true
+            },
+            {
+              "kind": "field",
+              "name": "showEnglish",
+              "privacy": "public",
+              "type": {
+                "text": "boolean"
+              },
+              "description": "Show the Gregorian equivalent of the selected date under the calendar.",
+              "default": "false",
+              "attribute": "show-english"
+            }
+          ],
+          "events": [
+            {
+              "name": "change",
+              "type": {
+                "text": "CustomEvent<NepaliDatePickerChangeDetail>"
+              },
+              "description": "Dispatched when the user selects a date. Bubbles and crosses the shadow boundary."
+            }
+          ],
+          "attributes": [
+            {
+              "name": "value",
+              "type": {
+                "text": "string"
+              },
+              "description": "Selected Bikram Sambat date as a `YYYY-MM-DD` string. Empty when nothing is selected.",
+              "default": "''",
+              "fieldName": "value"
+            },
+            {
+              "name": "language",
+              "type": {
+                "text": "NepaliLanguage"
+              },
+              "description": "Display language, `en` (English + Latin digits) or `ne` (Nepali + Devanagari digits).",
+              "default": "'en'",
+              "fieldName": "language"
+            },
+            {
+              "name": "min",
+              "type": {
+                "text": "string"
+              },
+              "description": "Earliest selectable Bikram Sambat date as `YYYY-MM-DD`, or empty for no lower bound.",
+              "default": "''",
+              "fieldName": "min"
+            },
+            {
+              "name": "max",
+              "type": {
+                "text": "string"
+              },
+              "description": "Latest selectable Bikram Sambat date as `YYYY-MM-DD`, or empty for no upper bound.",
+              "default": "''",
+              "fieldName": "max"
+            },
+            {
+              "name": "disabled",
+              "type": {
+                "text": "boolean"
+              },
+              "description": "When set, the picker is read-only and dims itself.",
+              "default": "false",
+              "fieldName": "disabled"
+            },
+            {
+              "name": "show-english",
+              "type": {
+                "text": "boolean"
+              },
+              "description": "Show the Gregorian equivalent of the selected date under the calendar.",
+              "default": "false",
+              "fieldName": "showEnglish"
+            }
+          ],
+          "superclass": {
+            "name": "LitElement",
+            "package": "lit"
+          },
+          "tagName": "nepali-date-picker",
+          "customElement": true
+        },
+        {
+          "kind": "function",
+          "name": "buildChangeDetail",
+          "return": {
+            "type": {
+              "text": "NepaliDatePickerChangeDetail"
+            }
+          },
+          "parameters": [
+            {
+              "name": "date",
+              "type": {
+                "text": "CalendarDate"
+              }
+            },
+            {
+              "name": "language",
+              "type": {
+                "text": "NepaliLanguage"
+              }
+            }
+          ],
+          "description": "Build the public `change` payload for a selected Bikram Sambat date."
+        }
+      ],
+      "exports": [
+        {
+          "kind": "js",
+          "name": "NepaliDatePicker",
+          "declaration": {
+            "name": "NepaliDatePicker",
+            "module": "src/nepali-date-picker.ts"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "buildChangeDetail",
+          "declaration": {
+            "name": "buildChangeDetail",
+            "module": "src/nepali-date-picker.ts"
+          }
+        },
+        {
+          "kind": "custom-element-definition",
+          "name": "nepali-date-picker",
+          "declaration": {
+            "name": "NepaliDatePicker",
+            "module": "src/nepali-date-picker.ts"
+          }
+        }
+      ]
+    },
+    {
+      "kind": "javascript-module",
+      "path": "src/nepali-date-range-field.ts",
+      "declarations": [
+        {
+          "kind": "class",
+          "description": "A pair of Bikram Sambat date text fields for a start / end range, with the same typed validation as\n`<nepali-date-field>` plus a cross-field check that the end is not before the start.\n\nEvery custom property set here also reaches the two inner `<nepali-date-field>` elements, since\ncustom properties inherit through the shadow boundary.",
+          "name": "NepaliDateRangeField",
+          "cssProperties": [
+            {
+              "description": "Font family for the labels, inputs and message.",
+              "name": "--ndp-font"
+            },
+            {
+              "description": "Input background.",
+              "name": "--ndp-bg"
+            },
+            {
+              "description": "Typed text color.",
+              "name": "--ndp-text"
+            },
+            {
+              "description": "Label color.",
+              "name": "--ndp-muted"
+            },
+            {
+              "description": "Focus outline color.",
+              "name": "--ndp-accent"
+            },
+            {
+              "description": "Input border color.",
+              "name": "--ndp-border"
+            },
+            {
+              "description": "Border and message color when a typed date is rejected.",
+              "name": "--ndp-error"
+            }
+          ],
+          "members": [
+            {
+              "kind": "field",
+              "name": "start",
+              "privacy": "public",
+              "type": {
+                "text": "string"
+              },
+              "default": "''",
+              "attribute": "start"
+            },
+            {
+              "kind": "field",
+              "name": "end",
+              "privacy": "public",
+              "type": {
+                "text": "string"
+              },
+              "default": "''",
+              "attribute": "end"
+            },
+            {
+              "kind": "field",
+              "name": "language",
+              "privacy": "public",
+              "type": {
+                "text": "NepaliLanguage"
+              },
+              "default": "'en'",
+              "attribute": "language"
+            },
+            {
+              "kind": "field",
+              "name": "min",
+              "privacy": "public",
+              "type": {
+                "text": "string"
+              },
+              "default": "''",
+              "attribute": "min"
+            },
+            {
+              "kind": "field",
+              "name": "max",
+              "privacy": "public",
+              "type": {
+                "text": "string"
+              },
+              "default": "''",
+              "attribute": "max"
+            },
+            {
+              "kind": "field",
+              "name": "disabled",
+              "privacy": "public",
+              "type": {
+                "text": "boolean"
+              },
+              "default": "false",
+              "attribute": "disabled",
+              "reflects": true
+            },
+            {
+              "kind": "field",
+              "name": "startLabel",
+              "privacy": "public",
+              "type": {
+                "text": "string"
+              },
+              "default": "''",
+              "attribute": "start-label"
+            },
+            {
+              "kind": "field",
+              "name": "endLabel",
+              "privacy": "public",
+              "type": {
+                "text": "string"
+              },
+              "default": "''",
+              "attribute": "end-label"
+            }
+          ],
+          "events": [
+            {
+              "name": "change",
+              "type": {
+                "text": "CustomEvent<NepaliDateRangeChangeDetail>"
+              },
+              "description": "Dispatched whenever a valid start or end changes."
+            },
+            {
+              "type": {
+                "text": "CustomEvent<NepaliDateFieldInvalidDetail>"
+              },
+              "description": "Reaches listeners here from whichever inner field rejected what was typed.",
+              "name": "invalid"
+            }
+          ],
+          "attributes": [
+            {
+              "name": "start",
+              "type": {
+                "text": "string"
+              },
+              "default": "''",
+              "fieldName": "start"
+            },
+            {
+              "name": "end",
+              "type": {
+                "text": "string"
+              },
+              "default": "''",
+              "fieldName": "end"
+            },
+            {
+              "name": "language",
+              "type": {
+                "text": "NepaliLanguage"
+              },
+              "default": "'en'",
+              "fieldName": "language"
+            },
+            {
+              "name": "min",
+              "type": {
+                "text": "string"
+              },
+              "default": "''",
+              "fieldName": "min"
+            },
+            {
+              "name": "max",
+              "type": {
+                "text": "string"
+              },
+              "default": "''",
+              "fieldName": "max"
+            },
+            {
+              "name": "disabled",
+              "type": {
+                "text": "boolean"
+              },
+              "default": "false",
+              "fieldName": "disabled"
+            },
+            {
+              "name": "start-label",
+              "type": {
+                "text": "string"
+              },
+              "default": "''",
+              "fieldName": "startLabel"
+            },
+            {
+              "name": "end-label",
+              "type": {
+                "text": "string"
+              },
+              "default": "''",
+              "fieldName": "endLabel"
+            }
+          ],
+          "superclass": {
+            "name": "LitElement",
+            "package": "lit"
+          },
+          "tagName": "nepali-date-range-field",
+          "customElement": true
+        }
+      ],
+      "exports": [
+        {
+          "kind": "js",
+          "name": "NepaliDateRangeField",
+          "declaration": {
+            "name": "NepaliDateRangeField",
+            "module": "src/nepali-date-range-field.ts"
+          }
+        },
+        {
+          "kind": "custom-element-definition",
+          "name": "nepali-date-range-field",
+          "declaration": {
+            "name": "NepaliDateRangeField",
+            "module": "src/nepali-date-range-field.ts"
+          }
+        }
+      ]
+    },
+    {
+      "kind": "javascript-module",
+      "path": "src/nepali-date-range-picker.ts",
+      "declarations": [
+        {
+          "kind": "class",
+          "description": "A Bikram Sambat date range picker. The first click sets the start, the second sets the end (clicks\nearlier than the start swap the two); a third click starts a new range.",
+          "name": "NepaliDateRangePicker",
+          "cssProperties": [
+            {
+              "description": "Font family for the whole element.",
+              "name": "--ndp-font"
+            },
+            {
+              "description": "Calendar surface background.",
+              "name": "--ndp-bg"
+            },
+            {
+              "description": "Primary text color.",
+              "name": "--ndp-text"
+            },
+            {
+              "description": "Secondary text, weekday headers and out-of-month days.",
+              "name": "--ndp-muted"
+            },
+            {
+              "description": "Background of the two range endpoints.",
+              "name": "--ndp-accent"
+            },
+            {
+              "description": "Text color on top of the accent.",
+              "name": "--ndp-on-accent"
+            },
+            {
+              "description": "Wash behind the days between the endpoints.",
+              "name": "--ndp-in-range"
+            },
+            {
+              "description": "Hover wash over a selectable day.",
+              "name": "--ndp-hover"
+            },
+            {
+              "description": "Ring color marking today.",
+              "name": "--ndp-today-ring"
+            },
+            {
+              "description": "Divider and outline color.",
+              "name": "--ndp-border"
+            },
+            {
+              "description": "Corner radius of the surface and day cells.",
+              "name": "--ndp-radius"
+            }
+          ],
+          "members": [
+            {
+              "kind": "field",
+              "name": "start",
+              "privacy": "public",
+              "type": {
+                "text": "string"
+              },
+              "description": "Selected start date as a `YYYY-MM-DD` Bikram Sambat string.",
+              "default": "''",
+              "attribute": "start"
+            },
+            {
+              "kind": "field",
+              "name": "end",
+              "privacy": "public",
+              "type": {
+                "text": "string"
+              },
+              "description": "Selected end date as a `YYYY-MM-DD` Bikram Sambat string.",
+              "default": "''",
+              "attribute": "end"
+            },
+            {
+              "kind": "field",
+              "name": "language",
+              "privacy": "public",
+              "type": {
+                "text": "NepaliLanguage"
+              },
+              "default": "'en'",
+              "attribute": "language"
+            },
+            {
+              "kind": "field",
+              "name": "min",
+              "privacy": "public",
+              "type": {
+                "text": "string"
+              },
+              "default": "''",
+              "attribute": "min"
+            },
+            {
+              "kind": "field",
+              "name": "max",
+              "privacy": "public",
+              "type": {
+                "text": "string"
+              },
+              "default": "''",
+              "attribute": "max"
+            },
+            {
+              "kind": "field",
+              "name": "disabled",
+              "privacy": "public",
+              "type": {
+                "text": "boolean"
+              },
+              "default": "false",
+              "attribute": "disabled",
+              "reflects": true
+            },
+            {
+              "kind": "field",
+              "name": "showEnglish",
+              "privacy": "public",
+              "type": {
+                "text": "boolean"
+              },
+              "default": "false",
+              "attribute": "show-english"
+            }
+          ],
+          "events": [
+            {
+              "name": "change",
+              "type": {
+                "text": "CustomEvent<NepaliDateRangeChangeDetail>"
+              },
+              "description": "Dispatched on each pick."
+            }
+          ],
+          "attributes": [
+            {
+              "name": "start",
+              "type": {
+                "text": "string"
+              },
+              "description": "Selected start date as a `YYYY-MM-DD` Bikram Sambat string.",
+              "default": "''",
+              "fieldName": "start"
+            },
+            {
+              "name": "end",
+              "type": {
+                "text": "string"
+              },
+              "description": "Selected end date as a `YYYY-MM-DD` Bikram Sambat string.",
+              "default": "''",
+              "fieldName": "end"
+            },
+            {
+              "name": "language",
+              "type": {
+                "text": "NepaliLanguage"
+              },
+              "default": "'en'",
+              "fieldName": "language"
+            },
+            {
+              "name": "min",
+              "type": {
+                "text": "string"
+              },
+              "default": "''",
+              "fieldName": "min"
+            },
+            {
+              "name": "max",
+              "type": {
+                "text": "string"
+              },
+              "default": "''",
+              "fieldName": "max"
+            },
+            {
+              "name": "disabled",
+              "type": {
+                "text": "boolean"
+              },
+              "default": "false",
+              "fieldName": "disabled"
+            },
+            {
+              "name": "show-english",
+              "type": {
+                "text": "boolean"
+              },
+              "default": "false",
+              "fieldName": "showEnglish"
+            }
+          ],
+          "superclass": {
+            "name": "LitElement",
+            "package": "lit"
+          },
+          "tagName": "nepali-date-range-picker",
+          "customElement": true
+        }
+      ],
+      "exports": [
+        {
+          "kind": "js",
+          "name": "NepaliDateRangePicker",
+          "declaration": {
+            "name": "NepaliDateRangePicker",
+            "module": "src/nepali-date-range-picker.ts"
+          }
+        },
+        {
+          "kind": "custom-element-definition",
+          "name": "nepali-date-range-picker",
+          "declaration": {
+            "name": "NepaliDateRangePicker",
+            "module": "src/nepali-date-range-picker.ts"
+          }
+        }
+      ]
+    },
+    {
+      "kind": "javascript-module",
+      "path": "src/nepali-wheel-date-picker.ts",
+      "declarations": [
+        {
+          "kind": "class",
+          "description": "A wheel (spinner) Bikram Sambat date picker: three scroll-snapping columns for year, month, and\nday. The day column adjusts to the selected month's length. Selection is driven by clicking an item\nor the Up / Down arrows, so it is accessible and works without pointer scrolling.",
+          "name": "NepaliWheelDatePicker",
+          "cssProperties": [
+            {
+              "description": "Font family for the whole element.",
+              "name": "--ndp-font"
+            },
+            {
+              "description": "Wheel background.",
+              "name": "--ndp-bg"
+            },
+            {
+              "description": "Color of the centered, selected value.",
+              "name": "--ndp-text"
+            },
+            {
+              "description": "Color of the values above and below the selection.",
+              "name": "--ndp-muted"
+            },
+            {
+              "description": "Selection band and focus outline color.",
+              "name": "--ndp-accent"
+            },
+            {
+              "description": "Hover wash over a value.",
+              "name": "--ndp-hover"
+            },
+            {
+              "description": "Corner radius of the wheel and its selection band.",
+              "name": "--ndp-radius"
+            }
+          ],
+          "members": [
+            {
+              "kind": "field",
+              "name": "value",
+              "privacy": "public",
+              "type": {
+                "text": "string"
+              },
+              "default": "''",
+              "attribute": "value"
+            },
+            {
+              "kind": "field",
+              "name": "language",
+              "privacy": "public",
+              "type": {
+                "text": "NepaliLanguage"
+              },
+              "default": "'en'",
+              "attribute": "language"
+            },
+            {
+              "kind": "field",
+              "name": "disabled",
+              "privacy": "public",
+              "type": {
+                "text": "boolean"
+              },
+              "default": "false",
+              "attribute": "disabled",
+              "reflects": true
+            }
+          ],
+          "events": [
+            {
+              "name": "change",
+              "type": {
+                "text": "CustomEvent<NepaliDatePickerChangeDetail>"
+              },
+              "description": "Dispatched whenever the selected date changes."
+            }
+          ],
+          "attributes": [
+            {
+              "name": "value",
+              "type": {
+                "text": "string"
+              },
+              "default": "''",
+              "fieldName": "value"
+            },
+            {
+              "name": "language",
+              "type": {
+                "text": "NepaliLanguage"
+              },
+              "default": "'en'",
+              "fieldName": "language"
+            },
+            {
+              "name": "disabled",
+              "type": {
+                "text": "boolean"
+              },
+              "default": "false",
+              "fieldName": "disabled"
+            }
+          ],
+          "superclass": {
+            "name": "LitElement",
+            "package": "lit"
+          },
+          "tagName": "nepali-wheel-date-picker",
+          "customElement": true
+        }
+      ],
+      "exports": [
+        {
+          "kind": "js",
+          "name": "NepaliWheelDatePicker",
+          "declaration": {
+            "name": "NepaliWheelDatePicker",
+            "module": "src/nepali-wheel-date-picker.ts"
+          }
+        },
+        {
+          "kind": "custom-element-definition",
+          "name": "nepali-wheel-date-picker",
+          "declaration": {
+            "name": "NepaliWheelDatePicker",
+            "module": "src/nepali-wheel-date-picker.ts"
+          }
+        }
+      ]
+    },
+    {
+      "kind": "javascript-module",
+      "path": "src/types.ts",
+      "declarations": [],
+      "exports": []
+    },
+    {
+      "kind": "javascript-module",
+      "path": "src/utils.ts",
+      "declarations": [
+        {
+          "kind": "function",
+          "name": "toIso",
+          "return": {
+            "type": {
+              "text": "string"
+            }
+          },
+          "parameters": [
+            {
+              "name": "date",
+              "type": {
+                "text": "CalendarDate"
+              }
+            }
+          ],
+          "description": "Format a date as a zero-padded `YYYY-MM-DD` string (Latin digits)."
+        },
+        {
+          "kind": "function",
+          "name": "parseIso",
+          "return": {
+            "type": {
+              "text": "CalendarDate | null"
+            }
+          },
+          "parameters": [
+            {
+              "name": "value",
+              "type": {
+                "text": "string | null | undefined"
+              }
+            }
+          ],
+          "description": "Parse a `YYYY-MM-DD` (or `YYYY/MM/DD`) date string into a [CalendarDate].\n\nDevanagari digits are accepted and folded to Latin first. Returns `null` for empty or malformed\ninput; range validity against the calendar is the caller's responsibility."
+        },
+        {
+          "kind": "function",
+          "name": "sameDate",
+          "return": {
+            "type": {
+              "text": "boolean"
+            }
+          },
+          "parameters": [
+            {
+              "name": "a",
+              "type": {
+                "text": "CalendarDate | null"
+              }
+            },
+            {
+              "name": "b",
+              "type": {
+                "text": "CalendarDate | null"
+              }
+            }
+          ],
+          "description": "Structural equality for two dates, tolerating `null`."
+        }
+      ],
+      "exports": [
+        {
+          "kind": "js",
+          "name": "toIso",
+          "declaration": {
+            "name": "toIso",
+            "module": "src/utils.ts"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "parseIso",
+          "declaration": {
+            "name": "parseIso",
+            "module": "src/utils.ts"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "sameDate",
+          "declaration": {
+            "name": "sameDate",
+            "module": "src/utils.ts"
+          }
+        }
+      ]
+    }
+  ]
+}

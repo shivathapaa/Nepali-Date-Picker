@@ -18,7 +18,19 @@ import { calendarStyles, tokens } from './internal/styles.js';
  * A Bikram Sambat date range picker. The first click sets the start, the second sets the end (clicks
  * earlier than the start swap the two); a third click starts a new range.
  *
- * @fires change - A [CustomEvent] with a [NepaliDateRangeChangeDetail] payload on each pick.
+ * @fires {CustomEvent<NepaliDateRangeChangeDetail>} change - Dispatched on each pick.
+ *
+ * @cssprop [--ndp-font] - Font family for the whole element.
+ * @cssprop [--ndp-bg] - Calendar surface background.
+ * @cssprop [--ndp-text] - Primary text color.
+ * @cssprop [--ndp-muted] - Secondary text, weekday headers and out-of-month days.
+ * @cssprop [--ndp-accent] - Background of the two range endpoints.
+ * @cssprop [--ndp-on-accent] - Text color on top of the accent.
+ * @cssprop [--ndp-in-range] - Wash behind the days between the endpoints.
+ * @cssprop [--ndp-hover] - Hover wash over a selectable day.
+ * @cssprop [--ndp-today-ring] - Ring color marking today.
+ * @cssprop [--ndp-border] - Divider and outline color.
+ * @cssprop [--ndp-radius] - Corner radius of the surface and day cells.
  */
 export class NepaliDateRangePicker extends LitElement {
   static override properties = {

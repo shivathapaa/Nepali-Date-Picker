@@ -200,7 +200,12 @@ jobs:
         run: |
           npm run --workspace @nepali-date-picker/web-component typecheck
           npm run --workspace @nepali-date-picker/web-component build
+          npm run --workspace @nepali-date-picker/web-component typecheck:jsx
           npm run --workspace @nepali-date-picker/web-component test
+
+      - name: Fail if custom-elements.json is stale
+        working-directory: js/packages/web-component
+        run: npm run check:manifest
 
       - name: Build the web-component showcase (sample/jsApp)
         working-directory: sample/jsApp

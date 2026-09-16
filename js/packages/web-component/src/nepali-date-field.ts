@@ -8,10 +8,16 @@
 import { LitElement, css, html, nothing } from 'lit';
 import type { PropertyValues, TemplateResult } from 'lit';
 import { getTotalDaysInBsMonth, localizeDigits, toLatinDigits } from '@nepali-date-picker/core';
-import type { CalendarDate, NepaliDatePickerChangeDetail, NepaliLanguage } from './types.js';
+import type {
+  CalendarDate,
+  NepaliDateFieldInvalidDetail,
+  NepaliDatePickerChangeDetail,
+  NepaliLanguage,
+} from './types.js';
 import { parseIso, toIso } from './utils.js';
 import { buildChangeDetail } from './nepali-date-picker.js';
 import { YEAR_RANGE, isSelectable } from './internal/calendar-model.js';
+import { tokens } from './internal/styles.js';
 
 interface Validation {
   date: CalendarDate | null;
@@ -22,8 +28,18 @@ interface Validation {
  * A text field for typing a Bikram Sambat date (`YYYY/MM/DD`) with inline validation and localized
  * error messages. Devanagari digits are accepted. No calendar UI, so it is ideal inside forms.
  *
- * @fires change - [NepaliDatePickerChangeDetail] when the typed date becomes valid.
- * @fires invalid - A [CustomEvent] with `{ message }` when the typed date is rejected.
+ * @fires {CustomEvent<NepaliDatePickerChangeDetail>} change - Dispatched when the typed date becomes
+ *   valid.
+ * @fires {CustomEvent<NepaliDateFieldInvalidDetail>} invalid - Dispatched when the typed date is
+ *   rejected. React does not deliver this event to an `onInvalid` prop, so use `addEventListener`.
+ *
+ * @cssprop [--ndp-font] - Font family for the label, input and message.
+ * @cssprop [--ndp-bg] - Input background.
+ * @cssprop [--ndp-text] - Typed text color.
+ * @cssprop [--ndp-muted] - Label color.
+ * @cssprop [--ndp-accent] - Focus outline color.
+ * @cssprop [--ndp-border] - Input border color.
+ * @cssprop [--ndp-error] - Border and message color when the typed date is rejected.
  */
 export class NepaliDateField extends LitElement {
   static override properties = {
@@ -45,19 +61,10 @@ export class NepaliDateField extends LitElement {
   declare private _error: string;
 
   static override styles = [
+    tokens,
     css`
       :host {
-        --ndp-font: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
-        --ndp-text: #1b1b1f;
-        --ndp-muted: #6b6b70;
-        --ndp-accent: #2f6fed;
-        --ndp-bg: #ffffff;
-        --ndp-border: #d3d4d8;
-        --ndp-error: #ba1a1a;
-        --ndp-hover: rgba(47, 111, 237, 0.12);
         display: inline-block;
-        font-family: var(--ndp-font);
-        color: var(--ndp-text);
       }
       :host([disabled]) {
         opacity: 0.55;
@@ -70,27 +77,27 @@ export class NepaliDateField extends LitElement {
       }
       label {
         font-size: 0.78rem;
-        color: var(--ndp-muted);
+        color: var(--_ndp-muted);
       }
       input {
         font: inherit;
-        color: var(--ndp-text);
-        background: var(--ndp-bg);
-        border: 1px solid var(--ndp-border);
+        color: var(--_ndp-text);
+        background: var(--_ndp-bg);
+        border: 1px solid var(--_ndp-border);
         border-radius: 8px;
         padding: 8px 10px;
         min-width: 9.5rem;
       }
       input:focus-visible {
-        outline: 2px solid var(--ndp-accent);
-        border-color: var(--ndp-accent);
+        outline: 2px solid var(--_ndp-accent);
+        border-color: var(--_ndp-accent);
       }
       :host(.invalid) input,
       .invalid input {
-        border-color: var(--ndp-error);
+        border-color: var(--_ndp-error);
       }
       .error {
-        color: var(--ndp-error);
+        color: var(--_ndp-error);
         font-size: 0.75rem;
         min-height: 1em;
       }
@@ -160,7 +167,13 @@ export class NepaliDateField extends LitElement {
         }),
       );
     } else if (result.error) {
-      this.dispatchEvent(new CustomEvent('invalid', { detail: { message: result.error }, bubbles: true, composed: true }));
+      this.dispatchEvent(
+        new CustomEvent<NepaliDateFieldInvalidDetail>('invalid', {
+          detail: { message: result.error },
+          bubbles: true,
+          composed: true,
+        }),
+      );
     }
   }
 

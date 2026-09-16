@@ -19,7 +19,20 @@ import { calendarStyles, fieldStyles, overlayStyles, tokens } from './internal/s
  * A docked Bikram Sambat date picker: a text field the user can type into, plus a calendar button
  * that opens the month grid in an anchored popover.
  *
- * @fires change - [NepaliDatePickerChangeDetail] when a valid date is chosen by typing or clicking.
+ * @fires {CustomEvent<NepaliDatePickerChangeDetail>} change - Dispatched when a valid date is
+ *   chosen by typing or clicking.
+ *
+ * @cssprop [--ndp-font] - Font family for the whole element.
+ * @cssprop [--ndp-bg] - Field and popover background.
+ * @cssprop [--ndp-text] - Primary text color.
+ * @cssprop [--ndp-muted] - Label, weekday headers and out-of-month days.
+ * @cssprop [--ndp-accent] - Selection background and the field focus outline.
+ * @cssprop [--ndp-on-accent] - Text color on top of the accent.
+ * @cssprop [--ndp-hover] - Hover wash over a selectable day.
+ * @cssprop [--ndp-today-ring] - Ring color marking today.
+ * @cssprop [--ndp-border] - Field border, divider and outline color.
+ * @cssprop [--ndp-error] - Border and message color when the typed date is rejected.
+ * @cssprop [--ndp-radius] - Corner radius of the popover, surface and day cells.
  */
 export class NepaliDatePickerDocked extends LitElement {
   static override properties = {

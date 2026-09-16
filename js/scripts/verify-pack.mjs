@@ -13,7 +13,9 @@ const wcDir = join(jsRoot, 'packages', 'web-component');
 
 const coreDist = join(coreDir, 'dist', 'NepaliDatePickerKmp-nepali-date-picker-core.mjs');
 const wcDist = join(wcDir, 'dist', 'index.js');
-if (!existsSync(coreDist) || !existsSync(wcDist)) {
+const wcBundle = join(wcDir, 'dist', 'nepali-date-picker.bundled.js');
+const wcReactTypes = join(wcDir, 'dist', 'react.d.ts');
+if (!existsSync(coreDist) || !existsSync(wcDist) || !existsSync(wcBundle) || !existsSync(wcReactTypes)) {
   console.error('Missing build output. Run `npm run build` (from js/) before verify:pack.');
   process.exit(1);
 }
@@ -56,7 +58,7 @@ try {
           '@nepali-date-picker/web-component': `file:${wcTgz}`,
         },
         overrides: { '@nepali-date-picker/core': `file:${coreTgz}` },
-        devDependencies: { vite: '^5.4.0' },
+        devDependencies: { vite: '^5.4.0', jsdom: '^25.0.0' },
       },
       null,
       2,
@@ -95,6 +97,7 @@ console.log('core runtime OK (round-trip 2024-01-15, today BS ' + today.year + '
   writeFileSync(
     join(consumer, 'entry.js'),
     `import '@nepali-date-picker/web-component';
+import '@nepali-date-picker/web-component/react';
 import { NepaliDatePicker } from '@nepali-date-picker/web-component';
 if (typeof NepaliDatePicker !== 'function') {
   throw new Error('NepaliDatePicker export is not a class');
@@ -102,8 +105,66 @@ if (typeof NepaliDatePicker !== 'function') {
 `,
   );
 
+  // The CDN bundle is the one artifact a browser loads without a resolver, so it is checked for the
+  // two properties that would make it useless there: a leftover bare import, and an element that
+  // never registers. jsdom stands in for the browser because the bundle inlines Lit's browser build
+  // and so needs real DOM globals, not Lit's server shim.
+  writeFileSync(
+    join(consumer, 'bundle-check.mjs'),
+    `import { readFileSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
+import { JSDOM } from 'jsdom';
+
+const tags = [
+  'nepali-date-picker',
+  'nepali-date-range-picker',
+  'nepali-date-picker-dialog',
+  'nepali-date-picker-docked',
+  'nepali-date-field',
+  'nepali-date-range-field',
+  'nepali-wheel-date-picker',
+];
+
+// Resolved through the exports map on the ESM condition, so a broken './bundle' entry fails here
+// rather than in a consumer's browser.
+const bundleUrl = import.meta.resolve('@nepali-date-picker/web-component/bundle');
+const source = readFileSync(fileURLToPath(bundleUrl), 'utf8');
+const bareImport = /(?:\\bfrom\\s*|\\bimport\\s*)["']([^"'.\\/][^"']*)["']/.exec(source);
+if (bareImport) {
+  throw new Error('bundle still imports the bare specifier ' + bareImport[1] + '; a CDN cannot resolve it');
+}
+
+// Every DOM global jsdom offers is installed, not a hand-picked list: Lit touches Document,
+// CSSStyleSheet and friends at module scope, and Node's own Event / CustomEvent classes are not
+// interchangeable with jsdom's, so jsdom has to win.
+const dom = new JSDOM('<!doctype html><nepali-date-picker></nepali-date-picker>');
+for (const key of Object.getOwnPropertyNames(dom.window)) {
+  if (key === 'undefined' || key === 'globalThis' || key === 'navigator') continue;
+  try {
+    globalThis[key] = dom.window[key];
+  } catch {
+    // Read-only globals such as \`window\` itself are already correct or unused here.
+  }
+}
+Object.defineProperty(globalThis, 'navigator', { value: dom.window.navigator, configurable: true });
+
+await import(bundleUrl);
+
+const missing = tags.filter((tag) => !dom.window.customElements.get(tag));
+if (missing.length > 0) {
+  throw new Error('bundle registered no element for: ' + missing.join(', '));
+}
+const el = dom.window.document.querySelector('nepali-date-picker');
+if (el.constructor === dom.window.HTMLElement) {
+  throw new Error('the existing <nepali-date-picker> tag was never upgraded');
+}
+console.log('bundle OK (' + tags.length + ' elements registered, no bare imports)');
+`,
+  );
+
   run('npm', ['install', '--no-audit', '--no-fund'], consumer);
   run('node', ['core-check.mjs'], consumer);
+  run('node', ['bundle-check.mjs'], consumer);
   run('npx', ['vite', 'build', '--logLevel', 'warn'], consumer);
   if (!existsSync(join(consumer, 'dist', 'index.html'))) {
     throw new Error('vite build produced no output; web-component did not resolve');

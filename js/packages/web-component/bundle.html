@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>CDN bundle smoke test</title>
+
+    <!--
+      Loads the single self-contained file a CDN consumer gets, rather than the per-element ESM the
+      rest of the tooling exercises. This is the manual browser check before a release: jsdom cannot
+      tell you whether shadow DOM, adopted stylesheets and layout actually work.
+
+      Run `npm run build`, then serve this directory and open /bundle.html. Use
+      `python3 -m http.server 8000` to load the artifact byte for byte; `npm run dev` also works but
+      Vite rewrites the module on the way through. A module script cannot be opened over file://.
+
+      Every `--ndp-*` below is set on :root, not on the elements. That only reaches an element if its
+      token defaults come from the shared block, so a regression there is visible here immediately:
+      the pickers would fall back to blue.
+    -->
+    <style>
+      :root {
+        --ndp-accent: #b5179e;
+        --ndp-today-ring: #b5179e;
+        --ndp-in-range: rgba(181, 23, 158, 0.16);
+        --ndp-hover: rgba(181, 23, 158, 0.12);
+        --ndp-radius: 16px;
+        --ndp-error: #c1121f;
+      }
+      body {
+        font-family: system-ui, sans-serif;
+        margin: 0;
+        padding: 32px;
+        background: #f4f5f7;
+        color: #1b1b1f;
+      }
+      h1 {
+        font-size: 1.25rem;
+      }
+      p.note {
+        max-width: 60ch;
+        color: #56565c;
+        font-size: 0.85rem;
+      }
+      .grid {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 32px;
+        align-items: flex-start;
+        margin-top: 24px;
+      }
+      section {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+      h2 {
+        font-size: 0.78rem;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: #56565c;
+        margin: 0;
+      }
+      pre {
+        background: #1b1b1f;
+        color: #d6e2ff;
+        padding: 16px;
+        border-radius: 12px;
+        font-size: 0.78rem;
+        max-height: 16rem;
+        overflow: auto;
+      }
+      #status {
+        font-weight: 600;
+      }
+    </style>
+  </head>
+
+  <body>
+    <h1>CDN bundle smoke test</h1>
+    <p class="note">
+      Every element below comes from <code>dist/nepali-date-picker.bundled.js</code>, and every color
+      comes from <code>:root</code>. Click through each one and watch the log.
+    </p>
+    <p id="status">loading…</p>
+
+    <div class="grid">
+      <section>
+        <h2>inline</h2>
+        <nepali-date-picker value="2081-05-24" show-english></nepali-date-picker>
+      </section>
+
+      <section>
+        <h2>range</h2>
+        <nepali-date-range-picker start="2081-05-10" end="2081-05-24"></nepali-date-range-picker>
+      </section>
+
+      <section>
+        <h2>wheel</h2>
+        <nepali-wheel-date-picker value="2081-05-24"></nepali-wheel-date-picker>
+      </section>
+
+      <section>
+        <h2>docked</h2>
+        <nepali-date-picker-docked label="Joined on"></nepali-date-picker-docked>
+      </section>
+
+      <section>
+        <h2>field (type 2081/01/40 for the error state)</h2>
+        <nepali-date-field label="Date of birth"></nepali-date-field>
+      </section>
+
+      <section>
+        <h2>range field</h2>
+        <nepali-date-range-field start-label="From" end-label="To"></nepali-date-range-field>
+      </section>
+
+      <section>
+        <h2>dialog</h2>
+        <button id="open">Open dialog</button>
+        <nepali-date-picker-dialog heading="Pick a date"></nepali-date-picker-dialog>
+      </section>
+
+      <section>
+        <h2>nepali script</h2>
+        <nepali-date-picker language="ne" value="2081-05-24"></nepali-date-picker>
+      </section>
+    </div>
+
+    <h2 style="margin-top: 32px">events</h2>
+    <pre id="log">nothing yet</pre>
+
+    <script type="module" src="./dist/nepali-date-picker.bundled.js"></script>
+    <script type="module">
+      const tags = [
+        'nepali-date-picker',
+        'nepali-date-range-picker',
+        'nepali-date-picker-dialog',
+        'nepali-date-picker-docked',
+        'nepali-date-field',
+        'nepali-date-range-field',
+        'nepali-wheel-date-picker',
+      ];
+
+      await Promise.all(tags.map((tag) => customElements.whenDefined(tag)));
+
+      const status = document.getElementById('status');
+      const host = document.querySelector('nepali-date-picker');
+      const resolved = getComputedStyle(host).getPropertyValue('--_ndp-accent').trim();
+      if (resolved === '') {
+        status.textContent = `${tags.length} elements registered. Check the colors by eye.`;
+      } else {
+        const themed = resolved === '#b5179e';
+        status.textContent = `${tags.length} elements registered. Theme inherited from :root: ${themed ? 'yes' : 'NO, this is a regression'}`;
+        status.style.color = themed ? '#2d6a4f' : '#c1121f';
+      }
+
+      const log = document.getElementById('log');
+      const lines = [];
+      const record = (event) => {
+        lines.unshift(`${event.target.tagName.toLowerCase()} ${event.type} ${JSON.stringify(event.detail ?? null)}`);
+        log.textContent = lines.slice(0, 12).join('\n');
+      };
+      for (const type of ['change', 'invalid', 'cancel']) document.addEventListener(type, record);
+
+      document.getElementById('open').addEventListener('click', () => {
+        document.querySelector('nepali-date-picker-dialog').show();
+      });
+    </script>
+  </body>
+</html>

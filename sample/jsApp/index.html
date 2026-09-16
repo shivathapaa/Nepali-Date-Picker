@@ -219,6 +219,7 @@ convertAdToBs(2024, 9, 9);  // { year: 2081, month: 5, dayOfMonth: 24, ... }</co
             <button class="tab" role="tab" data-tab="vue" aria-selected="false">Vue</button>
             <button class="tab" role="tab" data-tab="angular" aria-selected="false">Angular</button>
             <button class="tab" role="tab" data-tab="svelte" aria-selected="false">Svelte</button>
+            <button class="tab" role="tab" data-tab="cdn" aria-selected="false">CDN / jQuery</button>
           </div>
           <div class="tabpanel" data-tab="vanilla" data-active>
             <pre><code>import '@nepali-date-picker/web-component';
@@ -232,11 +233,12 @@ export function Picker() {
   return (
     &lt;nepali-date-picker
       value="2081-05-24"
-      onChange={(e) =&gt; console.log(e.detail)}
+      onChange={(e) =&gt; console.log(e.nativeEvent.detail)}
     /&gt;
   );
 }
-// React 19 sets properties and forwards events natively.</code></pre>
+// React wraps the CustomEvent, so the payload is on nativeEvent.
+// Import '@nepali-date-picker/web-component/react' once for TSX types.</code></pre>
           </div>
           <div class="tabpanel" data-tab="vue">
             <pre><code>// vite.config.js: mark the tag as a custom element
@@ -256,7 +258,23 @@ import '@nepali-date-picker/web-component';
           <div class="tabpanel" data-tab="svelte">
             <pre><code>&lt;script&gt;import '@nepali-date-picker/web-component';&lt;/script&gt;
 
+&lt;!-- Svelte 5 --&gt;
+&lt;nepali-date-picker value="2081-05-24" onchange={(e) =&gt; console.log(e.detail)} /&gt;
+
+&lt;!-- Svelte 4 --&gt;
 &lt;nepali-date-picker value="2081-05-24" on:change={(e) =&gt; console.log(e.detail)} /&gt;</code></pre>
+          </div>
+          <div class="tabpanel" data-tab="cdn">
+            <pre><code>&lt;!-- no bundler: one self-contained file, 64 kB gzipped --&gt;
+&lt;script type="module" src="https://cdn.jsdelivr.net/npm/@nepali-date-picker/web-component"&gt;&lt;/script&gt;
+
+&lt;nepali-date-picker id="picker"&gt;&lt;/nepali-date-picker&gt;
+
+&lt;script&gt;
+  // jQuery needs no plugin; .val() does not reach a custom element property
+  $('#picker')[0].value = '2081-05-24';
+  $('#picker').on('change', (e) =&gt; console.log(e.detail.bsIso));
+&lt;/script&gt;</code></pre>
           </div>
         </section>
       </div>

@@ -11,6 +11,7 @@ import { convertBsToAd } from '@nepali-date-picker/core';
 import type { CalendarDate, NepaliDateRangeChangeDetail, NepaliLanguage } from './types.js';
 import { parseIso, toIso } from './utils.js';
 import { compare } from './internal/calendar-model.js';
+import { tokens } from './internal/styles.js';
 import './nepali-date-field.js';
 import type { NepaliDateField } from './nepali-date-field.js';
 
@@ -18,7 +19,21 @@ import type { NepaliDateField } from './nepali-date-field.js';
  * A pair of Bikram Sambat date text fields for a start / end range, with the same typed validation as
  * `<nepali-date-field>` plus a cross-field check that the end is not before the start.
  *
- * @fires change - [NepaliDateRangeChangeDetail] whenever a valid start or end changes.
+ * Every custom property set here also reaches the two inner `<nepali-date-field>` elements, since
+ * custom properties inherit through the shadow boundary.
+ *
+ * @fires {CustomEvent<NepaliDateRangeChangeDetail>} change - Dispatched whenever a valid start or
+ *   end changes.
+ * @fires {CustomEvent<NepaliDateFieldInvalidDetail>} invalid - Reaches listeners here from whichever
+ *   inner field rejected what was typed.
+ *
+ * @cssprop [--ndp-font] - Font family for the labels, inputs and message.
+ * @cssprop [--ndp-bg] - Input background.
+ * @cssprop [--ndp-text] - Typed text color.
+ * @cssprop [--ndp-muted] - Label color.
+ * @cssprop [--ndp-accent] - Focus outline color.
+ * @cssprop [--ndp-border] - Input border color.
+ * @cssprop [--ndp-error] - Border and message color when a typed date is rejected.
  */
 export class NepaliDateRangeField extends LitElement {
   static override properties = {
@@ -44,11 +59,10 @@ export class NepaliDateRangeField extends LitElement {
   declare private _error: string;
 
   static override styles = [
+    tokens,
     css`
       :host {
-        --ndp-error: #ba1a1a;
         display: inline-block;
-        font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
       }
       .row {
         display: inline-flex;
@@ -56,7 +70,7 @@ export class NepaliDateRangeField extends LitElement {
         flex-wrap: wrap;
       }
       .error {
-        color: var(--ndp-error);
+        color: var(--_ndp-error);
         font-size: 0.75rem;
         min-height: 1em;
         margin-top: 4px;

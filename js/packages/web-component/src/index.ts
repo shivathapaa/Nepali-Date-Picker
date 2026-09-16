@@ -24,6 +24,10 @@ export { NepaliWheelDatePicker } from './nepali-wheel-date-picker.js';
 export type {
   CalendarDate,
   NepaliLanguage,
+  NepaliDateFieldInvalidDetail,
+  NepaliDateFieldInvalidEvent,
   NepaliDatePickerChangeDetail,
+  NepaliDatePickerChangeEvent,
   NepaliDateRangeChangeDetail,
+  NepaliDateRangeChangeEvent,
 } from './types.js';

@@ -49,3 +49,25 @@ export interface NepaliDateRangeChangeDetail {
   startAdIso: string | null;
   endAdIso: string | null;
 }
+
+/**
+ * Payload of the `invalid` event dispatched by the text field elements when what the user typed
+ * cannot be accepted.
+ *
+ * @property message The rejection reason, already localized to the element's current language.
+ */
+export interface NepaliDateFieldInvalidDetail {
+  message: string;
+}
+
+/**
+ * The `change` event of the single-date elements. Named so that `addEventListener` callbacks can be
+ * annotated without spelling out the `CustomEvent` wrapper.
+ */
+export type NepaliDatePickerChangeEvent = CustomEvent<NepaliDatePickerChangeDetail>;
+
+/** The `change` event of the range elements. */
+export type NepaliDateRangeChangeEvent = CustomEvent<NepaliDateRangeChangeDetail>;
+
+/** The `invalid` event of the text field elements. */
+export type NepaliDateFieldInvalidEvent = CustomEvent<NepaliDateFieldInvalidDetail>;

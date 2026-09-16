@@ -28,6 +28,9 @@ and engine function, is **[README-js.md](../README-js.md)**. To run the showcase
 </script>
 ```
 
+No bundler? Swap that import for the self-contained build (64 kB gzipped, all seven elements):
+`<script type="module" src="https://cdn.jsdelivr.net/npm/@nepali-date-picker/web-component"></script>`.
+
 Works in any framework (custom elements are standard DOM). Full attribute / event / theming reference
 and framework snippets: **[web-component README](packages/web-component/README.md)**.
 

@@ -26,7 +26,16 @@ interface WheelOption {
  * day. The day column adjusts to the selected month's length. Selection is driven by clicking an item
  * or the Up / Down arrows, so it is accessible and works without pointer scrolling.
  *
- * @fires change - [NepaliDatePickerChangeDetail] whenever the selected date changes.
+ * @fires {CustomEvent<NepaliDatePickerChangeDetail>} change - Dispatched whenever the selected date
+ *   changes.
+ *
+ * @cssprop [--ndp-font] - Font family for the whole element.
+ * @cssprop [--ndp-bg] - Wheel background.
+ * @cssprop [--ndp-text] - Color of the centered, selected value.
+ * @cssprop [--ndp-muted] - Color of the values above and below the selection.
+ * @cssprop [--ndp-accent] - Selection band and focus outline color.
+ * @cssprop [--ndp-hover] - Hover wash over a value.
+ * @cssprop [--ndp-radius] - Corner radius of the wheel and its selection band.
  */
 export class NepaliWheelDatePicker extends LitElement {
   static override properties = {

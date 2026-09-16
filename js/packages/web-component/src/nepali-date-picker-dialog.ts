@@ -21,8 +21,21 @@ import { calendarStyles, overlayStyles, tokens } from './internal/styles.js';
  * A modal Bikram Sambat date picker dialog with a headline and confirm / cancel actions. Set
  * `fullscreen` for the full-screen variant.
  *
- * @fires change - [NepaliDatePickerChangeDetail] when the user confirms a date.
- * @fires cancel - When the user dismisses the dialog without confirming.
+ * @fires {CustomEvent<NepaliDatePickerChangeDetail>} change - Dispatched when the user confirms a
+ *   date.
+ * @fires {CustomEvent} cancel - Dispatched, with no detail, when the user dismisses the dialog
+ *   without confirming.
+ *
+ * @cssprop [--ndp-font] - Font family for the whole element.
+ * @cssprop [--ndp-bg] - Dialog and calendar surface background.
+ * @cssprop [--ndp-text] - Primary text color.
+ * @cssprop [--ndp-muted] - Secondary text, weekday headers and out-of-month days.
+ * @cssprop [--ndp-accent] - Selection background and the confirm action color.
+ * @cssprop [--ndp-on-accent] - Text color on top of the accent.
+ * @cssprop [--ndp-hover] - Hover wash over a day or an action.
+ * @cssprop [--ndp-today-ring] - Ring color marking today.
+ * @cssprop [--ndp-border] - Divider and outline color.
+ * @cssprop [--ndp-radius] - Corner radius of the dialog, surface and day cells.
  */
 export class NepaliDatePickerDialog extends LitElement {
   static override properties = {

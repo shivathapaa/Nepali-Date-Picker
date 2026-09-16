@@ -41,9 +41,30 @@ every 3.1.0 project can upgrade without touching code.
 * `:core` gained a `@JsExport` wrapper API and now emits `.d.ts`, so the npm engine is typed.
 * Full web documentation lives in [`README-js.md`](./README-js.md), with a live showcase at
   [`/demo/`](https://shivathapaa.github.io/Nepali-Date-Picker/demo/) built from `sample/jsApp`.
+* A self-contained build ships for CDN and `<script>` use: one file with Lit and the conversion
+  engine inlined, 232 kB minified and 64 kB gzipped for all seven elements, reachable as
+  `@nepali-date-picker/web-component/bundle` or straight from jsDelivr / unpkg. It is an ES module
+  rather than UMD, since every browser that implements custom elements also supports module scripts.
+* The elements ship a `custom-elements.json` manifest, so editors with custom-element support
+  complete attributes, events and CSS custom properties per tag, and every element now documents the
+  `--ndp-*` properties it actually reads.
+* TSX typings for the tags are generated from that manifest and opt in with a single import of
+  `@nepali-date-picker/web-component/react`. No runtime, no dependency, no peer dependency. They
+  encode what React genuinely does with a custom element: `onChange` arrives as a synthetic event, so
+  the payload is at `event.nativeEvent.detail`, and `invalid` and `cancel` never reach an
+  `on`-prefixed prop at all, so no props are generated for them.
+* `NepaliDateFieldInvalidDetail` is exported instead of being an anonymous inline type, alongside
+  `NepaliDatePickerChangeEvent`, `NepaliDateRangeChangeEvent` and `NepaliDateFieldInvalidEvent` for
+  typing listeners.
+* Fixed: `<nepali-date-field>` and `<nepali-date-range-field>` declared their own `--ndp-*` defaults,
+  which beat an inherited value, so page-level theming such as `:root { --ndp-accent: ... }` never
+  reached them. All seven elements now take their defaults from the shared token block, and theming
+  behaves the same everywhere.
 * `verify:pack` packs both packages, installs them into a throwaway consumer and round-trips a
   conversion before a release can publish, so a broken `exports` map or an incomplete `dist` cannot
-  ship. npm publishing uses OIDC trusted publishing instead of a long-lived token.
+  ship. It also resolves the CDN bundle through the `exports` map, rejects any bare import left in
+  it, and loads it in a DOM to confirm all seven tags register. npm publishing uses OIDC trusted
+  publishing instead of a long-lived token.
 
 ### Documentation
 

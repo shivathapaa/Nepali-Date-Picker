@@ -22,12 +22,19 @@ import { calendarStyles, tokens } from './internal/styles.js';
  * All calendar math comes from `@nepali-date-picker/core`, the same engine used by the Kotlin,
  * Android, and Python builds, so dates always agree across platforms.
  *
- * @fires change - A [CustomEvent] with a [NepaliDatePickerChangeDetail] payload when the user
- *   selects a date. Bubbles and crosses the shadow boundary.
+ * @fires {CustomEvent<NepaliDatePickerChangeDetail>} change - Dispatched when the user selects a
+ *   date. Bubbles and crosses the shadow boundary.
  *
- * @cssprop [--ndp-accent] - Selection background color.
+ * @cssprop [--ndp-font] - Font family for the whole element.
+ * @cssprop [--ndp-bg] - Calendar surface background.
+ * @cssprop [--ndp-text] - Primary text color.
+ * @cssprop [--ndp-muted] - Secondary text, weekday headers and out-of-month days.
+ * @cssprop [--ndp-accent] - Selection background and focus color.
+ * @cssprop [--ndp-on-accent] - Text color on top of the accent.
+ * @cssprop [--ndp-hover] - Hover wash over a selectable day.
  * @cssprop [--ndp-today-ring] - Ring color marking today.
- * @cssprop [--ndp-radius] - Corner radius. See the README for the full `--ndp-*` list.
+ * @cssprop [--ndp-border] - Divider and outline color.
+ * @cssprop [--ndp-radius] - Corner radius of the surface and day cells.
  */
 export class NepaliDatePicker extends LitElement {
   static override properties = {

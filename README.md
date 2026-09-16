@@ -157,9 +157,12 @@ npm install @nepali-date-picker/core            # engine only
 <nepali-date-picker value="2081-05-24" language="ne"></nepali-date-picker>
 ```
 
+With no bundler, swap that import for the self-contained build (64 kB gzipped, every element):
+`<script type="module" src="https://cdn.jsdelivr.net/npm/@nepali-date-picker/web-component"></script>`.
+
 The web component ships every variant (inline, dialog, docked, range, field, range-field, wheel). See
-the [live showcase](https://shivathapaa.github.io/Nepali-Date-Picker/demo/); build, test, and
-publishing details live in [`js/README.md`](js/README.md).
+the [live showcase](https://shivathapaa.github.io/Nepali-Date-Picker/demo/) and the full web guide in
+[README-js.md](./README-js.md); build and publishing details live in [`js/README.md`](js/README.md).
 
 ### Artifacts (3.0.0+)
 

@@ -9,7 +9,11 @@ import type {
   NepaliDateRangePicker,
   NepaliWheelDatePicker,
 } from '../src/index.js';
-import type { NepaliDatePickerChangeDetail, NepaliDateRangeChangeDetail } from '../src/types.js';
+import type {
+  NepaliDateFieldInvalidEvent,
+  NepaliDatePickerChangeDetail,
+  NepaliDateRangeChangeDetail,
+} from '../src/types.js';
 
 async function mount<T extends HTMLElement>(tag: string, attrs: Record<string, string> = {}): Promise<T> {
   const el = document.createElement(tag) as T;
@@ -168,7 +172,7 @@ describe('<nepali-date-field>', () => {
     let invalidMsg = '';
     let changed = false;
     el.addEventListener('invalid', (e) => {
-      invalidMsg = (e as CustomEvent<{ message: string }>).detail.message;
+      invalidMsg = (e as NepaliDateFieldInvalidEvent).detail.message;
     });
     el.addEventListener('change', () => {
       changed = true;

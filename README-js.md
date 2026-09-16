@@ -23,15 +23,12 @@ Two packages. Install whichever you need (the UI package already includes the en
 > **Indexing (important):** months and weekdays are **1-based**. Month `1` = Baisakh … `12` = Chaitra.
 > Weekday `1` = Sunday … `7` = Saturday. `era`: `1` = AD, `2` = BS.
 
-> **Where the code lives.** Both packages are generated from the Kotlin Multiplatform `:core` engine
-> in [shivathapaa/Nepali-Date-Picker](https://github.com/shivathapaa/Nepali-Date-Picker). The
-> TypeScript sources for the elements are under [`js/`](./js), and a showcase that uses every one of
-> them is in [`sample/jsApp`](./sample/jsApp).
-
-> **Other platforms.** The same calendar tables power the Kotlin Multiplatform library (see the
-> [main README](./README.md)), the iOS Swift package (see [README-spm.md](./README-spm.md)), and
-> [`nepali_calendar_utils`](https://github.com/shivathapaa/nepali_calendar_utils) on PyPI, so results
-> match across JavaScript, Kotlin, Swift and Python.
+> **Other platforms.** Both packages are generated from the Kotlin Multiplatform `:core` engine, the
+> same one behind the Kotlin library (see the [main README](./README.md)), the iOS Swift package
+> ([README-spm.md](./README-spm.md)), and
+> [`nepali_calendar_utils`](https://github.com/shivathapaa/nepali_calendar_utils) on PyPI, so a date
+> converts identically across JavaScript, Kotlin, Swift and Python. The element sources live in
+> [`js/`](./js) and a showcase using every one of them is in [`sample/jsApp`](./sample/jsApp).
 
 ---
 
@@ -43,6 +40,18 @@ Two packages. Install whichever you need (the UI package already includes the en
 npm install @nepali-date-picker/web-component
 ```
 
+No bundler? Load the self-contained build from a CDN. It inlines Lit and the conversion engine, so
+there is nothing left for the browser to resolve:
+
+```html
+<script type="module" src="https://cdn.jsdelivr.net/npm/@nepali-date-picker/web-component"></script>
+<nepali-date-picker value="2081-05-24"></nepali-date-picker>
+```
+
+232 kB minified, 64 kB gzipped, all seven elements. It is ES-module only, which costs nothing in
+practice: every browser that implements custom elements also supports module scripts. This file is
+browser-only; on a server, import the package itself (see [Server rendering](#server-rendering)).
+
 ## Registering the elements
 
 Import the package once (side-effect import). This defines **all** the custom elements; then use the
@@ -52,7 +61,9 @@ tags anywhere in your markup:
 import '@nepali-date-picker/web-component';
 ```
 
-To pull in only the element(s) you use (smaller bundle), import the matching **subpath** instead:
+To register only the element(s) you use, import the matching **subpath** instead. The saving is
+modest on purpose: the shared conversion engine is about 79% of the payload, so one element is only
+around 3 kB gzipped lighter than all seven.
 
 | Import | Registers |
 | --- | --- |
@@ -191,7 +202,7 @@ forms. Accepts `YYYY/MM/DD` and Devanagari digits.
 | `label` | `label` | string | `""` | Field label. |
 
 **Events:** `change` → `NepaliDatePickerChangeDetail` when the typed date becomes valid;
-`invalid` → `{ message: string }` when rejected. The host also toggles a `.invalid` class.
+`invalid` → `NepaliDateFieldInvalidDetail` when rejected. The host also toggles a `.invalid` class.
 
 ```html
 <nepali-date-field label="Date of birth" value="2050-04-12"></nepali-date-field>
@@ -218,7 +229,8 @@ the start (localized error). The end field's lower bound follows the chosen star
 | `end-label` | `endLabel` | string | localized "End date" | End field label. |
 | `disabled` | `disabled` | boolean | `false` | Read-only + dimmed. |
 
-**Events:** `change` → `NepaliDateRangeChangeDetail` whenever a valid start or end changes.
+**Events:** `change` → `NepaliDateRangeChangeDetail` whenever a valid start or end changes;
+`invalid` → `NepaliDateFieldInvalidDetail` from whichever inner field rejected the input.
 
 ```html
 <nepali-date-range-field start="2081-05-10" end="2081-05-20" start-label="From" end-label="To"></nepali-date-range-field>
@@ -270,8 +282,20 @@ interface NepaliDateRangeChangeDetail {
 }
 ```
 
-`<nepali-date-field>` also emits `invalid` → `CustomEvent<{ message: string }>`.
-`<nepali-date-picker-dialog>` also emits `cancel` (no detail).
+Both text field elements also emit `invalid` → `CustomEvent<NepaliDateFieldInvalidDetail>`
+(`{ message: string }`, already localized); on `<nepali-date-range-field>` it arrives from whichever
+inner field rejected the input. `<nepali-date-picker-dialog>` also emits `cancel` (no detail).
+
+For typing a listener without spelling out the `CustomEvent` wrapper, the package exports
+`NepaliDatePickerChangeEvent`, `NepaliDateRangeChangeEvent`, and `NepaliDateFieldInvalidEvent`:
+
+```ts
+import type { NepaliDatePickerChangeEvent } from '@nepali-date-picker/web-component';
+
+picker.addEventListener('change', (event) => {
+  console.log((event as NepaliDatePickerChangeEvent).detail.bsIso);
+});
+```
 
 ## Keyboard (calendar elements)
 
@@ -303,6 +327,10 @@ the element, or on any ancestor (e.g. `body`) - handy for a global or dark theme
 | `--ndp-border` | `#d3d4d8` | Field / select borders. |
 | `--ndp-error` | `#ba1a1a` | Validation error color. |
 | `--ndp-radius` | `12px` | Corner radius. |
+
+Not every element reads every property: a text field has no day grid to tint. Each documents its own
+subset in the shipped `custom-elements.json`, which editors with custom-element support (WebStorm, or
+VS Code with the Lit plugin) use for per-tag completion.
 
 ```css
 /* Brand accent */
@@ -346,6 +374,9 @@ dlg.close();   // close
 
 ## Framework usage
 
+The elements are ordinary DOM, so every framework renders them as-is and there is no wrapper package
+to install. React is the only one that needs anything extra.
+
 <details open>
 <summary><b>Plain HTML / vanilla JS</b></summary>
 
@@ -356,23 +387,68 @@ dlg.close();   // close
 </details>
 
 <details>
-<summary><b>React (19+)</b></summary>
+<summary><b>jQuery</b></summary>
+
+No plugin needed. `.val()` does not reach a custom element's property, so assign it on the DOM node;
+jQuery passes the event payload straight through on `.on()`:
+
+```html
+<script type="module" src="https://cdn.jsdelivr.net/npm/@nepali-date-picker/web-component"></script>
+<nepali-date-picker id="picker"></nepali-date-picker>
+
+<script>
+  $('#picker')[0].value = '2081-05-24';
+  $('#picker').on('change', (event) => console.log(event.detail.bsIso));
+</script>
+```
+</details>
+
+<details>
+<summary><b>React and Next.js</b></summary>
+
+Import the types entry once anywhere in the project and the tags type-check in TSX. It contains no
+runtime code:
 
 ```tsx
 import '@nepali-date-picker/web-component';
+import '@nepali-date-picker/web-component/react';
 
 export function Picker() {
   return (
     <nepali-date-picker
       value="2081-05-24"
-      onChange={(e: CustomEvent) => console.log(e.detail)}
+      language="ne"
+      showEnglish
+      onChange={(event) => console.log(event.nativeEvent.detail.bsIso)}
     />
   );
 }
 ```
 
-React 19 sets custom-element properties and forwards events natively. On React 18 or earlier, set
-non-string props and attach the `change` listener through a `ref`.
+Two things about React are easy to get wrong, so the shipped types encode both:
+
+- **`onChange` hands you a React synthetic event, not the `CustomEvent`.** The payload is at
+  `event.nativeEvent.detail`; `event.detail` is `undefined`.
+- **`invalid` and `cancel` never reach a prop.** React forwards only the events in its own synthetic
+  set, so `onInvalid` and `onCancel` type-check on ordinary elements but would silently do nothing
+  here, and are deliberately absent. Subscribe through a ref instead:
+
+```tsx
+const ref = useRef<NepaliDateField>(null);
+
+useEffect(() => {
+  const el = ref.current;
+  const onInvalid = (event: Event) =>
+    setError((event as NepaliDateFieldInvalidEvent).detail.message);
+  el?.addEventListener('invalid', onInvalid);
+  return () => el?.removeEventListener('invalid', onInvalid);
+}, []);
+```
+
+On React 18 and earlier every prop is written as a string attribute, so set non-string properties
+through the same ref (`ref.current.showEnglish = true`).
+
+In the Next.js App Router, put `'use client'` at the top of the file that renders the elements.
 </details>
 
 <details>
@@ -404,13 +480,33 @@ Add `CUSTOM_ELEMENTS_SCHEMA` to the module / component, import the package once,
 </details>
 
 <details>
-<summary><b>Svelte</b></summary>
+<summary><b>Svelte and SvelteKit</b></summary>
+
+Nothing to configure. Svelte compiles to real DOM, so the elements and their events work directly
+and `event.detail` is the payload itself.
 
 ```svelte
-<script>import '@nepali-date-picker/web-component';</script>
+<script>
+  import '@nepali-date-picker/web-component';
+</script>
+
+<!-- Svelte 5 -->
+<nepali-date-picker value="2081-05-24" onchange={(e) => console.log(e.detail)} />
+
+<!-- Svelte 4 -->
 <nepali-date-picker value="2081-05-24" on:change={(e) => console.log(e.detail)} />
 ```
 </details>
+
+### Server rendering
+
+`import '@nepali-date-picker/web-component'` is safe to run on a server. Lit installs a DOM shim on
+Node, so importing the package during a Next.js, SvelteKit, Nuxt, or Astro server render does not
+throw; the tags stay unupgraded until the browser runs the module. No `typeof window` guard, no
+`ssr: false`, and no dynamic import are needed.
+
+The CDN bundle is the one exception. It inlines Lit's browser build, so importing it on a server
+fails with `HTMLElement is not defined`. Load it from a `<script type="module">` tag only.
 
 ---
 
@@ -591,7 +687,7 @@ toLatinDigits('२०८१ सोमबार');                 // "2081 स�
 
 ## TypeScript
 
-Both packages ship declarations. Common imports:
+Both packages ship declarations.
 
 ```ts
 import type {
@@ -603,33 +699,26 @@ import type {
   NepaliLanguage,                 // "en" | "ne"
   NepaliDatePickerChangeDetail,   // single-date change payload
   NepaliDateRangeChangeDetail,    // range change payload
+  NepaliDateFieldInvalidDetail,   // invalid payload
+  NepaliDatePickerChangeEvent,    // the CustomEvent wrappers, for listener callbacks
+  NepaliDateRangeChangeEvent,
+  NepaliDateFieldInvalidEvent,
   NepaliDatePicker, NepaliDatePickerDialog, NepaliDatePickerDocked,
   NepaliDateRangePicker, NepaliDateField, NepaliDateRangeField, NepaliWheelDatePicker,
 } from '@nepali-date-picker/web-component';
 ```
 
-Typing a custom-element `change` event:
-
-```ts
-picker.addEventListener('change', (e) => {
-  const detail = (e as CustomEvent<NepaliDatePickerChangeDetail>).detail;
-  console.log(detail.bsIso, detail.adIso, detail.formatted);
-});
-```
-
 Element instances are typed via `HTMLElementTagNameMap`, so `document.querySelector('nepali-date-picker')`
 is typed as `NepaliDatePicker` (with `.value`, `.show()`, etc.).
 
-## Complete export list
+For the tags themselves in TSX, add `import '@nepali-date-picker/web-component/react';` once. See
+[React and Next.js](#framework-usage).
 
-**`@nepali-date-picker/web-component`** - classes `NepaliDatePicker`, `NepaliDateRangePicker`,
-`NepaliDatePickerDialog`, `NepaliDatePickerDocked`, `NepaliDateField`, `NepaliDateRangeField`,
-`NepaliWheelDatePicker`; types `CalendarDate`, `NepaliLanguage`, `NepaliDatePickerChangeDetail`,
-`NepaliDateRangeChangeDetail`.
+## Complete `core` export list
 
-**`@nepali-date-picker/core`** - classes `NepaliDate`, `NepaliMonthInfo`, `NepaliTime`,
-`NepaliDateTime`, `YearRange`; functions `getBsYearRange`, `getAdYearRange`, `getTodayBs`,
-`getTodayAd`, `getCurrentTime`, `convertAdToBs`, `convertBsToAd`, `getBsCalendar`, `getBsMonth`,
+Classes `NepaliDate`, `NepaliMonthInfo`, `NepaliTime`, `NepaliDateTime`, `YearRange`; functions
+`getBsYearRange`, `getAdYearRange`, `getTodayBs`, `getTodayAd`, `getCurrentTime`, `convertAdToBs`,
+`convertBsToAd`, `getBsCalendar`, `getBsMonth`,
 `getTotalDaysInBsMonth`, `getTotalDaysInAdMonth`, `addDaysToBsDate`, `getBsDaysBetween`,
 `getAdDaysBetween`, `compareBsDates`, `getWeekdayName`, `getBsMonthName`, `getAdMonthName`,
 `formatBsDate`, `formatAdDate`, `formatBsDateByPattern`, `formatAdDateByPattern`, `formatTimeEnglish`,
