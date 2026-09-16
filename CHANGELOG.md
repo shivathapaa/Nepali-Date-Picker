@@ -4,6 +4,62 @@ All notable changes to **Nepali-Date-Picker (KMP)** are documented here.
 
 The project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html). Pre-3.0 release history lives in the [GitHub Releases](https://github.com/shivathapaa/Nepali-Date-Picker/releases) page.
 
+## 3.1.1 - Swift package, npm packages, published API reference
+
+Distribution release. The library now ships to Swift Package Manager and npm alongside Maven Central,
+all three generated from the same calendar core, so a Bikram Sambat date converts identically in
+Kotlin, Swift, JavaScript and Python. Nothing in the existing Kotlin and Compose public API changed;
+every 3.1.0 project can upgrade without touching code.
+
+### iOS and Swift
+
+* The pickers are exposed to Swift through `UIViewController` factories, so a SwiftUI or UIKit app can
+  embed them without any Compose code: `NepaliDatePickerViewController`, `NepaliDatePickerDockedViewController`,
+  `NepaliWheelDatePickerViewController`, the range and dialog hosts, and the text-field hosts. Each
+  factory takes a plain options object (`NepaliCalendarOptions`, `NepaliDockedOptions`, `NepaliWheelOptions`,
+  `NepaliFieldOptions`, `NepaliDialogOptions`) instead of a long parameter list, since Kotlin default
+  arguments do not survive the Objective-C bridge.
+* Compose cannot report an intrinsic size to SwiftUI, so every factory takes an `onHeightChange`
+  callback the host can drive its frame from.
+* `:ui` assembles `nepali_date_picker.xcframework` (pickers plus the engine), and `:core` assembles a
+  Compose-free `nepali_date_picker_core.xcframework` (~4 MB) for Swift consumers that only need
+  conversion. The two are alternatives, never additive.
+* Published as a Swift package at [Nepali-Date-Picker-SPM](https://github.com/shivathapaa/Nepali-Date-Picker-SPM)
+  with one product per framework. Full Swift documentation lives in [`README-spm.md`](./README-spm.md).
+* The export surface is now snapshot-tested. `checkIosApi` compares the linked framework against
+  `nepali-date-picker/ui/api/ios.api`, `dumpIosApi` rewrites that snapshot, and `checkBridgeCoverage`
+  fails if a Compose picker has no iOS factory.
+
+### JavaScript and the web
+
+* Two npm packages, generated from `:core` so the conversion tables match exactly:
+  [`@nepali-date-picker/core`](https://www.npmjs.com/package/@nepali-date-picker/core), a
+  zero-dependency BS↔AD conversion and formatting engine with TypeScript definitions, and
+  [`@nepali-date-picker/web-component`](https://www.npmjs.com/package/@nepali-date-picker/web-component),
+  a framework-agnostic custom-element suite (`<nepali-date-picker>`, dialog, docked, range, field,
+  range field, wheel) that works in React, Vue, Angular, Svelte and plain HTML.
+* `:core` gained a `@JsExport` wrapper API and now emits `.d.ts`, so the npm engine is typed.
+* Full web documentation lives in [`README-js.md`](./README-js.md), with a live showcase at
+  [`/demo/`](https://shivathapaa.github.io/Nepali-Date-Picker/demo/) built from `sample/jsApp`.
+* `verify:pack` packs both packages, installs them into a throwaway consumer and round-trips a
+  conversion before a release can publish, so a broken `exports` map or an incomplete `dist` cannot
+  ship. npm publishing uses OIDC trusted publishing instead of a long-lived token.
+
+### Documentation
+
+* A multi-module Dokka API reference is published to
+  [`/api/`](https://shivathapaa.github.io/Nepali-Date-Picker/api/).
+* Every sample app is documented in [`sample/`](./sample), including a SwiftUI sample
+  (`sample/iosSwiftApp`) that consumes the XCFramework the way a real Swift project does.
+
+### Fixes
+
+* `<nepali-date-picker>` rendered its calendar grid with the columns misaligned, ignored theming
+  applied to an ancestor element, and laid the full-screen variant out incorrectly.
+* The Compose sample sized a picker to its content in only one direction.
+* `kotlin-js-store/yarn.lock` is committed and kept current, so JS and Wasm CI builds resolve pinned
+  dependencies.
+
 ## 3.1.0 - New picker experiences, serialization, digit script, holidays, accessibility, and performance
 
 Additive release. No breaking changes to existing public symbols; every prior API works unchanged and all new APIs are opt-in.

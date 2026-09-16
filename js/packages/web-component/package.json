@@ -1,6 +1,6 @@
 {
   "name": "@nepali-date-picker/web-component",
-  "version": "3.1.0",
+  "version": "3.1.1",
   "description": "Framework-agnostic <nepali-date-picker> custom element: a Bikram Sambat (Nepali) calendar date picker that works in React, Vue, Angular, Svelte, and plain HTML.",
   "type": "module",
   "license": "MPL-2.0",
@@ -87,7 +87,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@nepali-date-picker/core": "3.1.0",
+    "@nepali-date-picker/core": "3.1.1",
     "lit": "^3.2.0"
   },
   "devDependencies": {
