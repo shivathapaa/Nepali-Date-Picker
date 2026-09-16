@@ -1,12 +1,13 @@
-# Nepali Date Picker - Swift Package Manager (iOS)
+# Nepali Date Picker - Swift Package Manager (iOS, macOS engine)
 
 <p align="center">
   <img src=".github/assets/nepaliDatePickerBanner.png" alt="" width="100%">
 </p>
 
 A **Bikram Sambat (Nepali) date picker** for iOS, plus a headless **BS ↔ AD conversion, comparison
-and formatting engine**. The pickers are the same Material3-aligned Compose Multiplatform UI that
-ships to Android, hosted inside a `UIViewController` so SwiftUI and UIKit can embed them directly.
+and formatting engine** for iOS and macOS. The pickers are the same Material3-aligned Compose
+Multiplatform UI that ships to Android, hosted inside a `UIViewController` so SwiftUI and UIKit can
+embed them directly.
 
 <p align="center">
   <a href="https://github.com/shivathapaa/Nepali-Date-Picker-SPM/releases">
@@ -86,14 +87,22 @@ ships to Android, hosted inside a `UIViewController` so SwiftUI and UIKit can em
 
 | | |
 | --- | --- |
-| Minimum deployment target | iOS 14 |
-| Architectures | `ios-arm64` (device), `ios-arm64-simulator` (Apple silicon) |
+| Minimum deployment target | iOS 14, macOS 12 (engine only) |
+| Architectures, `nepali-date-picker` | `ios-arm64` (device), `ios-arm64-simulator` (Apple silicon) |
+| Architectures, `nepali-date-picker-core` | the same two, plus `macos-arm64` |
 | Swift tools | 5.5+ |
 | Supported range | BS **1970–2100**, AD **1913–2043** |
 
 The archives ship **arm64 only**. There is no `x86_64` simulator slice, so an Intel Mac, or an
 Apple silicon Mac building for the Rosetta simulator, cannot link the framework. See
 [Required Xcode configuration](#required-xcode-configuration).
+
+> **macOS covers the engine, not the pickers.** `nepali-date-picker-core` carries a `macos-arm64`
+> slice, so a macOS app gets the full conversion, comparison and formatting API. The pickers stay
+> iOS-only: they are hosted in a `UIViewController`, and Compose Multiplatform publishes no
+> embeddable AppKit host to mirror that on macOS. Building a macOS target against the
+> `nepali-date-picker` product fails with `no library for this platform was found`. See
+> [Troubleshooting](#troubleshooting).
 
 > **Indexing (important).** Months and weekdays are **1-based**. Month `1` = Baisakh … `12` = Chaitra.
 > Weekday `1` = Sunday … `7` = Saturday. `era`: `1` = AD, `2` = BS. The first day of the week is
@@ -103,13 +112,14 @@ Apple silicon Mac building for the Rosetta simulator, cannot link the framework.
 
 The package vends two products. **Depend on exactly one.**
 
-| Product | Contains | Swift import | Download |
-| --- | --- | --- | --- |
-| `nepali-date-picker` | The Compose pickers **plus** the full conversion engine | `nepali_date_picker` | ~60 MB |
-| `nepali-date-picker-core` | The conversion engine only, no UI | `nepali_date_picker_core` | ~4 MB |
+| Product | Contains | Platforms | Swift import | Download |
+| --- | --- | --- | --- | --- |
+| `nepali-date-picker` | The Compose pickers **plus** the full conversion engine | iOS 14+ | `nepali_date_picker` | ~60 MB |
+| `nepali-date-picker-core` | The conversion engine only, no UI | iOS 14+, macOS 12+ | `nepali_date_picker_core` | ~4 MB |
 
 Pick `nepali-date-picker-core` when you build your own SwiftUI or UIKit interface and only need
-BS ↔ AD conversion, month details, formatting and comparison.
+BS ↔ AD conversion, month details, formatting and comparison. It is also the only product a
+**macOS** target can link.
 
 > **Never add both.** Unlike the Maven artifacts, where `-ui` depends on `-core` and a single copy
 > lands on the classpath, each XCFramework is a self-contained static binary and the UI framework
@@ -863,6 +873,8 @@ Extending the supported range means extending `daysInMonthMap` in the library, n
 | Symptom | Cause and fix |
 | --- | --- |
 | `found architecture 'arm64', required architecture 'x86_64'` | Building for the Intel simulator. Set `EXCLUDED_ARCHS[sdk=iphonesimulator*] = x86_64`. |
+| `While building for macOS, no library for this platform was found in ... nepali_date_picker.xcframework` | A macOS target is linking the **UI** product, which is iOS-only. Switch the run destination to an iOS Simulator or device, or depend on `nepali-date-picker-core` instead. |
+| The same error naming `nepali_date_picker_core.xcframework` | An Intel Mac, or a macOS deployment target below 12. The macOS slice is `arm64`, minimum macOS 12. |
 | `cannot load module 'Your_App' as 'nepali_date_picker'` | Your app's module name matches the framework's ignoring case. Change `PRODUCT_MODULE_NAME`. |
 | Crash on launch, `SIGABRT` in `PlistSanityCheck` | `CADisableMinimumFrameDurationOnPhone` is missing from `Info.plist`. |
 | `No such module 'nepali_date_picker'` in the editor only | SourceKit indexes before the framework is built. Build once; it resolves. |

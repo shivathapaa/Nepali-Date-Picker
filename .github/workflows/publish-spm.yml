@@ -1,11 +1,9 @@
 name: Publish SPM
 
-# Builds the iOS XCFramework from :nepali-date-picker:ui and publishes it as a
-# self-contained Swift Package Manager release on the sibling repo
-# shivathapaa/Nepali-Date-Picker-SPM: the zip becomes a release asset there,
-# Package.swift is rewritten to point at that asset with its checksum, and a
-# matching semver tag/release is created. Runs on the same release event that
-# drives the Maven Central publish.
+# Builds the :nepali-date-picker:ui XCFramework and publishes it as a self-contained
+# Swift Package Manager release to the sibling shivathapaa/Nepali-Date-Picker-SPM repo.
+# The zip is uploaded as a release asset, Package.swift is updated with its checksum,
+# and a matching semver tag/release is created alongside the Maven Central release.
 on:
   release:
     types: [released, prereleased]
@@ -17,8 +15,8 @@ on:
         type: string
 
 concurrency:
-  # One SPM publish per version. Never cancel in flight: a half-done release
-  # can leave the asset and the Package.swift commit out of sync.
+  # One SPM publish per version; never cancel in-flight releases to avoid
+  # leaving the asset and Package.swift commit out of sync.
   group: publish-spm-${{ github.event.release.tag_name || github.event.inputs.tag }}
   cancel-in-progress: false
 
@@ -160,15 +158,18 @@ jobs:
 
           import PackageDescription
 
-          // Two products, deliberately mutually exclusive. The UI framework
-          // statically embeds the core module, so depending on both would link
-          // the Kotlin runtime and every core symbol twice. Pick
-          // "nepali-date-picker" for the Compose pickers plus the conversion
-          // engine, or "nepali-date-picker-core" for the conversion engine alone.
+          // Two mutually exclusive products: the UI framework embeds core, so linking both
+          // duplicates the Kotlin runtime and core symbols. Use "nepali-date-picker" for UI +
+          // conversion, or "nepali-date-picker-core" for conversion only.
+          //
+          // "nepali-date-picker-core" supports arm64 macOS; the UI product is iOS-only because
+          // Compose Multiplatform has no embeddable AppKit host. macOS 12 is the macosArm64
+          // minimum; Intel Macs are unsupported.
           let package = Package(
               name: "nepali-date-picker",
               platforms: [
                   .iOS(.v14),
+                  .macOS(.v12),
               ],
               products: [
                   .library(name: "nepali-date-picker", targets: ["nepali-date-picker"]),
@@ -240,7 +241,7 @@ jobs:
               --repo "${REPO}" \
               --target main \
               --title "${VERSION}" \
-              --notes "Swift Package Manager distribution of Nepali Date Picker ${VERSION}. Products: \`nepali-date-picker\` (pickers plus the conversion engine) and \`nepali-date-picker-core\` (conversion engine only). Depend on one, never both. Source: https://github.com/shivathapaa/Nepali-Date-Picker/releases/tag/${SOURCE_TAG}" \
+              --notes "Swift Package Manager distribution of Nepali Date Picker ${VERSION}. Products: \`nepali-date-picker\` (pickers plus the conversion engine, iOS only) and \`nepali-date-picker-core\` (conversion engine only, iOS and Apple Silicon macOS 12+). Depend on one, never both. Source: https://github.com/shivathapaa/Nepali-Date-Picker/releases/tag/${SOURCE_TAG}" \
               ${prerelease_flag}
           fi
           echo "SPM ${VERSION} published: https://github.com/${REPO}/releases/tag/${VERSION}"
