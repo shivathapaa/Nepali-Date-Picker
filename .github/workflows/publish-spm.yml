@@ -12,7 +12,7 @@ on:
   workflow_dispatch:
     inputs:
       tag:
-        description: "Existing git tag to (re)publish to SPM, e.g. v3.1.0. The XCFramework is built from this tag."
+        description: "Existing git tag to (re)publish to SPM, e.g. 3.1.0. The XCFramework is built from this tag."
         required: true
         type: string
 
@@ -221,6 +221,7 @@ jobs:
           GH_TOKEN: ${{ secrets.SPM_REPO_TOKEN }}
           REPO: shivathapaa/Nepali-Date-Picker-SPM
           VERSION: ${{ steps.v.outputs.version }}
+          SOURCE_TAG: ${{ steps.v.outputs.raw_tag }}
           UI_ZIP: ${{ github.workspace }}/${{ steps.pkg.outputs.ui_zip_path }}
           CORE_ZIP: ${{ github.workspace }}/${{ steps.pkg.outputs.core_zip_path }}
           PRERELEASE: ${{ github.event.release.prerelease || false }}
@@ -239,7 +240,7 @@ jobs:
               --repo "${REPO}" \
               --target main \
               --title "${VERSION}" \
-              --notes "Swift Package Manager distribution of Nepali Date Picker ${VERSION}. Products: \`nepali-date-picker\` (pickers plus the conversion engine) and \`nepali-date-picker-core\` (conversion engine only). Depend on one, never both. Source: https://github.com/shivathapaa/Nepali-Date-Picker/releases/tag/v${VERSION}" \
+              --notes "Swift Package Manager distribution of Nepali Date Picker ${VERSION}. Products: \`nepali-date-picker\` (pickers plus the conversion engine) and \`nepali-date-picker-core\` (conversion engine only). Depend on one, never both. Source: https://github.com/shivathapaa/Nepali-Date-Picker/releases/tag/${SOURCE_TAG}" \
               ${prerelease_flag}
           fi
           echo "SPM ${VERSION} published: https://github.com/${REPO}/releases/tag/${VERSION}"
