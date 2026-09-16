@@ -50,8 +50,36 @@ jobs:
             :nepali-date-picker:core:jvmTest \
             :nepali-date-picker:core:testAndroidHostTest \
             :nepali-date-picker:core:wasmWasiNodeTest \
+            :nepali-date-picker:ui:iosSimulatorArm64Test \
+            :nepali-date-picker:ui:checkBridgeCoverage \
             :sample:androidApp:assembleDebug \
             --stacktrace
+
+      # Linking the framework takes minutes, so the export snapshot runs only on macOS and only
+      # here, not in the fast local loop.
+      - name: Verify the iOS export surface
+        if: runner.os == 'macOS'
+        run: ./gradlew :nepali-date-picker:ui:checkIosApi --stacktrace
+
+      # The Swift sample is the only thing that exercises the bridge the way a consumer does, and
+      # the only place the Xcode-side requirements (arm64-only slices, the module name, the Compose
+      # plist key) can regress.
+      #
+      # The framework has to exist before xcodebuild starts: Xcode resolves the Swift module graph
+      # while planning the build, so one produced by a script phase during that same build arrives
+      # too late. checkIosApi above already assembled it, and the sample's own aggregate target
+      # keeps it fresh on later builds.
+      - name: Build the Swift sample
+        if: runner.os == 'macOS'
+        working-directory: sample/iosSwiftApp
+        run: |
+          xcodebuild \
+            -project iosSwiftApp.xcodeproj \
+            -scheme iosSwiftApp \
+            -sdk iphonesimulator \
+            -destination 'generic/platform=iOS Simulator' \
+            -configuration Debug \
+            build
 
       # Linux: JVM + Android host + JS/Wasm node + linuxX64 native + sample. No Apple, no mingw.
       - name: Build & test (Linux)
@@ -81,3 +109,54 @@ jobs:
             **/build/reports/tests/
             **/build/test-results/
           retention-days: 30
+
+  # Workflow shell blocks are only executed on release, so a mistake in one sits undiscovered until
+  # it breaks a publish. Lint them on every run instead.
+  workflow-shell:
+    name: Lint workflow shell
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v5
+
+      - name: Extract run blocks
+        run: |
+          set -euo pipefail
+          python3 -m pip install --quiet pyyaml
+          mkdir -p /tmp/wf
+          python3 - <<'PY'
+          import glob, os, re, yaml
+          for path in sorted(glob.glob(".github/workflows/*.yml")):
+              spec = yaml.safe_load(open(path))
+              for job_name, job in (spec.get("jobs") or {}).items():
+                  for index, step in enumerate(job.get("steps") or []):
+                      script = step.get("run")
+                      if not script:
+                          continue
+                      # GitHub expands ${{ … }} before the shell sees it, so substitute a plain
+                      # token rather than leaving syntax the parser cannot read.
+                      script = re.sub(r"\$\{\{[^}]*\}\}", "GHA_EXPR", script)
+                      name = f"{os.path.basename(path)}-{job_name}-{index}".replace("/", "_")
+                      with open(f"/tmp/wf/{name}.sh", "w") as out:
+                          out.write("#!/usr/bin/env bash\n" + script)
+          PY
+          find /tmp/wf -name '*.sh' | wc -l
+
+      # SC2050 fires on the GHA_EXPR placeholders substituted above, which are constants by
+      # construction. Style and info findings are not worth failing a build over.
+      - name: shellcheck
+        run: shellcheck -s bash --severity=warning --exclude=SC2050 /tmp/wf/*.sh
+
+      - name: Reject empty-array expansion under set -u
+        run: |
+          set -euo pipefail
+          offenders=$(grep -lE '\$\{[A-Za-z_][A-Za-z0-9_]*\[@\]\}' /tmp/wf/*.sh || true)
+          failed=0
+          for file in $offenders; do
+            if grep -qE 'set -[a-z]*u' "$file"; then
+              echo "::error::$file expands an array under 'set -u'. On bash 3.2 that aborts when the array is empty; use a plain string flag instead."
+              failed=1
+            fi
+          done
+          exit "$failed"
