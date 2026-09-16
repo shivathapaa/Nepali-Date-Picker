@@ -100,13 +100,29 @@ jobs:
         working-directory: js
         run: npm run verify:pack
 
+      # Both publishes skip a version that is already on the registry, which keeps the workflow
+      # re-runnable. Without it, a run that publishes core and then fails on the web component
+      # cannot be retried: the retry dies on core and the release has to be finished by hand. It
+      # also lets a GitHub release be cut for a version that was published manually.
       - name: Publish @nepali-date-picker/core
         working-directory: js/packages/core
-        run: npm publish ${{ steps.v.outputs.flags }}
+        run: |
+          set -euo pipefail
+          if npm view "@nepali-date-picker/core@${{ steps.v.outputs.target }}" version >/dev/null 2>&1; then
+            echo "::notice::@nepali-date-picker/core@${{ steps.v.outputs.target }} is already published, skipping."
+          else
+            npm publish ${{ steps.v.outputs.flags }}
+          fi
 
       - name: Publish @nepali-date-picker/web-component
         working-directory: js/packages/web-component
-        run: npm publish ${{ steps.v.outputs.flags }}
+        run: |
+          set -euo pipefail
+          if npm view "@nepali-date-picker/web-component@${{ steps.v.outputs.target }}" version >/dev/null 2>&1; then
+            echo "::notice::@nepali-date-picker/web-component@${{ steps.v.outputs.target }} is already published, skipping."
+          else
+            npm publish ${{ steps.v.outputs.flags }}
+          fi
 
       - name: Summary
         run: |
