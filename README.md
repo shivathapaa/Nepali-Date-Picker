@@ -65,7 +65,7 @@ Live: the [Compose demo](https://shivathapaa.github.io/Nepali-Date-Picker/), the
     * [Common Gradle](#common-gradle)
     * [Android](#android)
     * [iOS](#ios)
-    * [Desktop/Web](#desktopweb)
+    * [Desktop, Wasm, & Js](#desktop-wasm--js)
 * [Samples](#samples)
 * [License](#license)
 * [Brief simple example usage](#brief-simple-example-usage)
@@ -157,7 +157,7 @@ npm install @nepali-date-picker/core            # engine only
 <nepali-date-picker value="2081-05-24" language="ne"></nepali-date-picker>
 ```
 
-With no bundler, swap that import for the self-contained build (64 kB gzipped, every element):
+With no bundler, swap that import for the self-contained build (65 kB gzipped, every element):
 `<script type="module" src="https://cdn.jsdelivr.net/npm/@nepali-date-picker/web-component"></script>`.
 
 The web component ships every variant (inline, dialog, docked, range, field, range-field, wheel). See
@@ -171,7 +171,7 @@ Starting with **3.0.0** the library ships as separate artifacts instead of one u
 | Artifact | Contents | When to depend on it |
 | --- | --- | --- |
 | `io.github.shivathapaa:nepali-date-picker-core` | `NepaliDateConverter`, `NepaliCalendarModel`, `CustomCalendar`, `NepaliCalendarDefaults`, `NepaliSelectableDates`, `DigitScript`, `NepaliDateFormatter`, the `holiday` SPI, and other data utilities. Pure Kotlin + `kotlinx-datetime`. **Zero Compose / UI dependencies** - `@Immutable` / `@Stable` are expect-annotations that alias to `androidx.compose.runtime.*` only on Compose-supported targets. | Backend / CLI / embedded modules that only need date conversion, or any non-Compose Kotlin target. |
-| `io.github.shivathapaa:nepali-date-picker-ui` | All composables - `NepaliDatePicker`, `NepaliDatePickerDialog`, `NepaliDateRangePicker`, `NepaliDateInput`, `NepaliWheelDatePicker`, `NepaliDatePickerDocked`, `NepaliDateTextField`, `NepaliDatePickerDefaults`, etc. Transitively brings in `-core`. | Any module that renders the picker UI. |
+| `io.github.shivathapaa:nepali-date-picker-ui` | All composables - `NepaliDatePicker`, `NepaliDatePickerDialog`, `NepaliDateRangePicker`, `NepaliWheelDatePicker`, `NepaliDatePickerDocked`, `NepaliDateTextField`, `NepaliDateField`, `NepaliDatePickerDefaults`, etc. Transitively brings in `-core`. | Any module that renders the picker UI. |
 | `io.github.shivathapaa:nepali-date-picker-serialization` _(3.1.0+, optional)_ | `kotlinx-serialization` `KSerializer`s for `SimpleDate`, `SimpleTime`, `CustomCalendar`, and `NepaliMonthCalendar` in string and struct flavors, registered together by `NepaliDatePickerSerializersModule`. Ships the full `-core` target matrix. The `-core` POM stays annotation-free, so nothing leaks into projects that don't depend on this. | Modules that serialize Nepali date types over JSON / Protobuf / CBOR (Ktor, Room `TypeConverter`, DataStore, etc.). |
 
 #### Supported KMP targets
@@ -293,7 +293,9 @@ dependencies {
 
 ### iOS
 
-The library supports various iOS architectures, including `iosarm64`, `iossimulatorarm64`, and `iosx64`.
+The UI artifact targets `iosArm64` (device) and `iosSimulatorArm64` (Apple silicon simulator). There is no
+`iosX64` slice, so an Intel Mac, or the Rosetta simulator, cannot link it - see the
+[target table](#supported-kmp-targets) and [README-spm.md](./README-spm.md).
 
 To integrate this library into your iOS project using Swift Package Manager(SPM):
 
@@ -531,9 +533,9 @@ val datePickerStateWithDateLimiter = rememberNepaliDatePickerState(
 
 // For Range, minDate and maxDate should make sense i.e., minDate should be less than or equal to maxDate
 val nepaliDatePickerStateWithRangeSelectable = rememberNepaliDatePickerState(
-    nepaliSelectableDates = DateRangeSelectableDates(
-        SimpleDate(2081, 2, 11),
-        SimpleDate(2082, 1, 29)
+    nepaliSelectableDates = NepaliDateConverter.DateRangeSelectable(
+        minDate = SimpleDate(2081, 2, 11),
+        maxDate = SimpleDate(2082, 1, 29)
     )
 )
 
@@ -627,7 +629,7 @@ if (showNepaliDatePickerDialog) {
 #### Using rememberNepaliDatePickerState() for different cases (similar for rememberNepaliDateRangePickerState())
 ```kotlin
 // Using rememberNepaliDatePickerState() for different cases 
-val todayNepaliDate = NepaliDateConverter.todayNepaliDate
+val todayNepaliDate = NepaliDateConverter.todayNepaliSimpleDate
 
 // Remember that, "BeforeSelectable", "AfterSelectable", and "RangeSelectable" are helper Selectables
 // that helps with enabling and disabling dates before or after today, or before or
@@ -872,7 +874,7 @@ val formattedNepaliDate = NepaliDateConverter.formatNepaliDateTimeToIsoFormat(to
 #### Convert ISO 8601 UTC format to CustomDateTime which represents the CustomCalendar and  SimpleTime
 ```kotlin
 // Converts ISO 8601 UTC format to CustomDateTime which represents the Nepali CustomCalendar and Nepali SimpleTime
-val customNepaliDateTime = NepaliDateConverter.getNepaliDateTimeFromIsoFormat
+val customNepaliDateTime = NepaliDateConverter.getNepaliDateTimeFromIsoFormat("2024-09-09T09:00:15Z")
 println(customNepaliDateTime)  // Outputs: CustomDateTime(customCalendar = CustomCalendar(..), simpleTime = SimpleTime(..))
 
 // Converts ISO 8601 UTC format to CustomDateTime which represents the English CustomCalendar and Nepali SimpleTime
@@ -906,9 +908,9 @@ val customFormatLocale = NepaliDateLocale(
     monthName = NameFormat.FULL
 )
 
-val nepaliFormattedDate = NepaliDateConverter.formatNepaliDate(todayNepaliDate, customFormatLocale) // returns "सोमबार, असार २१, २०८४"
+val nepaliFormattedDate = NepaliDateConverter.formatNepaliDate(todayNepaliDate, customFormatLocale) // returns "सोमबार, असार २१, २०८२"
 val nepaliDefaultFormattedDate = NepaliDateConverter.formatNepaliDate(todayNepaliDate, NepaliDatePickerDefaults.DefaultLocale)  // returns "Asar 21, 2082"
-val todayFormattedDate = NepaliDateConverter.formatNepaliDate(todayNepaliDate) // returns "Asar 21, 2082"
+val todayFormattedDate = NepaliDateConverter.formatNepaliDate(todayNepaliDate, NepaliDatePickerDefaults.DefaultLocale) // returns "Asar 21, 2082"
 val formattedNepaliDate = NepaliDateConverter.formatNepaliDate(2081, 3, 21, 5, NepaliDatePickerDefaults.DefaultLocale) // returns "Asar 21, 2081"
 val englishFormattedDate = NepaliDateConverter.formatEnglishDate(todayEnglishDate.year, todayEnglishDate.month, todayEnglishDate.dayOfMonth, 5, customFormatLocale) // returns "बिहिबार, अक्टोबर ३, २०२४
 ```

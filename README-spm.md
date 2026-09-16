@@ -46,9 +46,11 @@ embed them directly.
 * [Swift naming conventions](#swift-naming-conventions)
 * [Part 1 - The pickers](#part-1---the-pickers)
     * [How hosting works](#how-hosting-works)
-        * [Sizing](#sizing)
-        * [Options](#options)
-        * [What cannot cross the bridge](#what-cannot-cross-the-bridge)
+    * [Step 1 - paste the support file](#step-1---paste-the-support-file)
+    * [Step 2 - paste the representables](#step-2---paste-the-representables)
+    * [Sizing](#sizing)
+    * [Options](#options)
+    * [What cannot cross the bridge](#what-cannot-cross-the-bridge)
     * [Calendar picker](#calendar-picker)
     * [Range picker](#range-picker)
     * [Docked picker](#docked-picker)
@@ -204,12 +206,19 @@ people up:
 | `IntRange` | `KotlinIntRange` | Read `.first` and `.last`; the picker factories take plain `Int32` bounds instead. |
 | top-level functions | `<FileName>Kt.function(...)` | For example `NepaliDatePickerViewControllersKt`. |
 
-Two engine functions are **deprecated**; prefer the replacements:
+Two engine functions are **deprecated** and warn; prefer the replacements:
 
 | Deprecated | Use instead |
 | --- | --- |
 | `convertToNepaliNumber(_:)` | `localizeDigits(_:script:)` with `.devanagari` |
 | `convertToEnglishNumber(_:)` | `toLatinDigits(_:)` |
+
+Two more are **unavailable**, so referencing them fails to compile rather than warning:
+
+| Unavailable | Use instead |
+| --- | --- |
+| `todayNepaliDate` | `todayNepaliSimpleDate` or `todayNepaliCalendar` |
+| `todayEnglishDate` | `todayEnglishSimpleDate` or `todayEnglishCalendar` |
 
 ---
 
@@ -223,90 +232,520 @@ Compose `@Composable` functions cannot be called from Swift. The library therefo
 factory per picker, each returning a `UIViewController` that hosts the Compose scene already wrapped
 in `MaterialTheme` and a `Surface`.
 
-Wrap a factory in a `UIViewControllerRepresentable` to embed it in SwiftUI:
+Every factory is a top-level Kotlin function, so Swift reaches it through the file's generated class
+(`NepaliDatePickerViewControllersKt` and friends). All eight share the same shape:
+
+| Parameter | Type | Notes |
+| --- | --- | --- |
+| the initial value | `SimpleDate?` | Named per picker: `initialSelectedDate`, `initialDate`, `initialValue`, or the `initialSelectedStartDate` / `initialSelectedEndDate` pair. |
+| `locale` | `NepaliDateLocale` | Required, no default across the bridge. See [Localization and appearance](#localization-and-appearance). |
+| `yearRangeStart` / `yearRangeEnd` | `Int32` | Two plain bounds, not an `IntRange`. |
+| `selectableDates` | `NepaliSelectableDates?` | `nil` allows every date. |
+| `options` | one options class per picker, nullable | `nil` takes every library default. See [Options](#options). |
+| `onHeightChange` | `(KotlinFloat) -> Void` | Content height in points. See [Sizing](#sizing). |
+| the callback | closure | Fires on every change, including the initial value. |
+
+> **`onHeightChange` hands you a boxed `KotlinFloat`, not a `Float`.** Kotlin function types box
+> their primitive parameters on the Objective-C bridge. `KotlinFloat` is an `NSNumber` subclass, so
+> convert with `CGFloat(truncating:)`. Plain `CGFloat($0)` resolves to the deprecated `NSNumber`
+> initializer and warns.
+
+The two dialogs add a `calendarOptions` before `options`, and the two field factories add a
+`dateFormat` after `locale`.
+
+Here are the exact Swift signatures, copied from the generated header:
 
 ```swift
-import SwiftUI
-import nepali_date_picker
+NepaliDatePickerViewControllersKt.NepaliDatePickerViewController(
+    initialSelectedDate:locale:yearRangeStart:yearRangeEnd:selectableDates:options:onHeightChange:onDateSelected:)
 
-struct NepaliDatePickerView: UIViewControllerRepresentable {
-    var initialSelectedDate: SimpleDate?
-    var locale: NepaliDateLocale
-    var onHeightChange: (CGFloat) -> Void = { _ in }
-    var onDateSelected: (CustomCalendar?) -> Void
+NepaliDatePickerViewControllersKt.NepaliDatePickerDockedViewController(
+    initialSelectedDate:locale:yearRangeStart:yearRangeEnd:selectableDates:options:onHeightChange:onDateSelected:)
 
-    func makeUIViewController(context: Context) -> UIViewController {
-        NepaliDatePickerViewControllersKt.NepaliDatePickerViewController(
-            initialSelectedDate: initialSelectedDate,
-            locale: locale,
-            yearRangeStart: 1970,
-            yearRangeEnd: 2100,
-            selectableDates: nil,       // nil = every date selectable
-            showModeToggle: true,
-            showTodayButton: true,
-            showEnglishDate: false,
-            onHeightChange: { onHeightChange(CGFloat($0)) },
-            onDateSelected: onDateSelected
-        )
-    }
+NepaliDatePickerViewControllersKt.NepaliWheelDatePickerViewController(
+    initialDate:locale:yearRangeStart:yearRangeEnd:selectableDates:options:onHeightChange:onDateChange:)
 
-    func updateUIViewController(_ controller: UIViewController, context: Context) {}
-}
+NepaliDateRangeViewControllersKt.NepaliDateRangePickerViewController(
+    initialSelectedStartDate:initialSelectedEndDate:locale:yearRangeStart:yearRangeEnd:selectableDates:options:onHeightChange:onRangeSelected:)
+
+NepaliDateFieldViewControllersKt.NepaliDateFieldViewController(
+    initialValue:locale:dateFormat:yearRangeStart:yearRangeEnd:selectableDates:options:onHeightChange:onValueChange:)
+
+NepaliDateRangeViewControllersKt.NepaliDateRangeFieldViewController(
+    initialStartValue:initialEndValue:locale:dateFormat:yearRangeStart:yearRangeEnd:selectableDates:options:onHeightChange:onRangeChange:)
+
+NepaliDateDialogViewControllersKt.NepaliDatePickerDialogViewController(
+    initialSelectedDate:locale:yearRangeStart:yearRangeEnd:selectableDates:calendarOptions:options:onHeightChange:onConfirm:onDismiss:)
+
+NepaliDateDialogViewControllersKt.NepaliDatePickerFullScreenDialogViewController(
+    initialSelectedDate:locale:yearRangeStart:yearRangeEnd:selectableDates:calendarOptions:options:onHeightChange:onConfirm:onDismiss:)
 ```
 
-From UIKit, present or embed the controller directly:
+Kotlin default arguments do not survive the Objective-C bridge, so **every** argument has to be
+written out at every call. That is what the two files below are for: paste them once and the rest of
+this document becomes one-liners.
+
+From UIKit, embed the controller directly instead:
 
 ```swift
-let controller = NepaliDatePickerViewControllersKt.NepaliDatePickerViewController(/* … */)
+let controller = NepaliDatePickerViewControllersKt.NepaliDatePickerViewController(
+    initialSelectedDate: nil,
+    locale: NepaliPickerDefaults.english,
+    yearRangeStart: 1970,
+    yearRangeEnd: 2100,
+    selectableDates: nil,
+    options: nil,
+    onHeightChange: { [weak self] height in
+        self?.applyHeight(CGFloat(truncating: height))
+    },
+    onDateSelected: { [weak self] selected in
+        self?.apply(selected)
+    }
+)
 addChild(controller)
 view.addSubview(controller.view)
 controller.didMove(toParent: self)
 ```
 
-### Sizing
+## Step 1 - paste the support file
 
-A hosted controller has no intrinsic height, so SwiftUI needs a `.frame(height:)`. Guessing one
-crops the last week of the calendar, or leaves a void under a text field. Every factory therefore
-takes `onHeightChange`, which reports the content height in points as Compose measures it.
-
-Every picker wraps its content, so the reported height is authoritative: use it. The only thing a
-caller decides is the height granted for the *first* layout pass, before any measurement exists.
-That seed has to be generous enough for the content to lay itself out honestly, because a picker
-given too little room lays out cropped and then reports that cropped height.
-
-Treat the seed as a starting point, never as a floor. Clamping to it is what leaves a gap under a
-calendar whose month needs fewer rows than the seed allowed for.
+`NepaliPickerSupport.swift`. Shared locales, the year range, and the container that sizes a hosted
+picker to the height Compose reports.
 
 ```swift
+import SwiftUI
+import nepali_date_picker
+
+/// Shared defaults so every screen agrees on the year range and locale.
+enum NepaliPickerDefaults {
+    static let yearRange: ClosedRange<Int32> = {
+        let range = NepaliCalendarDefaults.shared.NepaliYearRange
+        return range.first...range.last
+    }()
+
+    /// Corner radius for every typed field, in points. The Material default is nearly square, which
+    /// reads as unfinished next to rounded SwiftUI controls.
+    static let fieldCornerRadius: Float = 14
+
+    static let english = NepaliDateLocale(
+        language: .english,
+        dateFormat: .long_,
+        weekDayName: .short_,
+        monthName: .full,
+        digitScript: nil
+    )
+
+    static let nepali = NepaliDateLocale(
+        language: .nepali,
+        dateFormat: .long_,
+        weekDayName: .short_,
+        monthName: .full,
+        digitScript: nil
+    )
+
+    /// Range headlines print both ends, which wraps badly at picker width. A numeric style keeps
+    /// them on one line.
+    static let englishRange = NepaliDateLocale(
+        language: .english,
+        dateFormat: .shortYmd,
+        weekDayName: .short_,
+        monthName: .full,
+        digitScript: nil
+    )
+}
+
+/// Sizes a hosted picker to the height Compose reports, instead of a guessed constant.
+///
+/// The hosted scene is always given `measurementHeight`, while the surrounding layout takes the
+/// height Compose reports back. Keeping those two apart is the whole point: Compose measures inside
+/// the frame it is given, so if the scene shrank with the layout, a report could never exceed the
+/// current frame and the content would be trapped at its smallest size. Switching a picker to typed
+/// input and back is exactly that case.
 struct AutoSized<Content: View>: View {
-    /// Room granted for the first measurement only.
-    var initialHeight: CGFloat = 420
+    /// Height the scene is measured in. Generous enough for the tallest mode the picker can show.
+    var measurementHeight: CGFloat = 420
     @ViewBuilder var content: (@escaping (CGFloat) -> Void) -> Content
 
     @State private var measured: CGFloat?
 
     var body: some View {
         content { reported in
+            // Compose reports on every layout pass; ignore the noise.
             if measured == nil || abs(measured! - reported) > 0.5 { measured = reported }
         }
-        // Seeding at zero is self-defeating: the content gets no room, measures zero, and never grows.
-        .frame(height: measured ?? initialHeight)
+        .frame(height: measurementHeight, alignment: .top)
+        .frame(height: measured ?? measurementHeight, alignment: .top)
+        .clipped()
+        // Clip the scene out of hit testing too, so the part hanging below the visible height
+        // cannot swallow taps meant for whatever follows it.
+        .contentShape(Rectangle())
+        .clipShape(RoundedRectangle(cornerRadius: 12))
     }
 }
+
+extension CustomCalendar {
+    /// The library's typed dates are separate structs, so drop the calendar detail when a plain
+    /// year/month/day triple is all an API needs.
+    var simple: SimpleDate { SimpleDate(year: year, month: month, dayOfMonth: dayOfMonth) }
+}
 ```
+
+## Step 2 - paste the representables
+
+`NepaliPickerRepresentables.swift`. One thin `UIViewControllerRepresentable` per factory, every
+argument filled in, every knob surfaced as a property with the library's own default. Paste the
+whole file, or just the wrappers you need.
 
 ```swift
-AutoSized(initialHeight: 560) { report in      // calendar: needs room to measure
-    NepaliDatePickerView(initialSelectedDate: nil, onHeightChange: report) { selected = $0 }
+import SwiftUI
+import nepali_date_picker
+
+/// The full calendar picker, optionally paired with its Gregorian equivalent.
+struct NepaliDatePickerView: UIViewControllerRepresentable {
+    var onHeightChange: (CGFloat) -> Void = { _ in }
+    var initialSelectedDate: SimpleDate?
+    var locale: NepaliDateLocale = NepaliPickerDefaults.english
+    var yearRange: ClosedRange<Int32> = NepaliPickerDefaults.yearRange
+    var selectableDates: NepaliSelectableDates?
+    var showModeToggle: Bool = true
+    var showTodayButton: Bool = true
+    var showEnglishDate: Bool = false
+    var englishDateLocale: NepaliDateLocale?
+    var onDateSelected: (CustomCalendar?) -> Void
+
+    func makeUIViewController(context: Context) -> UIViewController {
+        let options = NepaliCalendarOptions()
+        options.showModeToggle = showModeToggle
+        options.showTodayButton = showTodayButton
+        options.showEnglishDate = showEnglishDate
+        options.englishDateLocale = englishDateLocale
+
+        return NepaliDatePickerViewControllersKt.NepaliDatePickerViewController(
+            initialSelectedDate: initialSelectedDate,
+            locale: locale,
+            yearRangeStart: yearRange.lowerBound,
+            yearRangeEnd: yearRange.upperBound,
+            selectableDates: selectableDates,
+            options: options,
+            onHeightChange: { onHeightChange(CGFloat(truncating: $0)) },
+            onDateSelected: onDateSelected
+        )
+    }
+
+    func updateUIViewController(_ uiViewController: UIViewController, context: Context) {}
 }
 
-AutoSized { report in                          // field: the 420 default is plenty
-    NepaliDateFieldView(initialValue: nil, onHeightChange: report) { value = $0 }
+/// The range calendar, which tracks a start and an end date.
+struct NepaliDateRangePickerView: UIViewControllerRepresentable {
+    var onHeightChange: (CGFloat) -> Void = { _ in }
+    var initialSelectedStartDate: SimpleDate?
+    var initialSelectedEndDate: SimpleDate?
+    var locale: NepaliDateLocale = NepaliPickerDefaults.englishRange
+    var yearRange: ClosedRange<Int32> = NepaliPickerDefaults.yearRange
+    var selectableDates: NepaliSelectableDates?
+    var showModeToggle: Bool = true
+    var showTodayButton: Bool = true
+    var showMonthsVertically: Bool = true
+    var showYearPickerAndMonthNavigation: Bool = true
+    var showEnglishDate: Bool = false
+    var englishDateLocale: NepaliDateLocale?
+    var onRangeSelected: (CustomCalendar?, CustomCalendar?) -> Void
+
+    func makeUIViewController(context: Context) -> UIViewController {
+        let options = NepaliRangeCalendarOptions()
+        options.showModeToggle = showModeToggle
+        options.showTodayButton = showTodayButton
+        options.showMonthsVertically = showMonthsVertically
+        options.showYearPickerAndMonthNavigation = showYearPickerAndMonthNavigation
+        options.showEnglishDate = showEnglishDate
+        options.englishDateLocale = englishDateLocale
+
+        return NepaliDateRangeViewControllersKt.NepaliDateRangePickerViewController(
+            initialSelectedStartDate: initialSelectedStartDate,
+            initialSelectedEndDate: initialSelectedEndDate,
+            locale: locale,
+            yearRangeStart: yearRange.lowerBound,
+            yearRangeEnd: yearRange.upperBound,
+            selectableDates: selectableDates,
+            options: options,
+            onHeightChange: { onHeightChange(CGFloat(truncating: $0)) },
+            onRangeSelected: onRangeSelected
+        )
+    }
+
+    func updateUIViewController(_ uiViewController: UIViewController, context: Context) {}
+}
+
+/// The compact field that opens the calendar in a popup.
+struct NepaliDatePickerDockedView: UIViewControllerRepresentable {
+    var onHeightChange: (CGFloat) -> Void = { _ in }
+    var initialSelectedDate: SimpleDate?
+    var locale: NepaliDateLocale = NepaliPickerDefaults.english
+    var yearRange: ClosedRange<Int32> = NepaliPickerDefaults.yearRange
+    var selectableDates: NepaliSelectableDates?
+    var dateFormatStyle: NepaliDateFormatStyle = .medium
+    var showTodayButton: Bool = true
+    var label: String?
+    var placeholder: String?
+    var cornerRadius: Float = NepaliPickerDefaults.fieldCornerRadius
+    var popupShadowElevation: Float = 6
+    var onDateSelected: (CustomCalendar?) -> Void
+
+    func makeUIViewController(context: Context) -> UIViewController {
+        let options = NepaliDockedOptions()
+        options.dateFormatStyle = dateFormatStyle
+        options.showTodayButton = showTodayButton
+        options.label = label
+        options.placeholder = placeholder
+        options.cornerRadius = cornerRadius
+        options.popupShadowElevation = popupShadowElevation
+
+        return NepaliDatePickerViewControllersKt.NepaliDatePickerDockedViewController(
+            initialSelectedDate: initialSelectedDate,
+            locale: locale,
+            yearRangeStart: yearRange.lowerBound,
+            yearRangeEnd: yearRange.upperBound,
+            selectableDates: selectableDates,
+            options: options,
+            onHeightChange: { onHeightChange(CGFloat(truncating: $0)) },
+            onDateSelected: onDateSelected
+        )
+    }
+
+    func updateUIViewController(_ uiViewController: UIViewController, context: Context) {}
+}
+
+/// The scrolling year/month/day wheel. Always has a selection.
+struct NepaliWheelDatePickerView: UIViewControllerRepresentable {
+    var onHeightChange: (CGFloat) -> Void = { _ in }
+    var initialDate: SimpleDate?
+    var locale: NepaliDateLocale = NepaliPickerDefaults.english
+    var yearRange: ClosedRange<Int32> = NepaliPickerDefaults.yearRange
+    var selectableDates: NepaliSelectableDates?
+    var itemHeight: Float = 44
+    var visibleItemCount: Int32 = 5
+    var cornerRadius: Float = 20
+    var onDateChange: (CustomCalendar) -> Void
+
+    func makeUIViewController(context: Context) -> UIViewController {
+        let options = NepaliWheelOptions()
+        options.itemHeight = itemHeight
+        options.visibleItemCount = visibleItemCount
+        options.cornerRadius = cornerRadius
+
+        return NepaliDatePickerViewControllersKt.NepaliWheelDatePickerViewController(
+            initialDate: initialDate,
+            locale: locale,
+            yearRangeStart: yearRange.lowerBound,
+            yearRangeEnd: yearRange.upperBound,
+            selectableDates: selectableDates,
+            options: options,
+            onHeightChange: { onHeightChange(CGFloat(truncating: $0)) },
+            onDateChange: onDateChange
+        )
+    }
+
+    func updateUIViewController(_ uiViewController: UIViewController, context: Context) {}
+}
+
+/// A single typed date entry field, outlined or filled.
+struct NepaliDateFieldView: UIViewControllerRepresentable {
+    var onHeightChange: (CGFloat) -> Void = { _ in }
+    var initialValue: SimpleDate?
+    var locale: NepaliDateLocale = NepaliPickerDefaults.english
+    var dateFormat: NepaliDateFormatter.Pattern = .yyyySlashMmSlashDd
+    var yearRange: ClosedRange<Int32> = NepaliPickerDefaults.yearRange
+    var selectableDates: NepaliSelectableDates?
+    var outlined: Bool = true
+    var label: String?
+    var placeholder: String?
+    var supportingText: String?
+    var isError: Bool = false
+    var enabled: Bool = true
+    var readOnly: Bool = false
+    var confirmButtonText: String?
+    var dismissButtonText: String?
+    var cornerRadius: Float = NepaliPickerDefaults.fieldCornerRadius
+    var onValueChange: (SimpleDate?) -> Void
+
+    func makeUIViewController(context: Context) -> UIViewController {
+        let options = NepaliFieldOptions()
+        options.outlined = outlined
+        options.label = label
+        options.placeholder = placeholder
+        options.supportingText = supportingText
+        options.isError = isError
+        options.enabled = enabled
+        options.readOnly = readOnly
+        options.confirmButtonText = confirmButtonText
+        options.dismissButtonText = dismissButtonText
+        options.cornerRadius = cornerRadius
+
+        return NepaliDateFieldViewControllersKt.NepaliDateFieldViewController(
+            initialValue: initialValue,
+            locale: locale,
+            dateFormat: dateFormat,
+            yearRangeStart: yearRange.lowerBound,
+            yearRangeEnd: yearRange.upperBound,
+            selectableDates: selectableDates,
+            options: options,
+            onHeightChange: { onHeightChange(CGFloat(truncating: $0)) },
+            onValueChange: onValueChange
+        )
+    }
+
+    func updateUIViewController(_ uiViewController: UIViewController, context: Context) {}
+}
+
+/// The paired start and end entry fields.
+struct NepaliDateRangeFieldView: UIViewControllerRepresentable {
+    var onHeightChange: (CGFloat) -> Void = { _ in }
+    var initialStartValue: SimpleDate?
+    var initialEndValue: SimpleDate?
+    var locale: NepaliDateLocale = NepaliPickerDefaults.english
+    var dateFormat: NepaliDateFormatter.Pattern = .yyyySlashMmSlashDd
+    var yearRange: ClosedRange<Int32> = NepaliPickerDefaults.yearRange
+    var selectableDates: NepaliSelectableDates?
+    var outlined: Bool = true
+    var startLabel: String?
+    var endLabel: String?
+    var supportingText: String?
+    var isStartError: Bool = false
+    var isEndError: Bool = false
+    var enabled: Bool = true
+    var readOnly: Bool = false
+    var confirmButtonText: String?
+    var dismissButtonText: String?
+    var cornerRadius: Float = NepaliPickerDefaults.fieldCornerRadius
+    var onRangeChange: (SimpleDate?, SimpleDate?) -> Void
+
+    func makeUIViewController(context: Context) -> UIViewController {
+        let options = NepaliRangeFieldOptions()
+        options.outlined = outlined
+        options.startLabel = startLabel
+        options.endLabel = endLabel
+        options.supportingText = supportingText
+        options.isStartError = isStartError
+        options.isEndError = isEndError
+        options.enabled = enabled
+        options.readOnly = readOnly
+        options.confirmButtonText = confirmButtonText
+        options.dismissButtonText = dismissButtonText
+        options.cornerRadius = cornerRadius
+
+        return NepaliDateRangeViewControllersKt.NepaliDateRangeFieldViewController(
+            initialStartValue: initialStartValue,
+            initialEndValue: initialEndValue,
+            locale: locale,
+            dateFormat: dateFormat,
+            yearRangeStart: yearRange.lowerBound,
+            yearRangeEnd: yearRange.upperBound,
+            selectableDates: selectableDates,
+            options: options,
+            onHeightChange: { onHeightChange(CGFloat(truncating: $0)) },
+            onRangeChange: onRangeChange
+        )
+    }
+
+    func updateUIViewController(_ uiViewController: UIViewController, context: Context) {}
+}
+
+/// The modal dialog holding a calendar, presented full screen from SwiftUI.
+struct NepaliDatePickerDialogView: UIViewControllerRepresentable {
+    var initialSelectedDate: SimpleDate?
+    var locale: NepaliDateLocale = NepaliPickerDefaults.english
+    var yearRange: ClosedRange<Int32> = NepaliPickerDefaults.yearRange
+    var selectableDates: NepaliSelectableDates?
+    var fullScreen: Bool = false
+    var title: String?
+    var confirmText: String = "OK"
+    var dismissText: String = "Cancel"
+    var tonalElevation: Float = 6
+    var cornerRadius: Float = 28
+    var onConfirm: (CustomCalendar?) -> Void
+    var onDismiss: () -> Void
+
+    private var options: NepaliDialogOptions {
+        let options = NepaliDialogOptions()
+        options.title = title
+        options.confirmText = confirmText
+        options.dismissText = dismissText
+        options.tonalElevation = tonalElevation
+        options.cornerRadius = cornerRadius
+        return options
+    }
+
+    func makeUIViewController(context: Context) -> UIViewController {
+        if fullScreen {
+            return NepaliDateDialogViewControllersKt.NepaliDatePickerFullScreenDialogViewController(
+                initialSelectedDate: initialSelectedDate,
+                locale: locale,
+                yearRangeStart: yearRange.lowerBound,
+                yearRangeEnd: yearRange.upperBound,
+                selectableDates: selectableDates,
+                calendarOptions: nil,
+                options: options,
+                // A dialog is an overlay, so its inline height is meaningless.
+                onHeightChange: { _ in },
+                onConfirm: onConfirm,
+                onDismiss: onDismiss
+            )
+        }
+        return NepaliDateDialogViewControllersKt.NepaliDatePickerDialogViewController(
+            initialSelectedDate: initialSelectedDate,
+            locale: locale,
+            yearRangeStart: yearRange.lowerBound,
+            yearRangeEnd: yearRange.upperBound,
+            selectableDates: selectableDates,
+            calendarOptions: nil,
+            options: options,
+            onHeightChange: { _ in },
+            onConfirm: onConfirm,
+            onDismiss: onDismiss
+        )
+    }
+
+    func updateUIViewController(_ uiViewController: UIViewController, context: Context) {}
 }
 ```
 
-Workable seeds: **560** for the calendar, **620** with Gregorian dates, **640** for the range
-calendar, **240** for the wheel. The docked picker and the fields need none.
+Every section from [Calendar picker](#calendar-picker) onwards assumes these two files are in your
+target.
+
+## Sizing
+
+A hosted controller has no intrinsic height, so SwiftUI needs a `.frame(height:)`. Guessing one
+crops the last week of the calendar, or leaves a void under a text field. Every factory therefore
+takes `onHeightChange`, which reports the content height in points as Compose measures it. The
+`AutoSized` container from [Step 1](#step-1---paste-the-support-file) applies that report for you.
+
+`measurementHeight` is the height the *scene* is measured in, not a floor on the layout. It has to be
+generous enough for the tallest mode the picker can show, because Compose measures inside the frame
+it is given and a picker with too little room lays out cropped, then reports that cropped height.
+The surrounding layout still collapses to whatever Compose reports back.
+
+Workable values, the same ones the sample app uses:
+
+| Picker | `measurementHeight` |
+| --- | --- |
+| Calendar | `560` |
+| Calendar with Gregorian dates | `620` |
+| Range calendar | `640` |
+| Wheel | `240` |
+| Docked picker, typed fields | the `420` default |
+
+```swift
+@State private var selected: CustomCalendar?
+@State private var typed: SimpleDate?
+
+AutoSized(measurementHeight: 560) { report in
+    NepaliDatePickerView(onHeightChange: report, initialSelectedDate: nil) { selected = $0 }
+}
+
+AutoSized { report in
+    NepaliDateFieldView(onHeightChange: report, initialValue: nil) { typed = $0 }
+}
+```
 
 ### Two more rules
 
@@ -315,39 +754,87 @@ calendar, **240** for the wheel. The docked picker and the fields need none.
 - **Give the grid room.** The calendar needs close to the full screen width. Nesting padding inside
   a padded card truncates the headline and clips the Gregorian sub-labels in the rightmost column.
 
-Every factory below takes `yearRangeStart` / `yearRangeEnd` as plain `Int32`, a `selectableDates`
-that may be `nil` to allow every date, an `options` object, and `onHeightChange`. Selection is
-reported through a closure, including the initial value.
+## Options
 
-### Options
-
-Kotlin default arguments do not survive the Objective-C bridge, so the customization each picker
-accepts is gathered into one options class per picker. Construct it empty, set only what you want to
-change, and pass `nil` to accept every default:
+The customization each picker accepts is gathered into one options class per picker, because Kotlin
+default arguments do not survive the Objective-C bridge. Construct it empty, set only what you want
+to change, and pass `nil` to accept every default. The representables in
+[Step 2](#step-2---paste-the-representables) already do this, so you normally set a property on the
+wrapper instead:
 
 ```swift
+// Through the representable.
+AutoSized(measurementHeight: 560) { report in
+    NepaliDatePickerView(onHeightChange: report, initialSelectedDate: nil, showTodayButton: false) {
+        selected = $0
+    }
+}
+
+// Or against the factory directly.
 let options = NepaliCalendarOptions()   // every property already holds the library default
 options.showTodayButton = false
 
 NepaliDatePickerViewControllersKt.NepaliDatePickerViewController(
-    initialSelectedDate: nil, locale: locale,
-    yearRangeStart: 1970, yearRangeEnd: 2100,
+    initialSelectedDate: nil,
+    locale: NepaliPickerDefaults.english,
+    yearRangeStart: 1970,
+    yearRangeEnd: 2100,
     selectableDates: nil,
     options: options,                   // or nil for the defaults
-    onHeightChange: report,
+    onHeightChange: { _ in },
     onDateSelected: { selected = $0 }
 )
 ```
 
-| Class | Properties |
-| --- | --- |
-| `NepaliCalendarOptions` | `showModeToggle`, `showTodayButton`, `showEnglishDate`, `englishDateLocale` |
-| `NepaliRangeCalendarOptions` | the four above, plus `showMonthsVertically`, `showYearPickerAndMonthNavigation` |
-| `NepaliWheelOptions` | `itemHeight`, `visibleItemCount`, `cornerRadius` |
-| `NepaliDockedOptions` | `dateFormatStyle`, `showTodayButton`, `label`, `placeholder`, `cornerRadius`, `popupShadowElevation` |
-| `NepaliFieldOptions` | `outlined`, `label`, `placeholder`, `supportingText`, `isError`, `enabled`, `readOnly`, `confirmButtonText`, `dismissButtonText`, `cornerRadius` |
-| `NepaliRangeFieldOptions` | `outlined`, `startLabel`, `endLabel`, `supportingText`, `isStartError`, `isEndError`, `enabled`, `readOnly`, `confirmButtonText`, `dismissButtonText`, `cornerRadius` |
-| `NepaliDialogOptions` | `title`, `confirmText`, `dismissText`, `tonalElevation`, `cornerRadius` |
+Every property, with its default:
+
+| Class | Property | Type | Default |
+| --- | --- | --- | --- |
+| `NepaliCalendarOptions` | `showModeToggle` | `Bool` | `true` |
+| | `showTodayButton` | `Bool` | `true` |
+| | `showEnglishDate` | `Bool` | `false` |
+| | `englishDateLocale` | `NepaliDateLocale?` | `nil`, falls back to the picker's locale |
+| `NepaliRangeCalendarOptions` | `showModeToggle` | `Bool` | `true` |
+| | `showTodayButton` | `Bool` | `true` |
+| | `showMonthsVertically` | `Bool` | `true` |
+| | `showYearPickerAndMonthNavigation` | `Bool` | `true` |
+| | `showEnglishDate` | `Bool` | `false` |
+| | `englishDateLocale` | `NepaliDateLocale?` | `nil` |
+| `NepaliWheelOptions` | `itemHeight` | `Float` | `44` |
+| | `visibleItemCount` | `Int32` | `5`, odd numbers centre the selection |
+| | `cornerRadius` | `Float` | `20` |
+| `NepaliDockedOptions` | `dateFormatStyle` | `NepaliDateFormatStyle` | `.medium` |
+| | `showTodayButton` | `Bool` | `true` |
+| | `label` | `String?` | `nil` |
+| | `placeholder` | `String?` | `nil` |
+| | `cornerRadius` | `Float` | `4` |
+| | `popupShadowElevation` | `Float` | `6` |
+| `NepaliFieldOptions` | `outlined` | `Bool` | `true` |
+| | `label` | `String?` | `nil` |
+| | `placeholder` | `String?` | `nil`, keeps the hint spelling out the pattern |
+| | `supportingText` | `String?` | `nil` |
+| | `isError` | `Bool` | `false` |
+| | `enabled` | `Bool` | `true` |
+| | `readOnly` | `Bool` | `false` |
+| | `confirmButtonText` | `String?` | `nil`, keeps the localized "OK" |
+| | `dismissButtonText` | `String?` | `nil`, keeps the localized "Cancel" |
+| | `cornerRadius` | `Float` | `4` |
+| `NepaliRangeFieldOptions` | `outlined` | `Bool` | `true` |
+| | `startLabel` | `String?` | `nil`, keeps the localized "Start Date" |
+| | `endLabel` | `String?` | `nil`, keeps the localized "End Date" |
+| | `supportingText` | `String?` | `nil` |
+| | `isStartError` | `Bool` | `false` |
+| | `isEndError` | `Bool` | `false` |
+| | `enabled` | `Bool` | `true` |
+| | `readOnly` | `Bool` | `false` |
+| | `confirmButtonText` | `String?` | `nil` |
+| | `dismissButtonText` | `String?` | `nil` |
+| | `cornerRadius` | `Float` | `4` |
+| `NepaliDialogOptions` | `title` | `String?` | `nil`, only the full-screen dialog draws one |
+| | `confirmText` | `String` | `"OK"` |
+| | `dismissText` | `String` | `"Cancel"` |
+| | `tonalElevation` | `Float` | `6`, ignored by the full-screen dialog |
+| | `cornerRadius` | `Float` | `28` |
 
 A `nil` text property keeps the library's own default rather than blanking it, so leaving
 `startLabel` alone still shows the localized "Start Date". Dimensions are in points.
@@ -356,7 +843,7 @@ A `nil` text property keeps the library's own default rather than blanking it, s
 when true, and the filled `NepaliDateField` / `NepaliDateRangeField` when false. The filled variants
 open a confirmation dialog, which is what `confirmButtonText` and `dismissButtonText` label.
 
-### What cannot cross the bridge
+## What cannot cross the bridge
 
 These parameters take Compose types Swift cannot construct, so they stay Kotlin-only and the
 factories use the library defaults:
@@ -377,17 +864,37 @@ factories use the library defaults:
 | `yearRangeStart` / `yearRangeEnd` | `Int32` | Selectable BS year bounds. |
 | `selectableDates` | `NepaliSelectableDates?` | Which dates are enabled. |
 | `options` | `NepaliCalendarOptions?` | Appearance and behaviour, or `nil` for the defaults. See [Options](#options). |
-| `onHeightChange` | `(Float) -> Void` | Measured content height in points. See [Sizing](#sizing). |
+| `onHeightChange` | `(KotlinFloat) -> Void` | Measured content height in points. See [Sizing](#sizing). |
 | `onDateSelected` | `(CustomCalendar?) -> Void` | Fires on every change. |
 
 ```swift
-@State private var selected: CustomCalendar?
+struct CalendarExample: View {
+    @State private var selected: CustomCalendar?
 
-AutoSized(initialHeight: 560) { report in
+    var body: some View {
+        VStack(spacing: 12) {
+            AutoSized(measurementHeight: 560) { report in
+                NepaliDatePickerView(
+                    onHeightChange: report,
+                    initialSelectedDate: SimpleDate(year: 2081, month: 1, dayOfMonth: 15)
+                ) { selected = $0 }
+            }
+            Text(selected.map { "\($0.year)/\($0.month)/\($0.dayOfMonth)" } ?? "none")
+        }
+    }
+}
+```
+
+Set `showEnglishDate` to pair every Bikram Sambat day with its Gregorian equivalent. That variant is
+taller, so raise `measurementHeight` to `620`:
+
+```swift
+AutoSized(measurementHeight: 620) { report in
     NepaliDatePickerView(
-        initialSelectedDate: SimpleDate(year: 2081, month: 1, dayOfMonth: 15),
-        locale: locale,
-        onHeightChange: report
+        onHeightChange: report,
+        initialSelectedDate: nil,
+        showEnglishDate: true,
+        englishDateLocale: NepaliPickerDefaults.english
     ) { selected = $0 }
 }
 ```
@@ -396,16 +903,38 @@ AutoSized(initialHeight: 560) { report in
 
 `NepaliDateRangeViewControllersKt.NepaliDateRangePickerViewController`
 
-Takes `initialSelectedStartDate` and `initialSelectedEndDate`, plus a `NepaliRangeCalendarOptions`
-carrying `showMonthsVertically` (stack the months instead of paging horizontally),
-`showYearPickerAndMonthNavigation` and `showEnglishDate`. Reports both ends.
+| Parameter | Type | Meaning |
+| --- | --- | --- |
+| `initialSelectedStartDate` | `SimpleDate?` | Start of the pre-selected range, or `nil`. |
+| `initialSelectedEndDate` | `SimpleDate?` | End of the pre-selected range, or `nil`. |
+| `locale` | `NepaliDateLocale` | Language, date format, name widths, digit script. |
+| `yearRangeStart` / `yearRangeEnd` | `Int32` | Selectable BS year bounds. |
+| `selectableDates` | `NepaliSelectableDates?` | Which dates are enabled. |
+| `options` | `NepaliRangeCalendarOptions?` | Adds `showMonthsVertically` and `showYearPickerAndMonthNavigation`. |
+| `onHeightChange` | `(KotlinFloat) -> Void` | Measured content height in points. |
+| `onRangeSelected` | `(CustomCalendar?, CustomCalendar?) -> Void` | Either end may be `nil` while the range is still being built. |
 
-The headline prints both dates, which wraps mid-word at picker width, so prefer a numeric
-`dateFormat` such as `.shortYmd` for this variant.
+The headline prints both dates, which wraps mid-word at picker width, so the wrapper defaults to
+`NepaliPickerDefaults.englishRange` with its numeric `.shortYmd` format.
 
 ```swift
-onRangeSelected: { start, end in
-    // Either end may be nil while the range is still being built.
+struct RangeExample: View {
+    @State private var start: CustomCalendar?
+    @State private var end: CustomCalendar?
+
+    var body: some View {
+        AutoSized(measurementHeight: 640) { report in
+            NepaliDateRangePickerView(
+                onHeightChange: report,
+                initialSelectedStartDate: SimpleDate(year: 2081, month: 1, dayOfMonth: 5),
+                initialSelectedEndDate: SimpleDate(year: 2081, month: 1, dayOfMonth: 20),
+                showMonthsVertically: true
+            ) { newStart, newEnd in
+                start = newStart
+                end = newEnd
+            }
+        }
+    }
 }
 ```
 
@@ -413,21 +942,57 @@ onRangeSelected: { start, end in
 
 `NepaliDatePickerViewControllersKt.NepaliDatePickerDockedViewController`
 
-A compact field that opens the calendar in a popup. Its `NepaliDockedOptions` carries
-`dateFormatStyle`, which controls how the chosen date is written inside the field, plus `label`,
-`placeholder`, `cornerRadius` and `popupShadowElevation`.
+A compact field that opens the calendar in a popup. `NepaliDockedOptions` carries `dateFormatStyle`,
+which controls how the chosen date is written inside the field, plus `label`, `placeholder`,
+`cornerRadius` and `popupShadowElevation`.
 
 The controller wraps the field, so left alone it settles at roughly the field's height. A Compose
-popup is clipped to its host, so pin the frame to about `380` points if you want the calendar to
+popup is clipped to its host, so raise `measurementHeight` to about `380` if you want the calendar to
 open inline. That space sits empty while the popup is closed, which is the trade you are making.
+
+```swift
+struct DockedExample: View {
+    @State private var selected: CustomCalendar?
+
+    var body: some View {
+        AutoSized(measurementHeight: 380) { report in
+            NepaliDatePickerDockedView(
+                onHeightChange: report,
+                initialSelectedDate: nil,
+                dateFormatStyle: .medium,
+                label: "Date of birth",
+                placeholder: "Pick a date"
+            ) { selected = $0 }
+        }
+    }
+}
+```
 
 ## Wheel picker
 
 `NepaliDatePickerViewControllersKt.NepaliWheelDatePickerViewController`
 
 Scrolling year / month / day columns. Takes `initialDate` (`nil` means today) and always has a
-selection, so `onDateChange` receives a non-optional `CustomCalendar`. `NepaliWheelOptions` sets
-`itemHeight`, `visibleItemCount` and `cornerRadius`.
+selection, so `onDateChange` receives a non-optional `CustomCalendar`.
+
+```swift
+struct WheelExample: View {
+    @State private var selected: CustomCalendar?
+
+    var body: some View {
+        AutoSized(measurementHeight: 240) { report in
+            NepaliWheelDatePickerView(
+                onHeightChange: report,
+                initialDate: nil,          // nil starts on today
+                locale: NepaliPickerDefaults.nepali,
+                itemHeight: 44,
+                visibleItemCount: 5,
+                cornerRadius: 20
+            ) { selected = $0 }
+        }
+    }
+}
+```
 
 ## Dialogs
 
@@ -435,41 +1000,116 @@ selection, so `onDateChange` receives a non-optional `CustomCalendar`. `NepaliWh
 `…NepaliDatePickerFullScreenDialogViewController`
 
 Both render the dialog immediately, so present the controller modally and dismiss it when the
-callback fires. They take a `NepaliDialogOptions` for the chrome (`title`, `confirmText`,
-`dismissText`, `tonalElevation`, `cornerRadius`) and a separate `calendarOptions` for the calendar
-inside. `tonalElevation` is ignored by the full-screen variant, which has no floating surface.
+callback fires. They take a `NepaliDialogOptions` for the chrome and a separate `calendarOptions` for
+the calendar inside. `tonalElevation` is ignored by the full-screen variant, which has no floating
+surface. Neither reports a useful inline height, so the wrapper discards `onHeightChange`.
 
 ```swift
-.fullScreenCover(isPresented: $showing) {
-    NepaliDatePickerDialogView(
-        initialSelectedDate: nil,
-        confirmText: "OK",
-        dismissText: "Cancel",
-        onConfirm: { date in selected = date; showing = false },
-        onDismiss: { showing = false }
-    )
-    .ignoresSafeArea()
+struct DialogExample: View {
+    @State private var showing = false
+    @State private var showingFullScreen = false
+    @State private var confirmed: CustomCalendar?
+
+    var body: some View {
+        VStack(spacing: 12) {
+            Button("Open dialog") { showing = true }
+            Button("Open full-screen dialog") { showingFullScreen = true }
+            Text(confirmed.map { "\($0.year)/\($0.month)/\($0.dayOfMonth)" } ?? "none")
+        }
+        .fullScreenCover(isPresented: $showing) {
+            NepaliDatePickerDialogView(
+                initialSelectedDate: SimpleDate(year: 2081, month: 3, dayOfMonth: 5),
+                confirmText: "OK",
+                dismissText: "Cancel",
+                onConfirm: { date in
+                    confirmed = date
+                    showing = false
+                },
+                onDismiss: { showing = false }
+            )
+            .ignoresSafeArea()
+        }
+        .fullScreenCover(isPresented: $showingFullScreen) {
+            NepaliDatePickerDialogView(
+                initialSelectedDate: nil,
+                fullScreen: true,
+                title: "Pick a date",
+                onConfirm: { date in
+                    confirmed = date
+                    showingFullScreen = false
+                },
+                onDismiss: { showingFullScreen = false }
+            )
+            .ignoresSafeArea()
+        }
+    }
 }
 ```
 
 ## Typed entry fields
 
-`NepaliDateFieldViewControllersKt.NepaliDateFieldViewController` for a single date, and
-`NepaliDateRangeViewControllersKt.NepaliDateRangeTextFieldViewController` for a start / end pair.
-
 `NepaliDateFieldViewControllersKt.NepaliDateFieldViewController` handles a single date and
 `NepaliDateRangeViewControllersKt.NepaliDateRangeFieldViewController` the start / end pair. Both take
 a `dateFormat: NepaliDateFormatter.Pattern` that masks typing, and an options object whose `outlined`
-flag chooses the Material style:
+flag chooses the Material style. The callback delivers `nil` while the entry is incomplete or
+invalid.
 
-| Pattern | Types as |
+| `NepaliDateFormatter.Pattern` | Types as |
 | --- | --- |
 | `.yyyySlashMmSlashDd` | `2081/01/15` |
 | `.yyyyDashMmDashDd` | `2081-01-15` |
 | `.ddSlashMmSlashYyyy` | `15/01/2081` |
 | `.ddDashMmDashYyyy` | `15-01-2081` |
 
-The callback delivers `nil` while the entry is incomplete or invalid.
+```swift
+struct FieldsExample: View {
+    @State private var value: SimpleDate?
+    @State private var start: SimpleDate?
+    @State private var end: SimpleDate?
+
+    var body: some View {
+        VStack(spacing: 16) {
+            // Outlined, the default style.
+            AutoSized { report in
+                NepaliDateFieldView(
+                    onHeightChange: report,
+                    initialValue: nil,
+                    dateFormat: .yyyySlashMmSlashDd,
+                    label: "Joining date",
+                    supportingText: "Bikram Sambat"
+                ) { value = $0 }
+            }
+
+            // Filled, which opens a confirmation dialog on tap.
+            AutoSized { report in
+                NepaliDateFieldView(
+                    onHeightChange: report,
+                    initialValue: SimpleDate(year: 2081, month: 1, dayOfMonth: 15),
+                    dateFormat: .ddDashMmDashYyyy,
+                    outlined: false,
+                    label: "Joining date",
+                    confirmButtonText: "OK",
+                    dismissButtonText: "Cancel"
+                ) { value = $0 }
+            }
+
+            AutoSized { report in
+                NepaliDateRangeFieldView(
+                    onHeightChange: report,
+                    initialStartValue: nil,
+                    initialEndValue: nil,
+                    dateFormat: .yyyySlashMmSlashDd,
+                    startLabel: "From",
+                    endLabel: "To"
+                ) { newStart, newEnd in
+                    start = newStart
+                    end = newEnd
+                }
+            }
+        }
+    }
+}
+```
 
 ## Picker state
 
@@ -484,7 +1124,7 @@ let state = NepaliDatePickerKt.NepaliDatePickerState(
     yearRange: NepaliCalendarDefaults.shared.NepaliYearRange,
     initialDisplayMode: 0,           // 0 = calendar, 1 = typed input
     nepaliSelectableDates: NepaliDatePickerDefaults.shared.AllDates,
-    locale: locale
+    locale: NepaliPickerDefaults.english
 )
 ```
 
@@ -500,8 +1140,30 @@ let state = NepaliDatePickerKt.NepaliDatePickerState(
 
 `NepaliDateRangePickerState` mirrors it with `selectedStartNepaliDate`, `selectedEndNepaliDate`,
 `selectedStartEnglishDate`, `selectedEndEnglishDate`, and a
-`setSelection(startNepaliDate:endNepaliDate:)` for driving it programmatically. Its factory is
-`NepaliDateRangePickerKt.NepaliDateRangePickerState(...)`.
+`setSelection(startNepaliDate:endNepaliDate:)` for driving it programmatically:
+
+```swift
+let rangeState = NepaliDateRangePickerKt.NepaliDateRangePickerState(
+    initialSelectedStartNepaliDate: SimpleDate(year: 2081, month: 1, dayOfMonth: 5),
+    initialSelectedEndNepaliDate: SimpleDate(year: 2081, month: 1, dayOfMonth: 20),
+    initialDisplayedMonth: nil,
+    yearRange: NepaliCalendarDefaults.shared.NepaliYearRange,
+    initialDisplayMode: 0,
+    nepaliSelectableDates: NepaliDatePickerDefaults.shared.AllDates,
+    locale: NepaliPickerDefaults.englishRange
+)
+
+// setSelection takes CustomCalendar, not SimpleDate, so build the ends through the converter.
+let converter = NepaliDateConverter.shared
+rangeState.setSelection(
+    startNepaliDate: converter.getNepaliCalendar(nepaliYYYY: 2081, nepaliMM: 2, nepaliDD: 1),
+    endNepaliDate: converter.getNepaliCalendar(nepaliYYYY: 2081, nepaliMM: 2, nepaliDD: 10)
+)
+```
+
+Note that the state factory names the range ends `initialSelectedStartNepaliDate` /
+`initialSelectedEndNepaliDate`, while the view controller factory shortens them to
+`initialSelectedStartDate` / `initialSelectedEndDate`.
 
 > These states are Compose snapshot objects. Reading them from Swift gives a value at that moment;
 > they do not publish to SwiftUI. Use the `onDateSelected` / `onRangeSelected` callbacks to observe
@@ -531,11 +1193,30 @@ Three helpers build a policy for you:
 ```swift
 let converter = NepaliDateConverter.shared
 let today = converter.todayNepaliSimpleDate
+let inThirtyDays = converter.getNepaliCalendarAfterAdditionOrSubtraction(
+    year: today.year, month: today.month, dayOfMonth: today.dayOfMonth, daysToAdjust: 30
+).simple
 
-converter.AfterDateSelectable(simpleDate: today, includeDate: false)   // future only
-converter.BeforeDateSelectable(simpleDate: today, includeDate: true)   // past, today allowed
-converter.DateRangeSelectable(minDate: today, maxDate: later,
-                              includeMinDate: true, includeMaxDate: true)
+let futureOnly = converter.AfterDateSelectable(simpleDate: today, includeDate: false)
+let pastAndToday = converter.BeforeDateSelectable(simpleDate: today, includeDate: true)
+let nextMonth = converter.DateRangeSelectable(
+    minDate: today,
+    maxDate: inThirtyDays,
+    includeMinDate: true,
+    includeMaxDate: true
+)
+```
+
+Hand any of them to a picker through `selectableDates`:
+
+```swift
+AutoSized(measurementHeight: 560) { report in
+    NepaliDatePickerView(
+        onHeightChange: report,
+        initialSelectedDate: nil,
+        selectableDates: futureOnly
+    ) { selected = $0 }
+}
 ```
 
 `NepaliSelectableDates` is a plain Kotlin interface, so your app can implement it directly in Swift:
@@ -553,16 +1234,29 @@ Disallowed dates render greyed out rather than disappearing.
 
 ## Localization and appearance
 
-One `NepaliDateLocale` drives language, the formatted headline, name widths and digits:
+One `NepaliDateLocale` drives language, the formatted headline, name widths and digits. It has no
+default across the bridge, which is why [Step 1](#step-1---paste-the-support-file) defines a few:
 
 ```swift
-let locale = NepaliDateLocale(
+let nepali = NepaliDateLocale(
     language: .nepali,      // .english | .nepali
     dateFormat: .long_,     // headline style
     weekDayName: .short_,   // column headers
     monthName: .full,
     digitScript: nil        // nil follows the language
 )
+
+@State private var useNepali = true
+
+AutoSized(measurementHeight: 560) { report in
+    NepaliDatePickerView(
+        onHeightChange: report,
+        initialSelectedDate: nil,
+        locale: useNepali ? nepali : NepaliPickerDefaults.english
+    ) { selected = $0 }
+}
+// makeUIViewController runs once per view identity, so a changed locale needs a new identity.
+.id(useNepali)
 ```
 
 > **Use `.short_` for `weekDayName`.** The calendar grid renders the *medium* weekday name ("Sun")
@@ -587,7 +1281,7 @@ let converter = NepaliDateConverter.shared
 
 ## Types
 
-```swift
+```text
 SimpleDate        // year, month, dayOfMonth
 SimpleTime        // hour, minute, second, nanosecond
 
@@ -642,10 +1336,11 @@ converter.todayNepaliCalendar      // CustomCalendar, BS
 converter.todayNepaliSimpleDate    // SimpleDate, BS
 converter.todayEnglishCalendar     // CustomCalendar, AD
 converter.todayEnglishSimpleDate   // SimpleDate, AD
-converter.todayNepaliDate          // SimpleDate, BS, same as todayNepaliSimpleDate
-converter.todayEnglishDate         // SimpleDate, AD
 converter.currentTime              // SimpleTime
 ```
+
+`todayNepaliDate` and `todayEnglishDate` are exported but marked **unavailable**, so referencing
+either is a compile error rather than a warning. Use the `…SimpleDate` or `…Calendar` property above.
 
 ## Conversion
 
@@ -704,13 +1399,16 @@ converter.getWeekdayName(dayOfWeek: 7, format: .short_, language: .nepali)   // 
 
 The tables behind them are exported too, if you want every width at once:
 
-```swift
-NepaliMonthName    // short_, full          e.g. "Bai" / "Baisakh"
-NepaliWeekdayName  // short_, medium, full  e.g. "S" / "Sun" / "Sunday"
+A `NepaliMonthName` carries `short_` and `full`, a `NepaliWeekdayName` carries `short_`, `medium`
+and `full`:
 
-NepaliDatePickerLang.nepali.months      // [NepaliMonthName]   Baisakh … Chaitra
-NepaliDatePickerLang.english.weekdays   // [NepaliWeekdayName] Sunday … Saturday
-NepaliDatePickerLang.english.englishMonths
+```swift
+NepaliDatePickerLang.nepali.months            // [NepaliMonthName]   Baisakh … Chaitra
+NepaliDatePickerLang.english.weekdays         // [NepaliWeekdayName] Sunday … Saturday
+NepaliDatePickerLang.english.englishMonths    // [NepaliMonthName]   January … December
+
+NepaliDatePickerLang.english.months[0].full   // "Baisakh"
+NepaliDatePickerLang.english.weekdays[0].medium  // "Sun"
 ```
 
 ## Formatting a date
@@ -786,9 +1484,20 @@ converter.localizeNumber("2081", locale: .nepali)       // "२०८१"
 // Swap the separator in a formatted date.
 converter.replaceDelimiter(dateString: "2081/01/15", newDelimiter: "-", oldDelimiter: "/")
 
-// Map a single Devanagari digit back to Latin, or nil if it is not a digit.
-DigitScriptKt.latinDigitOrNull("७")                      // "7"
 ```
+
+`latinDigitOrNull` maps a single Devanagari digit back to Latin, or `nil` if it is not a digit. It
+extends Kotlin's `Char`, which the bridge lowers to `unichar` (a UTF-16 code unit), so it takes and
+returns numbers rather than strings:
+
+```swift
+let devanagariSeven = Array("७".utf16)[0]
+if let latin = DigitScriptKt.latinDigitOrNull(devanagariSeven) as? unichar {
+    String(utf16CodeUnits: [latin], count: 1)            // "7"
+}
+```
+
+For whole strings, reach for `toLatinDigits(_:)` above instead.
 
 ## Working days and holidays
 
@@ -809,13 +1518,31 @@ converter.addWorkingDays(from: from, days: 5, provider: provider, weekend: weeke
 ```
 
 A `HolidayEntry` is `init(date:name:kind:)`, where `kind` is a `HolidayKind`:
-`.governmentpublic`, `.religious`, `.regional`, `.observance`. Two helpers filter a sequence of
-dates:
+`.governmentpublic`, `.religious`, `.regional`, `.observance`.
+
+Two more helpers **decorate a `NepaliSelectableDates`** rather than filtering a list of dates. Each
+returns a new policy that delegates to the one you passed and additionally rejects weekends, or
+holidays. Chain them to grey those days out in a picker:
 
 ```swift
-HolidayHelpersKt.excludingWeekends(dates, weekend: NepaliWeekend.shared.Default)
-HolidayHelpersKt.excludingHolidays(dates, provider: provider)
+let policy = NepaliDatePickerDefaults.shared.AllDates
+let workingDaysOnly = HolidayHelpersKt.excludingHolidays(
+    HolidayHelpersKt.excludingWeekends(policy, weekend: NepaliWeekend.shared.Default),
+    provider: provider
+)
+
+AutoSized(measurementHeight: 560) { report in
+    NepaliDatePickerView(
+        onHeightChange: report,
+        initialSelectedDate: nil,
+        selectableDates: workingDaysOnly
+    ) { selected = $0 }
+}
 ```
+
+Year-level rejection still defers to the wrapped policy, because holiday data is per-date, not
+per-year. `weekend` is a set of 1-based-Sunday weekday numbers: pass `[6, 7]` for a Friday and
+Saturday weekend, or `[1, 7]` for Sunday and Saturday.
 
 Implement the provider in Swift to honour your own holidays:
 
@@ -863,7 +1590,10 @@ NepaliYearMonthMapKt.daysInMonthMap   // [Int: KotlinIntArray]  BS year -> days 
 NepaliYearMonthMapKt.nepaliDateMap    // [Int: ReferenceDate]
 NepaliYearMonthMapKt.englishDateMap   // [Int: ReferenceDate]
 
-ReferenceDate(englishDate:nepaliDate:)  // the anchor pair a year's arithmetic starts from
+// A ReferenceDate is the anchor pair a year's arithmetic starts from. Both ends are CustomCalendar.
+let anchor = NepaliYearMonthMapKt.nepaliDateMap[2081]
+anchor?.englishDate
+anchor?.nepaliDate
 ```
 
 Extending the supported range means extending `daysInMonthMap` in the library, not in your app.
@@ -881,9 +1611,10 @@ Extending the supported range means extending `daysInMonthMap` in the library, n
 | Duplicate symbols or two Kotlin runtimes | Both products are linked. Depend on exactly one. |
 | A picker shows blank for a moment on first display | The Kotlin runtime and Metal shaders initialise on first render. Subsequent presentations are immediate. |
 | Weekday headers wrap to two lines | `weekDayName` is not `.short_`. |
-| Calendar's last week is cut off | The frame is shorter than the grid. Raise the seed, see [Sizing](#sizing). |
-| A picker renders at zero height | The frame was seeded at zero, so the content had no room to measure. Seed above zero. |
-| Empty band under a picker | The frame is clamped to a floor instead of following the reported height. |
+| Calendar's last week is cut off | The scene was measured in a frame shorter than the grid. Raise `measurementHeight`, see [Sizing](#sizing). |
+| A picker renders at zero height | `measurementHeight` is zero, so the content had no room to measure. |
+| Empty band under a picker | The outer frame is pinned to `measurementHeight` instead of the reported height. Keep the two frames separate, as `AutoSized` does. |
+| A picker stays short after switching to typed input | The scene shrank with the layout, so it can never report more than its current height. Measure in the fixed `measurementHeight`, size the layout from the report. |
 | A field stops short of the container, leaving the host surface beside it | Material's 280pt minimum width. The factories pass `fillMaxWidth`, so this only shows if you host the composable yourself. |
 | Gregorian sub-labels clipped in the last column | The grid is too narrow. Remove a layer of horizontal padding. |
 | Headline truncated, or a range headline wrapping mid-word | Same width problem, or a `dateFormat` that prints the weekday. Use `.long_`, or `.shortYmd` for ranges. |

@@ -48,7 +48,7 @@ there is nothing left for the browser to resolve:
 <nepali-date-picker value="2081-05-24"></nepali-date-picker>
 ```
 
-232 kB minified, 64 kB gzipped, all seven elements. It is ES-module only, which costs nothing in
+238 kB minified, 65 kB gzipped, all seven elements. It is ES-module only, which costs nothing in
 practice: every browser that implements custom elements also supports module scripts. This file is
 browser-only; on a server, import the package itself (see [Server rendering](#server-rendering)).
 
@@ -75,6 +75,10 @@ around 3 kB gzipped lighter than all seven.
 | `import '@nepali-date-picker/web-component/nepali-date-field';` | `<nepali-date-field>` |
 | `import '@nepali-date-picker/web-component/nepali-date-range-field';` | `<nepali-date-range-field>` |
 | `import '@nepali-date-picker/web-component/nepali-wheel-date-picker';` | `<nepali-wheel-date-picker>` |
+
+There is also `@nepali-date-picker/web-component/bundle`: the same self-contained file the CDN serves,
+with Lit and the engine inlined. Reach for it only when you want that build from npm without a
+bundler; the default entry is the right import everywhere else.
 
 ## Shared conventions
 
@@ -243,7 +247,7 @@ Scroll, click an item, or use `ArrowUp` / `ArrowDown` on a focused column.
 
 | Attribute | Property | Type | Default | Description |
 | --- | --- | --- | --- | --- |
-| `value` | `value` | string | today | Selected BS date. |
+| `value` | `value` | string | `""` | Selected BS date. Empty starts the wheels on today without setting the property. |
 | `language` | `language` | `"en"` \| `"ne"` | `"en"` | Text + digit script. |
 | `disabled` | `disabled` | boolean | `false` | Read-only + dimmed. |
 
@@ -557,7 +561,9 @@ These string arguments are case-insensitive:
 - `language`: `"en"` (English + Latin digits) | `"ne"` (Nepali + Devanagari digits)
 - name width (the `format` / `weekDayName` / `monthName` args): `"short"` | `"medium"` | `"full"`
 - `dateFormat`: `"full"` | `"long"` | `"medium"` | `"short_mdy"` | `"short_ymd"` | `"compact_mdy"` | `"compact_ymd"`
-- `digitScript`: `"latin"` | `"devanagari"` | `null` (follow `language`)
+- `digitScript`: `"latin"` | `"devanagari"` | `null`. Accepted by `formatBsDate` / `formatAdDate`,
+  but currently ignored by them: digits follow `language`. See
+  [Format a date (preset)](#format-a-date-preset).
 
 ## Ranges
 
@@ -618,15 +624,39 @@ getAdMonthName(6, 'full', 'en');    // "June"
 ## Format a date (preset)
 
 `formatBsDate` / `formatAdDate` take the date, its weekday, the language, a `dateFormat` style, the
-weekday-name and month-name widths, and a digit script (`null` = follow language):
+weekday-name and month-name widths, and a digit script:
 
 ```ts
-formatBsDate(2081, 5, 24, 3, 'en', 'full', 'full', 'full', null);
-// "Tuesday, Asar 24, 2081"
+formatBsDate(2081, 5, 24, 2, 'en', 'full', 'full', 'full', null);
+// "Monday, Bhadra 24, 2081"
 
-formatAdDate(2024, 9, 9, 2, 'en', 'medium', 'medium', 'medium', null);
-// e.g. "Mon, Sep 9, 2024"
+formatAdDate(2024, 9, 9, 2, 'en', 'full', 'medium', 'full', null);
+// "Mon, September 9, 2024"
 ```
+
+The weekday is **not** derived from the date, it is the 4th argument, so pass the real one (from
+`convertAdToBs(...).dayOfWeek`, or `getBsCalendar(...).dayOfWeek`) or the name will not match the
+date. `formatBsDateByPattern` below has no such trap.
+
+The `dateFormat` style decides the layout, using BS `2081-05-24` with full widths:
+
+| `dateFormat` | Output |
+| --- | --- |
+| `'full'` | `Monday, Bhadra 24, 2081` |
+| `'long'` | `Bhadra 24, 2081` |
+| `'medium'` | `2081 Bhadra 24` |
+| `'short_mdy'` | `05/24/2081` |
+| `'short_ymd'` | `2081/05/24` |
+| `'compact_mdy'` | `05/24/81` |
+| `'compact_ymd'` | `81/05/24` |
+
+Two things about the width arguments are easy to misread:
+
+- `monthName` only distinguishes `'short'` (`Bha`) from everything else. `'medium'` and `'full'` both
+  give `Bhadra`. `weekDayName` does honour all three (`M` / `Mon` / `Monday`).
+- **`digitScript` is currently ignored by these two functions.** They render digits from `language`,
+  so `'en'` always gives Latin digits and `'ne'` always gives Devanagari, whatever you pass. Pass
+  `null` and reach for `localizeDigits` when you need to force a script.
 
 ## Format a date (Unicode pattern)
 
@@ -647,8 +677,8 @@ formatAdDateByPattern('EEEE, MMM d, yyyy', 2024, 9, 9, 'en'); // "Monday, Sep 9,
 | `MMMM` / `MMM` | full / short month name | `Bhadra` / `Bha` |
 | `MM` / `M` | 2-digit / bare month | `05` / `5` |
 | `dd` / `d` | 2-digit / bare day | `24` / `24` |
-| `D` | day of the year | `147` |
-| `w` | week of the year | `22` |
+| `D` | day of the year | `150` |
+| `w` | week of the year | `23` |
 | `EEEE` | full weekday name | `Monday` |
 | `E` | medium weekday name | `Mon` |
 | `EEEEE` | short weekday name | `M` |
