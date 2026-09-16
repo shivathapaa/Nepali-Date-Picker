@@ -1,4 +1,5 @@
 import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
+import org.jetbrains.kotlin.gradle.plugin.mpp.apple.XCFramework
 
 plugins {
     id("picker.kotlinMultiplatform")
@@ -7,6 +8,21 @@ plugins {
 }
 
 kotlin {
+    // Compose-free XCFramework for Swift consumers that only need the conversion engine. The `:ui`
+    // XCFramework statically embeds this module, so the two frameworks are alternatives, never
+    // additive: linking both would duplicate the Kotlin runtime and this module's symbols.
+    val xcFrameworkName = "nepali-date-picker-core"
+    val xcf = XCFramework(xcFrameworkName)
+
+    listOf(iosArm64(), iosSimulatorArm64()).forEach { target ->
+        target.binaries.framework {
+            baseName = xcFrameworkName
+            binaryOption("bundleId", "io.github.shivathapaa.$xcFrameworkName")
+            xcf.add(this)
+            isStatic = true
+        }
+    }
+
     // Backend / native-only targets in addition to the Compose-supported set defined by the
     // `picker.kotlinMultiplatform` convention. These targets are pure kotlinx-datetime + stdlib
     // consumers (server, CLI, embedded, Apple wearables / TV, Apple x86_64 simulators, wasmWasi),
