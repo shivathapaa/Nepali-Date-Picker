@@ -134,8 +134,8 @@ jobs:
                       script = step.get("run")
                       if not script:
                           continue
-                      # GitHub expands ${{ … }} before the shell sees it, so substitute a plain
-                      # token rather than leaving syntax the parser cannot read.
+                      # GitHub expands its expression syntax before the shell sees it, so
+                      # substitute a plain token rather than leaving syntax shellcheck cannot read.
                       script = re.sub(r"\$\{\{[^}]*\}\}", "GHA_EXPR", script)
                       name = f"{os.path.basename(path)}-{job_name}-{index}".replace("/", "_")
                       with open(f"/tmp/wf/{name}.sh", "w") as out:
