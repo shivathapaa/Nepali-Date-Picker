@@ -4,6 +4,32 @@ All notable changes to **Nepali-Date-Picker (KMP)** are documented here.
 
 The project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html). Pre-3.0 release history lives in the [GitHub Releases](https://github.com/shivathapaa/Nepali-Date-Picker/releases) page.
 
+## 3.1.2 - macOS slice for the Swift engine framework
+
+Patch release. No Kotlin, Compose, Swift or JavaScript API changed, so every 3.1.1 project upgrades
+with a version bump.
+
+### Swift and macOS
+
+* `nepali-date-picker-core.xcframework` now ships a `macos-arm64` slice alongside the two iOS ones,
+  so a macOS app can use the BS↔AD conversion, comparison and formatting engine from Swift. The
+  generated `Package.swift` declares `.macOS(.v12)`, matching the deployment target Kotlin/Native
+  builds `macosArm64` against.
+* The pickers stay iOS-only. They are hosted in a `UIViewController`, and Compose Multiplatform
+  publishes no embeddable AppKit host on macOS, so there is no macOS equivalent of the factories
+  Swift callers use. A macOS target that links the `nepali-date-picker` product fails with
+  `no library for this platform was found`; `README-spm.md` documents this under Troubleshooting.
+* The macOS slice is Apple silicon only. Intel Macs are not covered.
+* SPM release notes link the source tag they were built from.
+
+### JavaScript tooling
+
+* `verify:pack` reads npm 12's object-shaped `npm pack --json` output, which had broken the release
+  gate on the newer CLI.
+* The npm publish workflow is pinned to npm 12.
+* Dev dependencies upgraded to clear advisories: vite, vitest and esbuild, plus TypeScript 7 and
+  jsdom 30. No shipped runtime dependency changed.
+
 ## 3.1.1 - Swift package, npm packages, published API reference
 
 Distribution release. The library now ships to Swift Package Manager and npm alongside Maven Central,
