@@ -66,7 +66,7 @@ try {
           '@nepali-date-picker/web-component': `file:${wcTgz}`,
         },
         overrides: { '@nepali-date-picker/core': `file:${coreTgz}` },
-        devDependencies: { vite: '^8.0.0', jsdom: '^25.0.0' },
+        devDependencies: { vite: '^8.0.0', jsdom: '^30.0.0' },
       },
       null,
       2,
