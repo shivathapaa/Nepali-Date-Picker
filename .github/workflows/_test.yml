@@ -17,7 +17,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     timeout-minutes: 60
     strategy:
-      # Surface failures from every host even if one fails — needed so the
+      # Surface failures from every host even if one fails - needed so the
       # release gate sees the complete picture.
       fail-fast: false
       matrix:
@@ -36,7 +36,7 @@ jobs:
         uses: gradle/actions/setup-gradle@v4
 
       # macOS: Apple natives + JVM + Android host + Wasm WASI node + sample.
-      # JS/Wasm-JS node tests run on the Linux leg only — they execute pure-Kotlin
+      # JS/Wasm-JS node tests run on the Linux leg only - they execute pure-Kotlin
       # compiled to V8, so host OS adds no signal, and the macOS GitHub Actions
       # Node runtime has historically flaked at `node:internal/timers` mid-suite.
       # Wasm WASI node stays on macOS because it has no Linux-leg twin and is
@@ -202,6 +202,8 @@ jobs:
           npm run --workspace @nepali-date-picker/web-component build
           npm run --workspace @nepali-date-picker/web-component test
 
-      - name: Build the web-component showcase
-        working-directory: js
-        run: npm run --workspace @nepali-date-picker/examples build
+      - name: Build the web-component showcase (sample/jsApp)
+        working-directory: sample/jsApp
+        run: |
+          npm ci
+          npm run build

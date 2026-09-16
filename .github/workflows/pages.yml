@@ -9,7 +9,7 @@ name: Deploy demo and API docs to Pages
 # Pages has one live environment per repo, so all three share a single artifact: the Compose demo
 # sits at the site root, the web-component showcase under demo/, and the Dokka HTML under api/.
 #
-# PRs do NOT trigger this — Pages has a single live environment and PR
+# PRs do NOT trigger this - Pages has a single live environment and PR
 # previews would either burn quota or fight for the deploy lock. PR
 # branches still get a build via ci.yml, just no deploy.
 
@@ -95,17 +95,23 @@ jobs:
           mkdir -p "$dist/api"
           cp -r build/dokka/html/. "$dist/api/"
 
-      - name: Build the web-component showcase
+      - name: Build the web packages (engine + web component)
         working-directory: js
         run: |
           npm ci
-          npm run build:examples
+          npm run build
+
+      - name: Build the web-component showcase (sample/jsApp)
+        working-directory: sample/jsApp
+        run: |
+          npm ci
+          npm run build
 
       - name: Nest the web-component showcase under /demo
         run: |
           dist=sample/composeApp/build/dist/wasmJs/productionExecutable
           mkdir -p "$dist/demo"
-          cp -r js/examples/dist/. "$dist/demo/"
+          cp -r sample/jsApp/dist/. "$dist/demo/"
 
       - name: Report bundle size
         run: |

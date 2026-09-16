@@ -143,9 +143,12 @@ Add `CUSTOM_ELEMENTS_SCHEMA`, `import '@nepali-date-picker/web-component';` once
 From the `js/` workspace root:
 
 ```bash
-npm run dev:examples   # live showcase of every variant
+npm run build          # compile the engine and build this package
 npm run test           # unit tests
 ```
+
+The live showcase of every variant lives in `sample/jsApp` (run `npm install && npm run dev`
+there after building the packages).
 
 ## License
 

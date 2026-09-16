@@ -4,7 +4,6 @@ node_modules/
 # Generated build output
 packages/core/dist/
 packages/web-component/dist/
-examples/dist/
 
 # TypeScript incremental build info
 *.tsbuildinfo
