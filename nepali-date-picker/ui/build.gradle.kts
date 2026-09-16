@@ -7,6 +7,9 @@ plugins {
     id("picker.dokka")
 }
 
+// Structural checks on the iOS export: dumpIosApi, checkIosApi, checkBridgeCoverage.
+apply(from = "iosApiVerification.gradle.kts")
+
 kotlin {
     val xcFrameworkName = "nepali-date-picker"
     val xcf = XCFramework(xcFrameworkName)

@@ -1,5 +1,5 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="All Tests (Local - mirrors CI macOS leg)" type="GradleRunConfiguration" factoryName="Gradle">
+  <configuration default="false" name="Dump iOS API Surface (regenerate ios.api)" type="GradleRunConfiguration" factoryName="Gradle">
     <ExternalSystemSettings>
       <option name="executionName" />
       <option name="externalProjectPath" value="$PROJECT_DIR$" />
@@ -10,14 +10,7 @@
       </option>
       <option name="taskNames">
         <list>
-          <option value=":nepali-date-picker:core:jvmTest" />
-          <option value=":nepali-date-picker:core:testAndroidHostTest" />
-          <option value=":nepali-date-picker:core:iosSimulatorArm64Test" />
-          <option value=":nepali-date-picker:core:macosArm64Test" />
-          <option value=":nepali-date-picker:core:jsNodeTest" />
-          <option value=":nepali-date-picker:core:wasmJsNodeTest" />
-          <option value=":nepali-date-picker:ui:iosSimulatorArm64Test" />
-          <option value=":nepali-date-picker:ui:checkBridgeCoverage" />
+          <option value=":nepali-date-picker:ui:dumpIosApi" />
         </list>
       </option>
       <option name="vmOptions" value="" />
@@ -25,7 +18,7 @@
     <ExternalSystemDebugServerProcess>true</ExternalSystemDebugServerProcess>
     <ExternalSystemReattachDebugProcess>true</ExternalSystemReattachDebugProcess>
     <DebugAllEnabled>false</DebugAllEnabled>
-    <RunAsTest>true</RunAsTest>
+    <RunAsTest>false</RunAsTest>
     <method v="2" />
   </configuration>
 </component>
