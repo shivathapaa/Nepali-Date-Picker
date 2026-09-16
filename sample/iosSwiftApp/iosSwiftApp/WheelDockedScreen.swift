@@ -23,7 +23,7 @@ struct WheelDockedScreen: View {
                     title: "Wheel picker",
                     subtitle: "Scrolling year, month and day columns. Starts on today when no date is given."
                 ) {
-                    AutoSized(initialHeight: 240) { report in
+                    AutoSized(measurementHeight: 240) { report in
                         NepaliWheelDatePickerView(onHeightChange: report, initialDate: nil) { wheel = $0 }
                     }
                     SelectionSummary(selection: wheel)
@@ -33,7 +33,7 @@ struct WheelDockedScreen: View {
                     title: "Wheel, pre-selected and localized",
                     subtitle: "Opens on Ashoj 10, 2081 with Nepali labels and Devanagari digits."
                 ) {
-                    AutoSized(initialHeight: 240) { report in
+                    AutoSized(measurementHeight: 240) { report in
                         NepaliWheelDatePickerView(
                             onHeightChange: report,
                             initialDate: preselectedDate,
@@ -45,7 +45,7 @@ struct WheelDockedScreen: View {
 
                 DemoSection(
                     title: "Docked picker",
-                    subtitle: "A compact field sized to its content. A Compose popup is clipped to its host, so raise initialHeight if you want the calendar to open inline."
+                    subtitle: "A compact field sized to its content. A Compose popup is clipped to its host, so raise measurementHeight if you want the calendar to open inline."
                 ) {
                     AutoSized { report in
                         NepaliDatePickerDockedView(onHeightChange: report, initialSelectedDate: preselectedDate) { docked = $0 }

@@ -36,7 +36,7 @@ struct SelectableDatesScreen: View {
                     title: "Future dates only",
                     subtitle: "AfterDateSelectable disables everything up to and including today."
                 ) {
-                    AutoSized(initialHeight: 560) { report in
+                    AutoSized(measurementHeight: 560) { report in
                         NepaliDatePickerView(
                             onHeightChange: report,
                             initialSelectedDate: nil,
@@ -53,7 +53,7 @@ struct SelectableDatesScreen: View {
                     title: "Past dates only",
                     subtitle: "BeforeDateSelectable with the boundary day kept selectable."
                 ) {
-                    AutoSized(initialHeight: 560) { report in
+                    AutoSized(measurementHeight: 560) { report in
                         NepaliDatePickerView(
                             onHeightChange: report,
                             initialSelectedDate: nil,
@@ -70,7 +70,7 @@ struct SelectableDatesScreen: View {
                     title: "A bounded window",
                     subtitle: "DateRangeSelectable limits the picker to the next thirty days."
                 ) {
-                    AutoSized(initialHeight: 560) { report in
+                    AutoSized(measurementHeight: 560) { report in
                         NepaliDatePickerView(
                             onHeightChange: report,
                             initialSelectedDate: nil,
@@ -90,7 +90,7 @@ struct SelectableDatesScreen: View {
                     title: "A policy written in Swift",
                     subtitle: "NepaliSelectableDates is a Kotlin interface, so the app can implement it directly. This one allows even days only."
                 ) {
-                    AutoSized(initialHeight: 560) { report in
+                    AutoSized(measurementHeight: 560) { report in
                         NepaliDatePickerView(
                             onHeightChange: report,
                             initialSelectedDate: nil,

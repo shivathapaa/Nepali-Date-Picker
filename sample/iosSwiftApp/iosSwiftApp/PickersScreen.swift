@@ -25,7 +25,7 @@ struct PickersScreen: View {
                     title: "Default picker",
                     subtitle: "No initial selection. The mode toggle switches between calendar and typed input."
                 ) {
-                    AutoSized(initialHeight: 560) { report in
+                    AutoSized(measurementHeight: 560) { report in
                         NepaliDatePickerView(onHeightChange: report, initialSelectedDate: nil) { plain = $0 }
                     }
                     SelectionSummary(selection: plain)
@@ -35,7 +35,7 @@ struct PickersScreen: View {
                     title: "Pre-selected date",
                     subtitle: "Opens on Baisakh 15, 2081 with that date already chosen and its month displayed."
                 ) {
-                    AutoSized(initialHeight: 560) { report in
+                    AutoSized(measurementHeight: 560) { report in
                         NepaliDatePickerView(onHeightChange: report, initialSelectedDate: preselectedDate) { preselected = $0 }
                     }
                     SelectionSummary(selection: preselected)
@@ -45,7 +45,7 @@ struct PickersScreen: View {
                     title: "With the Gregorian date",
                     subtitle: "Every Bikram Sambat day is annotated with its English equivalent."
                 ) {
-                    AutoSized(initialHeight: 620) { report in
+                    AutoSized(measurementHeight: 620) { report in
                         NepaliDatePickerView(
                             onHeightChange: report,
                             initialSelectedDate: preselectedDate,
@@ -69,7 +69,7 @@ struct PickersScreen: View {
                     title: "Nepali language",
                     subtitle: "The same picker localized, with Devanagari month names and digits."
                 ) {
-                    AutoSized(initialHeight: 560) { report in
+                    AutoSized(measurementHeight: 560) { report in
                         NepaliDatePickerView(
                             onHeightChange: report,
                             initialSelectedDate: nil,
@@ -83,7 +83,7 @@ struct PickersScreen: View {
                     title: "Range picker",
                     subtitle: "Pick a start and an end. Months are stacked vertically."
                 ) {
-                    AutoSized(initialHeight: 640) { report in
+                    AutoSized(measurementHeight: 640) { report in
                         NepaliDateRangePickerView(
                             onHeightChange: report,
                             initialSelectedStartDate: preselectedDate,
@@ -99,7 +99,7 @@ struct PickersScreen: View {
                     title: "Range with Gregorian dates",
                     subtitle: "The range calendar paired with English dates and horizontal paging."
                 ) {
-                    AutoSized(initialHeight: 640) { report in
+                    AutoSized(measurementHeight: 640) { report in
                         NepaliDateRangePickerView(
                             onHeightChange: report,
                             initialSelectedStartDate: nil,

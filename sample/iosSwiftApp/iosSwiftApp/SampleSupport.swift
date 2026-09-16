@@ -49,13 +49,20 @@ struct DemoSection<Content: View>: View {
 /// A `UIViewControllerRepresentable` has no intrinsic height, so a fixed frame either crops the
 /// calendar or leaves dead space under a text field. The builder receives the reporting closure to
 /// hand to the representable.
-/// The height Compose reports is authoritative once it arrives. `initialHeight` only seeds the
-/// first layout pass, giving the content enough room to lay itself out and measure honestly. It is
-/// deliberately not a floor: clamping to it is what leaves a gap under a calendar whose month needs
-/// fewer rows than the seed allowed for.
+/// Sizes a hosted picker to the height Compose reports.
+///
+/// The hosted scene is always given `measurementHeight`, while the surrounding layout takes the
+/// height Compose reports back. Keeping those two apart is the whole point: Compose measures
+/// inside the frame it is given, so if the scene shrank with the layout, a report could never
+/// exceed the current frame and the content would be trapped at its smallest size. Switching a
+/// picker to typed input and back is exactly that case.
+///
+/// Measuring the content unbounded would be tidier, but Compose forbids infinite height
+/// constraints above a vertically scrolling component and the range picker has one, so a generous
+/// finite height is the workable version.
 struct AutoSized<Content: View>: View {
-    /// Room granted for the first measurement, before Compose reports the real height.
-    var initialHeight: CGFloat = 420
+    /// Height the scene is measured in. Generous enough for the tallest mode the picker can show.
+    var measurementHeight: CGFloat = 420
     @ViewBuilder var content: (@escaping (CGFloat) -> Void) -> Content
 
     @State private var measured: CGFloat?
@@ -65,10 +72,12 @@ struct AutoSized<Content: View>: View {
             // Compose reports on every layout pass; ignore the noise.
             if measured == nil || abs(measured! - reported) > 0.5 { measured = reported }
         }
-        // Seeding at zero would be self-defeating: the content gets no room, measures zero, and
-        // never grows.
-        .frame(height: measured ?? initialHeight)
-        // The hosted surface is square, so round it to sit inside the card.
+        .frame(height: measurementHeight, alignment: .top)
+        .frame(height: measured ?? measurementHeight, alignment: .top)
+        .clipped()
+        // Clip the scene out of hit testing too, so the part hanging below the visible height
+        // cannot swallow taps meant for whatever follows it.
+        .contentShape(Rectangle())
         .clipShape(RoundedRectangle(cornerRadius: 12))
         .padding(.horizontal, 4)
     }

@@ -107,7 +107,7 @@ struct CustomizationScreen: View {
                     title: "Live picker",
                     subtitle: "The picker rebuilt with the settings above."
                 ) {
-                    AutoSized(initialHeight: 560) { report in
+                    AutoSized(measurementHeight: 560) { report in
                         NepaliDatePickerView(
                             onHeightChange: report,
                             initialSelectedDate: nil,

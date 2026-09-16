@@ -16,6 +16,7 @@
 			dependencies = (
 			);
 			name = AssembleXCFramework;
+			productName = AssembleXCFramework;
 		};
 /* End PBXAggregateTarget section */
 
@@ -34,7 +35,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		5EFFE4E03FAC6B49113B2D64 /* nepali_date_picker.xcframework */ = {isa = PBXFileReference; includeInIndex = 1; name = nepali_date_picker.xcframework; path = "../../nepali-date-picker/ui/build/XCFrameworks/release/nepali_date_picker.xcframework"; sourceTree = SOURCE_ROOT; };
+		5EFFE4E03FAC6B49113B2D64 /* nepali_date_picker.xcframework */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = wrapper.xcframework; name = nepali_date_picker.xcframework; path = "../../nepali-date-picker/ui/build/XCFrameworks/release/nepali_date_picker.xcframework"; sourceTree = SOURCE_ROOT; };
 		B0EB5616305902BB00171549 /* Nepali Date Picker.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Nepali Date Picker.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		B0EB5623305902BD00171549 /* Nepali Date PickerTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Nepali Date PickerTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		B0EB562D305902BD00171549 /* Nepali Date PickerUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Nepali Date PickerUITests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -43,8 +44,6 @@
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		B0EB5618305902BB00171549 /* iosSwiftApp */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			exceptions = (
-			);
 			path = iosSwiftApp;
 			sourceTree = "<group>";
 		};
@@ -125,14 +124,6 @@
 				TargetAttributes = {
 					B0EB5615305902BB00171549 = {
 						CreatedOnToolsVersion = 26.1.1;
-					};
-					B0EB5622305902BD00171549 = {
-						CreatedOnToolsVersion = 26.1.1;
-						TestTargetID = B0EB5615305902BB00171549;
-					};
-					B0EB562C305902BD00171549 = {
-						CreatedOnToolsVersion = 26.1.1;
-						TestTargetID = B0EB5615305902BB00171549;
 					};
 				};
 			};
