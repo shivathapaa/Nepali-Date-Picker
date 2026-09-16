@@ -27,7 +27,11 @@ ships to Android, hosted inside a `UIViewController` so SwiftUI and UIKit can em
 > [`nepali_calendar_utils`](https://github.com/shivathapaa/nepali_calendar_utils) on PyPI and
 > [`@nepali-date-picker/core`](https://www.npmjs.com/package/@nepali-date-picker/core) /
 > [`@nepali-date-picker/web-component`](https://www.npmjs.com/package/@nepali-date-picker/web-component)
-> on npm, so results match across Swift, Kotlin, Python and JavaScript.
+> on npm, so results match across Swift, Kotlin, Python and JavaScript. Their guides are the
+> [main README](https://github.com/shivathapaa/Nepali-Date-Picker/blob/main/README.md) for Kotlin
+> Multiplatform and Android, and
+> [README-js.md](https://github.com/shivathapaa/Nepali-Date-Picker/blob/main/README-js.md) for the
+> web.
 
 <br>
 

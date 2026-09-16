@@ -10,6 +10,10 @@ Android and Python builds, so conversions match everywhere.
 
 **[▶ Live demo](https://shivathapaa.github.io/Nepali-Date-Picker/demo/)** - every variant and use-case.
 
+This page is a quick start. The complete web guide, every element, attribute, event, theming hook
+and engine function, is **[README-js.md](../README-js.md)**. To run the showcase locally, see
+[`sample/jsApp`](../sample/jsApp).
+
 ## Picker UI
 
 ```html

@@ -33,15 +33,32 @@ KMP Nepali Date Picker for both Android and/or iOS and/or KMP (JVM, JS, Wasm) wh
 </p>
 <br>
 
-> **Note:** If you also want to implement date utilities and converters in your backend or Python project, the package is available on PyPI as _**nepali_calendar_utils**_. Similar to this library, [nepali_calendar_utils](https://github.com/shivathapaa/nepali_calendar_utils) Python package provides a collection of utilities for working with Nepali Dates, offering seamless conversion and integration between the Nepali Calendar and the Gregorian Calendar.
+## Documentation for other platforms
 
-> **Note:** Building for the **web or JavaScript/TypeScript**? The same engine and picker UI are on npm: [`@nepali-date-picker/core`](https://www.npmjs.com/package/@nepali-date-picker/core) (zero-dependency BS↔AD engine with TypeScript types) and [`@nepali-date-picker/web-component`](https://www.npmjs.com/package/@nepali-date-picker/web-component) (a framework-agnostic `<nepali-date-picker>` suite for React, Vue, Angular, Svelte, and plain HTML). All three languages (Python, Kotlin/Android, JS) share the same calendar tables, so results match. See the [live web-component demo](https://shivathapaa.github.io/Nepali-Date-Picker/demo/).
+This README covers **Kotlin Multiplatform and Android**. The same calendar tables power the Swift,
+JavaScript and Python builds, so results match across all of them, and each one has its own complete
+guide:
+
+| Platform | Guide | Packages |
+| --- | --- | --- |
+| **Kotlin / Android / KMP** | This README | [Maven Central](https://central.sonatype.com/namespace/io.github.shivathapaa) |
+| **Swift / iOS** | [**README-spm.md**](./README-spm.md) - hosting, options, sizing, and the full Swift API | [Nepali-Date-Picker-SPM](https://github.com/shivathapaa/Nepali-Date-Picker-SPM) |
+| **JavaScript / TypeScript / web** | [**README-js.md**](./README-js.md) - custom elements, attributes, events, theming, and the headless engine | [`@nepali-date-picker/web-component`](https://www.npmjs.com/package/@nepali-date-picker/web-component), [`@nepali-date-picker/core`](https://www.npmjs.com/package/@nepali-date-picker/core) |
+| **Python / backend** | [nepali_calendar_utils](https://github.com/shivathapaa/nepali_calendar_utils) | [PyPI](https://pypi.org/project/nepali_calendar_utils/) |
+
+Runnable demos for every one of these live in [`sample/`](./sample) (Android, desktop, web, Compose
+on iOS, native SwiftUI, and the web components). See the [samples guide](./sample/README.md).
+
+Live: the [Compose demo](https://shivathapaa.github.io/Nepali-Date-Picker/), the
+[web-component demo](https://shivathapaa.github.io/Nepali-Date-Picker/demo/), and the
+[API reference](https://shivathapaa.github.io/Nepali-Date-Picker/api/).
 
 <br>
 
 <details>
   <summary><b>Table of Contents</b></summary>
 
+* [Documentation for other platforms](#documentation-for-other-platforms)
 * [Design overview](#design-overview)
 * [Types/features](#typesfeatures)
 * [Using in your projects](#using-in-your-projects)
@@ -49,6 +66,7 @@ KMP Nepali Date Picker for both Android and/or iOS and/or KMP (JVM, JS, Wasm) wh
     * [Android](#android)
     * [iOS](#ios)
     * [Desktop/Web](#desktopweb)
+* [Samples](#samples)
 * [License](#license)
 * [Brief simple example usage](#brief-simple-example-usage)
 * [Detailed examples to explore more](#detailed-examples-to-explore-more)
@@ -288,8 +306,33 @@ import nepali_date_picker // import Nepali Date Picker library
 // Create view ...
 ```
 
+> **Writing the iOS app in Swift, not Compose?** The pickers are exposed to Swift as
+> `UIViewController` factories you can drop into SwiftUI or UIKit. Hosting, sizing, the options
+> objects, and the complete Swift API are documented in [**README-spm.md**](./README-spm.md), with a
+> working app in [`sample/iosSwiftApp`](./sample/iosSwiftApp).
+
 ### Desktop, Wasm, & Js
 The library supports Desktop, Wasm, and Js from version [v2.5.0-beta01](https://github.com/shivathapaa/Nepali-Date-Picker/releases/tag/2.5.0-beta01). See all artifacts [here](https://central.sonatype.com/namespace/io.github.shivathapaa)
+
+> **Plain web app, no Compose?** For React, Vue, Angular, Svelte, or plain HTML, use the npm
+> packages instead: a framework-agnostic `<nepali-date-picker>` element suite and a zero-dependency
+> BS↔AD engine with TypeScript types. Full reference in [**README-js.md**](./README-js.md), live
+> [demo](https://shivathapaa.github.io/Nepali-Date-Picker/demo/), source in [`js/`](./js).
+
+## Samples
+
+Runnable apps for every distribution live in [`sample/`](./sample), each consuming the library the
+way a real project would:
+
+| Sample | What it shows | Run |
+| --- | --- | --- |
+| [`composeApp`](./sample/composeApp) | The shared Compose showcase: every picker, field, dialog and utility | `./gradlew :sample:composeApp:run` |
+| [`androidApp`](./sample/androidApp) | The showcase in a real Android app | `./gradlew :sample:androidApp:installDebug` |
+| [`iosApp`](./sample/iosApp) | Compose Multiplatform hosted in SwiftUI | Open `sample/iosApp/iosApp.xcodeproj` |
+| [`iosSwiftApp`](./sample/iosSwiftApp) | A native SwiftUI app consuming the XCFramework | Open `sample/iosSwiftApp/iosSwiftApp.xcodeproj` |
+| [`jsApp`](./sample/jsApp) | The web components and the headless engine | `cd js && npm run build`, then `cd sample/jsApp && npm run dev` |
+
+Prerequisites and the details for each are in the [samples guide](./sample/README.md).
 
 ## Migrating from 2.6.x to 3.0.x
 

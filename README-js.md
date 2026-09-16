@@ -23,6 +23,16 @@ Two packages. Install whichever you need (the UI package already includes the en
 > **Indexing (important):** months and weekdays are **1-based**. Month `1` = Baisakh … `12` = Chaitra.
 > Weekday `1` = Sunday … `7` = Saturday. `era`: `1` = AD, `2` = BS.
 
+> **Where the code lives.** Both packages are generated from the Kotlin Multiplatform `:core` engine
+> in [shivathapaa/Nepali-Date-Picker](https://github.com/shivathapaa/Nepali-Date-Picker). The
+> TypeScript sources for the elements are under [`js/`](./js), and a showcase that uses every one of
+> them is in [`sample/jsApp`](./sample/jsApp).
+
+> **Other platforms.** The same calendar tables power the Kotlin Multiplatform library (see the
+> [main README](./README.md)), the iOS Swift package (see [README-spm.md](./README-spm.md)), and
+> [`nepali_calendar_utils`](https://github.com/shivathapaa/nepali_calendar_utils) on PyPI, so results
+> match across JavaScript, Kotlin, Swift and Python.
+
 ---
 
 # Part 1 - `@nepali-date-picker/web-component` (UI)
