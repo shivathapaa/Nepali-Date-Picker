@@ -1,5 +1,7 @@
 # Nepali Date Picker
 
+[![npm web-component](https://img.shields.io/npm/v/@nepali-date-picker/web-component?label=npm%20web-component&logo=npm&color=CB3837)](https://www.npmjs.com/package/@nepali-date-picker/web-component)
+[![npm core](https://img.shields.io/npm/v/@nepali-date-picker/core?label=npm%20core&logo=npm&color=CB3837)](https://www.npmjs.com/package/@nepali-date-picker/core)
 [![License: MPL-2.0](https://img.shields.io/badge/License-MPL%202.0-brightgreen.svg)](https://mozilla.org/MPL/2.0/)
 
 A **Bikram Sambat (Nepali) date picker** for the web, plus a headless **BS ↔ AD conversion and
@@ -12,8 +14,8 @@ Two packages. Install whichever you need (the UI package already includes the en
 
 | Package | What it is | Install when you need… |
 | --- | --- | --- |
-| **`@nepali-date-picker/web-component`** | The `<nepali-date-picker>` custom elements: inline calendar, dialog, docked, range, text field, wheel. | A date picker on screen. |
-| **`@nepali-date-picker/core`** | Only the conversion / formatting functions. No UI. | BS ↔ AD math with your own UI, or on the server. |
+| **[`@nepali-date-picker/web-component`](https://www.npmjs.com/package/@nepali-date-picker/web-component)** | The `<nepali-date-picker>` custom elements: inline calendar, dialog, docked, range, text field, wheel. | A date picker on screen. |
+| **[`@nepali-date-picker/core`](https://www.npmjs.com/package/@nepali-date-picker/core)** | Only the conversion / formatting functions. No UI. | BS ↔ AD math with your own UI, or on the server. |
 
 - **Localized.** English / Nepali text, Latin / Devanagari digits.
 - **Accessible.** Real DOM, keyboard-navigable, ARIA grid, screen-reader labels.

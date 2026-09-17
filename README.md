@@ -10,7 +10,7 @@ KMP Nepali Date Picker for both Android and/or iOS and/or KMP (JVM, JS, Wasm) wh
 
 <p align="center">
   <a href="https://github.com/shivathapaa/Nepali-Date-Picker/releases">
-    <img alt="version" src="https://img.shields.io/github/v/release/shivathapaa/nepali-date-picker?label=stable%20release" /></a>&nbsp;
+    <img alt="GitHub release" src="https://img.shields.io/github/v/release/shivathapaa/nepali-date-picker?label=GitHub%20release&logo=github&labelColor=E2E3D8&color=12100E" /></a>&nbsp;
   <a href="https://github.com/shivathapaa/Nepali-Date-Picker/blob/main/LICENSE">
     <img alt="license" src="https://img.shields.io/github/license/shivathapaa/nepali-date-picker?labelColor=F5DDD7&color=E0BFB7"/></a>&nbsp;
   <a href="https://medium.com/@shivathapaa/nepali-date-picker-for-android-and-ios-kotlin-multiplatform-a739ea0caf47">
@@ -25,7 +25,13 @@ KMP Nepali Date Picker for both Android and/or iOS and/or KMP (JVM, JS, Wasm) wh
 <!--     <a href="https://github.com">
     <img alt="Made for community" src="https://img.shields.io/badge/Made%20for%20community-F3FBF7" /></a>&nbsp; -->
   <a href="https://central.sonatype.com/namespace/io.github.shivathapaa">
-  <img alt="latest release" src="https://img.shields.io/maven-central/v/io.github.shivathapaa/nepali-date-picker-core?label=latest%20release"></a>&nbsp;
+  <img alt="Maven Central" src="https://img.shields.io/maven-central/v/io.github.shivathapaa/nepali-date-picker-core?label=Maven%20Central&logo=apachemaven&labelColor=E2E3D8&color=C71A36"></a>&nbsp;
+  <a href="https://klibs.io/project/shivathapaa/Nepali-Date-Picker">
+  <img alt="klibs.io" src="https://img.shields.io/badge/klibs.io-%E2%86%92-7F52FF?logo=kotlin&labelColor=E2E3D8"></a>&nbsp;
+  <a href="https://www.npmjs.com/package/@nepali-date-picker/web-component">
+  <img alt="npm web-component" src="https://img.shields.io/npm/v/@nepali-date-picker/web-component?label=npm%20web-component&logo=npm&labelColor=E2E3D8&color=CB3837"></a>&nbsp;
+  <a href="https://www.npmjs.com/package/@nepali-date-picker/core">
+  <img alt="npm core" src="https://img.shields.io/npm/v/@nepali-date-picker/core?label=npm%20core&logo=npm&labelColor=E2E3D8&color=CB3837"></a>&nbsp;
   <a href="#screenshots">
   <img alt="See Screenshots" src="https://img.shields.io/badge/see_screenshots-blue?color=D6E6DF"></a>&nbsp;
   <a href="https://github.com/shivathapaa/Nepali-Date-Picker/releases/download/2.2.4/Nepali_Date_Picker_v2.2.4.apk">
@@ -41,7 +47,7 @@ guide:
 
 | Platform | Guide | Packages |
 | --- | --- | --- |
-| **Kotlin / Android / KMP** | This README | [Maven Central](https://central.sonatype.com/namespace/io.github.shivathapaa) |
+| **Kotlin / Android / KMP** | This README | [Maven Central](https://central.sonatype.com/namespace/io.github.shivathapaa), [klibs.io](https://klibs.io/project/shivathapaa/Nepali-Date-Picker) |
 | **Swift / iOS** | [**README-spm.md**](./README-spm.md) - hosting, options, sizing, and the full Swift API | [Nepali-Date-Picker-SPM](https://github.com/shivathapaa/Nepali-Date-Picker-SPM) |
 | **JavaScript / TypeScript / web** | [**README-js.md**](./README-js.md) - custom elements, attributes, events, theming, and the headless engine | [`@nepali-date-picker/web-component`](https://www.npmjs.com/package/@nepali-date-picker/web-component), [`@nepali-date-picker/core`](https://www.npmjs.com/package/@nepali-date-picker/core) |
 | **Python / backend** | [nepali_calendar_utils](https://github.com/shivathapaa/nepali_calendar_utils) | [PyPI](https://pypi.org/project/nepali_calendar_utils/) |
@@ -144,8 +150,8 @@ so their BS↔AD tables and formatting match the Kotlin, Android, and Python bui
 
 | Package | Contents | When to depend on it |
 | --- | --- | --- |
-| [`@nepali-date-picker/core`](js/packages/core) | The conversion and formatting engine (`convertAdToBs`, `formatBsDateByPattern`, `getTodayBs`, …), compiled from Kotlin. Zero runtime dependencies, ships TypeScript types. | Node / browser code that needs BS↔AD conversion without any UI. |
-| [`@nepali-date-picker/web-component`](js/packages/web-component) | A framework-agnostic `<nepali-date-picker>` calendar element (Lit) that works in React, Vue, Angular, Svelte, and plain HTML. | Rendering a Nepali date picker on the web. |
+| [`@nepali-date-picker/core`](https://www.npmjs.com/package/@nepali-date-picker/core) ([source](js/packages/core)) | The conversion and formatting engine (`convertAdToBs`, `formatBsDateByPattern`, `getTodayBs`, …), compiled from Kotlin. Zero runtime dependencies, ships TypeScript types. | Node / browser code that needs BS↔AD conversion without any UI. |
+| [`@nepali-date-picker/web-component`](https://www.npmjs.com/package/@nepali-date-picker/web-component) ([source](js/packages/web-component)) | A framework-agnostic `<nepali-date-picker>` calendar element (Lit) that works in React, Vue, Angular, Svelte, and plain HTML. | Rendering a Nepali date picker on the web. |
 
 ```bash
 npm install @nepali-date-picker/web-component   # UI + engine
