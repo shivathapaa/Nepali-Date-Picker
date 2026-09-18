@@ -5,14 +5,23 @@
  * see http://mozilla.org/MPL/2.0/
  */
 
-import { LitElement, css, html } from 'lit';
+import { LitElement, css, html, nothing } from 'lit';
 import type { PropertyValues, TemplateResult } from 'lit';
-import { getBsMonthName, getTodayBs, getTotalDaysInBsMonth, localizeDigits } from '@nepali-date-picker/core';
-import type { CalendarDate, NepaliDatePickerChangeDetail, NepaliLanguage } from './types.js';
+import {
+  convertAdToBs,
+  getAdMonthName,
+  getBsMonthName,
+  getTodayBs,
+  getTotalDaysInAdMonth,
+  getTotalDaysInBsMonth,
+  isAdDateConvertible,
+  localizeDigits,
+} from '@nepali-date-picker/core';
+import type { CalendarDate, CalendarSystem, NepaliDatePickerChangeDetail, NepaliLanguage } from './types.js';
 import { parseIso, toIso } from './utils.js';
 import { buildChangeDetail } from './nepali-date-picker.js';
-import { YEAR_RANGE } from './internal/calendar-model.js';
-import { tokens } from './internal/styles.js';
+import { fromCanonical, yearRangeOf } from './internal/calendar-model.js';
+import { calendarStyles, tokens } from './internal/styles.js';
 
 type WheelPart = 'year' | 'month' | 'day';
 
@@ -42,6 +51,8 @@ export class NepaliWheelDatePicker extends LitElement {
     value: { type: String },
     language: { type: String },
     disabled: { type: Boolean, reflect: true },
+    calendarSystem: { type: String, attribute: 'calendar-system' },
+    showCalendarToggle: { type: Boolean, attribute: 'show-calendar-toggle' },
     _year: { state: true },
     _month: { state: true },
     _day: { state: true },
@@ -50,12 +61,20 @@ export class NepaliWheelDatePicker extends LitElement {
   declare value: string;
   declare language: NepaliLanguage;
   declare disabled: boolean;
+  /**
+   * Calendar the wheels spin in, `bs` (Bikram Sambat) or `ad` (Gregorian). `value` and the
+   * `change` event stay Bikram Sambat either way.
+   */
+  declare calendarSystem: CalendarSystem;
+  /** Show a `B.S.` / `A.D.` switch above the wheels. */
+  declare showCalendarToggle: boolean;
   declare private _year: number;
   declare private _month: number;
   declare private _day: number;
 
   static override styles = [
     tokens,
+    calendarStyles,
     css`
       :host {
         display: inline-block;
@@ -130,6 +149,8 @@ export class NepaliWheelDatePicker extends LitElement {
     this.value = '';
     this.language = 'en';
     this.disabled = false;
+    this.calendarSystem = 'bs';
+    this.showCalendarToggle = false;
     const today = getTodayBs();
     this._year = today.year;
     this._month = today.month;
@@ -138,40 +159,83 @@ export class NepaliWheelDatePicker extends LitElement {
 
   override connectedCallback(): void {
     super.connectedCallback();
-    const parsed = parseIso(this.value);
-    if (parsed) {
-      this._year = parsed.year;
-      this._month = parsed.month;
-      this._day = parsed.dayOfMonth;
-    }
+    this.syncWheelsToValue();
   }
 
   override willUpdate(changed: PropertyValues<this>): void {
-    if (changed.has('value')) {
-      const parsed = parseIso(this.value);
-      if (parsed) {
-        this._year = parsed.year;
-        this._month = parsed.month;
-        this._day = Math.min(parsed.dayOfMonth, getTotalDaysInBsMonth(parsed.year, parsed.month));
-      }
+    // Re-anchor on the current position before the value re-seeds the wheels, so a switch with no
+    // value set still keeps the same day.
+    if (changed.has('calendarSystem')) this.reanchor();
+    if (changed.has('value')) this.syncWheelsToValue();
+  }
+
+  /** The wheels' current position read as a Bikram Sambat date, or `null` when it has none. */
+  private canonicalPosition(): CalendarDate | null {
+    if (this.system() === 'bs') {
+      return { year: this._year, month: this._month, dayOfMonth: this._day };
     }
+    if (!isAdDateConvertible(this._year, this._month, this._day)) return null;
+    const bs = convertAdToBs(this._year, this._month, this._day);
+    return { year: bs.year, month: bs.month, dayOfMonth: bs.dayOfMonth };
+  }
+
+  private system(): CalendarSystem {
+    return this.calendarSystem === 'ad' ? 'ad' : 'bs';
+  }
+
+  private daysInSelectedMonth(): number {
+    return this.system() === 'ad'
+      ? getTotalDaysInAdMonth(this._year, this._month)
+      : getTotalDaysInBsMonth(this._year, this._month);
+  }
+
+  private moveWheelsTo(date: CalendarDate | null): void {
+    if (!date) return;
+    this._year = date.year;
+    this._month = date.month;
+    this._day = date.dayOfMonth;
+  }
+
+  private syncWheelsToValue(): void {
+    const parsed = parseIso(this.value);
+    if (!parsed) return;
+    const displayed = fromCanonical(this.system(), parsed);
+    if (!displayed) return;
+    this.moveWheelsTo(displayed);
+    this._day = Math.min(this._day, this.daysInSelectedMonth());
+  }
+
+  private reanchor(): void {
+    const canonical = this.canonicalPosition();
+    this.moveWheelsTo(canonical ? fromCanonical(this.system(), canonical) : null);
   }
 
   private select(part: WheelPart, value: number): void {
     if (part === 'year') this._year = value;
     else if (part === 'month') this._month = value;
     else this._day = value;
-    const maxDay = getTotalDaysInBsMonth(this._year, this._month);
+    const maxDay = this.daysInSelectedMonth();
     if (this._day > maxDay) this._day = maxDay;
-    const date: CalendarDate = { year: this._year, month: this._month, dayOfMonth: this._day };
-    this.value = toIso(date);
+
+    // A Gregorian day before the conversion anchor has no Bikram Sambat equivalent to report.
+    const canonical = this.canonicalPosition();
+    if (!canonical) return;
+
+    this.value = toIso(canonical);
     this.dispatchEvent(
       new CustomEvent<NepaliDatePickerChangeDetail>('change', {
-        detail: buildChangeDetail(date, this.language),
+        detail: buildChangeDetail(canonical, this.language),
         bubbles: true,
         composed: true,
       }),
     );
+  }
+
+  private setSystem(system: CalendarSystem): void {
+    if (system === this.system()) return;
+    const canonical = this.canonicalPosition();
+    this.calendarSystem = system;
+    this.moveWheelsTo(canonical ? fromCanonical(system, canonical) : null);
   }
 
   private onColumnKeydown(event: KeyboardEvent, part: WheelPart, options: WheelOption[], current: number): void {
@@ -218,16 +282,53 @@ export class NepaliWheelDatePicker extends LitElement {
     `;
   }
 
+  private renderCalendarToggle(): TemplateResult {
+    const system = this.system();
+    const segment = (target: CalendarSystem, label: string, description: string): TemplateResult => html`
+      <button
+        class=${target === system ? 'segment active' : 'segment'}
+        type="button"
+        role="radio"
+        aria-checked=${target === system ? 'true' : 'false'}
+        aria-label=${description}
+        ?disabled=${this.disabled}
+        @click=${() => this.setSystem(target)}
+      >
+        ${label}
+      </button>
+    `;
+    return html`
+      <div class="calendar-toggle" role="radiogroup" aria-label=${this.language === 'ne' ? 'पात्रो' : 'Calendar'}>
+        ${segment(
+          'bs',
+          this.language === 'ne' ? 'बि.सं.' : 'B.S.',
+          this.language === 'ne' ? 'बिक्रम सम्बत् क्यालेन्डर हेर्नुहोस्' : 'Show the Bikram Sambat calendar',
+        )}
+        ${segment(
+          'ad',
+          this.language === 'ne' ? 'ई.सं.' : 'A.D.',
+          this.language === 'ne' ? 'ईस्वी सम्बत् क्यालेन्डर हेर्नुहोस्' : 'Show the Gregorian calendar',
+        )}
+      </div>
+    `;
+  }
+
   override render(): TemplateResult {
     const script = this.language === 'ne' ? 'devanagari' : 'latin';
+    const system = this.system();
+    const yearRange = yearRangeOf(system);
     const years: WheelOption[] = [];
-    for (let y = YEAR_RANGE.first; y <= YEAR_RANGE.last; y += 1) years.push({ value: y, label: localizeDigits(String(y), script) });
+    for (let y = yearRange.first; y <= yearRange.last; y += 1) years.push({ value: y, label: localizeDigits(String(y), script) });
     const months: WheelOption[] = [];
-    for (let m = 1; m <= 12; m += 1) months.push({ value: m, label: getBsMonthName(m, 'full', this.language) });
+    for (let m = 1; m <= 12; m += 1) {
+      const name = system === 'ad' ? getAdMonthName(m, 'full', this.language) : getBsMonthName(m, 'full', this.language);
+      months.push({ value: m, label: name });
+    }
     const days: WheelOption[] = [];
-    for (let d = 1; d <= getTotalDaysInBsMonth(this._year, this._month); d += 1) days.push({ value: d, label: localizeDigits(String(d), script) });
+    for (let d = 1; d <= this.daysInSelectedMonth(); d += 1) days.push({ value: d, label: localizeDigits(String(d), script) });
 
     return html`
+      ${this.showCalendarToggle ? this.renderCalendarToggle() : nothing}
       <div class="wheels">
         ${this.renderColumn('year', years, this._year, this.language === 'ne' ? 'वर्ष' : 'Year')}
         ${this.renderColumn('month', months, this._month, this.language === 'ne' ? 'महिना' : 'Month')}

@@ -16,6 +16,14 @@ export interface CalendarDate {
 export type NepaliLanguage = 'en' | 'ne';
 
 /**
+ * Which calendar a grid displays: `bs` for Bikram Sambat, `ad` for Gregorian.
+ *
+ * Only the display changes. A selected date is always reported in Bikram Sambat, so switching keeps
+ * the same day selected.
+ */
+export type CalendarSystem = 'bs' | 'ad';
+
+/**
  * Payload of the `change` event dispatched when the user picks a date.
  *
  * @property bs The selected date in the Bikram Sambat calendar.

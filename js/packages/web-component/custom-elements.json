@@ -228,6 +228,17 @@
               },
               "default": "''",
               "attribute": "label"
+            },
+            {
+              "kind": "field",
+              "name": "calendarSystem",
+              "privacy": "public",
+              "type": {
+                "text": "CalendarSystem"
+              },
+              "description": "Calendar the user types in, `bs` (Bikram Sambat) or `ad` (Gregorian). `value` and the\n`change` event stay Bikram Sambat either way.",
+              "default": "'bs'",
+              "attribute": "calendar-system"
             }
           ],
           "events": [
@@ -294,6 +305,15 @@
               },
               "default": "''",
               "fieldName": "label"
+            },
+            {
+              "name": "calendar-system",
+              "type": {
+                "text": "CalendarSystem"
+              },
+              "description": "Calendar the user types in, `bs` (Bikram Sambat) or `ad` (Gregorian). `value` and the\n`change` event stay Bikram Sambat either way.",
+              "default": "'bs'",
+              "fieldName": "calendarSystem"
             }
           ],
           "superclass": {
@@ -302,14 +322,6 @@
           },
           "tagName": "nepali-date-field",
           "customElement": true
-        },
-        {
-          "kind": "variable",
-          "name": "year"
-        },
-        {
-          "kind": "variable",
-          "name": "month"
         }
       ],
       "exports": [
@@ -458,6 +470,39 @@
             },
             {
               "kind": "field",
+              "name": "calendarSystem",
+              "privacy": "public",
+              "type": {
+                "text": "CalendarSystem"
+              },
+              "description": "Calendar the grid displays, `bs` (Bikram Sambat) or `ad` (Gregorian). Only the display\nchanges: `value` and the `change` event stay Bikram Sambat.",
+              "default": "'bs'",
+              "attribute": "calendar-system"
+            },
+            {
+              "kind": "field",
+              "name": "showCalendarToggle",
+              "privacy": "public",
+              "type": {
+                "text": "boolean"
+              },
+              "description": "Show a `B.S.` / `A.D.` switch above the month header.",
+              "default": "false",
+              "attribute": "show-calendar-toggle"
+            },
+            {
+              "kind": "field",
+              "name": "showAdjacentMonthDays",
+              "privacy": "public",
+              "type": {
+                "text": "boolean"
+              },
+              "description": "Fill the grid's empty cells with the neighbouring months' days, drawn faded. Clicking one picks\nthat day and moves the grid to its month.",
+              "default": "false",
+              "attribute": "show-adjacent-month-days"
+            },
+            {
+              "kind": "field",
               "name": "heading",
               "privacy": "public",
               "type": {
@@ -563,6 +608,33 @@
               },
               "default": "false",
               "fieldName": "showEnglish"
+            },
+            {
+              "name": "calendar-system",
+              "type": {
+                "text": "CalendarSystem"
+              },
+              "description": "Calendar the grid displays, `bs` (Bikram Sambat) or `ad` (Gregorian). Only the display\nchanges: `value` and the `change` event stay Bikram Sambat.",
+              "default": "'bs'",
+              "fieldName": "calendarSystem"
+            },
+            {
+              "name": "show-calendar-toggle",
+              "type": {
+                "text": "boolean"
+              },
+              "description": "Show a `B.S.` / `A.D.` switch above the month header.",
+              "default": "false",
+              "fieldName": "showCalendarToggle"
+            },
+            {
+              "name": "show-adjacent-month-days",
+              "type": {
+                "text": "boolean"
+              },
+              "description": "Fill the grid's empty cells with the neighbouring months' days, drawn faded. Clicking one picks\nthat day and moves the grid to its month.",
+              "default": "false",
+              "fieldName": "showAdjacentMonthDays"
             },
             {
               "name": "heading",
@@ -719,6 +791,39 @@
             },
             {
               "kind": "field",
+              "name": "calendarSystem",
+              "privacy": "public",
+              "type": {
+                "text": "CalendarSystem"
+              },
+              "description": "Calendar the grid displays, `bs` (Bikram Sambat) or `ad` (Gregorian). Only the display\nchanges: `value` and the `change` event stay Bikram Sambat.",
+              "default": "'bs'",
+              "attribute": "calendar-system"
+            },
+            {
+              "kind": "field",
+              "name": "showCalendarToggle",
+              "privacy": "public",
+              "type": {
+                "text": "boolean"
+              },
+              "description": "Show a `B.S.` / `A.D.` switch above the month header.",
+              "default": "false",
+              "attribute": "show-calendar-toggle"
+            },
+            {
+              "kind": "field",
+              "name": "showAdjacentMonthDays",
+              "privacy": "public",
+              "type": {
+                "text": "boolean"
+              },
+              "description": "Fill the grid's empty cells with the neighbouring months' days, drawn faded. Clicking one picks\nthat day and moves the grid to its month.",
+              "default": "false",
+              "attribute": "show-adjacent-month-days"
+            },
+            {
+              "kind": "field",
               "name": "label",
               "privacy": "public",
               "type": {
@@ -786,6 +891,33 @@
               },
               "default": "false",
               "fieldName": "showEnglish"
+            },
+            {
+              "name": "calendar-system",
+              "type": {
+                "text": "CalendarSystem"
+              },
+              "description": "Calendar the grid displays, `bs` (Bikram Sambat) or `ad` (Gregorian). Only the display\nchanges: `value` and the `change` event stay Bikram Sambat.",
+              "default": "'bs'",
+              "fieldName": "calendarSystem"
+            },
+            {
+              "name": "show-calendar-toggle",
+              "type": {
+                "text": "boolean"
+              },
+              "description": "Show a `B.S.` / `A.D.` switch above the month header.",
+              "default": "false",
+              "fieldName": "showCalendarToggle"
+            },
+            {
+              "name": "show-adjacent-month-days",
+              "type": {
+                "text": "boolean"
+              },
+              "description": "Fill the grid's empty cells with the neighbouring months' days, drawn faded. Clicking one picks\nthat day and moves the grid to its month.",
+              "default": "false",
+              "fieldName": "showAdjacentMonthDays"
             },
             {
               "name": "label",
@@ -941,6 +1073,39 @@
               "description": "Show the Gregorian equivalent of the selected date under the calendar.",
               "default": "false",
               "attribute": "show-english"
+            },
+            {
+              "kind": "field",
+              "name": "calendarSystem",
+              "privacy": "public",
+              "type": {
+                "text": "CalendarSystem"
+              },
+              "description": "Calendar the grid displays, `bs` (Bikram Sambat) or `ad` (Gregorian). Only the display changes:\n`value` and the `change` event stay Bikram Sambat, so switching keeps the same day selected.",
+              "default": "'bs'",
+              "attribute": "calendar-system"
+            },
+            {
+              "kind": "field",
+              "name": "showCalendarToggle",
+              "privacy": "public",
+              "type": {
+                "text": "boolean"
+              },
+              "description": "Show a `B.S.` / `A.D.` switch above the month header.",
+              "default": "false",
+              "attribute": "show-calendar-toggle"
+            },
+            {
+              "kind": "field",
+              "name": "showAdjacentMonthDays",
+              "privacy": "public",
+              "type": {
+                "text": "boolean"
+              },
+              "description": "Fill the grid's empty cells with the neighbouring months' days, drawn faded. Clicking one picks\nthat day and moves the grid to its month.",
+              "default": "false",
+              "attribute": "show-adjacent-month-days"
             }
           ],
           "events": [
@@ -1006,6 +1171,33 @@
               "description": "Show the Gregorian equivalent of the selected date under the calendar.",
               "default": "false",
               "fieldName": "showEnglish"
+            },
+            {
+              "name": "calendar-system",
+              "type": {
+                "text": "CalendarSystem"
+              },
+              "description": "Calendar the grid displays, `bs` (Bikram Sambat) or `ad` (Gregorian). Only the display changes:\n`value` and the `change` event stay Bikram Sambat, so switching keeps the same day selected.",
+              "default": "'bs'",
+              "fieldName": "calendarSystem"
+            },
+            {
+              "name": "show-calendar-toggle",
+              "type": {
+                "text": "boolean"
+              },
+              "description": "Show a `B.S.` / `A.D.` switch above the month header.",
+              "default": "false",
+              "fieldName": "showCalendarToggle"
+            },
+            {
+              "name": "show-adjacent-month-days",
+              "type": {
+                "text": "boolean"
+              },
+              "description": "Fill the grid's empty cells with the neighbouring months' days, drawn faded. Clicking one picks\nthat day and moves the grid to its month.",
+              "default": "false",
+              "fieldName": "showAdjacentMonthDays"
             }
           ],
           "superclass": {
@@ -1186,6 +1378,17 @@
               },
               "default": "''",
               "attribute": "end-label"
+            },
+            {
+              "kind": "field",
+              "name": "calendarSystem",
+              "privacy": "public",
+              "type": {
+                "text": "CalendarSystem"
+              },
+              "description": "Calendar both sides are typed in, `bs` (Bikram Sambat) or `ad` (Gregorian). `start`, `end`\nand the `change` event stay Bikram Sambat either way.",
+              "default": "'bs'",
+              "attribute": "calendar-system"
             }
           ],
           "events": [
@@ -1268,6 +1471,15 @@
               },
               "default": "''",
               "fieldName": "endLabel"
+            },
+            {
+              "name": "calendar-system",
+              "type": {
+                "text": "CalendarSystem"
+              },
+              "description": "Calendar both sides are typed in, `bs` (Bikram Sambat) or `ad` (Gregorian). `start`, `end`\nand the `change` event stay Bikram Sambat either way.",
+              "default": "'bs'",
+              "fieldName": "calendarSystem"
             }
           ],
           "superclass": {
@@ -1424,6 +1636,39 @@
               },
               "default": "false",
               "attribute": "show-english"
+            },
+            {
+              "kind": "field",
+              "name": "calendarSystem",
+              "privacy": "public",
+              "type": {
+                "text": "CalendarSystem"
+              },
+              "description": "Calendar the grid displays, `bs` (Bikram Sambat) or `ad` (Gregorian). Only the display\nchanges: `start`, `end` and the `change` event stay Bikram Sambat.",
+              "default": "'bs'",
+              "attribute": "calendar-system"
+            },
+            {
+              "kind": "field",
+              "name": "showCalendarToggle",
+              "privacy": "public",
+              "type": {
+                "text": "boolean"
+              },
+              "description": "Show a `B.S.` / `A.D.` switch above the month header.",
+              "default": "false",
+              "attribute": "show-calendar-toggle"
+            },
+            {
+              "kind": "field",
+              "name": "showAdjacentMonthDays",
+              "privacy": "public",
+              "type": {
+                "text": "boolean"
+              },
+              "description": "Fill the grid's empty cells with the neighbouring months' days, drawn faded. Clicking one picks\nthat day and moves the grid to its month.",
+              "default": "false",
+              "attribute": "show-adjacent-month-days"
             }
           ],
           "events": [
@@ -1493,6 +1738,33 @@
               },
               "default": "false",
               "fieldName": "showEnglish"
+            },
+            {
+              "name": "calendar-system",
+              "type": {
+                "text": "CalendarSystem"
+              },
+              "description": "Calendar the grid displays, `bs` (Bikram Sambat) or `ad` (Gregorian). Only the display\nchanges: `start`, `end` and the `change` event stay Bikram Sambat.",
+              "default": "'bs'",
+              "fieldName": "calendarSystem"
+            },
+            {
+              "name": "show-calendar-toggle",
+              "type": {
+                "text": "boolean"
+              },
+              "description": "Show a `B.S.` / `A.D.` switch above the month header.",
+              "default": "false",
+              "fieldName": "showCalendarToggle"
+            },
+            {
+              "name": "show-adjacent-month-days",
+              "type": {
+                "text": "boolean"
+              },
+              "description": "Fill the grid's empty cells with the neighbouring months' days, drawn faded. Clicking one picks\nthat day and moves the grid to its month.",
+              "default": "false",
+              "fieldName": "showAdjacentMonthDays"
             }
           ],
           "superclass": {
@@ -1591,6 +1863,28 @@
               "default": "false",
               "attribute": "disabled",
               "reflects": true
+            },
+            {
+              "kind": "field",
+              "name": "calendarSystem",
+              "privacy": "public",
+              "type": {
+                "text": "CalendarSystem"
+              },
+              "description": "Calendar the wheels spin in, `bs` (Bikram Sambat) or `ad` (Gregorian). `value` and the\n`change` event stay Bikram Sambat either way.",
+              "default": "'bs'",
+              "attribute": "calendar-system"
+            },
+            {
+              "kind": "field",
+              "name": "showCalendarToggle",
+              "privacy": "public",
+              "type": {
+                "text": "boolean"
+              },
+              "description": "Show a `B.S.` / `A.D.` switch above the wheels.",
+              "default": "false",
+              "attribute": "show-calendar-toggle"
             }
           ],
           "events": [
@@ -1626,6 +1920,24 @@
               },
               "default": "false",
               "fieldName": "disabled"
+            },
+            {
+              "name": "calendar-system",
+              "type": {
+                "text": "CalendarSystem"
+              },
+              "description": "Calendar the wheels spin in, `bs` (Bikram Sambat) or `ad` (Gregorian). `value` and the\n`change` event stay Bikram Sambat either way.",
+              "default": "'bs'",
+              "fieldName": "calendarSystem"
+            },
+            {
+              "name": "show-calendar-toggle",
+              "type": {
+                "text": "boolean"
+              },
+              "description": "Show a `B.S.` / `A.D.` switch above the wheels.",
+              "default": "false",
+              "fieldName": "showCalendarToggle"
             }
           ],
           "superclass": {

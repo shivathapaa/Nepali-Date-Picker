@@ -8,7 +8,7 @@
 import { LitElement, css, html } from 'lit';
 import type { PropertyValues, TemplateResult } from 'lit';
 import { convertBsToAd } from '@nepali-date-picker/core';
-import type { CalendarDate, NepaliDateRangeChangeDetail, NepaliLanguage } from './types.js';
+import type { CalendarDate, CalendarSystem, NepaliDateRangeChangeDetail, NepaliLanguage } from './types.js';
 import { parseIso, toIso } from './utils.js';
 import { compare } from './internal/calendar-model.js';
 import { tokens } from './internal/styles.js';
@@ -45,6 +45,7 @@ export class NepaliDateRangeField extends LitElement {
     disabled: { type: Boolean, reflect: true },
     startLabel: { type: String, attribute: 'start-label' },
     endLabel: { type: String, attribute: 'end-label' },
+    calendarSystem: { type: String, attribute: 'calendar-system' },
     _error: { state: true },
   };
 
@@ -56,6 +57,11 @@ export class NepaliDateRangeField extends LitElement {
   declare disabled: boolean;
   declare startLabel: string;
   declare endLabel: string;
+  /**
+   * Calendar both sides are typed in, `bs` (Bikram Sambat) or `ad` (Gregorian). `start`, `end`
+   * and the `change` event stay Bikram Sambat either way.
+   */
+  declare calendarSystem: CalendarSystem;
   declare private _error: string;
 
   static override styles = [
@@ -88,6 +94,7 @@ export class NepaliDateRangeField extends LitElement {
     this.disabled = false;
     this.startLabel = '';
     this.endLabel = '';
+    this.calendarSystem = 'bs';
     this._error = '';
   }
 
@@ -144,6 +151,7 @@ export class NepaliDateRangeField extends LitElement {
           min=${this.min}
           max=${this.max}
           ?disabled=${this.disabled}
+          calendar-system=${this.calendarSystem}
           @change=${this.onStart}
         ></nepali-date-field>
         <nepali-date-field
@@ -154,6 +162,7 @@ export class NepaliDateRangeField extends LitElement {
           min=${this.start || this.min}
           max=${this.max}
           ?disabled=${this.disabled}
+          calendar-system=${this.calendarSystem}
           @change=${this.onEnd}
         ></nepali-date-field>
       </div>

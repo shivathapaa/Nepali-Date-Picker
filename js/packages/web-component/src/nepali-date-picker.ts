@@ -8,7 +8,7 @@
 import { LitElement, css, html } from 'lit';
 import type { PropertyValues, TemplateResult } from 'lit';
 import { convertBsToAd, formatBsDate } from '@nepali-date-picker/core';
-import type { CalendarDate, NepaliDatePickerChangeDetail, NepaliLanguage } from './types.js';
+import type { CalendarDate, CalendarSystem, NepaliDatePickerChangeDetail, NepaliLanguage } from './types.js';
 import { parseIso, toIso } from './utils.js';
 import { CalendarController } from './internal/calendar-controller.js';
 import { weekdayOf } from './internal/calendar-model.js';
@@ -44,6 +44,9 @@ export class NepaliDatePicker extends LitElement {
     max: { type: String },
     disabled: { type: Boolean, reflect: true },
     showEnglish: { type: Boolean, attribute: 'show-english' },
+    calendarSystem: { type: String, attribute: 'calendar-system' },
+    showCalendarToggle: { type: Boolean, attribute: 'show-calendar-toggle' },
+    showAdjacentMonthDays: { type: Boolean, attribute: 'show-adjacent-month-days' },
   };
 
   /** Selected Bikram Sambat date as a `YYYY-MM-DD` string. Empty when nothing is selected. */
@@ -58,6 +61,18 @@ export class NepaliDatePicker extends LitElement {
   declare disabled: boolean;
   /** Show the Gregorian equivalent of the selected date under the calendar. */
   declare showEnglish: boolean;
+  /**
+   * Calendar the grid displays, `bs` (Bikram Sambat) or `ad` (Gregorian). Only the display changes:
+   * `value` and the `change` event stay Bikram Sambat, so switching keeps the same day selected.
+   */
+  declare calendarSystem: CalendarSystem;
+  /** Show a `B.S.` / `A.D.` switch above the month header. */
+  declare showCalendarToggle: boolean;
+  /**
+   * Fill the grid's empty cells with the neighbouring months' days, drawn faded. Clicking one picks
+   * that day and moves the grid to its month.
+   */
+  declare showAdjacentMonthDays: boolean;
 
   private readonly cal = new CalendarController(this);
 
@@ -86,12 +101,19 @@ export class NepaliDatePicker extends LitElement {
     this.max = '';
     this.disabled = false;
     this.showEnglish = false;
+    this.calendarSystem = 'bs';
+    this.showCalendarToggle = false;
+    this.showAdjacentMonthDays = false;
     this.cal.onSelect = () => this.commit();
   }
 
   override willUpdate(changed: PropertyValues<this>): void {
     if (changed.has('min') || changed.has('max')) {
       this.cal.configure({ mode: 'single', min: parseIso(this.min), max: parseIso(this.max) });
+    }
+    // Applied before the value so the grid lands on the selection in the right calendar.
+    if (changed.has('calendarSystem')) {
+      this.cal.setSystem(this.calendarSystem === 'ad' ? 'ad' : 'bs');
     }
     if (changed.has('value')) {
       this.cal.setSelected(parseIso(this.value));
@@ -119,6 +141,8 @@ export class NepaliDatePicker extends LitElement {
           disabled: this.disabled,
           showFooter: true,
           showEnglish: this.showEnglish,
+          showCalendarToggle: this.showCalendarToggle,
+          showAdjacentDays: this.showAdjacentMonthDays,
         })}
       </div>
     `;

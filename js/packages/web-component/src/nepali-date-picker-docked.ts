@@ -8,10 +8,11 @@
 import { LitElement, css, html, nothing } from 'lit';
 import type { PropertyValues, TemplateResult } from 'lit';
 import { localizeDigits } from '@nepali-date-picker/core';
-import type { NepaliDatePickerChangeDetail, NepaliLanguage } from './types.js';
+import type { CalendarSystem, NepaliDatePickerChangeDetail, NepaliLanguage } from './types.js';
 import { parseIso, toIso } from './utils.js';
 import { buildChangeDetail } from './nepali-date-picker.js';
 import { CalendarController } from './internal/calendar-controller.js';
+import { fromCanonical, toCanonical } from './internal/calendar-model.js';
 import { renderCalendar } from './internal/calendar-view.js';
 import { calendarStyles, fieldStyles, overlayStyles, tokens } from './internal/styles.js';
 
@@ -42,6 +43,9 @@ export class NepaliDatePickerDocked extends LitElement {
     max: { type: String },
     disabled: { type: Boolean, reflect: true },
     showEnglish: { type: Boolean, attribute: 'show-english' },
+    calendarSystem: { type: String, attribute: 'calendar-system' },
+    showCalendarToggle: { type: Boolean, attribute: 'show-calendar-toggle' },
+    showAdjacentMonthDays: { type: Boolean, attribute: 'show-adjacent-month-days' },
     label: { type: String },
     _open: { state: true },
   };
@@ -52,6 +56,18 @@ export class NepaliDatePickerDocked extends LitElement {
   declare max: string;
   declare disabled: boolean;
   declare showEnglish: boolean;
+  /**
+   * Calendar the grid displays, `bs` (Bikram Sambat) or `ad` (Gregorian). Only the display
+   * changes: `value` and the `change` event stay Bikram Sambat.
+   */
+  declare calendarSystem: CalendarSystem;
+  /** Show a `B.S.` / `A.D.` switch above the month header. */
+  declare showCalendarToggle: boolean;
+  /**
+   * Fill the grid's empty cells with the neighbouring months' days, drawn faded. Clicking one picks
+   * that day and moves the grid to its month.
+   */
+  declare showAdjacentMonthDays: boolean;
   /** Optional field label. */
   declare label: string;
   declare private _open: boolean;
@@ -89,6 +105,9 @@ export class NepaliDatePickerDocked extends LitElement {
     this.max = '';
     this.disabled = false;
     this.showEnglish = false;
+    this.calendarSystem = 'bs';
+    this.showCalendarToggle = false;
+    this.showAdjacentMonthDays = false;
     this.label = '';
     this._open = false;
     this.cal.onSelect = () => this.onCalendarPick();
@@ -103,6 +122,10 @@ export class NepaliDatePickerDocked extends LitElement {
     if (changed.has('min') || changed.has('max')) {
       this.cal.configure({ mode: 'single', min: parseIso(this.min), max: parseIso(this.max) });
     }
+    // Applied before the value so the grid lands on the selection in the right calendar.
+    if (changed.has('calendarSystem')) {
+      this.cal.setSystem(this.calendarSystem === 'ad' ? 'ad' : 'bs');
+    }
     if (changed.has('value')) {
       this.cal.setSelected(parseIso(this.value));
     }
@@ -115,15 +138,30 @@ export class NepaliDatePickerDocked extends LitElement {
     }
   }
 
+  private system(): CalendarSystem {
+    return this.calendarSystem === 'ad' ? 'ad' : 'bs';
+  }
+
+  /** The value written in the calendar on screen, which is also the calendar the field types in. */
   private get displayValue(): string {
     const parsed = parseIso(this.value);
     if (!parsed) return '';
-    return localizeDigits(toIso(parsed), this.language === 'ne' ? 'devanagari' : 'latin');
+    const displayed = fromCanonical(this.system(), parsed);
+    if (!displayed) return '';
+    return localizeDigits(toIso(displayed), this.language === 'ne' ? 'devanagari' : 'latin');
   }
 
-  private commit(iso: string): void {
-    const parsed = parseIso(iso);
-    if (!parsed || !this.cal.isSelectable(parsed)) return;
+  /**
+   * Commits text typed into the field, read in the displayed calendar and stored as Bikram Sambat.
+   *
+   * The controller takes a displayed date to judge selectability and a canonical one to select, so
+   * the two calls below are deliberately given different calendars.
+   */
+  private commit(typed: string): void {
+    const displayed = parseIso(typed);
+    if (!displayed || !this.cal.isSelectable(displayed)) return;
+    const parsed = toCanonical(this.system(), displayed);
+    if (!parsed) return;
     this.value = toIso(parsed);
     this.cal.setSelected(parsed);
     this.dispatchEvent(
@@ -196,6 +234,8 @@ export class NepaliDatePickerDocked extends LitElement {
                   disabled: false,
                   showFooter: true,
                   showEnglish: this.showEnglish,
+                  showCalendarToggle: this.showCalendarToggle,
+                  showAdjacentDays: this.showAdjacentMonthDays,
                 })}
               </div>
             `

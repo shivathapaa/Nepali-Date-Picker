@@ -7,16 +7,22 @@
 
 import { LitElement, css, html, nothing } from 'lit';
 import type { PropertyValues, TemplateResult } from 'lit';
-import { getTotalDaysInBsMonth, localizeDigits, toLatinDigits } from '@nepali-date-picker/core';
+import {
+  getTotalDaysInAdMonth,
+  getTotalDaysInBsMonth,
+  localizeDigits,
+  toLatinDigits,
+} from '@nepali-date-picker/core';
 import type {
   CalendarDate,
+  CalendarSystem,
   NepaliDateFieldInvalidDetail,
   NepaliDatePickerChangeDetail,
   NepaliLanguage,
 } from './types.js';
 import { parseIso, toIso } from './utils.js';
 import { buildChangeDetail } from './nepali-date-picker.js';
-import { YEAR_RANGE, isSelectable } from './internal/calendar-model.js';
+import { fromCanonical, isSelectable, toCanonical, yearRangeOf } from './internal/calendar-model.js';
 import { tokens } from './internal/styles.js';
 
 interface Validation {
@@ -49,6 +55,7 @@ export class NepaliDateField extends LitElement {
     max: { type: String },
     disabled: { type: Boolean, reflect: true },
     label: { type: String },
+    calendarSystem: { type: String, attribute: 'calendar-system' },
     _error: { state: true },
   };
 
@@ -58,6 +65,11 @@ export class NepaliDateField extends LitElement {
   declare max: string;
   declare disabled: boolean;
   declare label: string;
+  /**
+   * Calendar the user types in, `bs` (Bikram Sambat) or `ad` (Gregorian). `value` and the
+   * `change` event stay Bikram Sambat either way.
+   */
+  declare calendarSystem: CalendarSystem;
   declare private _error: string;
 
   static override styles = [
@@ -112,6 +124,7 @@ export class NepaliDateField extends LitElement {
     this.max = '';
     this.disabled = false;
     this.label = '';
+    this.calendarSystem = 'bs';
     this._error = '';
   }
 
@@ -133,20 +146,36 @@ export class NepaliDateField extends LitElement {
     return (this.language === 'ne' ? ne : en)[key];
   }
 
+  private system(): CalendarSystem {
+    return this.calendarSystem === 'ad' ? 'ad' : 'bs';
+  }
+
+  /**
+   * Parse and check what the user typed, in whichever calendar the field types in.
+   *
+   * The returned date is always Bikram Sambat: the year range and month length are checked in
+   * the typed calendar, then the date is converted before the min / max rules apply.
+   */
   private validate(raw: string): Validation {
     const text = raw.trim();
     if (!text) return { date: null, error: '' };
     const match = /^(\d{1,4})[-/](\d{1,2})[-/](\d{1,2})$/.exec(toLatinDigits(text));
     if (!match) return { date: null, error: this.t('format') };
+    const system = this.system();
+    const yearRange = yearRangeOf(system);
     const year = Number(match[1]);
     const month = Number(match[2]);
     const day = Number(match[3]);
     if (month < 1 || month > 12) return { date: null, error: this.t('monthDay') };
-    if (year < YEAR_RANGE.first || year > YEAR_RANGE.last) return { date: null, error: this.t('range') };
-    if (day < 1 || day > getTotalDaysInBsMonth(year, month)) return { date: null, error: this.t('day') };
-    const date: CalendarDate = { year, month, dayOfMonth: day };
-    if (!isSelectable(date, parseIso(this.min), parseIso(this.max))) return { date: null, error: this.t('notAllowed') };
-    return { date, error: '' };
+    if (year < yearRange.first || year > yearRange.last) return { date: null, error: this.t('range') };
+    const daysInMonth = system === 'ad' ? getTotalDaysInAdMonth(year, month) : getTotalDaysInBsMonth(year, month);
+    if (day < 1 || day > daysInMonth) return { date: null, error: this.t('day') };
+    const canonical = toCanonical(system, { year, month, dayOfMonth: day });
+    if (!canonical) return { date: null, error: this.t('range') };
+    if (!isSelectable(canonical, parseIso(this.min), parseIso(this.max))) {
+      return { date: null, error: this.t('notAllowed') };
+    }
+    return { date: canonical, error: '' };
   }
 
   private onInput(event: Event): void {
@@ -180,7 +209,15 @@ export class NepaliDateField extends LitElement {
   private get displayValue(): string {
     const parsed = parseIso(this.value);
     if (!parsed) return '';
-    return localizeDigits(toIso(parsed), this.language === 'ne' ? 'devanagari' : 'latin');
+    const displayed = fromCanonical(this.system(), parsed);
+    if (!displayed) return '';
+    return localizeDigits(toIso(displayed), this.language === 'ne' ? 'devanagari' : 'latin');
+  }
+
+  override willUpdate(changed: PropertyValues<this>): void {
+    // The message names what was typed in the calendar that was on screen, so it cannot outlive a
+    // switch. The digits themselves are re-derived by `displayValue` on every render.
+    if (changed.has('calendarSystem')) this._error = '';
   }
 
   override updated(changed: PropertyValues): void {

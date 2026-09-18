@@ -127,6 +127,9 @@ export const calendarStyles = css`
     opacity: 0.4;
     cursor: default;
   }
+  .day.adjacent {
+    opacity: 0.38;
+  }
   .day.today {
     box-shadow: inset 0 0 0 1.5px var(--_ndp-today-ring);
   }
@@ -162,6 +165,39 @@ export const calendarStyles = css`
   }
   .link:hover {
     background: var(--_ndp-hover);
+  }
+  /* The track is the pill behind the two segments, so it has to hug them. Left as a block-level
+     flex it stretches to the calendar's width and reads as a banner rather than a switch. */
+  .calendar-toggle {
+    display: flex;
+    gap: 2px;
+    width: fit-content;
+    margin: 0 auto 8px;
+    padding: 3px;
+    border-radius: 999px;
+    background: var(--_ndp-in-range);
+  }
+  .segment {
+    min-width: 44px;
+    padding: 5px 10px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--_ndp-muted);
+  }
+  .segment:hover:not(:disabled):not(.active) {
+    background: var(--_ndp-hover);
+  }
+  .segment.active {
+    background: var(--_ndp-accent);
+    color: var(--_ndp-on-accent);
+  }
+  .segment:disabled {
+    opacity: 0.4;
+    cursor: default;
+  }
+  .segment:focus-visible {
+    outline: 2px solid var(--_ndp-accent);
+    outline-offset: 1px;
   }
 `;
 

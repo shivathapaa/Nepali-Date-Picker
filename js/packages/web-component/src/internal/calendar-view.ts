@@ -8,10 +8,16 @@
 import { html, nothing } from 'lit';
 import type { TemplateResult } from 'lit';
 import { classMap } from 'lit/directives/class-map.js';
-import { convertBsToAd, getBsMonthName, getTodayBs, getWeekdayName, localizeDigits } from '@nepali-date-picker/core';
-import type { CalendarDate, NepaliLanguage } from '../types.js';
-import { sameDate, toIso } from '../utils.js';
-import { monthGrid, YEAR_RANGE } from './calendar-model.js';
+import {
+  convertBsToAd,
+  getAdMonthName,
+  getBsMonthName,
+  getWeekdayName,
+  localizeDigits,
+} from '@nepali-date-picker/core';
+import type { CalendarDate, CalendarSystem, NepaliLanguage } from '../types.js';
+import { toIso } from '../utils.js';
+import { monthGrid, stepMonth, yearRangeOf } from './calendar-model.js';
 import type { CalendarController } from './calendar-controller.js';
 
 const WEEKDAYS = [1, 2, 3, 4, 5, 6, 7];
@@ -24,10 +30,41 @@ export interface CalendarViewOptions {
   showFooter?: boolean;
   /** Show the Gregorian equivalent of the current selection under the grid. */
   showEnglish?: boolean;
+  /** Show the `B.S.` / `A.D.` switch above the month header. */
+  showCalendarToggle?: boolean;
+  /**
+   * Fill the grid's empty cells with the neighbouring months' days, drawn faded. Clicking one picks
+   * that day and moves the grid to its month.
+   */
+  showAdjacentDays?: boolean;
 }
+
+const TOGGLE_LABELS: Record<CalendarSystem, Record<NepaliLanguage, string>> = {
+  bs: { en: 'B.S.', ne: 'बि.सं.' },
+  ad: { en: 'A.D.', ne: 'ई.सं.' },
+};
+
+/**
+ * Appended to a day cell borrowed from a neighbouring month, after the date itself. The date already
+ * names its own month, so this only has to say that choosing the cell moves the grid there, which
+ * the fading says to a sighted user and nothing says to a screen reader.
+ */
+const ADJACENT_DAY_DESCRIPTIONS: Record<NepaliLanguage, string> = {
+  en: 'shows another month',
+  ne: 'अर्को महिना देखाउँछ',
+};
+
+const TOGGLE_DESCRIPTIONS: Record<CalendarSystem, Record<NepaliLanguage, string>> = {
+  bs: { en: 'Show the Bikram Sambat calendar', ne: 'बिक्रम सम्बत् क्यालेन्डर हेर्नुहोस्' },
+  ad: { en: 'Show the Gregorian calendar', ne: 'ईस्वी सम्बत् क्यालेन्डर हेर्नुहोस्' },
+};
 
 function digitScript(language: NepaliLanguage): 'devanagari' | 'latin' {
   return language === 'ne' ? 'devanagari' : 'latin';
+}
+
+function monthNameOf(system: CalendarSystem, month: number, language: NepaliLanguage): string {
+  return system === 'ad' ? getAdMonthName(month, 'full', language) : getBsMonthName(month, 'full', language);
 }
 
 function englishLine(c: CalendarController, language: NepaliLanguage): string | null {
@@ -46,31 +83,54 @@ function adOf(date: CalendarDate): CalendarDate {
   return { year: ad.year, month: ad.month, dayOfMonth: ad.dayOfMonth };
 }
 
+function renderCalendarToggle(c: CalendarController, language: NepaliLanguage, disabled: boolean): TemplateResult {
+  const segment = (system: CalendarSystem): TemplateResult => html`
+    <button
+      class=${classMap({ segment: true, active: c.system === system })}
+      type="button"
+      role="radio"
+      aria-checked=${c.system === system ? 'true' : 'false'}
+      aria-label=${TOGGLE_DESCRIPTIONS[system][language]}
+      ?disabled=${disabled}
+      @click=${() => c.setSystem(system)}
+    >
+      ${TOGGLE_LABELS[system][language]}
+    </button>
+  `;
+  return html`
+    <div class="calendar-toggle" role="radiogroup" aria-label=${language === 'ne' ? 'पात्रो' : 'Calendar'}>
+      ${segment('bs')}${segment('ad')}
+    </div>
+  `;
+}
+
 /** Render the shared month calendar (header, weekday row, day grid, optional footer). */
 export function renderCalendar(c: CalendarController, opts: CalendarViewOptions): TemplateResult {
   const { language, disabled } = opts;
   const script = digitScript(language);
   const loc = (value: number): string => localizeDigits(String(value), script);
-  const monthName = getBsMonthName(c.viewMonth, 'full', language);
-  const today = getTodayBs();
+  const monthName = monthNameOf(c.system, c.viewMonth, language);
+  const yearRange = yearRangeOf(c.system);
 
-  const { leading, days } = monthGrid(c.viewYear, c.viewMonth);
-  const cells: TemplateResult[] = [];
-  for (let i = 0; i < leading; i += 1) cells.push(html`<span class="day blank" aria-hidden="true"></span>`);
-  for (const day of days) {
-    const date: CalendarDate = { year: c.viewYear, month: c.viewMonth, dayOfMonth: day };
-    const isToday = today.year === date.year && today.month === date.month && today.dayOfMonth === date.dayOfMonth;
-    const isSelected = sameDate(c.selected, date);
-    const isStart = sameDate(c.rangeStart, date);
-    const isEnd = sameDate(c.rangeEnd, date);
+  const { leading, days } = monthGrid(c.system, c.viewYear, c.viewMonth);
+
+  const dayCell = (date: CalendarDate, adjacent: boolean): TemplateResult => {
+    const isToday = c.isToday(date);
+    const isSelected = c.isSelected(date);
+    const isStart = c.isRangeStart(date);
+    const isEnd = c.isRangeEnd(date);
     const inRange = c.inRange(date);
     const selectable = c.isSelectable(date);
     const weekdayName = getWeekdayName(c.weekdayOf(date), 'full', language);
-    const ariaLabel = `${weekdayName}, ${monthName} ${date.dayOfMonth}, ${date.year}`;
-    cells.push(html`
+    const cellMonthName = monthNameOf(c.system, date.month, language);
+    const adjacentHint = adjacent ? `, ${ADJACENT_DAY_DESCRIPTIONS[language]}` : '';
+    const ariaLabel =
+      `${weekdayName}, ${cellMonthName} ${date.dayOfMonth}, ${date.year}${adjacentHint}`;
+    return html`
       <button
         class=${classMap({
           day: true,
+          adjacent,
           today: isToday,
           selected: isSelected,
           'range-start': isStart,
@@ -82,26 +142,53 @@ export function renderCalendar(c: CalendarController, opts: CalendarViewOptions)
         aria-selected=${isSelected || isStart || isEnd ? 'true' : 'false'}
         aria-disabled=${selectable ? 'false' : 'true'}
         aria-current=${isToday ? 'date' : nothing}
-        tabindex=${sameDate(c.focus, date) ? 0 : -1}
-        @click=${() => c.pick(date)}
+        tabindex=${!adjacent && c.isFocused(date) ? 0 : -1}
+        @click=${() => {
+          c.pick(date);
+          // A day the picker will not select does not move the view either, so an unreachable cell
+          // stays inert. Moving after picking keeps the focus the pick just set.
+          if (adjacent && selectable) c.setView(date.year, date.month, true);
+        }}
       >
-        ${loc(day)}
+        ${loc(date.dayOfMonth)}
       </button>
-    `);
+    `;
+  };
+
+  const blank = (): TemplateResult => html`<span class="day blank" aria-hidden="true"></span>`;
+
+  // The neighbouring months, resolved once. `null` at the edges of the year range, where there is
+  // nothing to borrow from and the cells stay blank.
+  const previous = opts.showAdjacentDays ? stepMonth(c.system, c.viewYear, c.viewMonth, -1) : null;
+  const next = opts.showAdjacentDays ? stepMonth(c.system, c.viewYear, c.viewMonth, 1) : null;
+
+  const cells: TemplateResult[] = [];
+  if (previous && leading > 0) {
+    const tail = monthGrid(c.system, previous.year, previous.month).days.slice(-leading);
+    for (const day of tail) cells.push(dayCell({ ...previous, dayOfMonth: day }, true));
+  } else {
+    for (let i = 0; i < leading; i += 1) cells.push(blank());
   }
-  while (cells.length % 7 !== 0) cells.push(html`<span class="day blank" aria-hidden="true"></span>`);
+  for (const day of days) {
+    cells.push(dayCell({ year: c.viewYear, month: c.viewMonth, dayOfMonth: day }, false));
+  }
+  // Pad to the end of the last row holding a day of this month, and no further.
+  while (cells.length % 7 !== 0) {
+    cells.push(next ? dayCell({ ...next, dayOfMonth: cells.length - leading - days.length + 1 }, true) : blank());
+  }
 
   const rows: TemplateResult[] = [];
   for (let i = 0; i < cells.length; i += 7) rows.push(html`<div role="row">${cells.slice(i, i + 7)}</div>`);
 
   const years: number[] = [];
-  for (let y = YEAR_RANGE.first; y <= YEAR_RANGE.last; y += 1) years.push(y);
+  for (let y = yearRange.first; y <= yearRange.last; y += 1) years.push(y);
 
-  const atMin = c.viewYear <= YEAR_RANGE.first && c.viewMonth <= 1;
-  const atMax = c.viewYear >= YEAR_RANGE.last && c.viewMonth >= 12;
+  const atMin = c.viewYear <= yearRange.first && c.viewMonth <= 1;
+  const atMax = c.viewYear >= yearRange.last && c.viewMonth >= 12;
   const english = opts.showEnglish ? englishLine(c, language) : null;
 
   return html`
+    ${opts.showCalendarToggle ? renderCalendarToggle(c, language, disabled) : nothing}
     <div class="header">
       <button
         class="nav"
