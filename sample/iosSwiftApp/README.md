@@ -21,6 +21,7 @@ iosSwiftApp/
     ├── ContentView.swift               Today's date in BS / Nepali / AD, plus navigation to each screen
     ├── NepaliPickerRepresentables.swift One UIViewControllerRepresentable per Kotlin factory, plus SampleDefaults
     ├── PickersScreen.swift             Calendar and range pickers
+    ├── CalendarSystemScreen.swift      Bikram Sambat / Gregorian display and the filled grid
     ├── WheelDockedScreen.swift         Wheel and docked pickers
     ├── DialogsScreen.swift             Dialog and full-screen dialog hosts
     ├── FieldsScreen.swift              Date and range text fields
@@ -50,6 +51,11 @@ return NepaliDatePickerViewControllersKt.NepaliDatePickerViewController(
 
 Compose cannot report an intrinsic size to SwiftUI, so each factory takes an `onHeightChange`
 callback and the representable drives the SwiftUI frame from it.
+
+`NepaliCalendarSystemToggleViewController` is the one factory that hosts no picker: it renders the
+`B.S.` / `A.D.` switch on its own, so the app can drive the displayed calendar from its own chrome.
+`CalendarSystemScreen.swift` shows that alongside every picker's `initialCalendarSystem`,
+`showCalendarSystemToggle` and `showAdjacentMonthDays` option.
 
 ## How the framework gets there
 

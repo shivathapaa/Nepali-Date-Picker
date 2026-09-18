@@ -86,6 +86,144 @@
           </details>
         </section>
 
+        <!-- Calendar switch -->
+        <section class="card" id="calendar-switch">
+          <span class="tag">calendar-system / show-calendar-toggle</span>
+          <h2>Bikram Sambat or Gregorian</h2>
+          <p class="desc">
+            Every calendar element can display either calendar. Only the display changes:
+            <code>value</code>, <code>start</code>, <code>end</code> and the <code>change</code> event
+            stay Bikram Sambat, so switching keeps the same day selected.
+          </p>
+          <div class="demo-row">
+            <div class="demo-item">
+              <span class="caption">With the B.S. / A.D. switch</span>
+              <nepali-date-picker
+                class="sync"
+                value="2083-06-01"
+                show-calendar-toggle
+              ></nepali-date-picker>
+            </div>
+            <div class="demo-item">
+              <span class="caption">Gregorian-first, no switch</span>
+              <nepali-date-picker
+                class="sync"
+                value="2083-06-01"
+                calendar-system="ad"
+                show-english
+              ></nepali-date-picker>
+            </div>
+            <div class="demo-item">
+              <span class="caption">Range picker, switchable</span>
+              <nepali-date-range-picker
+                class="sync"
+                start="2083-06-01"
+                end="2083-06-10"
+                show-calendar-toggle
+              ></nepali-date-range-picker>
+            </div>
+          </div>
+          <div class="demo-row">
+            <div class="demo-item">
+              <span class="caption">Wheel, switchable</span>
+              <nepali-wheel-date-picker
+                class="sync"
+                value="2083-06-01"
+                show-calendar-toggle
+              ></nepali-wheel-date-picker>
+            </div>
+            <div class="demo-item">
+              <span class="caption">Field typed in Gregorian</span>
+              <nepali-date-field
+                class="sync"
+                label="Date (A.D.)"
+                value="2083-06-01"
+                calendar-system="ad"
+              ></nepali-date-field>
+            </div>
+            <div class="demo-item">
+              <span class="caption">Docked, switchable</span>
+              <nepali-date-picker-docked
+                class="sync"
+                label="Appointment"
+                value="2083-06-01"
+                show-calendar-toggle
+              ></nepali-date-picker-docked>
+            </div>
+          </div>
+          <details>
+            <summary>HTML</summary>
+            <pre><code>&lt;!-- a switch the user can flip --&gt;
+&lt;nepali-date-picker value="2083-06-01" show-calendar-toggle&gt;&lt;/nepali-date-picker&gt;
+
+&lt;!-- or open straight on the Gregorian grid --&gt;
+&lt;nepali-date-picker value="2083-06-01" calendar-system="ad"&gt;&lt;/nepali-date-picker&gt;
+&lt;script&gt;
+  // The payload is Bikram Sambat whichever calendar is on screen.
+  picker.addEventListener('change', (e) =&gt; console.log(e.detail.bsIso));
+&lt;/script&gt;</code></pre>
+          </details>
+        </section>
+
+        <!-- Adjacent month days -->
+        <section class="card" id="adjacent-days">
+          <span class="tag">show-adjacent-month-days</span>
+          <h2>Neighbouring months in the empty cells</h2>
+          <p class="desc">
+            Fills the blank cells around the month with the days either side of it, drawn faded.
+            Clicking one picks that day and moves the grid to its month. Off by default, so an existing
+            grid is unchanged.
+          </p>
+          <div class="demo-row">
+            <div class="demo-item">
+              <span class="caption">Off (the default)</span>
+              <nepali-date-picker class="sync" value="2083-04-15"></nepali-date-picker>
+            </div>
+            <div class="demo-item">
+              <span class="caption">On</span>
+              <nepali-date-picker
+                class="sync"
+                value="2083-04-15"
+                show-adjacent-month-days
+              ></nepali-date-picker>
+            </div>
+            <div class="demo-item">
+              <span class="caption">On, with the switch and both calendars</span>
+              <nepali-date-picker
+                class="sync"
+                value="2083-04-15"
+                show-adjacent-month-days
+                show-calendar-toggle
+                show-english
+              ></nepali-date-picker>
+            </div>
+          </div>
+          <div class="demo-row">
+            <div class="demo-item">
+              <span class="caption">Range picker, filled edges</span>
+              <nepali-date-range-picker
+                class="sync"
+                start="2083-04-28"
+                end="2083-05-04"
+                show-adjacent-month-days
+              ></nepali-date-range-picker>
+            </div>
+            <div class="demo-item">
+              <span class="caption">Docked, filled edges</span>
+              <nepali-date-picker-docked
+                class="sync"
+                label="Appointment"
+                value="2083-04-15"
+                show-adjacent-month-days
+              ></nepali-date-picker-docked>
+            </div>
+          </div>
+          <details>
+            <summary>HTML</summary>
+            <pre><code>&lt;nepali-date-picker value="2083-04-15" show-adjacent-month-days&gt;&lt;/nepali-date-picker&gt;</code></pre>
+          </details>
+        </section>
+
         <!-- Dialog -->
         <section class="card" id="dialog">
           <span class="tag">&lt;nepali-date-picker-dialog&gt;</span>
@@ -95,7 +233,14 @@
             <button class="action" id="open-dialog">Open dialog</button>
             <button class="action" id="open-dialog-fs">Open full-screen</button>
           </div>
-          <nepali-date-picker-dialog class="sync" id="dialog-el" value="2081-05-24" show-english></nepali-date-picker-dialog>
+          <nepali-date-picker-dialog
+            class="sync"
+            id="dialog-el"
+            value="2081-05-24"
+            show-english
+            show-calendar-toggle
+            show-adjacent-month-days
+          ></nepali-date-picker-dialog>
           <nepali-date-picker-dialog class="sync" id="dialog-fs" value="2081-05-24" fullscreen></nepali-date-picker-dialog>
           <details>
             <summary>HTML</summary>
@@ -164,7 +309,19 @@
           <h2>Range text fields</h2>
           <p class="desc">Two validated fields with a start ≤ end check.</p>
           <div class="demo-row">
-            <nepali-date-range-field class="sync" start="2081-05-10" end="2081-05-20"></nepali-date-range-field>
+            <div class="demo-item">
+              <span class="caption">Bikram Sambat</span>
+              <nepali-date-range-field class="sync" start="2081-05-10" end="2081-05-20"></nepali-date-range-field>
+            </div>
+            <div class="demo-item">
+              <span class="caption">Typed in Gregorian, reported in Bikram Sambat</span>
+              <nepali-date-range-field
+                class="sync"
+                start="2083-06-01"
+                end="2083-06-10"
+                calendar-system="ad"
+              ></nepali-date-range-field>
+            </div>
           </div>
           <details>
             <summary>HTML</summary>

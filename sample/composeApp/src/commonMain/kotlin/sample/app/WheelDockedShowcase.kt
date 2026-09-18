@@ -27,6 +27,7 @@ import dev.shivathapaa.nepalidatepickerkmp.NepaliDatePickerDocked
 import dev.shivathapaa.nepalidatepickerkmp.NepaliWheelDatePicker
 import dev.shivathapaa.nepalidatepickerkmp.annotations.ExperimentalNepaliDatePickerApi
 import dev.shivathapaa.nepalidatepickerkmp.calendar_model.NepaliDatePickerDefaults
+import dev.shivathapaa.nepalidatepickerkmp.data.CalendarSystem
 import dev.shivathapaa.nepalidatepickerkmp.data.CustomCalendar
 import dev.shivathapaa.nepalidatepickerkmp.data.NepaliDateFormatStyle
 import dev.shivathapaa.nepalidatepickerkmp.data.NepaliDateLocale
@@ -61,6 +62,18 @@ fun WheelDockedShowcase(modifier: Modifier = Modifier) {
                     fontWeight = FontWeight.Bold
                 ),
                 unselectedTextStyle = MaterialTheme.typography.bodyMedium,
+                onDateChange = { selected = it }
+            )
+            SelectedText(selected.readout()?.let { "Selected (BS): $it" })
+        }
+
+        DemoSection(
+            "Wheel picker with a B.S. / A.D. switch",
+            "The wheels spin in either calendar. The date reported back is Bikram Sambat either way."
+        ) {
+            var selected by remember { mutableStateOf<CustomCalendar?>(null) }
+            NepaliWheelDatePicker(
+                showCalendarSystemToggle = true,
                 onDateChange = { selected = it }
             )
             SelectedText(selected.readout()?.let { "Selected (BS): $it" })
@@ -129,6 +142,52 @@ fun WheelDockedShowcase(modifier: Modifier = Modifier) {
                 popupShadowElevation = 12.dp
             )
             SelectedText(state.selectedDate.readout()?.let { "Selected: $it" })
+        }
+
+        DemoSection(
+            "Docked picker with a B.S. / A.D. switch",
+            "The dropdown calendar switches; the field always writes the Bikram Sambat date."
+        ) {
+            val state = rememberNepaliDatePickerState()
+            NepaliDatePickerDocked(
+                state = state,
+                modifier = Modifier.fillMaxWidth(),
+                label = { Text("Pick a date") },
+                showCalendarSystemToggle = true
+            )
+            SelectedText(state.selectedDate.readout()?.let { "Selected (BS): $it" })
+        }
+
+        DemoSection(
+            "Docked picker, Gregorian-first with a filled grid",
+            "Opens on the Gregorian month with the neighbouring months filling the edges, so the " +
+                    "dropdown reads like a wall calendar."
+        ) {
+            val state = rememberNepaliDatePickerState(
+                initialCalendarSystem = CalendarSystem.GREGORIAN
+            )
+            NepaliDatePickerDocked(
+                state = state,
+                modifier = Modifier.fillMaxWidth(),
+                label = { Text("Date (A.D.)") },
+                showCalendarSystemToggle = true,
+                showAdjacentMonthDays = true
+            )
+            SelectedText(state.selectedDate.readout()?.let { "Selected (BS): $it" })
+        }
+
+        DemoSection(
+            "Wheel picker, Gregorian-first",
+            "Opens on the Gregorian wheels. There is no grid to fill here, so the switch is the " +
+                    "only calendar option the wheel takes."
+        ) {
+            var selected by remember { mutableStateOf<CustomCalendar?>(null) }
+            NepaliWheelDatePicker(
+                initialCalendarSystem = CalendarSystem.GREGORIAN,
+                showCalendarSystemToggle = true,
+                onDateChange = { selected = it }
+            )
+            SelectedText(selected.readout()?.let { "Selected (BS): $it" })
         }
     }
 }

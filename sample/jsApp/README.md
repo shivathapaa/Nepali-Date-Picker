@@ -15,6 +15,11 @@ Elements on show:
 <nepali-wheel-date-picker>
 ```
 
+Two cards cover the display options every calendar element takes: `calendar-system` /
+`show-calendar-toggle` for showing the Gregorian calendar, and `show-adjacent-month-days` for filling
+the grid's empty cells with the neighbouring months. Both leave the reported value in Bikram Sambat,
+which the event log under the showcase makes visible.
+
 ## Layout
 
 ```

@@ -23,6 +23,7 @@ import dev.shivathapaa.nepalidatepickerkmp.NepaliDatePicker
 import dev.shivathapaa.nepalidatepickerkmp.NepaliDatePickerDialog
 import dev.shivathapaa.nepalidatepickerkmp.NepaliDatePickerFullScreenDialog
 import dev.shivathapaa.nepalidatepickerkmp.NepaliDateRangePicker
+import dev.shivathapaa.nepalidatepickerkmp.NepaliDateRangePickerWithEnglishDate
 import dev.shivathapaa.nepalidatepickerkmp.annotations.ExperimentalNepaliDatePickerApi
 import dev.shivathapaa.nepalidatepickerkmp.calendar_model.NepaliDatePickerDefaults
 import dev.shivathapaa.nepalidatepickerkmp.rememberNepaliDatePickerState
@@ -127,6 +128,78 @@ fun DialogsShowcase(modifier: Modifier = Modifier) {
                     title = { Text("Select a range") }
                 ) {
                     NepaliDateRangePicker(state = state, showMonthsVertically = true)
+                }
+            }
+        }
+
+        DemoSection(
+            "Modal dialog, switchable and filled",
+            "The same modal hosting a picker that can switch calendar and fills its edges with the " +
+                    "neighbouring months."
+        ) {
+            var show by rememberSaveable { mutableStateOf(false) }
+            var result by remember { mutableStateOf<String?>(null) }
+            val state = rememberNepaliDatePickerState()
+
+            Button(onClick = { show = true }) { Text("Open switchable dialog") }
+            SelectedText(result?.let { "Picked (BS): $it" })
+
+            if (show) {
+                NepaliDatePickerDialog(
+                    onDismissRequest = { show = false },
+                    confirmButton = {
+                        dialogButton("OK") {
+                            result = state.selectedDate.readout()
+                            show = false
+                        }
+                    },
+                    dismissButton = {
+                        dialogButton("Cancel") { show = false }
+                    }
+                ) {
+                    NepaliDatePicker(
+                        state = state,
+                        showCalendarSystemToggle = true,
+                        showAdjacentMonthDays = true
+                    )
+                }
+            }
+        }
+
+        DemoSection(
+            "Full-screen dual-date range dialog",
+            "The dual-date range picker at full screen, switchable, with the edges filled so a " +
+                    "range crossing a month boundary stays shaded on both sides."
+        ) {
+            var show by rememberSaveable { mutableStateOf(false) }
+            var result by remember { mutableStateOf<String?>(null) }
+            val state = rememberNepaliDateRangePickerState()
+
+            Button(onClick = { show = true }) { Text("Open dual-date range dialog") }
+            SelectedText(result)
+
+            if (show) {
+                NepaliDatePickerFullScreenDialog(
+                    onDismissRequest = { show = false },
+                    confirmButton = {
+                        dialogButton("OK") {
+                            val start = state.selectedStartNepaliDate.readout()
+                            val end = state.selectedEndNepaliDate.readout()
+                            result = "Range (BS): ${start ?: "..."} to ${end ?: "..."}"
+                            show = false
+                        }
+                    },
+                    dismissButton = {
+                        dialogButton("Cancel") { show = false }
+                    },
+                    title = { Text("Select a range") }
+                ) {
+                    NepaliDateRangePickerWithEnglishDate(
+                        state = state,
+                        showMonthsVertically = true,
+                        showCalendarSystemToggle = true,
+                        showAdjacentMonthDays = true
+                    )
                 }
             }
         }

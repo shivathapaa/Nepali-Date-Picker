@@ -26,6 +26,7 @@ import dev.shivathapaa.nepalidatepickerkmp.NepaliDateRangeField
 import dev.shivathapaa.nepalidatepickerkmp.NepaliDateRangeTextField
 import dev.shivathapaa.nepalidatepickerkmp.NepaliDateTextField
 import dev.shivathapaa.nepalidatepickerkmp.annotations.ExperimentalNepaliDatePickerApi
+import dev.shivathapaa.nepalidatepickerkmp.data.CalendarSystem
 import dev.shivathapaa.nepalidatepickerkmp.data.NepaliDateFormatter.Pattern
 import dev.shivathapaa.nepalidatepickerkmp.data.NepaliDateLocale
 import dev.shivathapaa.nepalidatepickerkmp.data.NepaliDatePickerLang
@@ -64,6 +65,23 @@ fun TextFieldsShowcase(modifier: Modifier = Modifier) {
         }
 
         DemoSection(
+            "Gregorian date field",
+            "Typed in Gregorian, parsed back to Bikram Sambat. The dialog it opens carries the " +
+                    "B.S. / A.D. switch."
+        ) {
+            var value by rememberSimpleDateState()
+            NepaliDateField(
+                value = value,
+                onValueChange = { value = it },
+                modifier = Modifier.fillMaxWidth(),
+                label = { Text("Date (A.D.)") },
+                calendarSystem = CalendarSystem.GREGORIAN,
+                showCalendarSystemToggle = true
+            )
+            SelectedText(value.readout()?.let { "Parsed (BS): $it" })
+        }
+
+        DemoSection(
             "Range text field",
             "Two linked fields. An end earlier than the start is rejected."
         ) {
@@ -91,6 +109,72 @@ fun TextFieldsShowcase(modifier: Modifier = Modifier) {
                 modifier = Modifier.fillMaxWidth()
             )
             SelectedText(rangeReadoutOrNull(start.readout(), end.readout()))
+        }
+
+        DemoSection(
+            "Gregorian range field",
+            "Both sides typed in Gregorian and reported in Bikram Sambat. The range dialog it opens " +
+                    "carries the switch and fills its edges with the neighbouring months."
+        ) {
+            var start by remember { mutableStateOf<SimpleDate?>(null) }
+            var end by remember { mutableStateOf<SimpleDate?>(null) }
+            NepaliDateRangeField(
+                startValue = start,
+                endValue = end,
+                onRangeChange = { s, e -> start = s; end = e },
+                modifier = Modifier.fillMaxWidth(),
+                calendarSystem = CalendarSystem.GREGORIAN,
+                showCalendarSystemToggle = true,
+                showAdjacentMonthDays = true
+            )
+            SelectedText(rangeReadoutOrNull(start.readout(), end.readout()))
+        }
+
+        DemoSection(
+            "Gregorian range text field",
+            "The outlined pair without a dialog, typed and displayed in Gregorian."
+        ) {
+            var start by remember { mutableStateOf<SimpleDate?>(null) }
+            var end by remember { mutableStateOf<SimpleDate?>(null) }
+            NepaliDateRangeTextField(
+                startValue = start,
+                endValue = end,
+                onRangeChange = { s, e -> start = s; end = e },
+                modifier = Modifier.fillMaxWidth(),
+                calendarSystem = CalendarSystem.GREGORIAN
+            )
+            SelectedText(rangeReadoutOrNull(start.readout(), end.readout()))
+        }
+
+        DemoSection(
+            "Date field with a filled dialog grid",
+            "The trailing icon opens a calendar whose empty cells hold the neighbouring months' days."
+        ) {
+            var value by rememberSimpleDateState()
+            NepaliDateField(
+                value = value,
+                onValueChange = { value = it },
+                modifier = Modifier.fillMaxWidth(),
+                label = { Text("Date") },
+                showAdjacentMonthDays = true
+            )
+            SelectedText(value.readout()?.let { "Parsed: $it" })
+        }
+
+        DemoSection(
+            "Gregorian date text field",
+            "The outlined field on its own, typed and displayed in Gregorian, parsed back to " +
+                    "Bikram Sambat."
+        ) {
+            var value by rememberSimpleDateState()
+            NepaliDateTextField(
+                value = value,
+                onValueChange = { value = it },
+                modifier = Modifier.fillMaxWidth(),
+                label = { Text("Date (A.D.)") },
+                calendarSystem = CalendarSystem.GREGORIAN
+            )
+            SelectedText(value.readout()?.let { "Parsed (BS): $it" })
         }
 
         DemoSection(

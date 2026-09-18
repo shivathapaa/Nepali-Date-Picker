@@ -32,6 +32,7 @@ struct ContentView: View {
 
                 Section("Showcase") {
                     NavigationLink("Pickers") { PickersScreen() }
+                    NavigationLink("Calendar switch") { CalendarSystemScreen() }
                     NavigationLink("Wheel & Docked") { WheelDockedScreen() }
                     NavigationLink("Dialogs") { DialogsScreen() }
                     NavigationLink("Text fields") { FieldsScreen() }

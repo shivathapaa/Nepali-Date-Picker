@@ -61,6 +61,9 @@ dependencies and can take several minutes; later runs are fast.
 
 ## Keeping the showcases in sync
 
-`composeApp`, `iosSwiftApp` and `jsApp` all present the same seven groups (pickers, wheel and
-docked, dialogs, text fields, customization, selectable dates, utilities). When a new public API
-lands, add it to each showcase that can host it, so no platform silently lags behind.
+`composeApp`, `iosSwiftApp` and `jsApp` all present the same groups (pickers, wheel and docked,
+dialogs, text fields, customization, selectable dates, utilities), and each covers the Bikram Sambat
+and Gregorian display options as well: `composeApp` folds them into the picker, wheel, docked, dialog
+and text-field groups, `iosSwiftApp` gives them a "Calendar switch" screen, and `jsApp` gives them two
+cards. When a new public API lands, add it to each showcase that can host it, so no platform silently
+lags behind.

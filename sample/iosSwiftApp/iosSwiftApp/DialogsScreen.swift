@@ -12,6 +12,7 @@ struct DialogsScreen: View {
     @State private var showingDialog = false
     @State private var showingFullScreen = false
     @State private var showingNepaliDialog = false
+    @State private var showingSwitchableDialog = false
     @State private var confirmed: CustomCalendar?
 
     private let preselectedDate = SimpleDate(year: 2081, month: 3, dayOfMonth: 5)
@@ -43,6 +44,15 @@ struct DialogsScreen: View {
                     subtitle: "The same dialog in Nepali, opening on a pre-selected date."
                 ) {
                     Button("Open Nepali dialog") { showingNepaliDialog = true }
+                        .buttonStyle(.bordered)
+                        .padding(.horizontal, 12)
+                }
+
+                DemoSection(
+                    title: "Switchable dialog",
+                    subtitle: "The hosted calendar carries the B.S. / A.D. switch, both calendars per cell, and the neighbouring months filling its edges."
+                ) {
+                    Button("Open switchable dialog") { showingSwitchableDialog = true }
                         .buttonStyle(.bordered)
                         .padding(.horizontal, 12)
                 }
@@ -89,6 +99,21 @@ struct DialogsScreen: View {
                 onDismiss: { showingNepaliDialog = false }
             )
             .ignoresSafeArea()
+        }
+        .fullScreenCover(isPresented: $showingSwitchableDialog) {
+            NepaliDatePickerDialogView(
+                initialSelectedDate: SimpleDate(year: 2083, month: 4, dayOfMonth: 15),
+                showEnglishDate: true,
+                showCalendarSystemToggle: true,
+                showAdjacentMonthDays: true,
+                onConfirm: { date in
+                    confirmed = date
+                    showingSwitchableDialog = false
+                },
+                onDismiss: { showingSwitchableDialog = false }
+            )
+            .ignoresSafeArea()
+            .background(.clear)
         }
     }
 }

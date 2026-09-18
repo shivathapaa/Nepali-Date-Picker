@@ -15,7 +15,8 @@ src/
 ├── commonMain/kotlin/sample/app/
 │   ├── App.kt                      Scaffold + scrollable tab row; the list of tabs lives here
 │   ├── Components.kt               Small shared building blocks (DemoSection, LabeledValue, ...)
-│   ├── PickersShowcase.kt          NepaliDatePicker, NepaliDatePickerWithEnglishDate, range picker
+│   ├── PickersShowcase.kt          NepaliDatePicker, NepaliDatePickerWithEnglishDate, range picker,
+│   │                               the B.S. / A.D. switch and the filled grid
 │   ├── WheelDockedShowcase.kt      NepaliWheelDatePicker and NepaliDatePickerDocked
 │   ├── DialogsShowcase.kt          NepaliDatePickerDialog and NepaliDatePickerFullScreenDialog
 │   ├── TextFieldsShowcase.kt       NepaliDateTextField / NepaliDateField and their range variants
@@ -54,4 +55,5 @@ For Android run [`androidApp`](../androidApp); for iOS open [`iosApp`](../iosApp
 
 The sample follows the same rules as the library: no hardcoded colors, `MaterialTheme` for all
 styling, and experimental composables behind `@OptIn(ExperimentalNepaliDatePickerApi::class)`. The
-wheel, docked, full-screen dialog and range field demos all need that opt-in.
+wheel, docked, full-screen dialog, range field and `NepaliCalendarSystemToggle` demos all need that
+opt-in.
