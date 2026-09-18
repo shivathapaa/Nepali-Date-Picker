@@ -94,7 +94,9 @@ bundler; the default entry is the right import everywhere else.
   display changes: `value`, `start`, `end`, `min`, `max` and every `change` payload stay Bikram
   Sambat, so switching keeps the same day selected. Calendar elements also take
   `show-calendar-toggle` to let the user do the switching, and `show-adjacent-month-days` to
-  fill the grid's empty cells with the neighbouring months. _(3.2.0)_
+  fill the grid's empty cells with the neighbouring months. Switching fades the month header and the
+  grid in, matching the Compose pickers; the animation is skipped under
+  `prefers-reduced-motion: reduce`, and paging months is never animated. _(3.2.0)_
 
 ---
 

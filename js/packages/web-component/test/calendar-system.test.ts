@@ -426,3 +426,73 @@ describe('calendar system switching', () => {
     expect(endField!.renderRoot.querySelector<HTMLInputElement>('input')!.value).toBe('2026-09-26');
   });
 });
+
+describe('calendar switch motion', () => {
+  /** jsdom ships no Web Animations API, so the animation is observed by standing one in. */
+  function captureAnimations(): { calls: Keyframe[][]; restore: () => void } {
+    const calls: Keyframe[][] = [];
+    const proto = Element.prototype as unknown as { animate?: unknown };
+    const original = proto.animate;
+    proto.animate = function stub(keyframes: Keyframe[]): { finished: Promise<void> } {
+      calls.push(keyframes);
+      return { finished: Promise.resolve() };
+    };
+    return {
+      calls,
+      restore: () => {
+        if (original === undefined) delete proto.animate;
+        else proto.animate = original;
+      },
+    };
+  }
+
+  it('fades the header and the grid in when the calendar switches', async () => {
+    const el = await mount({ value: '2083-06-01', 'show-calendar-toggle': '' });
+    const animations = captureAnimations();
+    try {
+      const [, ad] = segments(el);
+      ad.click();
+      await el.updateComplete;
+
+      // One for the month header, one for the day grid.
+      expect(animations.calls).toHaveLength(2);
+      expect(animations.calls[0]![0]).toMatchObject({ opacity: '0' });
+      expect(animations.calls[0]![1]).toMatchObject({ opacity: '1', transform: 'scale(1)' });
+    } finally {
+      animations.restore();
+    }
+  });
+
+  it('does not fade when only the month changes', async () => {
+    const el = await mount({ value: '2083-06-01', 'show-calendar-toggle': '' });
+    const animations = captureAnimations();
+    try {
+      el.renderRoot.querySelectorAll<HTMLButtonElement>('button.nav')[1]!.click();
+      await el.updateComplete;
+
+      expect(animations.calls).toHaveLength(0);
+    } finally {
+      animations.restore();
+    }
+  });
+
+  it('stays still when the user asks for reduced motion', async () => {
+    const el = await mount({ value: '2083-06-01', 'show-calendar-toggle': '' });
+    const animations = captureAnimations();
+    const originalMatchMedia = window.matchMedia;
+    window.matchMedia = ((query: string) =>
+      ({ matches: query.includes('prefers-reduced-motion'), media: query })) as typeof window.matchMedia;
+    try {
+      const [, ad] = segments(el);
+      ad.click();
+      await el.updateComplete;
+
+      expect(animations.calls).toHaveLength(0);
+      // The switch itself still happened; only the motion was skipped.
+      expect(segments(el)[1]!.getAttribute('aria-checked')).toBe('true');
+    } finally {
+      window.matchMedia = originalMatchMedia;
+      animations.restore();
+    }
+  });
+});

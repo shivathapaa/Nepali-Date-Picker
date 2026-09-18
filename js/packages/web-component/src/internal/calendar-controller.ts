@@ -8,6 +8,7 @@
 import type { LitElement, ReactiveController } from 'lit';
 import { addDaysToBsDate, getTodayBs } from '@nepali-date-picker/core';
 import type { CalendarDate, CalendarSystem } from '../types.js';
+import { fadeInRerenderedRegion } from './motion.js';
 import {
   canonicalDatesInMonth,
   clampDay,
@@ -52,6 +53,7 @@ export class CalendarController implements ReactiveController {
   private min: CalendarDate | null = null;
   private max: CalendarDate | null = null;
   private pendingFocus = false;
+  private pendingSwitchAnimation = false;
   private canonicalCache: { key: string; dates: (CalendarDate | null)[] } | null = null;
 
   constructor(host: LitElement) {
@@ -96,14 +98,22 @@ export class CalendarController implements ReactiveController {
       this.focus = { year: this.viewYear, month: this.viewMonth, dayOfMonth: 1 };
     }
     this.pendingFocus = true;
+    this.pendingSwitchAnimation = true;
     this.host.requestUpdate();
   }
 
   hostUpdated(): void {
-    if (!this.pendingFocus) return;
-    this.pendingFocus = false;
-    const cell = this.host.renderRoot.querySelector<HTMLElement>('.day[tabindex="0"]');
-    cell?.focus();
+    if (this.pendingFocus) {
+      this.pendingFocus = false;
+      const cell = this.host.renderRoot.querySelector<HTMLElement>('.day[tabindex="0"]');
+      cell?.focus();
+    }
+    // Only a calendar switch animates. Paging months re-renders the same grid just as often, and
+    // fading on every arrow click would read as lag.
+    if (this.pendingSwitchAnimation) {
+      this.pendingSwitchAnimation = false;
+      fadeInRerenderedRegion(this.host.renderRoot);
+    }
   }
 
   /** The Bikram Sambat date a displayed cell selects, or `null` when it has none. */
