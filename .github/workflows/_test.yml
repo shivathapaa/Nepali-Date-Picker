@@ -99,14 +99,11 @@ jobs:
             :sample:androidApp:assembleDebug \
             --stacktrace
 
-      # Windows: mingwX64 only - everything else is covered elsewhere.
+      # Windows: mingwX64 only - everything else is covered elsewhere. Keep this on one
+      # line: Windows runners default to PowerShell, where `\` is not a line continuation.
       - name: Build & test (Windows)
         if: runner.os == 'Windows'
-        run: |
-          ./gradlew \
-            :nepali-date-picker:core:mingwX64Test \
-            :nepali-date-picker:serialization:mingwX64Test \
-            --stacktrace
+        run: ./gradlew :nepali-date-picker:core:mingwX64Test :nepali-date-picker:serialization:mingwX64Test --stacktrace
 
       - name: Upload test reports
         if: failure()
@@ -155,6 +152,35 @@ jobs:
       # construction. Style and info findings are not worth failing a build over.
       - name: shellcheck
         run: shellcheck -s bash --severity=warning --exclude=SC2050 /tmp/wf/*.sh
+
+      # Windows runners default to PowerShell, so a bash-style `\` continuation is a
+      # parse error there. The shellcheck step above cannot catch it: it lints every
+      # block as bash, where the same line is valid.
+      - name: Reject backslash continuations in Windows steps
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import glob, re, sys, yaml
+          failed = False
+          for path in sorted(glob.glob(".github/workflows/*.yml")):
+              spec = yaml.safe_load(open(path))
+              for job_name, job in (spec.get("jobs") or {}).items():
+                  for index, step in enumerate(job.get("steps") or []):
+                      script, condition = step.get("run"), str(step.get("if", ""))
+                      if not script or "Windows" not in condition:
+                          continue
+                      if step.get("shell") in ("bash", "sh"):
+                          continue
+                      if re.search(r"\\\s*\n", script):
+                          print(
+                              f"::error file={path}::{job_name} step {index} "
+                              f"({step.get('name', 'unnamed')}) runs on Windows under PowerShell "
+                              "but uses a backslash line continuation. Put it on one line, or set "
+                              "`shell: bash` on the step."
+                          )
+                          failed = True
+          sys.exit(1 if failed else 0)
+          PY
 
       - name: Reject empty-array expansion under set -u
         run: |
