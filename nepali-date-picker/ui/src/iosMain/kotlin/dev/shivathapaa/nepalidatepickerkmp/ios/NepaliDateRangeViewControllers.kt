@@ -67,7 +67,8 @@ fun NepaliDateRangePickerViewController(
             yearRange = yearRangeOf(yearRangeStart, yearRangeEnd),
             initialDisplayMode = DisplayMode.Picker,
             nepaliSelectableDates = selectableDates.orAllDates(),
-            locale = locale
+            locale = locale,
+            initialCalendarSystem = opts.initialCalendarSystem
         )
     }
 
@@ -82,7 +83,9 @@ fun NepaliDateRangePickerViewController(
             showModeToggle = opts.showModeToggle,
             showTodayButton = opts.showTodayButton,
             showMonthsVertically = opts.showMonthsVertically,
-            showYearPickerAndMonthNavigation = opts.showYearPickerAndMonthNavigation
+            showYearPickerAndMonthNavigation = opts.showYearPickerAndMonthNavigation,
+            showCalendarSystemToggle = opts.showCalendarSystemToggle,
+            showAdjacentMonthDays = opts.showAdjacentMonthDays
         )
     } else {
         NepaliDateRangePicker(
@@ -90,7 +93,9 @@ fun NepaliDateRangePickerViewController(
             showModeToggle = opts.showModeToggle,
             showTodayButton = opts.showTodayButton,
             showMonthsVertically = opts.showMonthsVertically,
-            showYearPickerAndMonthNavigation = opts.showYearPickerAndMonthNavigation
+            showYearPickerAndMonthNavigation = opts.showYearPickerAndMonthNavigation,
+            showCalendarSystemToggle = opts.showCalendarSystemToggle,
+            showAdjacentMonthDays = opts.showAdjacentMonthDays
         )
     }
 }
@@ -162,7 +167,8 @@ fun NepaliDateRangeFieldViewController(
             isEndError = opts.isEndError,
             enabled = opts.enabled,
             readOnly = opts.readOnly,
-            shape = shape
+            shape = shape,
+            calendarSystem = opts.initialCalendarSystem
         )
     } else {
         NepaliDateRangeField(
@@ -183,7 +189,10 @@ fun NepaliDateRangeFieldViewController(
             readOnly = opts.readOnly,
             shape = shape,
             confirmButtonText = opts.confirmButtonText ?: locale.language.okText,
-            dismissButtonText = opts.dismissButtonText ?: locale.language.cancelText
+            dismissButtonText = opts.dismissButtonText ?: locale.language.cancelText,
+            calendarSystem = opts.initialCalendarSystem,
+            showCalendarSystemToggle = opts.showCalendarSystemToggle,
+            showAdjacentMonthDays = opts.showAdjacentMonthDays
         )
     }
 }

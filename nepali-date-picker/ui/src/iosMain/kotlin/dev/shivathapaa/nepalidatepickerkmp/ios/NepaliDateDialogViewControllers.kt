@@ -18,6 +18,7 @@ import dev.shivathapaa.nepalidatepickerkmp.NepaliDatePicker
 import dev.shivathapaa.nepalidatepickerkmp.NepaliDatePickerDialog
 import dev.shivathapaa.nepalidatepickerkmp.NepaliDatePickerFullScreenDialog
 import dev.shivathapaa.nepalidatepickerkmp.NepaliDatePickerState
+import dev.shivathapaa.nepalidatepickerkmp.NepaliDatePickerWithEnglishDate
 import dev.shivathapaa.nepalidatepickerkmp.NepaliSelectableDates
 import dev.shivathapaa.nepalidatepickerkmp.annotations.ExperimentalNepaliDatePickerApi
 import dev.shivathapaa.nepalidatepickerkmp.data.CustomCalendar
@@ -64,7 +65,8 @@ fun NepaliDatePickerDialogViewController(
             yearRange = yearRangeOf(yearRangeStart, yearRangeEnd),
             initialDisplayMode = DisplayMode.Picker,
             nepaliSelectableDates = selectableDates.orAllDates(),
-            locale = locale
+            locale = locale,
+            initialCalendarSystem = calendar.initialCalendarSystem
         )
     }
 
@@ -79,11 +81,24 @@ fun NepaliDatePickerDialogViewController(
         shape = RoundedCornerShape(opts.cornerRadius.dp),
         tonalElevation = opts.tonalElevation.dp
     ) {
-        NepaliDatePicker(
-            state = state,
-            showModeToggle = calendar.showModeToggle,
-            showTodayButton = calendar.showTodayButton
-        )
+        if (calendar.showEnglishDate) {
+            NepaliDatePickerWithEnglishDate(
+                state = state,
+                englishDateLocale = calendar.englishDateLocale ?: locale,
+                showModeToggle = calendar.showModeToggle,
+                showTodayButton = calendar.showTodayButton,
+                showCalendarSystemToggle = calendar.showCalendarSystemToggle,
+                showAdjacentMonthDays = calendar.showAdjacentMonthDays
+            )
+        } else {
+            NepaliDatePicker(
+                state = state,
+                showModeToggle = calendar.showModeToggle,
+                showTodayButton = calendar.showTodayButton,
+                showCalendarSystemToggle = calendar.showCalendarSystemToggle,
+                showAdjacentMonthDays = calendar.showAdjacentMonthDays
+            )
+        }
     }
 }
 
@@ -123,7 +138,8 @@ fun NepaliDatePickerFullScreenDialogViewController(
             yearRange = yearRangeOf(yearRangeStart, yearRangeEnd),
             initialDisplayMode = DisplayMode.Picker,
             nepaliSelectableDates = selectableDates.orAllDates(),
-            locale = locale
+            locale = locale,
+            initialCalendarSystem = calendar.initialCalendarSystem
         )
     }
 
@@ -137,10 +153,23 @@ fun NepaliDatePickerFullScreenDialogViewController(
         },
         title = opts.title?.let { text -> { Text(text) } }
     ) {
-        NepaliDatePicker(
-            state = state,
-            showModeToggle = calendar.showModeToggle,
-            showTodayButton = calendar.showTodayButton
-        )
+        if (calendar.showEnglishDate) {
+            NepaliDatePickerWithEnglishDate(
+                state = state,
+                englishDateLocale = calendar.englishDateLocale ?: locale,
+                showModeToggle = calendar.showModeToggle,
+                showTodayButton = calendar.showTodayButton,
+                showCalendarSystemToggle = calendar.showCalendarSystemToggle,
+                showAdjacentMonthDays = calendar.showAdjacentMonthDays
+            )
+        } else {
+            NepaliDatePicker(
+                state = state,
+                showModeToggle = calendar.showModeToggle,
+                showTodayButton = calendar.showTodayButton,
+                showCalendarSystemToggle = calendar.showCalendarSystemToggle,
+                showAdjacentMonthDays = calendar.showAdjacentMonthDays
+            )
+        }
     }
 }

@@ -64,7 +64,8 @@ fun NepaliDatePickerViewController(
             yearRange = yearRangeOf(yearRangeStart, yearRangeEnd),
             initialDisplayMode = DisplayMode.Picker,
             nepaliSelectableDates = selectableDates.orAllDates(),
-            locale = locale
+            locale = locale,
+            initialCalendarSystem = opts.initialCalendarSystem
         )
     }
 
@@ -75,13 +76,17 @@ fun NepaliDatePickerViewController(
             state = state,
             englishDateLocale = opts.englishDateLocale ?: locale,
             showModeToggle = opts.showModeToggle,
-            showTodayButton = opts.showTodayButton
+            showTodayButton = opts.showTodayButton,
+            showCalendarSystemToggle = opts.showCalendarSystemToggle,
+            showAdjacentMonthDays = opts.showAdjacentMonthDays
         )
     } else {
         NepaliDatePicker(
             state = state,
             showModeToggle = opts.showModeToggle,
-            showTodayButton = opts.showTodayButton
+            showTodayButton = opts.showTodayButton,
+            showCalendarSystemToggle = opts.showCalendarSystemToggle,
+            showAdjacentMonthDays = opts.showAdjacentMonthDays
         )
     }
 }
@@ -116,7 +121,8 @@ fun NepaliDatePickerDockedViewController(
             yearRange = yearRangeOf(yearRangeStart, yearRangeEnd),
             initialDisplayMode = DisplayMode.Picker,
             nepaliSelectableDates = selectableDates.orAllDates(),
-            locale = locale
+            locale = locale,
+            initialCalendarSystem = opts.initialCalendarSystem
         )
     }
 
@@ -129,6 +135,8 @@ fun NepaliDatePickerDockedViewController(
         placeholder = opts.placeholder?.let { text -> { Text(text) } },
         dateFormatStyle = opts.dateFormatStyle,
         showTodayButton = opts.showTodayButton,
+        showCalendarSystemToggle = opts.showCalendarSystemToggle,
+        showAdjacentMonthDays = opts.showAdjacentMonthDays,
         shape = RoundedCornerShape(opts.cornerRadius.dp),
         popupShadowElevation = opts.popupShadowElevation.dp
     )
@@ -169,6 +177,8 @@ fun NepaliWheelDatePickerViewController(
         itemHeight = opts.itemHeight.dp,
         visibleItemCount = opts.visibleItemCount,
         shape = RoundedCornerShape(opts.cornerRadius.dp),
+        initialCalendarSystem = opts.initialCalendarSystem,
+        showCalendarSystemToggle = opts.showCalendarSystemToggle,
         onDateChange = onDateChange
     )
 }

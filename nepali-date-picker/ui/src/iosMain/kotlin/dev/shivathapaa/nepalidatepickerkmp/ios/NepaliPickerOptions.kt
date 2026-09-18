@@ -6,6 +6,7 @@
 
 package dev.shivathapaa.nepalidatepickerkmp.ios
 
+import dev.shivathapaa.nepalidatepickerkmp.data.CalendarSystem
 import dev.shivathapaa.nepalidatepickerkmp.data.NepaliDateFormatStyle
 import dev.shivathapaa.nepalidatepickerkmp.data.NepaliDateLocale
 
@@ -20,12 +21,20 @@ import dev.shivathapaa.nepalidatepickerkmp.data.NepaliDateLocale
  * @property showTodayButton whether the shortcut back to today is shown.
  * @property showEnglishDate pairs every Bikram Sambat day with its Gregorian equivalent.
  * @property englishDateLocale locale used for the Gregorian half. Falls back to the picker's locale.
+ * @property initialCalendarSystem the calendar the grid opens in. The date reported back is always
+ * Bikram Sambat, whichever calendar is displayed.
+ * @property showCalendarSystemToggle whether the `B.S.` / `A.D.` switch is shown.
+ * @property showAdjacentMonthDays fills the grid's empty cells with the neighbouring months'
+ * days, drawn faded. Tapping one selects that day and moves the grid to its month.
  */
 class NepaliCalendarOptions {
     var showModeToggle: Boolean = true
     var showTodayButton: Boolean = true
     var showEnglishDate: Boolean = false
     var englishDateLocale: NepaliDateLocale? = null
+    var initialCalendarSystem: CalendarSystem = CalendarSystem.BIKRAM_SAMBAT
+    var showCalendarSystemToggle: Boolean = false
+    var showAdjacentMonthDays: Boolean = false
 }
 
 /**
@@ -37,6 +46,12 @@ class NepaliCalendarOptions {
  * @property showYearPickerAndMonthNavigation whether the year dropdown and month arrows are shown.
  * @property showEnglishDate pairs every Bikram Sambat day with its Gregorian equivalent.
  * @property englishDateLocale locale used for the Gregorian half. Falls back to the picker's locale.
+ * @property initialCalendarSystem the calendar the grid opens in. The range reported back is always
+ * Bikram Sambat, whichever calendar is displayed.
+ * @property showCalendarSystemToggle whether the `B.S.` / `A.D.` switch is shown. Needs
+ * [showYearPickerAndMonthNavigation].
+ * @property showAdjacentMonthDays fills the grid's empty cells with the neighbouring months'
+ * days, drawn faded. Tapping one selects that day and moves the grid to its month.
  */
 class NepaliRangeCalendarOptions {
     var showModeToggle: Boolean = true
@@ -45,6 +60,9 @@ class NepaliRangeCalendarOptions {
     var showYearPickerAndMonthNavigation: Boolean = true
     var showEnglishDate: Boolean = false
     var englishDateLocale: NepaliDateLocale? = null
+    var initialCalendarSystem: CalendarSystem = CalendarSystem.BIKRAM_SAMBAT
+    var showCalendarSystemToggle: Boolean = false
+    var showAdjacentMonthDays: Boolean = false
 }
 
 /**
@@ -53,11 +71,15 @@ class NepaliRangeCalendarOptions {
  * @property itemHeight height of one row, in points.
  * @property visibleItemCount how many rows are visible at once. Odd numbers centre the selection.
  * @property cornerRadius corner radius of the wheel, in points.
+ * @property initialCalendarSystem the calendar the wheels start in.
+ * @property showCalendarSystemToggle whether the `B.S.` / `A.D.` switch is shown above the wheels.
  */
 class NepaliWheelOptions {
     var itemHeight: Float = 44f
     var visibleItemCount: Int = 5
     var cornerRadius: Float = 20f
+    var initialCalendarSystem: CalendarSystem = CalendarSystem.BIKRAM_SAMBAT
+    var showCalendarSystemToggle: Boolean = false
 }
 
 /**
@@ -69,6 +91,10 @@ class NepaliWheelOptions {
  * @property placeholder text shown while the field is empty, or `null` for none.
  * @property cornerRadius corner radius of the anchoring field, in points.
  * @property popupShadowElevation shadow elevation of the popup, in points.
+ * @property initialCalendarSystem the calendar the popup grid opens in.
+ * @property showCalendarSystemToggle whether the `B.S.` / `A.D.` switch is shown in the popup.
+ * @property showAdjacentMonthDays fills the grid's empty cells with the neighbouring months'
+ * days, drawn faded. Tapping one selects that day and moves the grid to its month.
  */
 class NepaliDockedOptions {
     var dateFormatStyle: NepaliDateFormatStyle = NepaliDateFormatStyle.MEDIUM
@@ -77,6 +103,9 @@ class NepaliDockedOptions {
     var placeholder: String? = null
     var cornerRadius: Float = 4f
     var popupShadowElevation: Float = 6f
+    var initialCalendarSystem: CalendarSystem = CalendarSystem.BIKRAM_SAMBAT
+    var showCalendarSystemToggle: Boolean = false
+    var showAdjacentMonthDays: Boolean = false
 }
 
 /**
@@ -94,6 +123,12 @@ class NepaliDockedOptions {
  * @property confirmButtonText label of the filled style's confirming button.
  * @property dismissButtonText label of the filled style's dismissing button.
  * @property cornerRadius corner radius of the field, in points.
+ * @property initialCalendarSystem the calendar the user types in, and the one the filled style's
+ * dialog opens in. The date reported back is always Bikram Sambat.
+ * @property showCalendarSystemToggle whether the filled style's dialog shows the `B.S.` / `A.D.`
+ * switch. Ignored by the outlined style, which has no dialog.
+ * @property showAdjacentMonthDays fills the filled style's dialog grid with the neighbouring months'
+ * days, drawn faded. Ignored by the outlined style.
  */
 class NepaliFieldOptions {
     var outlined: Boolean = true
@@ -106,6 +141,9 @@ class NepaliFieldOptions {
     var confirmButtonText: String? = null
     var dismissButtonText: String? = null
     var cornerRadius: Float = 4f
+    var initialCalendarSystem: CalendarSystem = CalendarSystem.BIKRAM_SAMBAT
+    var showCalendarSystemToggle: Boolean = false
+    var showAdjacentMonthDays: Boolean = false
 }
 
 /**
@@ -122,6 +160,12 @@ class NepaliFieldOptions {
  * @property confirmButtonText label of the filled style's confirming button.
  * @property dismissButtonText label of the filled style's dismissing button.
  * @property cornerRadius corner radius of both fields, in points.
+ * @property initialCalendarSystem the calendar both sides are typed in, and the one the filled
+ * style's dialog opens in. The range reported back is always Bikram Sambat.
+ * @property showCalendarSystemToggle whether the filled style's dialog shows the `B.S.` / `A.D.`
+ * switch. Ignored by the outlined style, which has no dialog.
+ * @property showAdjacentMonthDays fills the filled style's dialog grid with the neighbouring months'
+ * days, drawn faded. Ignored by the outlined style.
  */
 class NepaliRangeFieldOptions {
     var outlined: Boolean = true
@@ -135,6 +179,9 @@ class NepaliRangeFieldOptions {
     var confirmButtonText: String? = null
     var dismissButtonText: String? = null
     var cornerRadius: Float = 4f
+    var initialCalendarSystem: CalendarSystem = CalendarSystem.BIKRAM_SAMBAT
+    var showCalendarSystemToggle: Boolean = false
+    var showAdjacentMonthDays: Boolean = false
 }
 
 /**

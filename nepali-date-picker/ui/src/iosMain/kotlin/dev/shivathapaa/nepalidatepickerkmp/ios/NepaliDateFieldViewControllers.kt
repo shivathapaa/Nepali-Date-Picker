@@ -84,7 +84,8 @@ fun NepaliDateFieldViewController(
             isError = opts.isError,
             enabled = opts.enabled,
             readOnly = opts.readOnly,
-            shape = shape
+            shape = shape,
+            calendarSystem = opts.initialCalendarSystem
         )
     } else {
         NepaliDateField(
@@ -103,7 +104,10 @@ fun NepaliDateFieldViewController(
             readOnly = opts.readOnly,
             shape = shape,
             confirmButtonText = opts.confirmButtonText ?: locale.language.okText,
-            dismissButtonText = opts.dismissButtonText ?: locale.language.cancelText
+            dismissButtonText = opts.dismissButtonText ?: locale.language.cancelText,
+            calendarSystem = opts.initialCalendarSystem,
+            showCalendarSystemToggle = opts.showCalendarSystemToggle,
+            showAdjacentMonthDays = opts.showAdjacentMonthDays
         )
     }
 }
