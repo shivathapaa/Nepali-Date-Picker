@@ -19,7 +19,6 @@ package dev.shivathapaa.nepalidatepickerkmp
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.gestures.snapping.rememberSnapFlingBehavior
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -38,6 +37,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -52,14 +52,19 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import dev.shivathapaa.nepalidatepickerkmp.annotations.ExperimentalNepaliDatePickerApi
+import dev.shivathapaa.nepalidatepickerkmp.calendar_model.CalendarViewAdapter
 import dev.shivathapaa.nepalidatepickerkmp.calendar_model.NepaliCalendarDefaults
 import dev.shivathapaa.nepalidatepickerkmp.calendar_model.NepaliCalendarModel
 import dev.shivathapaa.nepalidatepickerkmp.calendar_model.NepaliDateConverter
 import dev.shivathapaa.nepalidatepickerkmp.calendar_model.NepaliDatePickerColors
 import dev.shivathapaa.nepalidatepickerkmp.calendar_model.NepaliDatePickerDefaults
+import dev.shivathapaa.nepalidatepickerkmp.calendar_model.calendarViewAdapter
+import dev.shivathapaa.nepalidatepickerkmp.calendar_model.rememberCalendarViewAdapter
+import dev.shivathapaa.nepalidatepickerkmp.data.CalendarSystem
 import dev.shivathapaa.nepalidatepickerkmp.data.CustomCalendar
 import dev.shivathapaa.nepalidatepickerkmp.data.NepaliDateLocale
 import dev.shivathapaa.nepalidatepickerkmp.data.SimpleDate
+import dev.shivathapaa.nepalidatepickerkmp.data.toSimpleDate
 
 /**
  * A wheel / scroll date picker for Bikram Sambat dates - three snapping columns (Year, Month, Day).
@@ -73,9 +78,13 @@ import dev.shivathapaa.nepalidatepickerkmp.data.SimpleDate
  * The composable is always in a selected state (a wheel cannot be "empty"); [onDateChange] fires
  * with the resolved [CustomCalendar] whenever the selection settles on a new date.
  *
+ * The wheels can spin in either calendar. [onDateChange] always reports a Bikram Sambat
+ * [CustomCalendar], whichever calendar is on the wheels, so switching keeps the same day selected.
+ *
  * @param modifier the [Modifier] applied to the picker surface.
- * @param initialDate the [SimpleDate] shown centered on first composition. Defaults to today.
- * @param yearRange the selectable Bikram Sambat year range.
+ * @param initialDate the Bikram Sambat [SimpleDate] shown centered on first composition. Defaults to today.
+ * @param yearRange the selectable Bikram Sambat year range. A Gregorian wheel derives its own range
+ *   from this so both calendars cover the same span of real days.
  * @param locale the [NepaliDateLocale] controlling language, month names, and digit script.
  * @param selectableDates consulted via [NepaliSelectableDates.isSelectableYear] to drop non-selectable
  *   years from the year wheel. Fine-grained per-day disabling is not expressed by a wheel by design.
@@ -85,7 +94,11 @@ import dev.shivathapaa.nepalidatepickerkmp.data.SimpleDate
  * @param shape the [Shape] of the wheel surface.
  * @param selectedTextStyle the [TextStyle] of the centered (selected) row.
  * @param unselectedTextStyle the [TextStyle] of the non-centered rows.
- * @param onDateChange invoked with the resolved [CustomCalendar] when the selected date changes.
+ * @param initialCalendarSystem the calendar the wheels start in.
+ * @param showCalendarSystemToggle shows a `B.S.` / `A.D.` switch above the wheels. Unlike the grid
+ *   pickers the wheel has no external state holder, so it owns the choice itself.
+ * @param onDateChange invoked with the resolved Bikram Sambat [CustomCalendar] when the selected
+ *   date changes.
  *
  * Example usage:
  * ```
@@ -111,26 +124,49 @@ fun NepaliWheelDatePicker(
     shape: Shape = RoundedCornerShape(WheelCornerRadius),
     selectedTextStyle: TextStyle = MaterialTheme.typography.titleMedium,
     unselectedTextStyle: TextStyle = MaterialTheme.typography.bodyLarge,
+    initialCalendarSystem: CalendarSystem = CalendarSystem.BIKRAM_SAMBAT,
+    showCalendarSystemToggle: Boolean = false,
     onDateChange: (CustomCalendar) -> Unit
 ) {
     val calendarModel = remember(locale) { NepaliCalendarModel(locale) }
 
+    // Saved as the era rather than the ordinal so reordering the enum cannot silently restore the
+    // wrong calendar.
+    var calendarSystemEra by rememberSaveable { mutableIntStateOf(initialCalendarSystem.era) }
+    val calendarSystem = CalendarSystem.fromEra(calendarSystemEra)
+        ?: CalendarSystem.BIKRAM_SAMBAT
+    val adapter = rememberCalendarViewAdapter(calendarSystem, calendarModel, yearRange)
+
     // Keep an odd count of at least 3 rows so a single center row is always well-defined.
     val visibleCount = visibleItemCount.coerceAtLeast(3).let { if (it % 2 == 0) it + 1 else it }
 
-    // Year wheel entries - drop non-selectable years, but never present an empty wheel.
-    val yearList = remember(yearRange, selectableDates) {
-        yearRange.filter { selectableDates.isSelectableYear(it) }.ifEmpty { yearRange.toList() }
+    // Year wheel entries - drop non-selectable years, but never present an empty wheel. In a
+    // Gregorian wheel a year survives while either Bikram Sambat year it straddles is selectable.
+    val yearList = remember(adapter, selectableDates) {
+        adapter.yearRange
+            .filter { year ->
+                adapter.canonicalYearsIn(year).any { selectableDates.isSelectableYear(it) }
+            }
+            .ifEmpty { adapter.yearRange.toList() }
+    }
+
+    // The wheels spin in the displayed calendar; the date the caller gets is always Bikram Sambat.
+    val initialDisplayedDate = remember(adapter, initialDate) {
+        adapter.wheelPositionFor(initialDate, calendarModel)
     }
 
     var selectedYear by rememberSaveable {
-        mutableIntStateOf(initialDate.year.coerceIn(yearList.first(), yearList.last()))
+        mutableIntStateOf(initialDisplayedDate.year.coerceIn(yearList.first(), yearList.last()))
     }
-    var selectedMonth by rememberSaveable { mutableIntStateOf(initialDate.month.coerceIn(1, 12)) }
-    var selectedDay by rememberSaveable { mutableIntStateOf(initialDate.dayOfMonth.coerceAtLeast(1)) }
+    var selectedMonth by rememberSaveable {
+        mutableIntStateOf(initialDisplayedDate.month.coerceIn(1, MonthsInYear))
+    }
+    var selectedDay by rememberSaveable {
+        mutableIntStateOf(initialDisplayedDate.dayOfMonth.coerceAtLeast(1))
+    }
 
-    val daysInMonth = remember(selectedYear, selectedMonth) {
-        calendarModel.getTotalDaysInNepaliMonth(selectedYear, selectedMonth)
+    val daysInMonth = remember(adapter, selectedYear, selectedMonth) {
+        adapter.monthOf(selectedYear, selectedMonth).totalDaysInMonth
     }
 
     // A shorter month must not keep a stale higher day (e.g. leaving day 32 after switching months).
@@ -140,11 +176,10 @@ fun NepaliWheelDatePicker(
 
     val clampedDay = selectedDay.coerceIn(1, daysInMonth)
 
-    // Emit the resolved calendar whenever the settled selection changes.
-    LaunchedEffect(selectedYear, selectedMonth, clampedDay) {
-        runCatching {
-            calendarModel.getNepaliCalendar(SimpleDate(selectedYear, selectedMonth, clampedDay))
-        }.onSuccess(onDateChange)
+    // Emit the resolved Bikram Sambat calendar whenever the settled selection changes. A Gregorian
+    // day before the conversion anchor has no Bikram Sambat equivalent, so nothing is emitted.
+    LaunchedEffect(adapter, selectedYear, selectedMonth, clampedDay) {
+        adapter.canonicalDateAt(selectedYear, selectedMonth, clampedDay)?.let(onDateChange)
     }
 
     Surface(
@@ -152,71 +187,104 @@ fun NepaliWheelDatePicker(
         shape = shape,
         color = colors.containerColor
     ) {
-        Box(contentAlignment = Alignment.Center) {
-            // Center selection band drawn behind the wheels. A soft inset border defines the selected
-            // row without full-width rules, which would overshoot the rounded band and read as clutter.
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = WheelBandHorizontalPadding)
-                    .height(itemHeight)
-                    .background(
-                        color = colors.selectedDayContainerColor.copy(alpha = 0.18f),
-                        shape = RoundedCornerShape(WheelBandCornerRadius)
-                    )
-                    .border(
-                        width = 1.dp,
-                        color = colors.dividerColor,
-                        shape = RoundedCornerShape(WheelBandCornerRadius)
-                    )
-            )
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            if (showCalendarSystemToggle) {
+                NepaliCalendarSystemToggle(
+                    calendarSystem = calendarSystem,
+                    onCalendarSystemChange = { newSystem ->
+                        // Re-anchor on the current selection so the switch keeps the same day. A
+                        // Gregorian position before the conversion anchor has no Bikram Sambat date
+                        // to carry over, so fall back to the start of the range rather than leaving
+                        // the old calendar's numbers under the new calendar's labels.
+                        val anchor = adapter
+                            .canonicalDateAt(selectedYear, selectedMonth, clampedDay)
+                            ?.toSimpleDate()
+                            ?: SimpleDate(yearRange.first, 1, 1)
+                        calendarSystemEra = newSystem.era
 
-            Row(
-                modifier = Modifier.padding(horizontal = WheelBandHorizontalPadding),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                WheelColumn(
-                    itemCount = yearList.size,
-                    selectedIndex = yearList.indexOf(selectedYear).coerceAtLeast(0),
-                    onSelectedIndexChange = { selectedYear = yearList[it] },
-                    itemLabel = { index ->
-                        calendarModel.localizeNumber(yearList[index].toString(), locale.language)
+                        val moved = calendarViewAdapter(newSystem, calendarModel, yearRange)
+                            .wheelPositionFor(anchor, calendarModel)
+                        selectedYear = moved.year
+                        selectedMonth = moved.month
+                        selectedDay = moved.dayOfMonth
                     },
-                    colors = colors,
-                    itemHeight = itemHeight,
-                    visibleCount = visibleCount,
-                    selectedTextStyle = selectedTextStyle,
-                    unselectedTextStyle = unselectedTextStyle,
-                    modifier = Modifier.weight(1.1f)
+                    modifier = Modifier.padding(top = WheelTogglePadding),
+                    language = locale.language,
+                    colors = colors
                 )
-                WheelColumn(
-                    itemCount = 12,
-                    selectedIndex = selectedMonth - 1,
-                    onSelectedIndexChange = { selectedMonth = it + 1 },
-                    itemLabel = { index ->
-                        calendarModel.getNepaliMonthName(index + 1, locale.monthName, locale.language)
-                    },
-                    colors = colors,
-                    itemHeight = itemHeight,
-                    visibleCount = visibleCount,
-                    selectedTextStyle = selectedTextStyle,
-                    unselectedTextStyle = unselectedTextStyle,
-                    modifier = Modifier.weight(1.5f)
+            }
+
+            Box(contentAlignment = Alignment.Center) {
+                // Center selection band drawn behind the wheels. A soft inset border defines the selected
+                // row without full-width rules, which would overshoot the rounded band and read as clutter.
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = WheelBandHorizontalPadding)
+                        .height(itemHeight)
+                        .background(
+                            color = colors.selectedDayContainerColor.copy(alpha = 0.18f),
+                            shape = RoundedCornerShape(WheelBandCornerRadius)
+                        )
+                        .border(
+                            width = 1.dp,
+                            color = colors.dividerColor,
+                            shape = RoundedCornerShape(WheelBandCornerRadius)
+                        )
                 )
-                WheelColumn(
-                    itemCount = daysInMonth,
-                    selectedIndex = clampedDay - 1,
-                    onSelectedIndexChange = { selectedDay = it + 1 },
-                    itemLabel = { index ->
-                        calendarModel.localizeNumber((index + 1).toString(), locale.language)
-                    },
-                    colors = colors,
-                    itemHeight = itemHeight,
-                    visibleCount = visibleCount,
-                    selectedTextStyle = selectedTextStyle,
-                    unselectedTextStyle = unselectedTextStyle,
-                    modifier = Modifier.weight(1f)
-                )
+
+                // A switch changes what every column holds and how many rows it has, so their
+                // scroll state cannot be carried over; `key` rebuilds each one at the new index.
+                // Reusing it lets a LazyColumn measure against content it no longer has.
+                key(calendarSystem) {
+                Row(
+                    modifier = Modifier.padding(horizontal = WheelBandHorizontalPadding),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    WheelColumn(
+                        itemCount = yearList.size,
+                        selectedIndex = yearList.indexOf(selectedYear).coerceAtLeast(0),
+                        onSelectedIndexChange = { selectedYear = yearList[it] },
+                        itemLabel = { index ->
+                            calendarModel.localizeNumber(yearList[index].toString(), locale.language)
+                        },
+                        colors = colors,
+                        itemHeight = itemHeight,
+                        visibleCount = visibleCount,
+                        selectedTextStyle = selectedTextStyle,
+                        unselectedTextStyle = unselectedTextStyle,
+                        modifier = Modifier.weight(1.1f)
+                    )
+                    WheelColumn(
+                        itemCount = MonthsInYear,
+                        selectedIndex = selectedMonth - 1,
+                        onSelectedIndexChange = { selectedMonth = it + 1 },
+                        itemLabel = { index ->
+                            adapter.monthName(index + 1, locale.language, locale.monthName)
+                        },
+                        colors = colors,
+                        itemHeight = itemHeight,
+                        visibleCount = visibleCount,
+                        selectedTextStyle = selectedTextStyle,
+                        unselectedTextStyle = unselectedTextStyle,
+                        modifier = Modifier.weight(1.5f)
+                    )
+                    WheelColumn(
+                        itemCount = daysInMonth,
+                        selectedIndex = clampedDay - 1,
+                        onSelectedIndexChange = { selectedDay = it + 1 },
+                        itemLabel = { index ->
+                            calendarModel.localizeNumber((index + 1).toString(), locale.language)
+                        },
+                        colors = colors,
+                        itemHeight = itemHeight,
+                        visibleCount = visibleCount,
+                        selectedTextStyle = selectedTextStyle,
+                        unselectedTextStyle = unselectedTextStyle,
+                        modifier = Modifier.weight(1f)
+                    )
+                }
+                }
             }
         }
     }
@@ -300,7 +368,50 @@ private fun WheelColumn(
     }
 }
 
+/**
+ * The Bikram Sambat date the wheels are on, or `null` when that position has none: a Gregorian day
+ * before the conversion anchor, or a day the table does not cover.
+ *
+ * `parse` reports the second case as `totalDaysInMonth = -1` rather than as null, so that sentinel
+ * is filtered here instead of reaching the caller dressed as a real date.
+ */
+private fun CalendarViewAdapter.canonicalDateAt(
+    year: Int,
+    month: Int,
+    dayOfMonth: Int
+): CustomCalendar? = parse(
+    buildString {
+        append(year.toString().padStart(4, '0'))
+        append(month.toString().padStart(2, '0'))
+        append(dayOfMonth.toString().padStart(2, '0'))
+    }
+)?.takeIf { it.totalDaysInMonth > 0 }?.let { toCanonical(it) }
+
+/**
+ * Where the wheels should sit to show [canonicalDate] in this adapter's calendar.
+ *
+ * Falls back to the first of whatever month the date lands in when the date itself cannot be shown
+ * there, so the wheels never rest on a position this calendar has no number for.
+ */
+private fun CalendarViewAdapter.wheelPositionFor(
+    canonicalDate: SimpleDate,
+    calendarModel: NepaliCalendarModel
+): SimpleDate {
+    val month = monthContaining(canonicalDate)
+    val displayed = runCatching { calendarModel.getNepaliCalendar(canonicalDate) }
+        .getOrNull()
+        ?.let { fromCanonical(it) }
+        ?.takeIf { it.year == month.year && it.month == month.month }
+    return SimpleDate(
+        year = month.year,
+        month = month.month,
+        dayOfMonth = displayed?.dayOfMonth ?: 1
+    )
+}
+
 private val WheelItemHeight: Dp = 44.dp
+private val WheelTogglePadding: Dp = 12.dp
+private const val MonthsInYear: Int = 12
 private const val WheelVisibleCount: Int = 5
 private const val WheelUnselectedAlpha: Float = 0.38f
 private val WheelCornerRadius: Dp = 20.dp

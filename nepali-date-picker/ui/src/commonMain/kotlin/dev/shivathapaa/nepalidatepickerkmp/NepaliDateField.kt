@@ -36,20 +36,20 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Shape
-import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.input.OffsetMapping
 import androidx.compose.ui.text.input.TextFieldValue
-import androidx.compose.ui.text.input.TransformedText
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.window.DialogProperties
+import dev.shivathapaa.nepalidatepickerkmp.calendar_model.CalendarViewAdapter
 import dev.shivathapaa.nepalidatepickerkmp.calendar_model.NepaliCalendarDefaults
 import dev.shivathapaa.nepalidatepickerkmp.calendar_model.NepaliCalendarModel
 import dev.shivathapaa.nepalidatepickerkmp.calendar_model.NepaliDateConverter
 import dev.shivathapaa.nepalidatepickerkmp.calendar_model.NepaliDatePickerDefaults
+import dev.shivathapaa.nepalidatepickerkmp.calendar_model.rememberCalendarViewAdapter
+import dev.shivathapaa.nepalidatepickerkmp.data.CalendarSystem
 import dev.shivathapaa.nepalidatepickerkmp.data.CustomCalendar
 import dev.shivathapaa.nepalidatepickerkmp.data.NepaliDateFormatter.Pattern
 import dev.shivathapaa.nepalidatepickerkmp.data.NepaliDateLocale
@@ -92,6 +92,10 @@ import dev.shivathapaa.nepalidatepickerkmp.icons.NepaliIcons
  * @param suffix optional content shown after the input, inside the field.
  * @param shape the [Shape] of the field's outline.
  * @param interactionSource the [MutableInteractionSource] for observing interactions, or null to create one.
+ * @param calendarSystem the calendar the user types in. [value] and [onValueChange] stay Bikram
+ *   Sambat either way, so switching this changes only what is typed and shown, never the date.
+ *   With [CalendarSystem.GREGORIAN], [yearRange] is read as the Bikram Sambat span to cover and the
+ *   field accepts the English years matching it.
  *
  * @see NepaliDateField for a combo that pairs this field with a picker dialog.
  */
@@ -124,19 +128,30 @@ fun NepaliDateTextField(
     shape: Shape = OutlinedTextFieldDefaults.shape,
     interactionSource: MutableInteractionSource? = null,
     colors: TextFieldColors = OutlinedTextFieldDefaults.colors(),
+    calendarSystem: CalendarSystem = CalendarSystem.BIKRAM_SAMBAT,
 ) {
     val onValueChangeUpdated by rememberUpdatedState(onValueChange)
     val selectableDatesUpdated by rememberUpdatedState(selectableDates)
 
+    val calendarModel = remember(locale) { NepaliCalendarModel(locale) }
+    val adapter = rememberCalendarViewAdapter(calendarSystem, calendarModel, yearRange)
+
+    // The caller's value is always Bikram Sambat; the field writes it in whichever calendar it types.
+    val displayedDigits = remember(value, adapter, dateFormat) {
+        value.toDisplayedDate(adapter)?.toDigitString(dateFormat) ?: ""
+    }
+
     var text by rememberSaveable(stateSaver = TextFieldValue.Saver) {
-        mutableStateOf(TextFieldValue(text = value?.toDigitString(dateFormat) ?: ""))
+        mutableStateOf(TextFieldValue(text = displayedDigits))
     }
 
     // External value change (e.g. dialog confirmed) syncs into local state.
-    LaunchedEffect(value, dateFormat) {
-        val externalDigits = value?.toDigitString(dateFormat) ?: ""
-        if (text.text != externalDigits) {
-            text = TextFieldValue(text = externalDigits, selection = TextRange(externalDigits.length))
+    LaunchedEffect(displayedDigits) {
+        if (text.text != displayedDigits) {
+            text = TextFieldValue(
+                text = displayedDigits,
+                selection = TextRange(displayedDigits.length)
+            )
         }
     }
 
@@ -161,22 +176,22 @@ fun NepaliDateTextField(
             // 8 ASCII digits in pattern order - go straight to SimpleDate without round-tripping
             // through NepaliDateFormatter.parse (which would re-validate identical envelope rules).
             val parsed = parseDigits(filtered, dateFormat)
-            if (parsed == null || parsed.year !in yearRange) {
+            if (parsed == null || parsed.year !in adapter.yearRange) {
                 onValueChangeUpdated(null)
                 return@OutlinedTextField
             }
-            // Convert SimpleDate -> CustomCalendar for selectableDates predicate.
-            val customCalendar: CustomCalendar? = runCatching {
-                NepaliCalendarModelHolder.model.getNepaliCalendar(parsed)
-            }.getOrNull()
-            if (customCalendar == null ||
-                !selectableDatesUpdated.isSelectableYear(parsed.year) ||
-                !selectableDatesUpdated.isSelectableDate(customCalendar)
+            // Resolve to the canonical Bikram Sambat date: that is both what selectableDates judges
+            // and what the caller receives, whichever calendar was typed.
+            val canonicalCalendar: CustomCalendar? =
+                adapter.calendarOf(parsed)?.let(adapter::toCanonical)
+            if (canonicalCalendar == null ||
+                !selectableDatesUpdated.isSelectableYear(canonicalCalendar.year) ||
+                !selectableDatesUpdated.isSelectableDate(canonicalCalendar)
             ) {
                 onValueChangeUpdated(null)
                 return@OutlinedTextField
             }
-            onValueChangeUpdated(parsed)
+            onValueChangeUpdated(canonicalCalendar.toSimpleDate())
         },
         modifier = modifier,
         enabled = enabled,
@@ -211,6 +226,10 @@ fun NepaliDateTextField(
  *
  * When the user confirms a date in the dialog, [onValueChange] fires once with the
  * picked [SimpleDate]. Dismiss does not change [value].
+ *
+ * [calendarSystem] sets the calendar both the field and the dialog open in, and
+ * [showCalendarSystemToggle] lets the user change it from inside the dialog.
+ * [showAdjacentMonthDays] fills the dialog grid's empty cells with the neighbouring months' days.
  */
 @Composable
 fun NepaliDateField(
@@ -243,6 +262,9 @@ fun NepaliDateField(
     dialogProperties: DialogProperties = DialogProperties(),
     confirmButtonText: String = locale.language.okText,
     dismissButtonText: String = locale.language.cancelText,
+    calendarSystem: CalendarSystem = CalendarSystem.BIKRAM_SAMBAT,
+    showCalendarSystemToggle: Boolean = false,
+    showAdjacentMonthDays: Boolean = false,
 ) {
     var showDialog by rememberSaveable { mutableStateOf(false) }
     val onValueChangeUpdated by rememberUpdatedState(onValueChange)
@@ -279,6 +301,7 @@ fun NepaliDateField(
             shape = shape,
             interactionSource = interactionSource,
             colors = colors,
+            calendarSystem = calendarSystem,
         )
     }
 
@@ -298,6 +321,7 @@ fun NepaliDateField(
             yearRange = yearRange,
             nepaliSelectableDates = selectableDates,
             locale = locale,
+            initialCalendarSystem = calendarSystem,
         )
         NepaliDatePickerDialog(
             onDismissRequest = { showDialog = false },
@@ -319,7 +343,11 @@ fun NepaliDateField(
             },
             properties = dialogProperties,
         ) {
-            NepaliDatePicker(state = pickerState)
+            NepaliDatePicker(
+                state = pickerState,
+                showCalendarSystemToggle = showCalendarSystemToggle,
+                showAdjacentMonthDays = showAdjacentMonthDays
+            )
         }
     }
 }
@@ -367,7 +395,17 @@ private fun SimpleDate.toDigitString(pattern: Pattern): String {
     return if (pattern.yearFirst) "$yyyy$mm$dd" else "$dd$mm$yyyy"
 }
 
-/** Singleton converter - avoids creating a new [NepaliCalendarModel] per recomposition. */
-private object NepaliCalendarModelHolder {
-    val model: NepaliCalendarModel = NepaliCalendarModel()
+/**
+ * A Bikram Sambat value rewritten in [adapter]'s calendar, for display.
+ *
+ * A Bikram Sambat adapter returns the value untouched rather than round-tripping it through the
+ * converter, so a value that is not a real date still shows the digits the caller set.
+ */
+private fun SimpleDate?.toDisplayedDate(adapter: CalendarViewAdapter): SimpleDate? = when {
+    this == null -> null
+    adapter.calendarSystem == CalendarSystem.BIKRAM_SAMBAT -> this
+    else -> runCatching { NepaliDateConverter.getNepaliCalendar(year, month, dayOfMonth) }
+        .getOrNull()
+        ?.let(adapter::fromCanonical)
+        ?.toSimpleDate()
 }

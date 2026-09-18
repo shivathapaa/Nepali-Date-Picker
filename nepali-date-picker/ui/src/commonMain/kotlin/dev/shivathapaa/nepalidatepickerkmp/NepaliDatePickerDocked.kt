@@ -50,6 +50,7 @@ import dev.shivathapaa.nepalidatepickerkmp.annotations.ExperimentalNepaliDatePic
 import dev.shivathapaa.nepalidatepickerkmp.calendar_model.NepaliCalendarModel
 import dev.shivathapaa.nepalidatepickerkmp.calendar_model.NepaliDatePickerColors
 import dev.shivathapaa.nepalidatepickerkmp.calendar_model.NepaliDatePickerDefaults
+import dev.shivathapaa.nepalidatepickerkmp.calendar_model.formatInCalendar
 import dev.shivathapaa.nepalidatepickerkmp.icons.NepaliIcons
 import dev.shivathapaa.nepalidatepickerkmp.data.NepaliDateFormatStyle
 import kotlinx.coroutines.flow.first
@@ -72,6 +73,11 @@ import kotlinx.coroutines.flow.first
  * @param suffix optional inline content shown after the date text.
  * @param dateFormatStyle the [NepaliDateFormatStyle] used to render the selected date in the field.
  * @param showTodayButton whether the calendar shows its `TODAY` button.
+ * @param showCalendarSystemToggle whether the dropdown calendar shows the `B.S.` / `A.D.` switch.
+ *   The field itself always reads the selected date in Bikram Sambat.
+ * @param showAdjacentMonthDays whether the dropdown calendar fills its empty cells with the
+ *   neighbouring months' days, drawn faded. Tapping one selects that day and moves the grid to its
+ *   month.
  * @param textStyle the [TextStyle] applied to the field text.
  * @param shape the [Shape] of the text field.
  * @param interactionSource the [MutableInteractionSource] for the text field, or null for a remembered one.
@@ -100,6 +106,8 @@ fun NepaliDatePickerDocked(
     suffix: (@Composable () -> Unit)? = null,
     dateFormatStyle: NepaliDateFormatStyle = NepaliDateFormatStyle.MEDIUM,
     showTodayButton: Boolean = true,
+    showCalendarSystemToggle: Boolean = false,
+    showAdjacentMonthDays: Boolean = false,
     textStyle: TextStyle = LocalTextStyle.current,
     shape: Shape = OutlinedTextFieldDefaults.shape,
     interactionSource: MutableInteractionSource? = null,
@@ -112,10 +120,17 @@ fun NepaliDatePickerDocked(
     val fieldLocale = remember(state.locale, dateFormatStyle) {
         state.locale.copy(dateFormat = dateFormatStyle)
     }
-    // formatNepaliDate validates the date and can throw; fall back to empty so the field never crashes.
-    val displayText = state.selectedDate?.let {
-        runCatching { calendarModel.formatNepaliDate(it, fieldLocale) }.getOrDefault("")
-    } ?: ""
+    // The field reads the selection back, so it follows the calendar the dropdown shows, exactly as
+    // the full picker's headline does. Formatting validates the date and can throw, so an
+    // unformattable value falls back to empty rather than crashing the field.
+    val displayText = runCatching {
+        calendarModel.formatInCalendar(
+            calendarSystem = state.displayedCalendarSystem,
+            nepaliDate = state.selectedDate,
+            englishDate = state.selectedEnglishDate,
+            locale = fieldLocale
+        )
+    }.getOrNull() ?: ""
 
     Box(modifier = modifier) {
         OutlinedTextField(
@@ -168,6 +183,8 @@ fun NepaliDatePickerDocked(
                         title = null,
                         showModeToggle = false,
                         showTodayButton = showTodayButton,
+                        showCalendarSystemToggle = showCalendarSystemToggle,
+                        showAdjacentMonthDays = showAdjacentMonthDays,
                         colors = colors
                     )
                 }

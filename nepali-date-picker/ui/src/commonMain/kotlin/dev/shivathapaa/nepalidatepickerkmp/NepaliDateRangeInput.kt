@@ -24,6 +24,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import dev.shivathapaa.nepalidatepickerkmp.calendar_model.CalendarViewAdapter
 import dev.shivathapaa.nepalidatepickerkmp.calendar_model.NepaliCalendarModel
 import dev.shivathapaa.nepalidatepickerkmp.calendar_model.NepaliDatePickerColors
 import dev.shivathapaa.nepalidatepickerkmp.data.CustomCalendar
@@ -35,11 +36,13 @@ internal fun NepaliDateRangeInputContent(
     selectedEndDate: CustomCalendar?,
     onDatesSelectionChange: (startNepaliCalendar: CustomCalendar?, endNepaliCalendar: CustomCalendar?) -> Unit,
     calendarModel: NepaliCalendarModel,
-    yearRange: IntRange,
+    adapter: CalendarViewAdapter,
     language: NepaliDatePickerLang,
     nepaliSelectableDates: NepaliSelectableDates,
     colors: NepaliDatePickerColors
 ) {
+    // The fields type dates in whichever calendar the grid was last showing.
+    val yearRange = adapter.yearRange
     val errorDateOutOfYearRange =
         calendarModel.localizeNumber(
             stringToLocalize = "${language.errorDateOutOfYearRange} ${yearRange.first} - ${yearRange.last}",
@@ -47,10 +50,11 @@ internal fun NepaliDateRangeInputContent(
         )
 
     val dateInputValidator =
-        remember {
+        remember(adapter, nepaliSelectableDates, language) {
             NepaliDateInputValidator(
                 yearRange = yearRange,
                 nepaliSelectableDates = nepaliSelectableDates,
+                toCanonical = adapter::toCanonical,
                 errorInvalidMonthOrDay = language.errorInvalidMonthOrDay,
                 errorDateInvalidInput = language.errorInvalidDay,
                 errorDateOutOfYearRange = errorDateOutOfYearRange,
@@ -70,7 +74,7 @@ internal fun NepaliDateRangeInputContent(
         val startRangeText = language.startDate
         NepaliDateInputTextField(
             modifier = Modifier.weight(0.5f),
-            calendarModel = calendarModel,
+            adapter = adapter,
             label = { Text(startRangeText) },
             placeholder = { Text(PatternFormat) },
             initialSelectedDate = selectedStartDate,
@@ -79,14 +83,13 @@ internal fun NepaliDateRangeInputContent(
             },
             nepaliDateInputIdentifier = NepaliDateInputIdentifier.StartDateInput,
             nepaliDateInputValidator = dateInputValidator,
-            language = language,
             colors = colors
         )
 
         val endRangeText = language.endDate
         NepaliDateInputTextField(
             modifier = Modifier.weight(0.5f),
-            calendarModel = calendarModel,
+            adapter = adapter,
             label = { Text(endRangeText) },
             placeholder = { Text(PatternFormat) },
             initialSelectedDate = selectedEndDate,
@@ -95,7 +98,6 @@ internal fun NepaliDateRangeInputContent(
             },
             nepaliDateInputIdentifier = NepaliDateInputIdentifier.EndDateInput,
             nepaliDateInputValidator = dateInputValidator,
-            language = language,
             colors = colors
         )
     }

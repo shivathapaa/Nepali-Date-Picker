@@ -46,6 +46,7 @@ import androidx.compose.ui.unit.dp
 import dev.shivathapaa.nepalidatepickerkmp.DisplayMode
 import dev.shivathapaa.nepalidatepickerkmp.NepaliSelectableDates
 import dev.shivathapaa.nepalidatepickerkmp.annotations.ExperimentalNepaliDatePickerApi
+import dev.shivathapaa.nepalidatepickerkmp.data.CalendarSystem
 import dev.shivathapaa.nepalidatepickerkmp.data.CustomCalendar
 import dev.shivathapaa.nepalidatepickerkmp.data.NameFormat
 import dev.shivathapaa.nepalidatepickerkmp.data.NepaliDateFormatStyle
@@ -189,28 +190,46 @@ object NepaliDatePickerDefaults {
 
     @Composable
     internal fun NepaliDatePickerTitle(
-        modifier: Modifier = Modifier, language: NepaliDatePickerLang, displayMode: DisplayMode
+        modifier: Modifier = Modifier,
+        language: NepaliDatePickerLang,
+        displayMode: DisplayMode,
+        calendarSystem: CalendarSystem = CalendarSystem.BIKRAM_SAMBAT
     ) {
-        when (displayMode) {
-            DisplayMode.Picker ->
-                Text(text = language.datePickerTitle, modifier = modifier)
-
+        val bikramSambat = calendarSystem == CalendarSystem.BIKRAM_SAMBAT
+        val title = when (displayMode) {
             DisplayMode.Input ->
-                Text(text = language.dateInputTitle, modifier = modifier)
+                if (bikramSambat) language.dateInputTitle else language.englishDateInputTitle
+
+            else ->
+                if (bikramSambat) language.datePickerTitle else language.englishDatePickerTitle
         }
+        Text(text = title, modifier = modifier, maxLines = 1)
     }
 
     @Composable
     internal fun NepaliDateRangePickerTitle(
-        modifier: Modifier = Modifier, language: NepaliDatePickerLang, displayMode: DisplayMode
+        modifier: Modifier = Modifier,
+        language: NepaliDatePickerLang,
+        displayMode: DisplayMode,
+        calendarSystem: CalendarSystem = CalendarSystem.BIKRAM_SAMBAT
     ) {
-        when (displayMode) {
-            DisplayMode.Picker ->
-                Text(text = language.dateRangePickerTitle, modifier = modifier)
-
+        val bikramSambat = calendarSystem == CalendarSystem.BIKRAM_SAMBAT
+        val title = when (displayMode) {
             DisplayMode.Input ->
-                Text(text = language.dateRangeInputTitle, modifier = modifier)
+                if (bikramSambat) {
+                    language.dateRangeInputTitle
+                } else {
+                    language.englishDateRangeInputTitle
+                }
+
+            else ->
+                if (bikramSambat) {
+                    language.dateRangePickerTitle
+                } else {
+                    language.englishDateRangePickerTitle
+                }
         }
+        Text(text = title, modifier = modifier, maxLines = 1)
     }
 
     @Composable
@@ -218,19 +237,18 @@ object NepaliDatePickerDefaults {
         selectedDate: CustomCalendar?,
         locale: NepaliDateLocale,
         displayMode: DisplayMode,
-        modifier: Modifier = Modifier
+        modifier: Modifier = Modifier,
+        selectedEnglishDate: CustomCalendar? = null,
+        calendarSystem: CalendarSystem = CalendarSystem.BIKRAM_SAMBAT
     ) {
         val calendarModel = NepaliCalendarModel(locale)
 
-        val formattedDate = selectedDate?.let { date ->
-            calendarModel.formatNepaliDate(
-                year = date.year,
-                month = date.month,
-                dayOfMonth = date.dayOfMonth,
-                dayOfWeek = date.dayOfWeek,
-                locale = locale
-            )
-        } ?: if (displayMode == DisplayMode.Input) {
+        val formattedDate = calendarModel.formatInCalendar(
+            calendarSystem = calendarSystem,
+            nepaliDate = selectedDate,
+            englishDate = selectedEnglishDate,
+            locale = locale
+        ) ?: if (displayMode == DisplayMode.Input) {
             locale.language.writeDateText
         } else {
             locale.language.selectDateText
@@ -250,34 +268,30 @@ object NepaliDatePickerDefaults {
         locale: NepaliDateLocale,
         englishLocale: NepaliDateLocale,
         displayMode: DisplayMode,
-        modifier: Modifier = Modifier
+        modifier: Modifier = Modifier,
+        calendarSystem: CalendarSystem = CalendarSystem.BIKRAM_SAMBAT
     ) {
         val calendarModel = NepaliCalendarModel(locale)
 
-        val formattedDate = selectedDate?.let { date ->
-            calendarModel.formatNepaliDate(
-                year = date.year,
-                month = date.month,
-                dayOfMonth = date.dayOfMonth,
-                dayOfWeek = date.dayOfWeek,
-                locale = locale
-            )
-        } ?: if (displayMode == DisplayMode.Input) {
+        // The displayed calendar leads and takes the picker's own locale; the other one follows in
+        // the smaller line with the secondary locale.
+        val formattedDate = calendarModel.formatInCalendar(
+            calendarSystem = calendarSystem,
+            nepaliDate = selectedDate,
+            englishDate = selectedEnglishDate,
+            locale = locale
+        ) ?: if (displayMode == DisplayMode.Input) {
             locale.language.writeDateText
         } else {
             locale.language.selectDateText
         }
 
-
-        val formattedEnglishDate = selectedEnglishDate?.let { date ->
-            calendarModel.formatEnglishDate(
-                year = date.year,
-                month = date.month,
-                dayOfMonth = date.dayOfMonth,
-                dayOfWeek = date.dayOfWeek,
-                locale = englishLocale
-            )
-        }
+        val formattedSecondaryDate = calendarModel.formatInCalendar(
+            calendarSystem = calendarSystem.opposite(),
+            nepaliDate = selectedDate,
+            englishDate = selectedEnglishDate,
+            locale = englishLocale
+        )
 
         Column(
             modifier = modifier.heightIn(min = 72.dp, max = 92.dp),
@@ -289,9 +303,9 @@ object NepaliDatePickerDefaults {
                 maxLines = 1
             )
 
-            AnimatedVisibility(!formattedEnglishDate.isNullOrEmpty()) {
+            AnimatedVisibility(!formattedSecondaryDate.isNullOrEmpty()) {
                 Text(
-                    text = formattedEnglishDate ?: "", /* // */
+                    text = formattedSecondaryDate ?: "", /* // */
                     modifier = Modifier,
                     maxLines = 1,
                     style = MaterialTheme.typography.bodySmall
@@ -305,29 +319,26 @@ object NepaliDatePickerDefaults {
         selectedStartDate: CustomCalendar?,
         selectedEndDate: CustomCalendar?,
         modifier: Modifier = Modifier,
-        locale: NepaliDateLocale
+        locale: NepaliDateLocale,
+        selectedStartEnglishDate: CustomCalendar? = null,
+        selectedEndEnglishDate: CustomCalendar? = null,
+        calendarSystem: CalendarSystem = CalendarSystem.BIKRAM_SAMBAT
     ) {
         val calendarModel = NepaliCalendarModel(locale)
 
-        val formattedStartDate = selectedStartDate?.let { date ->
-            calendarModel.formatNepaliDate(
-                year = date.year,
-                month = date.month,
-                dayOfMonth = date.dayOfMonth,
-                dayOfWeek = date.dayOfWeek,
-                locale = locale
-            )
-        }
+        val formattedStartDate = calendarModel.formatInCalendar(
+            calendarSystem = calendarSystem,
+            nepaliDate = selectedStartDate,
+            englishDate = selectedStartEnglishDate,
+            locale = locale
+        )
 
-        val formattedEndDate = selectedEndDate?.let { date ->
-            calendarModel.formatNepaliDate(
-                year = date.year,
-                month = date.month,
-                dayOfMonth = date.dayOfMonth,
-                dayOfWeek = date.dayOfWeek,
-                locale = locale
-            )
-        }
+        val formattedEndDate = calendarModel.formatInCalendar(
+            calendarSystem = calendarSystem,
+            nepaliDate = selectedEndDate,
+            englishDate = selectedEndEnglishDate,
+            locale = locale
+        )
 
         Row(
             modifier = modifier,
@@ -371,49 +382,43 @@ object NepaliDatePickerDefaults {
         locale: NepaliDateLocale,
         englishLocale: NepaliDateLocale,
         modifier: Modifier = Modifier,
-        isEnglishDateAligned: Boolean = false
+        isEnglishDateAligned: Boolean = false,
+        calendarSystem: CalendarSystem = CalendarSystem.BIKRAM_SAMBAT
     ) {
         val calendarModel = NepaliCalendarModel(locale)
 
-        val formattedNepaliStartDate = selectedNepaliStartDate?.let { date ->
-            calendarModel.formatNepaliDate(
-                year = date.year,
-                month = date.month,
-                dayOfMonth = date.dayOfMonth,
-                dayOfWeek = date.dayOfWeek,
-                locale = locale
-            )
-        }
+        // Whichever calendar is displayed leads with the picker's own locale; the other follows in
+        // the smaller line with the secondary locale. The local names keep reading "Nepali" and
+        // "English" because that is what they mean when nothing has been switched.
+        val secondarySystem = calendarSystem.opposite()
 
-        val formattedNepaliEndDate = selectedNepaliEndDate?.let { date ->
-            calendarModel.formatNepaliDate(
-                year = date.year,
-                month = date.month,
-                dayOfMonth = date.dayOfMonth,
-                dayOfWeek = date.dayOfWeek,
-                locale = locale
-            )
-        }
+        val formattedNepaliStartDate = calendarModel.formatInCalendar(
+            calendarSystem = calendarSystem,
+            nepaliDate = selectedNepaliStartDate,
+            englishDate = selectedEnglishStartDate,
+            locale = locale
+        )
 
-        val formattedEnglishStartDate = selectedEnglishStartDate?.let { date ->
-            calendarModel.formatEnglishDate(
-                year = date.year,
-                month = date.month,
-                dayOfMonth = date.dayOfMonth,
-                dayOfWeek = date.dayOfWeek,
-                locale = englishLocale
-            )
-        }
+        val formattedNepaliEndDate = calendarModel.formatInCalendar(
+            calendarSystem = calendarSystem,
+            nepaliDate = selectedNepaliEndDate,
+            englishDate = selectedEnglishEndDate,
+            locale = locale
+        )
 
-        val formattedEnglishEndDate = selectedEnglishEndDate?.let { date ->
-            calendarModel.formatEnglishDate(
-                year = date.year,
-                month = date.month,
-                dayOfMonth = date.dayOfMonth,
-                dayOfWeek = date.dayOfWeek,
-                locale = englishLocale
-            )
-        }
+        val formattedEnglishStartDate = calendarModel.formatInCalendar(
+            calendarSystem = secondarySystem,
+            nepaliDate = selectedNepaliStartDate,
+            englishDate = selectedEnglishStartDate,
+            locale = englishLocale
+        )
+
+        val formattedEnglishEndDate = calendarModel.formatInCalendar(
+            calendarSystem = secondarySystem,
+            nepaliDate = selectedNepaliEndDate,
+            englishDate = selectedEnglishEndDate,
+            locale = englishLocale
+        )
 
         if (isEnglishDateAligned) {
             Row(
@@ -867,6 +872,40 @@ private fun NepaliEnglishDateRow(
         } else {
             Text(text = language.endDate, style = style)
         }
+    }
+}
+
+/**
+ * Formats whichever of the two dates [calendarSystem] names, or `null` when that one is absent.
+ *
+ * The headlines hold both halves of the same day and only differ in which one leads, so this keeps
+ * the "pick a calendar, format its date" step in one place. The docked field is a headline too, in
+ * that it reads back the selection, so it formats through here as well.
+ */
+internal fun NepaliCalendarModel.formatInCalendar(
+    calendarSystem: CalendarSystem,
+    nepaliDate: CustomCalendar?,
+    englishDate: CustomCalendar?,
+    locale: NepaliDateLocale
+): String? = when (calendarSystem) {
+    CalendarSystem.BIKRAM_SAMBAT -> nepaliDate?.let {
+        formatNepaliDate(
+            year = it.year,
+            month = it.month,
+            dayOfMonth = it.dayOfMonth,
+            dayOfWeek = it.dayOfWeek,
+            locale = locale
+        )
+    }
+
+    CalendarSystem.GREGORIAN -> englishDate?.let {
+        formatEnglishDate(
+            year = it.year,
+            month = it.month,
+            dayOfMonth = it.dayOfMonth,
+            dayOfWeek = it.dayOfWeek,
+            locale = locale
+        )
     }
 }
 

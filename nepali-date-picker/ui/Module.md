@@ -8,12 +8,19 @@ XCFramework.
 The newer variants (wheel, docked, range, full-screen dialog, text fields) require
 `@OptIn(ExperimentalNepaliDatePickerApi::class)`.
 
+Every picker can display either calendar. `NepaliDatePickerState.displayedCalendarSystem` decides
+which one is on screen, `showCalendarSystemToggle` draws a `B.S.` / `A.D.` switch for the user, and
+`showAdjacentMonthDays` fills the grid's empty cells with the neighbouring months' days. Only the
+display changes: a selected date is always reported in Bikram Sambat, so switching keeps the same day
+selected.
+
 # Package dev.shivathapaa.nepalidatepickerkmp
 
 The picker composables and their state holders: `NepaliDatePicker`, `NepaliDatePickerDialog`,
 `NepaliDatePickerDocked`, `NepaliDatePickerFullScreenDialog`, `NepaliWheelDatePicker`,
-`NepaliDateRangePicker`, the `*WithEnglishDate` variants, and the `NepaliDateField` /
-`NepaliDateInput` / `NepaliDateRangeField` text-entry surfaces.
+`NepaliDateRangePicker`, the `*WithEnglishDate` variants, the `NepaliDateField` /
+`NepaliDateInput` / `NepaliDateRangeField` text-entry surfaces, and `NepaliCalendarSystemToggle` for
+driving the displayed calendar from your own chrome.
 
 # Package dev.shivathapaa.nepalidatepickerkmp.calendar_model
 

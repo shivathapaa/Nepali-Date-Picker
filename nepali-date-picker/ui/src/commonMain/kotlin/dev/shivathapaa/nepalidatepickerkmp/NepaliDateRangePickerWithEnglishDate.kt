@@ -16,57 +16,26 @@
 
 package dev.shivathapaa.nepalidatepickerkmp
 
-import androidx.compose.animation.expandVertically
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.shrinkVertically
-import androidx.compose.foundation.gestures.snapping.rememberSnapFlingBehavior
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.requiredHeight
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyListState
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ProvideTextStyle
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.derivedStateOf
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import dev.shivathapaa.nepalidatepickerkmp.annotations.ExperimentalNepaliDatePickerApi
-import dev.shivathapaa.nepalidatepickerkmp.calendar_model.NepaliCalendarModel
 import dev.shivathapaa.nepalidatepickerkmp.calendar_model.NepaliDatePickerColors
 import dev.shivathapaa.nepalidatepickerkmp.calendar_model.NepaliDatePickerDefaults
-import dev.shivathapaa.nepalidatepickerkmp.data.CustomCalendar
-import dev.shivathapaa.nepalidatepickerkmp.data.NameFormat
 import dev.shivathapaa.nepalidatepickerkmp.data.NepaliDateLocale
-import dev.shivathapaa.nepalidatepickerkmp.data.NepaliDatePickerLang
-import dev.shivathapaa.nepalidatepickerkmp.data.NepaliMonthCalendar
-import dev.shivathapaa.nepalidatepickerkmp.data.SimpleDate
-import dev.shivathapaa.nepalidatepickerkmp.data.toSimpleDate
-import kotlinx.coroutines.launch
 
 /**
- * NNepaliDateRangePickerWithEnglishDate let people select a range of Nepali dates and can be embedded into dialogs.
- * See [NepaliDatePickerDialog]
+ * NepaliDateRangePickerWithEnglishDate let people select a range of Nepali dates and can be embedded
+ * into dialogs. See [NepaliDatePickerDialog]
  *
  * Nepali date picker lets you pick Nepali dates via a calendar UI which displays both Nepali and
  * English dates.
+ *
+ * This is [NepaliDateRangePicker] with its secondary date always on. Reach for
+ * [NepaliDateRangePicker] with `secondaryDateLocale` directly when you also want the `B.S.` / `A.D.`
+ * switch, or want the pairing to be conditional.
  *
  * @param state state of the Nepali date range picker. See [rememberNepaliDateRangePickerState].
  * @param modifier the [Modifier] to be applied to this Nepali date range picker.
@@ -83,6 +52,12 @@ import kotlinx.coroutines.launch
  * scrolling behavior to avoid these errors.
  * @param showYearPickerAndMonthNavigation the control to either show or hide `YearPicker` button and
  * `MonthNavigation` buttons. [showTodayButton] is affected by this.
+ * @param showCalendarSystemToggle the boolean to show the `B.S.` / `A.D.` switch, which drives
+ * [NepaliDateRangePickerState.displayedCalendarSystem]. It sits at the end of the title, so it is
+ * independent of [showYearPickerAndMonthNavigation].
+ * @param showAdjacentMonthDays the boolean to fill each month's empty cells with the neighbouring
+ * months' days, drawn faded. Tapping one selects that day as the range's start or end and moves the
+ * grid to its month.
  * @param colors [NepaliDatePickerColors] that will be used to resolve the colors used for this date
  * picker in different states. See [NepaliDatePickerDefaults.colors].
  *
@@ -107,7 +82,8 @@ fun NepaliDateRangePickerWithEnglishDate(
         NepaliDatePickerDefaults.NepaliDateRangePickerTitle(
             modifier = Modifier.padding(NepaliDateRangePickerTitlePadding),
             language = state.locale.language,
-            displayMode = state.displayMode
+            displayMode = state.displayMode,
+            calendarSystem = state.displayedCalendarSystem
         )
     },
     headline: (@Composable () -> Unit)? = {
@@ -118,488 +94,33 @@ fun NepaliDateRangePickerWithEnglishDate(
             selectedEnglishStartDate = state.selectedStartEnglishDate,
             selectedEnglishEndDate = state.selectedEndEnglishDate,
             englishLocale = englishDateLocale,
-            locale = state.locale
+            locale = state.locale,
+            calendarSystem = state.displayedCalendarSystem
         )
     },
     showModeToggle: Boolean = true,
     showTodayButton: Boolean = true,
     showMonthsVertically: Boolean = true,
     showYearPickerAndMonthNavigation: Boolean = true,
+    showCalendarSystemToggle: Boolean = false,
+    showAdjacentMonthDays: Boolean = false,
     colors: NepaliDatePickerColors = NepaliDatePickerDefaults.colors()
 ) {
-    val calendarModel = remember(state.locale) { NepaliCalendarModel(state.locale) }
-    val today = remember(calendarModel) { calendarModel.todayNepaliSimpleDate }
-
-    NepaliDateEntryContainer(
+    NepaliDateRangePicker(
+        state = state,
         modifier = modifier,
         title = title,
         headline = headline,
-        modeToggleButton =
-            if (showModeToggle) {
-                {
-                    NepaliDisplayModeToggleButton(
-                        modifier = Modifier.padding(NepaliDatePickerModeTogglePadding),
-                        displayMode = state.displayMode,
-                        onDisplayModeChange = { displayMode -> state.displayMode = displayMode },
-                        language = state.locale.language
-                    )
-                }
-            } else {
-                null
-            },
-        colors = colors,
-        headlineTextStyle = MaterialTheme.typography.titleLarge.copy(fontSize = 21.sp),
-        headerMinHeight = NepaliRangeSelectionHeaderContainerHeight - NepaliRangePickerHeaderHeightOffset,
-    ) {
-        SwitchableNepaliDateRangeEntryContent(
-            selectedNepaliStartDate = state.selectedStartNepaliDate,
-            selectedNepaliEndDate = state.selectedEndNepaliDate,
-            onDatesSelectionChange = { startNepaliCalendar, endNepaliCalendar ->
-                try {
-                    state.setSelection(
-                        startNepaliDate = startNepaliCalendar,
-                        endNepaliDate = endNepaliCalendar
-                    )
-                } catch (iae: IllegalArgumentException) {
-                    // By default, ignore exceptions that setSelection throws.
-                }
-            },
-            calendarModel = calendarModel,
-            colors = colors,
-            nepaliSelectableDates = state.nepaliSelectableDates,
-            yearRange = state.yearRange,
-            language = state.locale.language,
-            nepaliDisplayMode = state.displayMode
-        ) {
-            NepaliEnglishDateRangePicker(
-                selectedNepaliStartDate = state.selectedStartNepaliDate,
-                selectedNepaliEndDate = state.selectedEndNepaliDate,
-                displayedMonth = state.displayedMonth,
-                onDatesSelectionChange = { startNepaliCalendar, endNepaliCalendar ->
-                    try {
-                        state.setSelection(
-                            startNepaliDate = startNepaliCalendar,
-                            endNepaliDate = endNepaliCalendar
-                        )
-                    } catch (iae: IllegalArgumentException) {
-                        // By default, ignore exceptions that setSelection throws.
-                    }
-                },
-                calendarModel = calendarModel,
-                colors = colors,
-                showTodayButton = showTodayButton,
-                nepaliSelectableDates = state.nepaliSelectableDates,
-                yearRange = state.yearRange,
-                onDisplayedMonthChange = {
-                    state.displayedMonth = it
-                },
-                today = today,
-                englishDateLocale = englishDateLocale,
-                showMonthsVertically = showMonthsVertically,
-                showYearPickerAndMonthNavigation = showYearPickerAndMonthNavigation
-            )
-        }
-    }
-}
-
-@Composable
-private fun NepaliEnglishDateRangePicker(
-    selectedNepaliStartDate: CustomCalendar?,
-    selectedNepaliEndDate: CustomCalendar?,
-    displayedMonth: NepaliMonthCalendar,
-    onDatesSelectionChange: (startNepaliCalendar: CustomCalendar?, endNepaliCalendar: CustomCalendar?) -> Unit,
-    onDisplayedMonthChange: (NepaliMonthCalendar) -> Unit,
-    calendarModel: NepaliCalendarModel,
-    yearRange: IntRange,
-    nepaliSelectableDates: NepaliSelectableDates,
-    showTodayButton: Boolean,
-    colors: NepaliDatePickerColors,
-    today: SimpleDate,
-    englishDateLocale: NepaliDateLocale,
-    showMonthsVertically: Boolean,
-    showYearPickerAndMonthNavigation: Boolean
-) {
-    val displayedMonthIndex by remember(displayedMonth) {
-        derivedStateOf { displayedMonth.indexIn(yearRange) }
-    }
-    val initialIndex = today.indexIn(yearRange)
-
-    val isToday by remember(displayedMonthIndex) {
-        derivedStateOf { displayedMonthIndex == initialIndex }
-    }
-
-    val englishDateLanguage = englishDateLocale.language
-
-    val monthsListState = rememberLazyListState(initialFirstVisibleItemIndex = displayedMonthIndex)
-
-    val coroutineScope = rememberCoroutineScope()
-    var yearPickerVisible by rememberSaveable { mutableStateOf(false) }
-
-    val chosenLanguage = calendarModel.locale.language
-    val weekDayFormat = calendarModel.locale.weekDayName
-    val fullMonthName = chosenLanguage.months[displayedMonth.month - 1].full
-    val fullYear = calendarModel.localizeNumber(
-        stringToLocalize = displayedMonth.year.toString(), locale = chosenLanguage
+        showModeToggle = showModeToggle,
+        showTodayButton = showTodayButton,
+        showMonthsVertically = showMonthsVertically,
+        showYearPickerAndMonthNavigation = showYearPickerAndMonthNavigation,
+        secondaryDateLocale = englishDateLocale,
+        showCalendarSystemToggle = showCalendarSystemToggle,
+        showAdjacentMonthDays = showAdjacentMonthDays,
+        colors = colors
     )
-    val formattedMonthYear = "$fullMonthName $fullYear"
-
-    val englishCalendar by remember(displayedMonth) {
-        derivedStateOf {
-            calendarModel.convertToEnglishDate(
-                displayedMonth.year,
-                displayedMonth.month,
-                2
-            )
-        }
-    }
-
-    val currentEnglishMonth = englishCalendar.month
-    val currentEnglishMonthName =
-        calendarModel.getEnglishMonthName(
-            currentEnglishMonth,
-            englishDateLanguage,
-            NameFormat.SHORT
-        )
-    val fullEnglishYear = calendarModel.localizeNumber(
-        stringToLocalize = englishCalendar.year.toString(), locale = englishDateLanguage
-    )
-
-    val nextMonth = currentEnglishMonth + 1
-    // Adjust to ensure the month is within the 1-12 range
-    val adjustedNextMonth = if (nextMonth > 12) nextMonth - 12 else nextMonth
-    val nextMonthName =
-        calendarModel.getEnglishMonthName(adjustedNextMonth, englishDateLanguage, NameFormat.SHORT)
-
-    val formattedEnglishMonthYear = "$currentEnglishMonthName/$nextMonthName $fullEnglishYear"
-
-    Column {
-        if (showYearPickerAndMonthNavigation) {
-            NepaliMonthsNavigation(
-                modifier = Modifier.padding(horizontal = DatePickerHorizontalPadding),
-                isToday = isToday,
-                todayText = chosenLanguage.today,
-                nextAvailable = monthsListState.canScrollForward,
-                previousAvailable = monthsListState.canScrollBackward,
-                yearPickerVisible = yearPickerVisible,
-                yearPickerText = formattedMonthYear,
-                yearPickerSubtitle = formattedEnglishMonthYear,
-                previousMonthContentDescription = chosenLanguage.previousMonthContentDescription,
-                nextMonthContentDescription = chosenLanguage.nextMonthContentDescription,
-                showTodayButton = showTodayButton,
-                onNextClicked = {
-                    coroutineScope.launch {
-                        try {
-                            monthsListState.animateScrollToItem(
-                                monthsListState.firstVisibleItemIndex + 1
-                            )
-                        } catch (_: IllegalArgumentException) {
-                            // Ignore. This may happen if the user clicked the "next" arrow fast while
-                            // the list was still animating to the next item.
-                        }
-                    }
-                },
-                onPreviousClicked = {
-                    coroutineScope.launch {
-                        try {
-                            monthsListState.animateScrollToItem(
-                                monthsListState.firstVisibleItemIndex - 1
-                            )
-                        } catch (_: IllegalArgumentException) {
-                            // Ignore. This may happen if the user clicked the "previous" arrow fast
-                            // while  the list was still animating to the previous item.
-                        }
-                    }
-                },
-                onTodayClicked = {
-                    coroutineScope.launch { monthsListState.scrollToItem(initialIndex) }
-                },
-                onYearPickerButtonClicked = { yearPickerVisible = !yearPickerVisible },
-                colors = colors
-            )
-        }
-
-        Box {
-            Column(modifier = Modifier.padding(horizontal = DatePickerHorizontalPadding)) {
-                NepaliWeekDays(
-                    colors = colors, language = chosenLanguage, weekDayFormat = weekDayFormat
-                )
-
-                HorizontalVerticalMonthsList(
-                    lazyListState = monthsListState,
-                    selectedNepaliStartDate = selectedNepaliStartDate,
-                    selectedNepaliEndDate = selectedNepaliEndDate,
-                    onDatesSelectionChange = onDatesSelectionChange,
-                    onDisplayedMonthChange = onDisplayedMonthChange,
-                    calendarModel = calendarModel,
-                    chosenLanguage = chosenLanguage,
-                    yearRange = yearRange,
-                    englishDateLanguage = englishDateLanguage,
-                    colors = colors,
-                    today = today,
-                    nepaliSelectableDates = nepaliSelectableDates,
-                    showMonthsVertically = showMonthsVertically
-                )
-            }
-
-            androidx.compose.animation.AnimatedVisibility(
-                visible = yearPickerVisible,
-                modifier = Modifier.clipToBounds(),
-                enter = expandVertically() + fadeIn(initialAlpha = 0.6f),
-                exit = shrinkVertically() + fadeOut()
-            ) {
-                val nepaliYearPickerModifier: Modifier = if (showMonthsVertically) {
-                    Modifier.padding(horizontal = DatePickerHorizontalPadding)
-                } else {
-                    // Keep the height the same as the monthly calendar + weekdays height, and
-                    // take into account the thickness of the divider that will be composed
-                    // below it.
-                    Modifier.requiredHeight(
-                        RecommendedSizeForAccessibility * (NepaliMaxCalendarRows + 1) - 1.dp
-                    ).padding(horizontal = DatePickerHorizontalPadding)
-                }
-
-                Column {
-                    NepaliYearPicker(
-                        modifier = nepaliYearPickerModifier,
-                        currentYear = today.year,
-                        displayedYear = displayedMonth.year,
-                        onYearSelected = { year ->
-                            // Switch back to the monthly calendar and scroll to the selected year.
-                            yearPickerVisible = !yearPickerVisible
-                            coroutineScope.launch {
-                                // Scroll to the selected year (maintaining the month of year).
-                                // A LaunchEffect at the MonthsList will take care of rest and will
-                                // update the state's displayedMonth to the month we scrolled to.
-                                monthsListState.scrollToItem(
-                                    (year - yearRange.first) * 12 + displayedMonth.month - 1
-                                )
-                            }
-                        },
-                        nepaliSelectableDates = nepaliSelectableDates,
-                        calendarModel = calendarModel,
-                        yearRange = yearRange,
-                        colors = colors
-                    )
-                    HorizontalDivider(color = colors.dividerColor)
-                }
-            }
-        }
-    }
-}
-
-@Composable
-private fun HorizontalVerticalMonthsList(
-    today: SimpleDate,
-    lazyListState: LazyListState,
-    selectedNepaliStartDate: CustomCalendar?,
-    selectedNepaliEndDate: CustomCalendar?,
-    chosenLanguage: NepaliDatePickerLang,
-    onDatesSelectionChange: (startNepaliCalendar: CustomCalendar?, endNepaliCalendar: CustomCalendar?) -> Unit,
-    onDisplayedMonthChange: (NepaliMonthCalendar) -> Unit,
-    calendarModel: NepaliCalendarModel,
-    englishDateLanguage: NepaliDatePickerLang,
-    yearRange: IntRange,
-    nepaliSelectableDates: NepaliSelectableDates,
-    showMonthsVertically: Boolean,
-    colors: NepaliDatePickerColors
-) {
-    val firstMonth by remember(yearRange) {
-        derivedStateOf {
-            calendarModel.getNepaliMonth(
-                nepaliYear = yearRange.first, nepaliMonth = 1
-            )
-        }
-    }
-
-    ProvideTextStyle(MaterialTheme.typography.bodyLarge) {
-        // The updateDateSelection will invoke the onDatesSelectionChange with the proper
-        // selection according to the current state.
-        val onDateSelectionChange = { nepaliCalendar: CustomCalendar ->
-            updateNepaliDateSelection(
-                nepaliCalendar = nepaliCalendar,
-                currentNepaliStartDate = selectedNepaliStartDate,
-                currentNepaliEndDate = selectedNepaliEndDate,
-                onDatesSelectionChange = onDatesSelectionChange,
-                compareDates = calendarModel::compareDates
-            )
-        }
-
-        if (showMonthsVertically) {
-            VerticalNepaliEnglishMonthView(
-                lazyListState = lazyListState,
-                today = today,
-                yearRange = yearRange,
-                calendarModel = calendarModel,
-                chosenLanguage = chosenLanguage,
-                firstMonth = firstMonth,
-                englishDateLanguage = englishDateLanguage,
-                selectedNepaliStartDate = selectedNepaliStartDate,
-                selectedNepaliEndDate = selectedNepaliEndDate,
-                onDateSelectionChange = onDateSelectionChange,
-                nepaliSelectableDates = nepaliSelectableDates,
-                colors = colors
-            )
-        } else {
-            HorizontalNepaliEnglishMonthView(
-                lazyListState = lazyListState,
-                today = today,
-                yearRange = yearRange,
-                calendarModel = calendarModel,
-                englishDateLanguage = englishDateLanguage,
-                firstMonth = firstMonth,
-                selectedNepaliStartDate = selectedNepaliStartDate,
-                selectedNepaliEndDate = selectedNepaliEndDate,
-                onDateSelectionChange = onDateSelectionChange,
-                nepaliSelectableDates = nepaliSelectableDates,
-                colors = colors
-            )
-        }
-
-    }
-
-    LaunchedEffect(lazyListState) {
-        updateDisplayedMonth(
-            lazyListState = lazyListState,
-            onDisplayedMonthChange = onDisplayedMonthChange,
-            calendarModel = calendarModel,
-            yearRange = yearRange
-        )
-    }
-}
-
-
-@Composable
-private fun HorizontalNepaliEnglishMonthView(
-    lazyListState: LazyListState,
-    today: SimpleDate,
-    yearRange: IntRange,
-    calendarModel: NepaliCalendarModel,
-    englishDateLanguage: NepaliDatePickerLang,
-    firstMonth: NepaliMonthCalendar,
-    selectedNepaliStartDate: CustomCalendar?,
-    selectedNepaliEndDate: CustomCalendar?,
-    onDateSelectionChange: (CustomCalendar) -> Unit,
-    nepaliSelectableDates: NepaliSelectableDates,
-    colors: NepaliDatePickerColors
-) {
-    val snapFlingBehavior = rememberSnapFlingBehavior(lazyListState = lazyListState)
-
-    LazyRow(
-        modifier = Modifier, state = lazyListState, flingBehavior = snapFlingBehavior
-    ) {
-        items(numberOfMonthsInRange(yearRange)) { index ->
-            val monthCalendar = remember(index, calendarModel, firstMonth) {
-                calendarModel.plusNepaliMonths(
-                    fromNepaliCalendar = firstMonth, addedMonthsCount = index
-                )
-            }
-
-            Column(modifier = Modifier.fillParentMaxWidth()) {
-                val nepaliRangeSelectionInfo: NepaliSelectedRangeInfo? =
-                    if (selectedNepaliStartDate != null && selectedNepaliEndDate != null) {
-                        remember(selectedNepaliStartDate, selectedNepaliEndDate) {
-                            NepaliSelectedRangeInfo.calculateRangeInfo(
-                                nepaliMonthCalendar = monthCalendar,
-                                startNepaliCalendar = selectedNepaliStartDate,
-                                endNepaliCalendar = selectedNepaliEndDate,
-                                compareDates = calendarModel::compareDates
-                            )
-                        }
-                    } else {
-                        null
-                    }
-
-                NepaliMonth(
-                    monthCalendar = monthCalendar,
-                    onDateSelectionChange = onDateSelectionChange,
-                    todayDate = today,
-                    startDate = selectedNepaliStartDate,
-                    endDate = selectedNepaliEndDate,
-                    calendarModel = calendarModel,
-                    nepaliSelectedRangeInfo = nepaliRangeSelectionInfo,
-                    nepaliSelectableDates = nepaliSelectableDates,
-                    colors = colors,
-                    dayShape = RoundedCornerShape(4.dp),
-                    englishDateLanguage = englishDateLanguage
-                )
-            }
-        }
-    }
-}
-
-@Composable
-private fun VerticalNepaliEnglishMonthView(
-    lazyListState: LazyListState,
-    today: SimpleDate,
-    yearRange: IntRange,
-    calendarModel: NepaliCalendarModel,
-    firstMonth: NepaliMonthCalendar,
-    chosenLanguage: NepaliDatePickerLang,
-    englishDateLanguage: NepaliDatePickerLang,
-    selectedNepaliStartDate: CustomCalendar?,
-    selectedNepaliEndDate: CustomCalendar?,
-    onDateSelectionChange: (CustomCalendar) -> Unit,
-    nepaliSelectableDates: NepaliSelectableDates,
-    colors: NepaliDatePickerColors
-) {
-    LazyColumn(
-        modifier = Modifier, state = lazyListState
-    ) {
-        items(numberOfMonthsInRange(yearRange)) { index ->
-            val monthCalendar = remember(index, calendarModel, firstMonth) {
-                calendarModel.plusNepaliMonths(
-                    fromNepaliCalendar = firstMonth, addedMonthsCount = index
-                )
-            }
-
-            val monthName =
-                calendarModel.getNepaliMonthName(
-                    monthCalendar.month,
-                    NameFormat.FULL,
-                    chosenLanguage
-                )
-            val year =
-                calendarModel.localizeNumber(monthCalendar.year.toString(), chosenLanguage)
-
-            Column(modifier = Modifier.fillParentMaxWidth()) {
-                ProvideTextStyle(MaterialTheme.typography.titleSmall) {
-                    Text(
-                        text = "$monthName $year",
-                        modifier = Modifier.padding(paddingValues = CalendarMonthSubheadPadding),
-                        color = colors.subheadContentColor
-                    )
-                }
-                val nepaliRangeSelectionInfo: NepaliSelectedRangeInfo? =
-                    if (selectedNepaliStartDate != null && selectedNepaliEndDate != null) {
-                        remember(selectedNepaliStartDate, selectedNepaliEndDate) {
-                            NepaliSelectedRangeInfo.calculateRangeInfo(
-                                nepaliMonthCalendar = monthCalendar,
-                                startNepaliCalendar = selectedNepaliStartDate,
-                                endNepaliCalendar = selectedNepaliEndDate,
-                                compareDates = calendarModel::compareDates
-                            )
-                        }
-                    } else {
-                        null
-                    }
-
-                NepaliMonth(
-                    monthCalendar = monthCalendar,
-                    onDateSelectionChange = onDateSelectionChange,
-                    englishDateLanguage = englishDateLanguage,
-                    todayDate = today,
-                    startDate = selectedNepaliStartDate,
-                    endDate = selectedNepaliEndDate,
-                    calendarModel = calendarModel,
-                    nepaliSelectedRangeInfo = nepaliRangeSelectionInfo,
-                    nepaliSelectableDates = nepaliSelectableDates,
-                    colors = colors,
-                    dayShape = RoundedCornerShape(4.dp)
-                )
-            }
-        }
-    }
 }
 
 private val NepaliEnglishDateRangePickerHeadlinePadding =
-    PaddingValues(start = 24.dp, end = 12.dp, bottom = 4.dp)
+    PaddingValues(start = 24.dp, end = 12.dp, top = 16.dp, bottom = 12.dp)

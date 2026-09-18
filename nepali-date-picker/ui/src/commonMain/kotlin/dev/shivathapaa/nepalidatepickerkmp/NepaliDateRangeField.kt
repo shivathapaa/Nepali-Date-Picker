@@ -48,6 +48,7 @@ import dev.shivathapaa.nepalidatepickerkmp.annotations.ExperimentalNepaliDatePic
 import dev.shivathapaa.nepalidatepickerkmp.calendar_model.NepaliCalendarDefaults
 import dev.shivathapaa.nepalidatepickerkmp.calendar_model.NepaliDateConverter
 import dev.shivathapaa.nepalidatepickerkmp.calendar_model.NepaliDatePickerDefaults
+import dev.shivathapaa.nepalidatepickerkmp.data.CalendarSystem
 import dev.shivathapaa.nepalidatepickerkmp.data.NepaliDateFormatter.Pattern
 import dev.shivathapaa.nepalidatepickerkmp.data.NepaliDateLocale
 import dev.shivathapaa.nepalidatepickerkmp.data.SimpleDate
@@ -74,6 +75,9 @@ import dev.shivathapaa.nepalidatepickerkmp.icons.NepaliIcons
  * Text-field appearance is customizable through [textStyle], [shape], the per-field
  * [startPrefix] / [endPrefix], [startSuffix] / [endSuffix], and the per-field
  * [startInteractionSource] / [endInteractionSource].
+ *
+ * [calendarSystem] picks the calendar both sides are typed in. [startValue], [endValue] and
+ * [onRangeChange] stay Bikram Sambat either way.
  *
  * @see NepaliDateRangeField for a combo that pairs this with the range picker dialog.
  */
@@ -110,6 +114,7 @@ fun NepaliDateRangeTextField(
     endSuffix: @Composable (() -> Unit)? = null,
     startInteractionSource: MutableInteractionSource? = null,
     endInteractionSource: MutableInteractionSource? = null,
+    calendarSystem: CalendarSystem = CalendarSystem.BIKRAM_SAMBAT,
 ) {
     val onRangeChangeUpdated by rememberUpdatedState(onRangeChange)
 
@@ -142,6 +147,7 @@ fun NepaliDateRangeTextField(
                 prefix = startPrefix,
                 suffix = startSuffix,
                 interactionSource = startInteractionSource,
+                calendarSystem = calendarSystem,
             )
             NepaliDateTextField(
                 value = endValue,
@@ -166,6 +172,7 @@ fun NepaliDateRangeTextField(
                 prefix = endPrefix,
                 suffix = endSuffix,
                 interactionSource = endInteractionSource,
+                calendarSystem = calendarSystem,
             )
         }
         if (supportingText != null) supportingText()
@@ -180,6 +187,10 @@ fun NepaliDateRangeTextField(
  * respects the same [yearRange], [selectableDates], and [locale] so the two
  * surfaces stay in sync. Confirming in the dialog fires [onRangeChange] once
  * with the picked range. Dismiss does not change either value.
+ *
+ * [calendarSystem] sets the calendar both the fields and the dialog open in, and
+ * [showCalendarSystemToggle] lets the user change it from inside the dialog.
+ * [showAdjacentMonthDays] fills the dialog grid's empty cells with the neighbouring months' days.
  */
 @ExperimentalNepaliDatePickerApi
 @Composable
@@ -217,6 +228,9 @@ fun NepaliDateRangeField(
     dialogProperties: DialogProperties = DialogProperties(),
     confirmButtonText: String = locale.language.okText,
     dismissButtonText: String = locale.language.cancelText,
+    calendarSystem: CalendarSystem = CalendarSystem.BIKRAM_SAMBAT,
+    showCalendarSystemToggle: Boolean = false,
+    showAdjacentMonthDays: Boolean = false,
 ) {
     var showDialog by rememberSaveable { mutableStateOf(false) }
     val onRangeChangeUpdated by rememberUpdatedState(onRangeChange)
@@ -250,6 +264,7 @@ fun NepaliDateRangeField(
                 endSuffix = endSuffix,
                 startInteractionSource = startInteractionSource,
                 endInteractionSource = endInteractionSource,
+                calendarSystem = calendarSystem,
             )
             IconButton(onClick = { if (enabled && !readOnly) showDialog = true }) {
                 Icon(
@@ -271,6 +286,7 @@ fun NepaliDateRangeField(
             yearRange = yearRange,
             nepaliSelectableDates = selectableDates,
             locale = locale,
+            initialCalendarSystem = calendarSystem,
         )
         NepaliDatePickerDialog(
             onDismissRequest = { showDialog = false },
@@ -293,7 +309,11 @@ fun NepaliDateRangeField(
             },
             properties = dialogProperties,
         ) {
-            NepaliDateRangePicker(state = pickerState)
+            NepaliDateRangePicker(
+                state = pickerState,
+                showCalendarSystemToggle = showCalendarSystemToggle,
+                showAdjacentMonthDays = showAdjacentMonthDays
+            )
         }
     }
 }

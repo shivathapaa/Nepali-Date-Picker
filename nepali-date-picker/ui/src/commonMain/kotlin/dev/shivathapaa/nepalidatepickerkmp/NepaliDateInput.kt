@@ -36,6 +36,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
+import dev.shivathapaa.nepalidatepickerkmp.calendar_model.CalendarViewAdapter
 import dev.shivathapaa.nepalidatepickerkmp.calendar_model.NepaliCalendarModel
 import dev.shivathapaa.nepalidatepickerkmp.calendar_model.NepaliDateConverter.compareDates
 import dev.shivathapaa.nepalidatepickerkmp.calendar_model.NepaliDatePickerColors
@@ -51,11 +52,14 @@ internal fun NepaliDateInputContent(
     selectedDate: CustomCalendar?,
     onDateSelectionChange: (CustomCalendar?) -> Unit,
     calendarModel: NepaliCalendarModel,
-    yearRange: IntRange,
+    adapter: CalendarViewAdapter,
     language: NepaliDatePickerLang,
     nepaliSelectableDates: NepaliSelectableDates,
     colors: NepaliDatePickerColors
 ) {
+    // The field types dates in whichever calendar the grid was last showing, so the year range it
+    // checks against has to be that calendar's too.
+    val yearRange = adapter.yearRange
     val errorDateOutOfYearRange =
         calendarModel.localizeNumber(
             stringToLocalize = "${language.errorDateOutOfYearRange} ${yearRange.first} - ${yearRange.last}",
@@ -64,10 +68,11 @@ internal fun NepaliDateInputContent(
 
 
     val dateInputValidator =
-        remember {
+        remember(adapter, nepaliSelectableDates, language) {
             NepaliDateInputValidator(
                 yearRange = yearRange,
                 nepaliSelectableDates = nepaliSelectableDates,
+                toCanonical = adapter::toCanonical,
                 errorInvalidMonthOrDay = language.errorInvalidMonthOrDay,
                 errorDateInvalidInput = language.errorInvalidDay,
                 errorDateOutOfYearRange = errorDateOutOfYearRange,
@@ -78,8 +83,8 @@ internal fun NepaliDateInputContent(
 
     NepaliDateInputTextField(
         modifier = Modifier.fillMaxWidth().padding(NepaliDateInputTextFieldPadding),
-        calendarModel = calendarModel,
-        label = { Text(language.nepaliDate) },
+        adapter = adapter,
+        label = { Text(adapter.dateFieldLabel(language)) },
         placeholder = { Text(PatternFormat) },
         initialSelectedDate = selectedDate,
         onDateSelectionChange = onDateSelectionChange,
@@ -89,7 +94,6 @@ internal fun NepaliDateInputContent(
                 // Only need to apply the start date, as this is for a single date input.
                 currentStartDate = selectedDate
             },
-        language = language,
         colors = colors
     )
 }
@@ -99,29 +103,34 @@ internal fun NepaliDateInputTextField(
     modifier: Modifier,
     initialSelectedDate: CustomCalendar?,
     onDateSelectionChange: (CustomCalendar?) -> Unit,
-    calendarModel: NepaliCalendarModel,
+    adapter: CalendarViewAdapter,
     label: @Composable (() -> Unit)?,
     placeholder: @Composable (() -> Unit)?,
     nepaliDateInputIdentifier: NepaliDateInputIdentifier,
     nepaliDateInputValidator: NepaliDateInputValidator,
-    language: NepaliDatePickerLang,
     colors: NepaliDatePickerColors
 ) {
-    val errorText = rememberSaveable { mutableStateOf("") }
+    val language = adapter.locale.language
+
+    // The selection is always Bikram Sambat; write it out in the calendar being typed.
+    val displayedDigits = remember(initialSelectedDate, adapter) {
+        initialSelectedDate?.let(adapter::fromCanonical)?.let { date ->
+            val year = date.year.toString()
+            val month = date.month.toString().padStart(2, '0')
+            val day = date.dayOfMonth.toString().padStart(2, '0')
+            "$year$month$day"
+        } ?: ""
+    }
+
+    // A calendar switch keeps the same day selected but writes it with different digits, so both the
+    // field and any error about what was typed have to be re-seeded. Keying the saved state on the
+    // era does that, and only that: it is stable across a configuration change, so keystrokes still
+    // survive one, and it does not react to the selection going null part-way through typing.
+    val calendarEra = adapter.calendarSystem.era
+    val errorText = rememberSaveable(calendarEra) { mutableStateOf("") }
     var text by
-    rememberSaveable(stateSaver = TextFieldValue.Saver) {
-        mutableStateOf(
-            TextFieldValue(
-                text =
-                    initialSelectedDate?.let { date ->
-                        val year = date.year.toString()
-                        val month = date.month.toString().padStart(2, '0')
-                        val day = date.dayOfMonth.toString().padStart(2, '0')
-                        "$year$month$day"
-                    } ?: "",
-                TextRange(0, 0)
-            )
-        )
+    rememberSaveable(calendarEra, stateSaver = TextFieldValue.Saver) {
+        mutableStateOf(TextFieldValue(text = displayedDigits, selection = TextRange(0, 0)))
     }
 
     OutlinedTextField(
@@ -140,17 +149,18 @@ internal fun NepaliDateInputTextField(
                     errorText.value = ""
                     onDateSelectionChange(null)
                 } else {
-                    val parsedDate = calendarModel.parse(trimmedText)
+                    val parsedDate = adapter.parse(trimmedText)
                     errorText.value =
                         nepaliDateInputValidator.validate(
                             dateToValidate = parsedDate,
                             nepaliDateInputIdentifier = nepaliDateInputIdentifier
                         )
                     // Set the parsed date only if the error validation returned an empty string.
-                    // Otherwise, set it to null, as the validation failed.
+                    // Otherwise, set it to null, as the validation failed. The selection is always
+                    // stored in Bikram Sambat, whichever calendar was typed.
                     onDateSelectionChange(
                         if (errorText.value.isEmpty()) {
-                            parsedDate
+                            parsedDate?.let(adapter::toCanonical)
                         } else {
                             null
                         }
@@ -187,10 +197,18 @@ internal fun NepaliDateInputTextField(
     )
 }
 
+/**
+ * Validates a typed date.
+ *
+ * [dateToValidate] arrives in whichever calendar the field types in, while [currentStartDate],
+ * [currentEndDate] and [nepaliSelectableDates] all speak Bikram Sambat, so everything past the
+ * year-range check runs on [toCanonical]'s result.
+ */
 @Stable
 internal class NepaliDateInputValidator(
     private val yearRange: IntRange,
     private val nepaliSelectableDates: NepaliSelectableDates,
+    private val toCanonical: (CustomCalendar) -> CustomCalendar?,
     private val errorInvalidMonthOrDay: String,
     private val errorDateInvalidInput: String,
     private val errorDateOutOfYearRange: String,
@@ -215,11 +233,14 @@ internal class NepaliDateInputValidator(
             return errorDateInvalidInput
         }
 
+        // A real day in the typed calendar can still fall outside the conversion table.
+        val canonicalDate = toCanonical(dateToValidate) ?: return errorDateOutOfYearRange
+
         // Check that the provided NepaliSelectableDates allows this date to be selected.
         with(nepaliSelectableDates) {
             if (
-                !isSelectableYear(dateToValidate.year) ||
-                !isSelectableDate(dateToValidate)
+                !isSelectableYear(canonicalDate.year) ||
+                !isSelectableDate(canonicalDate)
             ) {
                 return errorInvalidNotAllowed
             }
@@ -228,13 +249,13 @@ internal class NepaliDateInputValidator(
         // Additional validation when the NepaliDateInputIdentifier is for start of end dates in a range input
         if (
             (nepaliDateInputIdentifier == NepaliDateInputIdentifier.StartDateInput && (compareDates(
-                dateToValidate.toSimpleDate(),
+                canonicalDate.toSimpleDate(),
                 currentEndDate?.year ?: IntMaxValue,
                 currentEndDate?.month ?: IntMaxValue,
                 currentEndDate?.dayOfMonth ?: IntMaxValue
             ) >= 0)) ||
             (nepaliDateInputIdentifier == NepaliDateInputIdentifier.EndDateInput && (compareDates(
-                dateToValidate.toSimpleDate(),
+                canonicalDate.toSimpleDate(),
                 currentStartDate?.year ?: IntMinValue,
                 currentStartDate?.month ?: IntMinValue,
                 currentStartDate?.dayOfMonth ?: IntMinValue
