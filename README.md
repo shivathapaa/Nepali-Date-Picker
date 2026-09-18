@@ -99,6 +99,8 @@ Few of them are listed below:
 - `CustomCalendar` - Calendar which represents both English and Nepali dates.
 - `SimpleDate` and  `SimpleTime` - Simple representation of date and time.
 - `NepaliMonthCalendar` - Nepali Month Calendar which consists of the month details.
+- `CalendarSystem` - `{ BIKRAM_SAMBAT, GREGORIAN }`. Which calendar a date is written in, and which one a picker displays. _(3.2.0)_
+- `MonthCalendar` - Calendar-agnostic month geometry, the shape a grid is laid out from in either calendar. _(3.2.0)_
 - `NepaliDateLocale` - To control language, dateFormat, weekDayName, and monthName.
 - `NepaliDatePickerLang` - Set of supported language (English & Nepali for now).
 - `NepaliDateConverter` - Provides utilities for date conversions (english to nepali and vice versa), get formatted date(6), get time, get date-time in ISO 8601 format, calculate days in between two date, and many more.
@@ -107,15 +109,16 @@ Few of them are listed below:
 - `DigitScript` - `{ LATIN, DEVANAGARI }`. Decouples numeral script from language, so locales that share the Devanagari digits (Maithili, Newari, Hindi, Marathi, Bhojpuri) reuse the same rendering. Comes with `String.localizeDigits(...)` / `String.toLatinDigits()`. _(3.1.0)_
 - `NepaliDateFormatter` - Text-field parse/format primitive with slash and dash patterns (`YYYY_...`, `DD_...`) that accepts both Latin and Devanagari input. _(3.1.0)_
 - Holiday provider SPI (`holiday` package) - `NepaliHolidayProvider`, `HolidayEntry` / `HolidayKind`, `NepaliWeekend`, plus `workingDaysBetween`, `nextWorkingDay`, and `addWorkingDays` (Excel `WORKDAY` semantics). No holiday data ships by design. _(3.1.0)_
-- `kotlinx-serialization` support - optional `nepali-date-picker-serialization` artifact provides `KSerializer`s for the Nepali date types. _(3.1.0)_
+- `kotlinx-serialization` support - optional `nepali-date-picker-serialization` artifact provides `KSerializer`s for the Nepali date types, including `MonthCalendar` and `CalendarSystem`. _(3.1.0, extended in 3.2.0)_
 
 Core UI specific,
 
 Calendar-grid pickers:
-- `NepaliDatePicker()` - Pick a Nepali date via a calendar UI which displays Nepali dates.
+- `NepaliDatePicker()` - Pick a Nepali date via a calendar UI which displays Nepali dates. Takes `secondaryDateLocale` to pair every day with the other calendar, `showCalendarSystemToggle` for the `B.S.` / `A.D.` switch, and `showAdjacentMonthDays` to fill the grid's empty cells with the neighbouring months. _(3.2.0)_
 - `NepaliDatePickerWithEnglishDate()` - Calendar UI which displays both the Nepali and the English day per cell.
 - `NepaliDateRangePicker()` - Pick a Nepali date range. Months can be laid out vertically or horizontally. _(experimental)_
 - `NepaliDateRangePickerWithEnglishDate()` - Range picker which displays both Nepali and English dates. _(experimental)_
+- `NepaliCalendarSystemToggle()` - The `B.S.` / `A.D.` switch on its own, for driving the calendar from your own chrome. _(experimental, 3.2.0)_
 
 Alternative experiences:
 - `NepaliWheelDatePicker()` - Scroll/wheel picker with three snapping columns (Year, Month, Day). Great for birth dates and dates far from today. _(experimental)_
@@ -178,7 +181,7 @@ Starting with **3.0.0** the library ships as separate artifacts instead of one u
 | --- | --- | --- |
 | `io.github.shivathapaa:nepali-date-picker-core` | `NepaliDateConverter`, `NepaliCalendarModel`, `CustomCalendar`, `NepaliCalendarDefaults`, `NepaliSelectableDates`, `DigitScript`, `NepaliDateFormatter`, the `holiday` SPI, and other data utilities. Pure Kotlin + `kotlinx-datetime`. **Zero Compose / UI dependencies** - `@Immutable` / `@Stable` are expect-annotations that alias to `androidx.compose.runtime.*` only on Compose-supported targets. | Backend / CLI / embedded modules that only need date conversion, or any non-Compose Kotlin target. |
 | `io.github.shivathapaa:nepali-date-picker-ui` | All composables - `NepaliDatePicker`, `NepaliDatePickerDialog`, `NepaliDateRangePicker`, `NepaliWheelDatePicker`, `NepaliDatePickerDocked`, `NepaliDateTextField`, `NepaliDateField`, `NepaliDatePickerDefaults`, etc. Transitively brings in `-core`. | Any module that renders the picker UI. |
-| `io.github.shivathapaa:nepali-date-picker-serialization` _(3.1.0+, optional)_ | `kotlinx-serialization` `KSerializer`s for `SimpleDate`, `SimpleTime`, `CustomCalendar`, and `NepaliMonthCalendar` in string and struct flavors, registered together by `NepaliDatePickerSerializersModule`. Ships the full `-core` target matrix. The `-core` POM stays annotation-free, so nothing leaks into projects that don't depend on this. | Modules that serialize Nepali date types over JSON / Protobuf / CBOR (Ktor, Room `TypeConverter`, DataStore, etc.). |
+| `io.github.shivathapaa:nepali-date-picker-serialization` _(3.1.0+, optional)_ | `kotlinx-serialization` `KSerializer`s for `SimpleDate`, `SimpleTime`, `CustomCalendar`, `NepaliMonthCalendar`, and since 3.2.0 `MonthCalendar` and `CalendarSystem`, in string and struct flavors, registered together by `NepaliDatePickerSerializersModule`. Ships the full `-core` target matrix. The `-core` POM stays annotation-free, so nothing leaks into projects that don't depend on this. | Modules that serialize Nepali date types over JSON / Protobuf / CBOR (Ktor, Room `TypeConverter`, DataStore, etc.). |
 
 #### Supported KMP targets
 
@@ -347,7 +350,7 @@ Prerequisites and the details for each are in the [samples guide](./sample/READM
 
 ## Migrating from 2.6.x to 3.0.x
 
-**3.0.0 splits the single `nepali-date-picker` artifact into two modules and is a breaking release.** All consumer code stays in the same package (`dev.shivathapaa.nepalidatepickerkmp.*`), so most projects only need to update the dependency coordinate plus a handful of qualified references. See [`CHANGELOG.md`](./CHANGELOG.md) for the full diff.
+**3.0.0 splits the single `nepali-date-picker` artifact into two modules and is a breaking release.** All consumer code stays in the same package (`dev.shivathapaa.nepalidatepickerkmp.*`), so most projects only need to update the dependency coordinate plus a handful of qualified references. See the [3.0.0 release notes](https://github.com/shivathapaa/Nepali-Date-Picker/releases/tag/3.0.0) for the full diff.
 
 ### 1. Replace the dependency coordinate
 
@@ -561,6 +564,116 @@ NepaliDatePicker(state = nepaliDatePickerStateWithRangeSelectable)
 
 NepaliDateRangePicker(customizedNepaliDateRangePickerState)
 // NepaliDateRangePickerWithEnglishDate(customizedNepaliDateRangePickerState)
+```
+
+## Switching between Bikram Sambat and Gregorian _(3.2.0)_
+
+Every calendar-grid picker, the wheel, and the text fields can display either calendar. Only the
+display changes: **a selected date is always stored as Bikram Sambat**, so switching keeps the same
+day selected and every `NepaliSelectableDates` rule you wrote keeps working untouched.
+
+Both knobs are off by default, so a picker that does not ask for them looks and behaves exactly as
+it did before.
+
+```kotlin
+val state = rememberNepaliDatePickerState()
+
+// One grid, either calendar, with the B.S. / A.D. switch and both dates in every cell.
+NepaliDatePicker(
+    state = state,
+    secondaryDateLocale = NepaliDatePickerDefaults.DefaultLocale,
+    showCalendarSystemToggle = true
+)
+
+// Open on the Gregorian grid instead, with no switch.
+val englishFirstState = rememberNepaliDatePickerState(
+    initialCalendarSystem = CalendarSystem.GREGORIAN
+)
+
+// Whatever is displayed, the selection reads the same way.
+state.selectedDate        // CustomCalendar in Bikram Sambat (era = 2)
+state.selectedEnglishDate // the same day in Gregorian (era = 1)
+```
+
+Drive it yourself when the switch belongs in your own chrome rather than inside the picker:
+
+```kotlin
+NepaliCalendarSystemToggle(
+    calendarSystem = state.displayedCalendarSystem,
+    onCalendarSystemChange = { state.displayedCalendarSystem = it }
+)
+```
+
+The same two parameters exist on `NepaliDateRangePicker`, `NepaliDatePickerDocked`,
+`NepaliDatePickerWithEnglishDate` and `NepaliDateRangePickerWithEnglishDate`. The wheel and the text
+fields take `initialCalendarSystem` / `calendarSystem` instead, since they have no state holder to
+read it from:
+
+```kotlin
+NepaliWheelDatePicker(
+    showCalendarSystemToggle = true,
+    onDateChange = { bikramSambatDate -> /* always Bikram Sambat */ }
+)
+
+NepaliDateField(
+    value = value,                              // a Bikram Sambat SimpleDate
+    onValueChange = { value = it },             // also Bikram Sambat
+    calendarSystem = CalendarSystem.GREGORIAN,  // but typed and shown in Gregorian
+    showCalendarSystemToggle = true             // and switchable inside the dialog it opens
+)
+```
+
+### Neighbouring months in the empty cells
+
+`showAdjacentMonthDays` fills the blank cells around a month with the days either side of it, drawn
+faded, the way a wall calendar does. Tapping one selects that day and moves the grid to its month.
+The fill reaches the end of the last row that holds a day of the displayed month and stops there, so
+a short month still ends on a blank row rather than showing a whole extra week.
+
+```kotlin
+NepaliDatePicker(
+    state = rememberNepaliDatePickerState(),
+    showAdjacentMonthDays = true
+)
+```
+
+A borrowed day is announced with its own month and year plus a note that choosing it moves the grid,
+since the fading that says so to a sighted user says nothing to a screen reader. One the picker
+cannot select, because of `NepaliSelectableDates` or the year range, is drawn faded and inert: it
+neither selects nor moves the grid. At the first and last month the picker
+covers there is no neighbour to borrow from, so those cells stay blank. The parameter exists on
+`NepaliDatePicker`, `NepaliDateRangePicker`, `NepaliDatePickerDocked`, `NepaliDateField`,
+`NepaliDateRangeField` and both `WithEnglishDate` variants, and is off by default so an existing
+picker's grid is unchanged.
+
+### State
+
+| Member | Meaning |
+| --- | --- |
+| `displayedCalendarSystem` | Which calendar the grid shows. Assigning it re-anchors the grid on the selection. |
+| `displayedMonthCalendar` | The month on screen, as a `MonthCalendar` in that calendar. |
+| `displayedMonth` | Unchanged: the **Bikram Sambat** month holding the first day of the visible grid. |
+| `englishYearRange` | Gregorian years derived from `yearRange`, clamped into `NepaliCalendarDefaults.EnglishYearRange`. |
+
+### Conversion bounds
+
+The two calendars start mid-year relative to each other: Bikram Sambat 1970-01-01 is 13 April 1913.
+A Gregorian grid therefore shows 1 to 12 April 1913 as disabled rather than hiding the month, and
+`NepaliCalendarDefaults.minConvertibleEnglishDate` / `maxConvertibleEnglishDate` name the exact
+bounds. `NepaliDateConverter.isEnglishDateConvertible(...)` answers the question for a single date,
+since `EnglishYearRange` alone is not a sufficient check.
+
+### Converting a whole month at once
+
+Resolving a Gregorian grid a day at a time would pay the converter's day-walk 28 to 31 times per
+month, so `:core` gained batch converters that do it in one pass. Reach for these whenever you need
+a full month mapped across calendars:
+
+```kotlin
+NepaliDateConverter.getEnglishMonthCalendar(2026, 9)          // Gregorian month geometry
+NepaliDateConverter.getEnglishCalendar(2026, 9, 17)           // a Gregorian CustomCalendar directly
+NepaliDateConverter.getNepaliCalendarsInEnglishMonth(2026, 9) // BS for every day of a Gregorian month
+NepaliDateConverter.getEnglishCalendarsInNepaliMonth(2083, 6) // and the mirror of it
 ```
 
 ## Detailed examples to explore more

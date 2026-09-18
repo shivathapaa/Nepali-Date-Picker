@@ -65,13 +65,17 @@ String enum arguments are case-insensitive.
 | `getTodayBs()` / `getTodayAd()` | `NepaliDate` |
 | `getCurrentTime()` | `NepaliTime` |
 | `convertAdToBs(y, m, d)` / `convertBsToAd(y, m, d)` | `NepaliDate` |
-| `getBsCalendar(y, m, d)` | `NepaliDate` |
-| `getBsMonth(y, m)` | `NepaliMonthInfo` |
+| `getBsCalendar(y, m, d)` / `getAdCalendar(y, m, d)` | `NepaliDate` |
+| `getBsMonth(y, m)` / `getAdMonth(y, m)` | `NepaliMonthInfo` |
+| `getBsCalendarsInAdMonth(y, m)` | `Array<NepaliDate \| null>` - a whole month in one pass |
+| `getAdCalendarsInBsMonth(y, m)` | `Array<NepaliDate>` - the mirror of it |
+| `isAdDateConvertible(y, m, d)` | `boolean` - the year range alone is not a sufficient check |
 | `getTotalDaysInBsMonth(y, m)` / `getTotalDaysInAdMonth(y, m)` | `number` |
 | `addDaysToBsDate(y, m, d, days)` | `NepaliDate` |
 | `getBsDaysBetween(...)` / `getAdDaysBetween(...)` | `number` |
 | `compareBsDates(y1, m1, d1, y2, m2, d2)` | `number` (`<0`, `0`, `>0`) |
 | `getBsYearRange()` / `getAdYearRange()` | `YearRange` |
+| `getAdYearRangeForBsYears(first, last)` | `YearRange` - the AD years covering a BS range |
 
 ### Names & formatting
 

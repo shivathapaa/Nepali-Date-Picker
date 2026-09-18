@@ -233,7 +233,7 @@ factory per picker, each returning a `UIViewController` that hosts the Compose s
 in `MaterialTheme` and a `Surface`.
 
 Every factory is a top-level Kotlin function, so Swift reaches it through the file's generated class
-(`NepaliDatePickerViewControllersKt` and friends). All eight share the same shape:
+(`NepaliDatePickerViewControllersKt` and friends). All eight pickers share the same shape:
 
 | Parameter | Type | Notes |
 | --- | --- | --- |
@@ -279,6 +279,15 @@ NepaliDateDialogViewControllersKt.NepaliDatePickerDialogViewController(
 
 NepaliDateDialogViewControllersKt.NepaliDatePickerFullScreenDialogViewController(
     initialSelectedDate:locale:yearRangeStart:yearRangeEnd:selectableDates:calendarOptions:options:onHeightChange:onConfirm:onDismiss:)
+```
+
+One more factory hosts the `B.S.` / `A.D.` switch on its own, for when it belongs in your own chrome
+(a navigation bar, a settings row) rather than inside a picker. It takes no dates, so it does not
+follow the shape above:
+
+```swift
+NepaliCalendarSystemToggleViewControllerKt.NepaliCalendarSystemToggleViewController(
+    initialCalendarSystem:language:onHeightChange:onCalendarSystemChange:)
 ```
 
 Kotlin default arguments do not survive the Objective-C bridge, so **every** argument has to be
@@ -411,6 +420,9 @@ struct NepaliDatePickerView: UIViewControllerRepresentable {
     var showTodayButton: Bool = true
     var showEnglishDate: Bool = false
     var englishDateLocale: NepaliDateLocale?
+    var initialCalendarSystem: CalendarSystem = .bikramSambat
+    var showCalendarSystemToggle: Bool = false
+    var showAdjacentMonthDays: Bool = false
     var onDateSelected: (CustomCalendar?) -> Void
 
     func makeUIViewController(context: Context) -> UIViewController {
@@ -419,6 +431,9 @@ struct NepaliDatePickerView: UIViewControllerRepresentable {
         options.showTodayButton = showTodayButton
         options.showEnglishDate = showEnglishDate
         options.englishDateLocale = englishDateLocale
+        options.initialCalendarSystem = initialCalendarSystem
+        options.showCalendarSystemToggle = showCalendarSystemToggle
+        options.showAdjacentMonthDays = showAdjacentMonthDays
 
         return NepaliDatePickerViewControllersKt.NepaliDatePickerViewController(
             initialSelectedDate: initialSelectedDate,
@@ -449,6 +464,9 @@ struct NepaliDateRangePickerView: UIViewControllerRepresentable {
     var showYearPickerAndMonthNavigation: Bool = true
     var showEnglishDate: Bool = false
     var englishDateLocale: NepaliDateLocale?
+    var initialCalendarSystem: CalendarSystem = .bikramSambat
+    var showCalendarSystemToggle: Bool = false
+    var showAdjacentMonthDays: Bool = false
     var onRangeSelected: (CustomCalendar?, CustomCalendar?) -> Void
 
     func makeUIViewController(context: Context) -> UIViewController {
@@ -459,6 +477,9 @@ struct NepaliDateRangePickerView: UIViewControllerRepresentable {
         options.showYearPickerAndMonthNavigation = showYearPickerAndMonthNavigation
         options.showEnglishDate = showEnglishDate
         options.englishDateLocale = englishDateLocale
+        options.initialCalendarSystem = initialCalendarSystem
+        options.showCalendarSystemToggle = showCalendarSystemToggle
+        options.showAdjacentMonthDays = showAdjacentMonthDays
 
         return NepaliDateRangeViewControllersKt.NepaliDateRangePickerViewController(
             initialSelectedStartDate: initialSelectedStartDate,
@@ -489,6 +510,9 @@ struct NepaliDatePickerDockedView: UIViewControllerRepresentable {
     var placeholder: String?
     var cornerRadius: Float = NepaliPickerDefaults.fieldCornerRadius
     var popupShadowElevation: Float = 6
+    var initialCalendarSystem: CalendarSystem = .bikramSambat
+    var showCalendarSystemToggle: Bool = false
+    var showAdjacentMonthDays: Bool = false
     var onDateSelected: (CustomCalendar?) -> Void
 
     func makeUIViewController(context: Context) -> UIViewController {
@@ -499,6 +523,9 @@ struct NepaliDatePickerDockedView: UIViewControllerRepresentable {
         options.placeholder = placeholder
         options.cornerRadius = cornerRadius
         options.popupShadowElevation = popupShadowElevation
+        options.initialCalendarSystem = initialCalendarSystem
+        options.showCalendarSystemToggle = showCalendarSystemToggle
+        options.showAdjacentMonthDays = showAdjacentMonthDays
 
         return NepaliDatePickerViewControllersKt.NepaliDatePickerDockedViewController(
             initialSelectedDate: initialSelectedDate,
@@ -525,6 +552,8 @@ struct NepaliWheelDatePickerView: UIViewControllerRepresentable {
     var itemHeight: Float = 44
     var visibleItemCount: Int32 = 5
     var cornerRadius: Float = 20
+    var initialCalendarSystem: CalendarSystem = .bikramSambat
+    var showCalendarSystemToggle: Bool = false
     var onDateChange: (CustomCalendar) -> Void
 
     func makeUIViewController(context: Context) -> UIViewController {
@@ -532,6 +561,8 @@ struct NepaliWheelDatePickerView: UIViewControllerRepresentable {
         options.itemHeight = itemHeight
         options.visibleItemCount = visibleItemCount
         options.cornerRadius = cornerRadius
+        options.initialCalendarSystem = initialCalendarSystem
+        options.showCalendarSystemToggle = showCalendarSystemToggle
 
         return NepaliDatePickerViewControllersKt.NepaliWheelDatePickerViewController(
             initialDate: initialDate,
@@ -566,6 +597,9 @@ struct NepaliDateFieldView: UIViewControllerRepresentable {
     var confirmButtonText: String?
     var dismissButtonText: String?
     var cornerRadius: Float = NepaliPickerDefaults.fieldCornerRadius
+    var initialCalendarSystem: CalendarSystem = .bikramSambat
+    var showCalendarSystemToggle: Bool = false
+    var showAdjacentMonthDays: Bool = false
     var onValueChange: (SimpleDate?) -> Void
 
     func makeUIViewController(context: Context) -> UIViewController {
@@ -580,6 +614,9 @@ struct NepaliDateFieldView: UIViewControllerRepresentable {
         options.confirmButtonText = confirmButtonText
         options.dismissButtonText = dismissButtonText
         options.cornerRadius = cornerRadius
+        options.initialCalendarSystem = initialCalendarSystem
+        options.showCalendarSystemToggle = showCalendarSystemToggle
+        options.showAdjacentMonthDays = showAdjacentMonthDays
 
         return NepaliDateFieldViewControllersKt.NepaliDateFieldViewController(
             initialValue: initialValue,
@@ -617,6 +654,9 @@ struct NepaliDateRangeFieldView: UIViewControllerRepresentable {
     var confirmButtonText: String?
     var dismissButtonText: String?
     var cornerRadius: Float = NepaliPickerDefaults.fieldCornerRadius
+    var initialCalendarSystem: CalendarSystem = .bikramSambat
+    var showCalendarSystemToggle: Bool = false
+    var showAdjacentMonthDays: Bool = false
     var onRangeChange: (SimpleDate?, SimpleDate?) -> Void
 
     func makeUIViewController(context: Context) -> UIViewController {
@@ -632,6 +672,9 @@ struct NepaliDateRangeFieldView: UIViewControllerRepresentable {
         options.confirmButtonText = confirmButtonText
         options.dismissButtonText = dismissButtonText
         options.cornerRadius = cornerRadius
+        options.initialCalendarSystem = initialCalendarSystem
+        options.showCalendarSystemToggle = showCalendarSystemToggle
+        options.showAdjacentMonthDays = showAdjacentMonthDays
 
         return NepaliDateRangeViewControllersKt.NepaliDateRangeFieldViewController(
             initialStartValue: initialStartValue,
@@ -662,6 +705,10 @@ struct NepaliDatePickerDialogView: UIViewControllerRepresentable {
     var dismissText: String = "Cancel"
     var tonalElevation: Float = 6
     var cornerRadius: Float = 28
+    var showEnglishDate: Bool = false
+    var initialCalendarSystem: CalendarSystem = .bikramSambat
+    var showCalendarSystemToggle: Bool = false
+    var showAdjacentMonthDays: Bool = false
     var onConfirm: (CustomCalendar?) -> Void
     var onDismiss: () -> Void
 
@@ -675,6 +722,16 @@ struct NepaliDatePickerDialogView: UIViewControllerRepresentable {
         return options
     }
 
+    /// Configures the calendar the dialog hosts, as opposed to the dialog chrome around it.
+    private var calendarOptions: NepaliCalendarOptions {
+        let options = NepaliCalendarOptions()
+        options.showEnglishDate = showEnglishDate
+        options.initialCalendarSystem = initialCalendarSystem
+        options.showCalendarSystemToggle = showCalendarSystemToggle
+        options.showAdjacentMonthDays = showAdjacentMonthDays
+        return options
+    }
+
     func makeUIViewController(context: Context) -> UIViewController {
         if fullScreen {
             return NepaliDateDialogViewControllersKt.NepaliDatePickerFullScreenDialogViewController(
@@ -683,7 +740,7 @@ struct NepaliDatePickerDialogView: UIViewControllerRepresentable {
                 yearRangeStart: yearRange.lowerBound,
                 yearRangeEnd: yearRange.upperBound,
                 selectableDates: selectableDates,
-                calendarOptions: nil,
+                calendarOptions: calendarOptions,
                 options: options,
                 // A dialog is an overlay, so its inline height is meaningless.
                 onHeightChange: { _ in },
@@ -697,11 +754,30 @@ struct NepaliDatePickerDialogView: UIViewControllerRepresentable {
             yearRangeStart: yearRange.lowerBound,
             yearRangeEnd: yearRange.upperBound,
             selectableDates: selectableDates,
-            calendarOptions: nil,
+            calendarOptions: calendarOptions,
             options: options,
             onHeightChange: { _ in },
             onConfirm: onConfirm,
             onDismiss: onDismiss
+        )
+    }
+
+    func updateUIViewController(_ uiViewController: UIViewController, context: Context) {}
+}
+
+/// The `B.S.` / `A.D.` switch on its own, for driving a picker from the app's own chrome.
+struct NepaliCalendarSystemToggleView: UIViewControllerRepresentable {
+    var onHeightChange: (CGFloat) -> Void = { _ in }
+    var initialCalendarSystem: CalendarSystem = .bikramSambat
+    var language: NepaliDatePickerLang = .english
+    var onCalendarSystemChange: (CalendarSystem) -> Void
+
+    func makeUIViewController(context: Context) -> UIViewController {
+        NepaliCalendarSystemToggleViewControllerKt.NepaliCalendarSystemToggleViewController(
+            initialCalendarSystem: initialCalendarSystem,
+            language: language,
+            onHeightChange: { onHeightChange(CGFloat(truncating: $0)) },
+            onCalendarSystemChange: onCalendarSystemChange
         )
     }
 
@@ -794,21 +870,32 @@ Every property, with its default:
 | | `showTodayButton` | `Bool` | `true` |
 | | `showEnglishDate` | `Bool` | `false` |
 | | `englishDateLocale` | `NepaliDateLocale?` | `nil`, falls back to the picker's locale |
+| | `initialCalendarSystem` | `CalendarSystem` | `.bikramSambat` |
+| | `showCalendarSystemToggle` | `Bool` | `false` |
+| | `showAdjacentMonthDays` | `Bool` | `false` |
 | `NepaliRangeCalendarOptions` | `showModeToggle` | `Bool` | `true` |
 | | `showTodayButton` | `Bool` | `true` |
 | | `showMonthsVertically` | `Bool` | `true` |
 | | `showYearPickerAndMonthNavigation` | `Bool` | `true` |
 | | `showEnglishDate` | `Bool` | `false` |
 | | `englishDateLocale` | `NepaliDateLocale?` | `nil` |
+| | `initialCalendarSystem` | `CalendarSystem` | `.bikramSambat` |
+| | `showCalendarSystemToggle` | `Bool` | `false`, needs `showYearPickerAndMonthNavigation` |
+| | `showAdjacentMonthDays` | `Bool` | `false` |
 | `NepaliWheelOptions` | `itemHeight` | `Float` | `44` |
 | | `visibleItemCount` | `Int32` | `5`, odd numbers centre the selection |
 | | `cornerRadius` | `Float` | `20` |
+| | `initialCalendarSystem` | `CalendarSystem` | `.bikramSambat` |
+| | `showCalendarSystemToggle` | `Bool` | `false` |
 | `NepaliDockedOptions` | `dateFormatStyle` | `NepaliDateFormatStyle` | `.medium` |
 | | `showTodayButton` | `Bool` | `true` |
 | | `label` | `String?` | `nil` |
 | | `placeholder` | `String?` | `nil` |
 | | `cornerRadius` | `Float` | `4` |
 | | `popupShadowElevation` | `Float` | `6` |
+| | `initialCalendarSystem` | `CalendarSystem` | `.bikramSambat` |
+| | `showCalendarSystemToggle` | `Bool` | `false` |
+| | `showAdjacentMonthDays` | `Bool` | `false` |
 | `NepaliFieldOptions` | `outlined` | `Bool` | `true` |
 | | `label` | `String?` | `nil` |
 | | `placeholder` | `String?` | `nil`, keeps the hint spelling out the pattern |
@@ -819,6 +906,9 @@ Every property, with its default:
 | | `confirmButtonText` | `String?` | `nil`, keeps the localized "OK" |
 | | `dismissButtonText` | `String?` | `nil`, keeps the localized "Cancel" |
 | | `cornerRadius` | `Float` | `4` |
+| | `initialCalendarSystem` | `CalendarSystem` | `.bikramSambat` |
+| | `showCalendarSystemToggle` | `Bool` | `false`, only the filled style has a dialog to show it in |
+| | `showAdjacentMonthDays` | `Bool` | `false`, same |
 | `NepaliRangeFieldOptions` | `outlined` | `Bool` | `true` |
 | | `startLabel` | `String?` | `nil`, keeps the localized "Start Date" |
 | | `endLabel` | `String?` | `nil`, keeps the localized "End Date" |
@@ -830,6 +920,9 @@ Every property, with its default:
 | | `confirmButtonText` | `String?` | `nil` |
 | | `dismissButtonText` | `String?` | `nil` |
 | | `cornerRadius` | `Float` | `4` |
+| | `initialCalendarSystem` | `CalendarSystem` | `.bikramSambat` |
+| | `showCalendarSystemToggle` | `Bool` | `false`, only the filled style has a dialog to show it in |
+| | `showAdjacentMonthDays` | `Bool` | `false`, same |
 | `NepaliDialogOptions` | `title` | `String?` | `nil`, only the full-screen dialog draws one |
 | | `confirmText` | `String` | `"OK"` |
 | | `dismissText` | `String` | `"Cancel"` |
@@ -838,6 +931,15 @@ Every property, with its default:
 
 A `nil` text property keeps the library's own default rather than blanking it, so leaving
 `startLabel` alone still shows the localized "Start Date". Dimensions are in points.
+
+`showAdjacentMonthDays` fills the grid's empty cells with the neighbouring months' days, drawn
+faded; tapping one selects that day and moves the grid to its month.
+
+`initialCalendarSystem` and `showCalendarSystemToggle` control which calendar the grid shows and
+whether the user can switch it. Only the display changes: the date handed back to Swift is always
+Bikram Sambat, so switching keeps the same day selected. On the field options these apply to the
+calendar the field types in, and to the dialog the filled style opens; the outlined style has no
+dialog, so it reads `initialCalendarSystem` and ignores the other two.
 
 `outlined` picks between the two Material styles: `NepaliDateTextField` / `NepaliDateRangeTextField`
 when true, and the filled `NepaliDateField` / `NepaliDateRangeField` when false. The filled variants
@@ -896,6 +998,79 @@ AutoSized(measurementHeight: 620) { report in
         showEnglishDate: true,
         englishDateLocale: NepaliPickerDefaults.english
     ) { selected = $0 }
+}
+```
+
+### Showing the Gregorian calendar
+
+The same grid can display either calendar. `showCalendarSystemToggle` draws a `B.S.` / `A.D.` switch
+in the header, and `initialCalendarSystem` decides which one it opens on. Only the display changes:
+`onDateSelected` always hands back a Bikram Sambat `CustomCalendar`, so switching keeps the same day
+selected and any `NepaliSelectableDates` rule keeps working untouched.
+
+```swift
+AutoSized(measurementHeight: 580) { report in
+    NepaliDatePickerView(
+        onHeightChange: report,
+        initialSelectedDate: SimpleDate(year: 2083, month: 6, dayOfMonth: 1),
+        initialCalendarSystem: .gregorian,   // opens on September 2026
+        showCalendarSystemToggle: true       // and the user can switch back
+    ) { selected = $0 }
+}
+```
+
+Days before AD 1913-04-13 have no Bikram Sambat equivalent, so a Gregorian grid draws them disabled
+rather than hiding the month. `NepaliDateConverter.shared.isEnglishDateConvertible(...)` answers that
+for a single date.
+
+### Filling the empty cells
+
+`showAdjacentMonthDays` fills the blank cells around the month with the days either side of it, drawn
+faded, the way a wall calendar does. Tapping one selects that day and moves the grid to its month. The
+fill reaches the end of the last row holding a day of the displayed month and stops there, so a short
+month still ends on a blank row.
+
+```swift
+AutoSized(measurementHeight: 580) { report in
+    NepaliDatePickerView(
+        onHeightChange: report,
+        initialSelectedDate: SimpleDate(year: 2083, month: 4, dayOfMonth: 15),
+        showAdjacentMonthDays: true
+    ) { selected = $0 }
+}
+```
+
+A borrowed day the picker cannot select is drawn faded and inert: it neither selects nor moves the
+grid. At the first and last month the picker covers there is no neighbour to borrow from, so those
+cells stay blank. VoiceOver reads a borrowed day with its own month and year plus a note that choosing
+it moves the grid, since the fading that says so to a sighted user says nothing to a screen reader.
+
+### Driving the switch from your own chrome
+
+`NepaliCalendarSystemToggleViewController` hosts the switch on its own, for a navigation bar or a
+settings row. The picker seeds its calendar once, so give it an `id` that changes with the selection to
+rebuild it:
+
+```swift
+struct ChromeSwitchExample: View {
+    @State private var system: CalendarSystem = .bikramSambat
+    @State private var selected: CustomCalendar?
+
+    var body: some View {
+        VStack(spacing: 12) {
+            AutoSized(measurementHeight: 60) { report in
+                NepaliCalendarSystemToggleView(onHeightChange: report) { system = $0 }
+            }
+            AutoSized(measurementHeight: 580) { report in
+                NepaliDatePickerView(
+                    onHeightChange: report,
+                    initialSelectedDate: nil,
+                    initialCalendarSystem: system
+                ) { selected = $0 }
+                .id(system)
+            }
+        }
+    }
 }
 ```
 
@@ -1001,8 +1176,10 @@ struct WheelExample: View {
 
 Both render the dialog immediately, so present the controller modally and dismiss it when the
 callback fires. They take a `NepaliDialogOptions` for the chrome and a separate `calendarOptions` for
-the calendar inside. `tonalElevation` is ignored by the full-screen variant, which has no floating
-surface. Neither reports a useful inline height, so the wrapper discards `onHeightChange`.
+the calendar inside, which is why the wrapper above surfaces `showEnglishDate`,
+`initialCalendarSystem`, `showCalendarSystemToggle` and `showAdjacentMonthDays` as its own properties.
+`tonalElevation` is ignored by the full-screen variant, which has no floating surface. Neither reports
+a useful inline height, so the wrapper discards `onHeightChange`.
 
 ```swift
 struct DialogExample: View {
@@ -1304,6 +1481,12 @@ Year bounds come from `NepaliCalendarDefaults.shared`:
 let bs = NepaliCalendarDefaults.shared.NepaliYearRange   // 1970...2100
 let ad = NepaliCalendarDefaults.shared.EnglishYearRange  // 1913...2043
 (bs.first, bs.last)
+
+// The calendars start mid-year relative to each other, so the year range alone is not a
+// sufficient bound. These name the exact first and last convertible English dates.
+NepaliCalendarDefaults.shared.minConvertibleEnglishDate  // 1913-04-13
+NepaliCalendarDefaults.shared.maxConvertibleEnglishDate  // 2043-12-31
+NepaliDateConverter.shared.isEnglishDateConvertible(englishYYYY: 1913, englishMM: 4, englishDD: 12) // false
 ```
 
 ## Enums
@@ -1314,6 +1497,7 @@ let ad = NepaliCalendarDefaults.shared.EnglishYearRange  // 1913...2043
 | `NepaliDateFormatStyle` | `.full`, `.long_`, `.medium`, `.shortMdy`, `.shortYmd`, `.compactMdy`, `.compactYmd` |
 | `NameFormat` | `.full`, `.medium`, `.short_` |
 | `DigitScript` | `.latin`, `.devanagari` |
+| `CalendarSystem` | `.bikramSambat`, `.gregorian` - the named form of `era` (2 and 1) |
 
 Format styles render as:
 

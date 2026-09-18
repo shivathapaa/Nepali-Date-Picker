@@ -28,6 +28,18 @@ and engine function, is **[README-js.md](../README-js.md)**. To run the showcase
 </script>
 ```
 
+Every calendar element can display the Gregorian calendar instead, with `calendar-system="ad"` or a
+`B.S.` / `A.D.` switch the user can flip, and can fill the grid's empty cells with the neighbouring
+months' days. The value stays Bikram Sambat either way:
+
+```html
+<nepali-date-picker
+  value="2083-06-01"
+  show-calendar-toggle
+  show-adjacent-month-days
+></nepali-date-picker>
+```
+
 No bundler? Swap that import for the self-contained build (64 kB gzipped, all seven elements):
 `<script type="module" src="https://cdn.jsdelivr.net/npm/@nepali-date-picker/web-component"></script>`.
 

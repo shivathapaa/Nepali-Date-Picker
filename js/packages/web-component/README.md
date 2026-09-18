@@ -60,6 +60,8 @@ the tags upgrade once the browser runs the module. The CDN build is the exceptio
 ### Common attributes
 
 All date values are Bikram Sambat `YYYY-MM-DD` strings; Devanagari digits are accepted on input.
+`calendar-system` changes only what is displayed, never what is reported, so switching keeps the
+same day selected.
 
 | Attribute | Type | Applies to | Description |
 | --- | --- | --- | --- |
@@ -69,6 +71,9 @@ All date values are Bikram Sambat `YYYY-MM-DD` strings; Devanagari digits are ac
 | `min` / `max` | `string` | all | Selectable bounds. |
 | `disabled` | `boolean` | all | Read-only, dimmed. |
 | `show-english` | `boolean` | calendar elements | Show the Gregorian equivalent. |
+| `calendar-system` | `"bs"` \| `"ad"` | all | Calendar shown or typed in. Values stay Bikram Sambat. |
+| `show-calendar-toggle` | `boolean` | calendar elements, wheel | Show the `B.S.` / `A.D.` switch. |
+| `show-adjacent-month-days` | `boolean` | calendar elements | Fill the empty cells with the neighbouring months' days, drawn faded. Each is announced with its own month and a note that it moves the grid. |
 | `open` | `boolean` | dialog | Whether the dialog is shown (or call `.show()` / `.close()`). |
 | `fullscreen` | `boolean` | dialog | Full-screen layout. |
 | `label` | `string` | docked, field | Field label. |

@@ -90,6 +90,11 @@ bundler; the default entry is the right import everywhere else.
   element itself or on any ancestor (even `document`).
 - Setting `language="ne"` switches both text **and** digits to Nepali / Devanagari.
 - `min` / `max` bound the selectable dates (inclusive).
+- **`calendar-system` picks which calendar is displayed**, `"bs"` (default) or `"ad"`. Only the
+  display changes: `value`, `start`, `end`, `min`, `max` and every `change` payload stay Bikram
+  Sambat, so switching keeps the same day selected. Calendar elements also take
+  `show-calendar-toggle` to let the user do the switching, and `show-adjacent-month-days` to
+  fill the grid's empty cells with the neighbouring months. _(3.2.0)_
 
 ---
 
@@ -107,6 +112,9 @@ An always-visible month calendar.
 | `max` | `max` | string | `""` | Latest selectable date, or `""` for no upper bound. |
 | `disabled` | `disabled` | boolean | `false` | Read-only + dimmed (reflected to attribute). |
 | `show-english` | `showEnglish` | boolean | `false` | Show the Gregorian equivalent under the grid. |
+| `calendar-system` | `calendarSystem` | `"bs"` \| `"ad"` | `"bs"` | Calendar the grid displays. |
+| `show-calendar-toggle` | `showCalendarToggle` | boolean | `false` | Show the `B.S.` / `A.D.` switch. |
+| `show-adjacent-month-days` | `showAdjacentMonthDays` | boolean | `false` | Fill the grid's empty cells with the neighbouring months' days, drawn faded. Clicking one picks that day and moves the grid to its month. |
 
 **Events:** `change` → `NepaliDatePickerChangeDetail`.
 
@@ -131,6 +139,9 @@ A modal calendar with a headline and OK / Cancel actions. Add `fullscreen` for t
 | `min` / `max` | `min` / `max` | string | `""` | Selectable bounds. |
 | `fullscreen` | `fullscreen` | boolean | `false` | Full-screen layout. |
 | `show-english` | `showEnglish` | boolean | `false` | Show the Gregorian equivalent. |
+| `calendar-system` | `calendarSystem` | `"bs"` \| `"ad"` | `"bs"` | Calendar the grid displays. |
+| `show-calendar-toggle` | `showCalendarToggle` | boolean | `false` | Show the `B.S.` / `A.D.` switch. |
+| `show-adjacent-month-days` | `showAdjacentMonthDays` | boolean | `false` | Fill the grid's empty cells with the neighbouring months' days, drawn faded. Clicking one picks that day and moves the grid to its month. |
 | `heading` | `heading` | string | localized "Select Nepali Date" | Dialog title text. |
 
 **Methods:** `show(): void`, `close(): void`.
@@ -161,6 +172,9 @@ Closes on outside click or `Escape`.
 | `min` / `max` | `min` / `max` | string | `""` | Selectable bounds. |
 | `disabled` | `disabled` | boolean | `false` | Read-only + dimmed. |
 | `show-english` | `showEnglish` | boolean | `false` | Show the Gregorian equivalent in the popover. |
+| `calendar-system` | `calendarSystem` | `"bs"` \| `"ad"` | `"bs"` | Calendar the grid displays. |
+| `show-calendar-toggle` | `showCalendarToggle` | boolean | `false` | Show the `B.S.` / `A.D.` switch. |
+| `show-adjacent-month-days` | `showAdjacentMonthDays` | boolean | `false` | Fill the grid's empty cells with the neighbouring months' days, drawn faded. Clicking one picks that day and moves the grid to its month. |
 | `label` | `label` | string | `""` | Field label. |
 
 **Events:** `change` → `NepaliDatePickerChangeDetail` (fires when a valid date is typed or clicked).
@@ -182,6 +196,9 @@ starts a new range.
 | `min` / `max` | `min` / `max` | string | `""` | Selectable bounds. |
 | `disabled` | `disabled` | boolean | `false` | Read-only + dimmed. |
 | `show-english` | `showEnglish` | boolean | `false` | Show the Gregorian equivalent. |
+| `calendar-system` | `calendarSystem` | `"bs"` \| `"ad"` | `"bs"` | Calendar the grid displays. |
+| `show-calendar-toggle` | `showCalendarToggle` | boolean | `false` | Show the `B.S.` / `A.D.` switch. |
+| `show-adjacent-month-days` | `showAdjacentMonthDays` | boolean | `false` | Fill the grid's empty cells with the neighbouring months' days, drawn faded. Clicking one picks that day and moves the grid to its month. |
 
 **Events:** `change` → `NepaliDateRangeChangeDetail` on each pick.
 
@@ -205,6 +222,7 @@ forms. Accepts `YYYY/MM/DD` and Devanagari digits.
 | `language` | `language` | `"en"` \| `"ne"` | `"en"` | Text + digit script + error language. |
 | `min` / `max` | `min` / `max` | string | `""` | Allowed bounds. |
 | `disabled` | `disabled` | boolean | `false` | Read-only + dimmed. |
+| `calendar-system` | `calendarSystem` | `"bs"` \| `"ad"` | `"bs"` | Calendar the user types in. |
 | `label` | `label` | string | `""` | Field label. |
 
 **Events:** `change` → `NepaliDatePickerChangeDetail` when the typed date becomes valid;
@@ -234,6 +252,7 @@ the start (localized error). The end field's lower bound follows the chosen star
 | `start-label` | `startLabel` | string | localized "Start date" | Start field label. |
 | `end-label` | `endLabel` | string | localized "End date" | End field label. |
 | `disabled` | `disabled` | boolean | `false` | Read-only + dimmed. |
+| `calendar-system` | `calendarSystem` | `"bs"` \| `"ad"` | `"bs"` | Calendar the user types in. |
 
 **Events:** `change` → `NepaliDateRangeChangeDetail` whenever a valid start or end changes;
 `invalid` → `NepaliDateFieldInvalidDetail` from whichever inner field rejected the input.
@@ -252,6 +271,8 @@ Scroll, click an item, or use `ArrowUp` / `ArrowDown` on a focused column.
 | `value` | `value` | string | `""` | Selected BS date. Empty starts the wheels on today without setting the property. |
 | `language` | `language` | `"en"` \| `"ne"` | `"en"` | Text + digit script. |
 | `disabled` | `disabled` | boolean | `false` | Read-only + dimmed. |
+| `calendar-system` | `calendarSystem` | `"bs"` \| `"ad"` | `"bs"` | Calendar the wheels spin in. |
+| `show-calendar-toggle` | `showCalendarToggle` | boolean | `false` | Show the `B.S.` / `A.D.` switch above the wheels. |
 
 **Events:** `change` → `NepaliDatePickerChangeDetail` whenever the selection changes.
 
@@ -588,14 +609,34 @@ getCurrentTime(); // NepaliTime - { hour, minute, second, nanosecond }
 convertAdToBs(2024, 9, 9);  // NepaliDate { year: 2081, month: 5, dayOfMonth: 24, era: 2, ... }
 convertBsToAd(2081, 5, 24); // NepaliDate { year: 2024, month: 9, dayOfMonth: 9,  era: 1, ... }
 getBsCalendar(2082, 4, 16); // NepaliDate - full breakdown for a BS date
+getAdCalendar(2026, 9, 17); // NepaliDate - full breakdown for an AD date, no BS round trip
+
+// EnglishYearRange alone is not enough: the calendars start mid-year relative to each other,
+// so 1913-01-01 through 1913-04-12 sit inside the range yet cannot be converted.
+isAdDateConvertible(1913, 4, 12); // false
+isAdDateConvertible(1913, 4, 13); // true
 ```
 
 ## Month & day counts
 
 ```ts
 getBsMonth(2081, 5);              // NepaliMonthInfo - details for Bhadra 2081
+getAdMonth(2026, 9);              // NepaliMonthInfo - details for September 2026
 getTotalDaysInBsMonth(2081, 10);  // number, e.g. 30
 getTotalDaysInAdMonth(2024, 2);   // number, e.g. 29
+```
+
+### Converting a whole month at once
+
+Resolving a grid a day at a time pays the converter's day-walk once per cell. These convert a
+whole month in a single pass, and are what the calendar elements use:
+
+```ts
+getBsCalendarsInAdMonth(2026, 9); // Array<NepaliDate | null>, null before the 1913-04-13 anchor
+getAdCalendarsInBsMonth(2083, 6); // Array<NepaliDate>, the mirror of it
+
+// Gregorian years covering the same span of real days as a BS year range.
+getAdYearRangeForBsYears(1970, 2100); // YearRange { first: 1913, last: 2043 }
 ```
 
 ## Arithmetic
@@ -750,7 +791,9 @@ For the tags themselves in TSX, add `import '@nepali-date-picker/web-component/r
 
 Classes `NepaliDate`, `NepaliMonthInfo`, `NepaliTime`, `NepaliDateTime`, `YearRange`; functions
 `getBsYearRange`, `getAdYearRange`, `getTodayBs`, `getTodayAd`, `getCurrentTime`, `convertAdToBs`,
-`convertBsToAd`, `getBsCalendar`, `getBsMonth`,
+`convertBsToAd`, `getBsCalendar`, `getAdCalendar`, `getBsMonth`, `getAdMonth`,
+`getBsCalendarsInAdMonth`, `getAdCalendarsInBsMonth`, `isAdDateConvertible`,
+`getAdYearRangeForBsYears`,
 `getTotalDaysInBsMonth`, `getTotalDaysInAdMonth`, `addDaysToBsDate`, `getBsDaysBetween`,
 `getAdDaysBetween`, `compareBsDates`, `getWeekdayName`, `getBsMonthName`, `getAdMonthName`,
 `formatBsDate`, `formatAdDate`, `formatBsDateByPattern`, `formatAdDateByPattern`, `formatTimeEnglish`,
