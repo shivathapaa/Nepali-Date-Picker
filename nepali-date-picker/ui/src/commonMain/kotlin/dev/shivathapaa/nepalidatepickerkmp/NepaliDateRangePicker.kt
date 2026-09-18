@@ -18,7 +18,7 @@ package dev.shivathapaa.nepalidatepickerkmp
 
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.SizeTransform
-import androidx.compose.animation.core.CubicBezierEasing
+import androidx.compose.animation.core.snap
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
@@ -309,15 +309,9 @@ internal fun SwitchableNepaliDateRangeEntryContent(
                         fadeOut(animationSpec = tween((100.0).toInt()))
             }
                 .using(
-                    SizeTransform(
-                        clip = true,
-                        sizeAnimationSpec = { _, _ ->
-                            tween(
-                                (500.0).toInt(),
-                                easing = CubicBezierEasing(0.05f, 0.7f, 0.1f, 1.0f)
-                            )
-                        }
-                    )
+                    // As in the single date picker, the size changes in one step and the fade and
+                    // the slide carry the motion.
+                    SizeTransform(clip = true) { _, _ -> snap() }
                 )
         },
         label = "NepaliDatePickerDisplayModeAnimation"

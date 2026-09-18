@@ -18,10 +18,10 @@ package dev.shivathapaa.nepalidatepickerkmp
 
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.SizeTransform
-import androidx.compose.animation.core.CubicBezierEasing
 import androidx.compose.animation.core.DecayAnimationSpec
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.exponentialDecay
+import androidx.compose.animation.core.snap
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.expandVertically
@@ -452,15 +452,10 @@ internal fun SwitchableNepaliDateEntryContent(
                         fadeOut(animationSpec = tween((100.0).toInt()))
             }
                 .using(
-                    SizeTransform(
-                        clip = true,
-                        sizeAnimationSpec = { _, _ ->
-                            tween(
-                                (500.0).toInt(),
-                                easing = CubicBezierEasing(0.05f, 0.7f, 0.1f, 1.0f)
-                            )
-                        }
-                    )
+                    // The size changes in one step instead of animating. The calendar and the
+                    // input field differ in height by hundreds of dp, and a dialog cannot resize
+                    // smoothly over that. The fade and the slide carry the motion.
+                    SizeTransform(clip = true) { _, _ -> snap() }
                 )
         },
         label = "NepaliDatePickerDisplayModeAnimation"
