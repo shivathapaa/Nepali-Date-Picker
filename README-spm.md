@@ -1174,12 +1174,15 @@ struct WheelExample: View {
 `NepaliDateDialogViewControllersKt.NepaliDatePickerDialogViewController` and
 `…NepaliDatePickerFullScreenDialogViewController`
 
-Both render the dialog immediately, so present the controller modally and dismiss it when the
-callback fires. They take a `NepaliDialogOptions` for the chrome and a separate `calendarOptions` for
-the calendar inside, which is why the wrapper above surfaces `showEnglishDate`,
-`initialCalendarSystem`, `showCalendarSystemToggle` and `showAdjacentMonthDays` as its own properties.
-`tonalElevation` is ignored by the full-screen variant, which has no floating surface. Neither reports
-a useful inline height, so the wrapper discards `onHeightChange`.
+Both render the dialog immediately into a transparent controller, so add it over your content with
+`overlay` and remove it when the callback fires. They take a `NepaliDialogOptions` for the chrome and
+a separate `calendarOptions` for the calendar inside, which is why the wrapper above surfaces
+`showEnglishDate`, `initialCalendarSystem`, `showCalendarSystemToggle` and `showAdjacentMonthDays` as
+its own properties. `tonalElevation` is ignored by the full-screen variant, which has no floating
+surface. Neither reports a useful inline height, so the wrapper discards `onHeightChange`.
+
+Do not wrap either one in a `sheet` or a `fullScreenCover`. The dialog already covers the screen, and
+a modal presentation around it closes out of step with it.
 
 ```swift
 struct DialogExample: View {
@@ -1193,31 +1196,35 @@ struct DialogExample: View {
             Button("Open full-screen dialog") { showingFullScreen = true }
             Text(confirmed.map { "\($0.year)/\($0.month)/\($0.dayOfMonth)" } ?? "none")
         }
-        .fullScreenCover(isPresented: $showing) {
-            NepaliDatePickerDialogView(
-                initialSelectedDate: SimpleDate(year: 2081, month: 3, dayOfMonth: 5),
-                confirmText: "OK",
-                dismissText: "Cancel",
-                onConfirm: { date in
-                    confirmed = date
-                    showing = false
-                },
-                onDismiss: { showing = false }
-            )
-            .ignoresSafeArea()
+        .overlay {
+            if showing {
+                NepaliDatePickerDialogView(
+                    initialSelectedDate: SimpleDate(year: 2081, month: 3, dayOfMonth: 5),
+                    confirmText: "OK",
+                    dismissText: "Cancel",
+                    onConfirm: { date in
+                        confirmed = date
+                        showing = false
+                    },
+                    onDismiss: { showing = false }
+                )
+                .ignoresSafeArea()
+            }
         }
-        .fullScreenCover(isPresented: $showingFullScreen) {
-            NepaliDatePickerDialogView(
-                initialSelectedDate: nil,
-                fullScreen: true,
-                title: "Pick a date",
-                onConfirm: { date in
-                    confirmed = date
-                    showingFullScreen = false
-                },
-                onDismiss: { showingFullScreen = false }
-            )
-            .ignoresSafeArea()
+        .overlay {
+            if showingFullScreen {
+                NepaliDatePickerDialogView(
+                    initialSelectedDate: nil,
+                    fullScreen: true,
+                    title: "Pick a date",
+                    onConfirm: { date in
+                        confirmed = date
+                        showingFullScreen = false
+                    },
+                    onDismiss: { showingFullScreen = false }
+                )
+                .ignoresSafeArea()
+            }
         }
     }
 }

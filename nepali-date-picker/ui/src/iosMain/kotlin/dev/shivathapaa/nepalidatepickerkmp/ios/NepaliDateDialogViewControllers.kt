@@ -29,8 +29,10 @@ import platform.UIKit.UIViewController
 /**
  * Hosts [NepaliDatePickerDialog] with a calendar inside it.
  *
- * The controller renders the dialog immediately, so present it modally from Swift (a SwiftUI
- * `fullScreenCover` works well) and dismiss it when [onDismiss] fires.
+ * The controller renders the dialog immediately and stays transparent behind it, so add it over the
+ * app's own content from Swift (a SwiftUI `overlay` works well) and remove it when [onDismiss]
+ * fires. Do not wrap it in a `sheet` or a `fullScreenCover`, which would close out of step with the
+ * dialog.
  *
  * @param initialSelectedDate date selected when the dialog opens, or `null` for no selection.
  * @param locale language, date format and digit script the dialog renders with.
@@ -55,7 +57,7 @@ fun NepaliDatePickerDialogViewController(
     onHeightChange: (Float) -> Unit,
     onConfirm: (CustomCalendar?) -> Unit,
     onDismiss: () -> Unit
-): UIViewController = nepaliPickerViewController(onHeightChange) {
+): UIViewController = nepaliDialogViewController(onHeightChange) {
     val opts = options ?: NepaliDialogOptions()
     val calendar = calendarOptions ?: NepaliCalendarOptions()
     val state = remember {
@@ -105,6 +107,8 @@ fun NepaliDatePickerDialogViewController(
 /**
  * Hosts [NepaliDatePickerFullScreenDialog], the edge-to-edge variant of the dialog.
  *
+ * Add it over the app's own content, the same way [NepaliDatePickerDialogViewController] is added.
+ *
  * @param initialSelectedDate date selected when the dialog opens, or `null` for no selection.
  * @param locale language, date format and digit script the dialog renders with.
  * @param yearRangeStart first Bikram Sambat year the picker allows.
@@ -128,7 +132,7 @@ fun NepaliDatePickerFullScreenDialogViewController(
     onHeightChange: (Float) -> Unit,
     onConfirm: (CustomCalendar?) -> Unit,
     onDismiss: () -> Unit
-): UIViewController = nepaliPickerViewController(onHeightChange) {
+): UIViewController = nepaliDialogViewController(onHeightChange) {
     val opts = options ?: NepaliDialogOptions()
     val calendar = calendarOptions ?: NepaliCalendarOptions()
     val state = remember {

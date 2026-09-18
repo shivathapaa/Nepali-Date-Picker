@@ -4,6 +4,9 @@
 //
 //  The modal and full-screen dialog variants, presented over SwiftUI.
 //
+//  Each one goes into an overlay: the hosted controller is transparent and the dialog paints its own
+//  scrim, so it needs no presentation of its own.
+//
 
 import SwiftUI
 import nepali_date_picker
@@ -61,59 +64,65 @@ struct DialogsScreen: View {
             .padding(.vertical, 16)
         }
         .navigationTitle("Dialogs")
-        .fullScreenCover(isPresented: $showingDialog) {
-            NepaliDatePickerDialogView(
-                initialSelectedDate: preselectedDate,
-                onConfirm: { date in
-                    confirmed = date
-                    showingDialog = false
-                },
-                onDismiss: { showingDialog = false }
-            )
-            .ignoresSafeArea()
-            .background(.clear)
+        .overlay {
+            if showingDialog {
+                NepaliDatePickerDialogView(
+                    initialSelectedDate: preselectedDate,
+                    onConfirm: { date in
+                        confirmed = date
+                        showingDialog = false
+                    },
+                    onDismiss: { showingDialog = false }
+                )
+                .ignoresSafeArea()
+            }
         }
-        .fullScreenCover(isPresented: $showingFullScreen) {
-            NepaliDatePickerDialogView(
-                initialSelectedDate: nil,
-                fullScreen: true,
-                title: "Pick a date",
-                onConfirm: { date in
-                    confirmed = date
-                    showingFullScreen = false
-                },
-                onDismiss: { showingFullScreen = false }
-            )
-            .ignoresSafeArea()
+        .overlay {
+            if showingFullScreen {
+                NepaliDatePickerDialogView(
+                    initialSelectedDate: nil,
+                    fullScreen: true,
+                    title: "Pick a date",
+                    onConfirm: { date in
+                        confirmed = date
+                        showingFullScreen = false
+                    },
+                    onDismiss: { showingFullScreen = false }
+                )
+                .ignoresSafeArea()
+            }
         }
-        .fullScreenCover(isPresented: $showingNepaliDialog) {
-            NepaliDatePickerDialogView(
-                initialSelectedDate: preselectedDate,
-                locale: SampleDefaults.nepali,
-                confirmText: "ठिक छ",
-                dismissText: "रद्द",
-                onConfirm: { date in
-                    confirmed = date
-                    showingNepaliDialog = false
-                },
-                onDismiss: { showingNepaliDialog = false }
-            )
-            .ignoresSafeArea()
+        .overlay {
+            if showingNepaliDialog {
+                NepaliDatePickerDialogView(
+                    initialSelectedDate: preselectedDate,
+                    locale: SampleDefaults.nepali,
+                    confirmText: "ठिक छ",
+                    dismissText: "रद्द",
+                    onConfirm: { date in
+                        confirmed = date
+                        showingNepaliDialog = false
+                    },
+                    onDismiss: { showingNepaliDialog = false }
+                )
+                .ignoresSafeArea()
+            }
         }
-        .fullScreenCover(isPresented: $showingSwitchableDialog) {
-            NepaliDatePickerDialogView(
-                initialSelectedDate: SimpleDate(year: 2083, month: 4, dayOfMonth: 15),
-                showEnglishDate: true,
-                showCalendarSystemToggle: true,
-                showAdjacentMonthDays: true,
-                onConfirm: { date in
-                    confirmed = date
-                    showingSwitchableDialog = false
-                },
-                onDismiss: { showingSwitchableDialog = false }
-            )
-            .ignoresSafeArea()
-            .background(.clear)
+        .overlay {
+            if showingSwitchableDialog {
+                NepaliDatePickerDialogView(
+                    initialSelectedDate: SimpleDate(year: 2083, month: 4, dayOfMonth: 15),
+                    showEnglishDate: true,
+                    showCalendarSystemToggle: true,
+                    showAdjacentMonthDays: true,
+                    onConfirm: { date in
+                        confirmed = date
+                        showingSwitchableDialog = false
+                    },
+                    onDismiss: { showingSwitchableDialog = false }
+                )
+                .ignoresSafeArea()
+            }
         }
     }
 }

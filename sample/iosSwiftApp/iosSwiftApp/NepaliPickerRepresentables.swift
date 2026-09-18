@@ -349,7 +349,7 @@ struct NepaliDateRangeFieldView: UIViewControllerRepresentable {
     func updateUIViewController(_ uiViewController: UIViewController, context: Context) {}
 }
 
-/// The modal dialog holding a calendar, presented full screen from SwiftUI.
+/// The modal dialog holding a calendar. It draws its own scrim, so put it in an `overlay`.
 struct NepaliDatePickerDialogView: UIViewControllerRepresentable {
     var onHeightChange: (CGFloat) -> Void = { _ in }
     var initialSelectedDate: SimpleDate?
