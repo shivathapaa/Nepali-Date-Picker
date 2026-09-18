@@ -258,7 +258,8 @@ fun NepaliDatePicker(
                 }
             } else {
                 null
-            }
+            },
+        displayedCalendarSystem = state.displayedCalendarSystem
     ) {
         SwitchableNepaliDateEntryContent(
             selectedDate = state.selectedDate,
@@ -304,6 +305,9 @@ internal fun NepaliDateEntryContainer(
     // Rides at the end of the title, or of the headline when there is no title. Either way it shares
     // a row that already exists, so the header never grows to hold it.
     calendarSystemToggle: (@Composable () -> Unit)? = null,
+    // The headline names a date in this calendar, so it cross-dissolves when the calendar changes
+    // instead of snapping while the grid below it dissolves.
+    displayedCalendarSystem: CalendarSystem,
     content: @Composable () -> Unit
 ) {
     val toggleInHeadline = if (title == null) calendarSystemToggle else null
@@ -334,7 +338,10 @@ internal fun NepaliDateEntryContainer(
                 ) {
                     if (headline != null) {
                         ProvideTextStyle(value = headlineTextStyle) {
-                            Box(modifier = Modifier.weight(1f)) {
+                            Box(
+                                modifier = Modifier.weight(1f)
+                                    .nepaliCalendarSwitchAppearance(displayedCalendarSystem)
+                            ) {
                                 headline()
                             }
                         }
@@ -591,7 +598,9 @@ private fun NepaliDatePicker(
         }
     }
 
-    Column {
+    // The month label, the grid and the year overlay all change together on a switch, so the whole
+    // block arrives as one.
+    Column(modifier = Modifier.nepaliCalendarSwitchAppearance(calendarSystem)) {
         NepaliMonthsNavigation(
             modifier = Modifier.padding(horizontal = DatePickerHorizontalPadding),
             isToday = isToday,

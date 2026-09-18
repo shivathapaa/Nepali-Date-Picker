@@ -604,6 +604,12 @@ NepaliCalendarSystemToggle(
 )
 ```
 
+Switching is animated: the headline, the month navigation and the grid fade and scale in together,
+so the change reads as the same day re-notated rather than as a new screen. A fade rather than a
+slide, because a horizontal slide is already month paging and a vertical one is already the
+calendar/typed-input toggle. Nothing to configure, and the platform's own "remove animations"
+setting suppresses it.
+
 The same two parameters exist on `NepaliDateRangePicker`, `NepaliDatePickerDocked`,
 `NepaliDatePickerWithEnglishDate` and `NepaliDateRangePickerWithEnglishDate`. The wheel and the text
 fields take `initialCalendarSystem` / `calendarSystem` instead, since they have no state holder to

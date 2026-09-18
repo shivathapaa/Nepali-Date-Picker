@@ -208,7 +208,8 @@ fun NepaliDateRangePicker(
                 }
             } else {
                 null
-            }
+            },
+        displayedCalendarSystem = state.displayedCalendarSystem
     ) {
         SwitchableNepaliDateRangeEntryContent(
             selectedNepaliStartDate = state.selectedStartNepaliDate,
@@ -403,7 +404,9 @@ private fun NepaliDateRangePicker(
         }
     }
 
-    Column {
+    // The month label, the grid and the year overlay all change together on a switch, so the whole
+    // block arrives as one.
+    Column(modifier = Modifier.nepaliCalendarSwitchAppearance(calendarSystem)) {
         if (showYearPickerAndMonthNavigation) {
             NepaliMonthsNavigation(
                 modifier = Modifier.padding(horizontal = DatePickerHorizontalPadding),
