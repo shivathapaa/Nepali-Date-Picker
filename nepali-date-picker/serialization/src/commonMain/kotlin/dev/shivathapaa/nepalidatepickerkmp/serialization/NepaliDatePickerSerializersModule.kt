@@ -10,17 +10,20 @@
 
 package dev.shivathapaa.nepalidatepickerkmp.serialization
 
+import dev.shivathapaa.nepalidatepickerkmp.data.CalendarSystem
 import dev.shivathapaa.nepalidatepickerkmp.data.CustomCalendar
+import dev.shivathapaa.nepalidatepickerkmp.data.MonthCalendar
 import dev.shivathapaa.nepalidatepickerkmp.data.NepaliMonthCalendar
 import dev.shivathapaa.nepalidatepickerkmp.data.SimpleDate
 import dev.shivathapaa.nepalidatepickerkmp.data.SimpleTime
 import kotlinx.serialization.modules.SerializersModule
 
 /**
- * Ready-to-register [SerializersModule] for all four data types.
+ * Ready-to-register [SerializersModule] for every data type the library publishes.
  *
  * Wires the default serializers - [SimpleDateSerializer] (string form),
- * [SimpleTimeSerializer], [CustomCalendarSerializer], [NepaliMonthCalendarSerializer].
+ * [SimpleTimeSerializer], [CustomCalendarSerializer], [NepaliMonthCalendarSerializer],
+ * [MonthCalendarSerializer] and [CalendarSystemSerializer].
  *
  * Usage with kotlinx-serialization-json:
  * ```
@@ -37,4 +40,6 @@ val NepaliDatePickerSerializersModule: SerializersModule = SerializersModule {
     contextual(SimpleTime::class, SimpleTimeSerializer)
     contextual(CustomCalendar::class, CustomCalendarSerializer)
     contextual(NepaliMonthCalendar::class, NepaliMonthCalendarSerializer)
+    contextual(MonthCalendar::class, MonthCalendarSerializer)
+    contextual(CalendarSystem::class, CalendarSystemSerializer)
 }

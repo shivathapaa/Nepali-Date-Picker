@@ -9,3 +9,8 @@ same expanded target matrix as `:core`.
 
 Serializers for the core calendar models. Register or reference these when persisting or
 transmitting Nepali Date Picker types through a `kotlinx-serialization` format.
+
+`NepaliDatePickerSerializersModule` binds every published type: `SimpleDate`, `SimpleTime`,
+`CustomCalendar`, `NepaliMonthCalendar`, `MonthCalendar` and `CalendarSystem`. A `CalendarSystem` is
+written as its `era` number, which is the form `CustomCalendarSerializer` already uses and is stable
+against reordering the enum.
