@@ -1,26 +1,27 @@
 name: Publish
 
+# One release triggers this, publish-npm.yml and publish-spm.yml in parallel. Each
+# gates on the test matrix independently; none gates on the others. A failed Maven
+# publish therefore does not stop npm or SPM, which is deliberate: both of those are
+# re-runnable, while a partial Maven deployment needs manual Central Portal cleanup.
 on:
   release:
     types: [released, prereleased]
 
 concurrency:
-  # Never cancel an in-flight publish — a half-cancelled deploy can leave a
-  # bundle hanging on Central Portal.
+  # A half-cancelled deploy can leave a bundle hanging on Central Portal.
   group: publish-${{ github.ref }}
   cancel-in-progress: false
 
 permissions:
   contents: read
 
-# Force JS-based actions onto Node 24 ahead of GitHub's June 2026 cutover. Only
-# needed for actions that haven't shipped a v5 (Node 24) major yet — currently
-# the gradle/actions/* family. Safe to drop once they release a Node-24 major.
+# Drop once the gradle/actions/* family ships a Node-24 major.
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
 jobs:
-  # ── Gate 1: tamper-check the Gradle wrapper before we execute it ───────────
+  # Tamper-check the wrapper before executing it.
   validate-wrapper:
     name: Validate Gradle wrapper
     runs-on: ubuntu-latest
@@ -29,7 +30,6 @@ jobs:
       - uses: actions/checkout@v5
       - uses: gradle/actions/wrapper-validation@v4
 
-  # ── Gate 2: release tag must match the version we're about to publish ─────
   verify-version:
     name: Verify release tag matches VERSION_NAME
     runs-on: ubuntu-latest
@@ -52,22 +52,16 @@ jobs:
           fi
           echo "✅ Tag '$tag' matches VERSION_NAME '$version_name'."
 
-  # ── Gate 3: every test on every host must pass ────────────────────────────
-  # Reusable workflow runs a fail-fast: false matrix across macOS, Linux and
-  # Windows. `needs: test` below waits for ALL matrix legs to succeed.
   test:
     needs: [validate-wrapper, verify-version]
     uses: ./.github/workflows/_test.yml
 
-  # ── Gate 4: publish only if every gate above is green ─────────────────────
   publish:
     name: Publish to Maven Central
     needs: test
     runs-on: macos-latest
     timeout-minutes: 60
-    # Optional manual approval before publishing — configure protection rules
-    # on the `maven-central` environment in repo settings if you want a human
-    # gate too. Without rules, the environment is permissive.
+    # Add protection rules to this environment in repo settings for a human gate.
     environment: maven-central
     steps:
       - uses: actions/checkout@v5
@@ -81,16 +75,18 @@ jobs:
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v4
 
-      - name: Publish :core and :ui in a single Gradle run
-        # Both modules share one Gradle invocation. If :core fails, :ui never
-        # runs (Gradle's default fail-fast). The remaining half-state risk is
-        # :core releasing successfully and :ui failing afterwards — Central
-        # Portal cleanup would then be manual. There is no Vanniktech task
-        # today that atomically promotes two deployments together.
+      - name: Publish :core, :ui and :serialization in a single Gradle run
+        # One invocation, so a failure stops the modules after it. Nothing promotes
+        # several Central deployments atomically, so a module releasing before a
+        # later one fails still needs manual cleanup.
+        #
+        # :serialization must stay listed. Its absence is why
+        # `nepali-date-picker-serialization` never reached Central before 3.2.0.
         run: |
           ./gradlew \
             :nepali-date-picker:core:publishAndReleaseToMavenCentral \
             :nepali-date-picker:ui:publishAndReleaseToMavenCentral \
+            :nepali-date-picker:serialization:publishAndReleaseToMavenCentral \
             --no-parallel \
             --stacktrace
         env:

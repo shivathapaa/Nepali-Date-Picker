@@ -6,12 +6,8 @@ name: Deploy demo and API docs to Pages
 #   https://shivathapaa.github.io/Nepali-Date-Picker/demo/  -> web-component showcase
 #   https://shivathapaa.github.io/Nepali-Date-Picker/api/   -> API reference
 #
-# Pages has one live environment per repo, so all three share a single artifact: the Compose demo
-# sits at the site root, the web-component showcase under demo/, and the Dokka HTML under api/.
-#
-# PRs do NOT trigger this - Pages has a single live environment and PR
-# previews would either burn quota or fight for the deploy lock. PR
-# branches still get a build via ci.yml, just no deploy.
+# One live Pages environment per repo, so all three share a single artifact. PRs do
+# not deploy for the same reason; they still get a build from ci.yml.
 
 on:
   push:
@@ -22,14 +18,12 @@ concurrency:
   group: pages-${{ github.ref }}
   cancel-in-progress: true
 
+# The deploy job adds what deploy-pages needs. The build job only reads, so it
+# cannot publish to the live environment.
 permissions:
   contents: read
-  pages: write
-  id-token: write
 
-# Force JS-based actions onto Node 24 ahead of GitHub's June 2026 cutover.
-# Only needed for actions that haven't shipped a v5 (Node 24) major yet -
-# currently the gradle/actions/* family.
+# Drop once the gradle/actions/* family ships a Node-24 major.
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
@@ -64,7 +58,10 @@ jobs:
         with:
           node-version: 24
           cache: npm
-          cache-dependency-path: js/package-lock.json
+          # `npm ci` runs in both workspaces, so both lockfiles key the cache.
+          cache-dependency-path: |
+            js/package-lock.json
+            sample/jsApp/package-lock.json
 
       - name: Read VERSION_NAME
         id: version
@@ -134,6 +131,10 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}

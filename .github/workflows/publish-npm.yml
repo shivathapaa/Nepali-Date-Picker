@@ -14,9 +14,10 @@ concurrency:
   group: publish-npm-${{ github.ref }}
   cancel-in-progress: false
 
+# The publish job adds the `id-token: write` trusted publishing needs. Granting it
+# here would hand it to the wrapper check and every leg of the test matrix too.
 permissions:
   contents: read
-  id-token: write
 
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
@@ -40,6 +41,10 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     environment: npm
+    permissions:
+      contents: read
+      # npm trusted publishing exchanges this for a registry token.
+      id-token: write
     steps:
       - uses: actions/checkout@v5
 
@@ -101,10 +106,8 @@ jobs:
         working-directory: js
         run: npm run verify:pack
 
-      # Both publishes skip a version that is already on the registry, which keeps the workflow
-      # re-runnable. Without it, a run that publishes core and then fails on the web component
-      # cannot be retried: the retry dies on core and the release has to be finished by hand. It
-      # also lets a GitHub release be cut for a version that was published manually.
+      # Skipping a version already on the registry keeps the workflow re-runnable: a run
+      # that publishes core then fails on the web component can simply be retried.
       - name: Publish @nepali-date-picker/core
         working-directory: js/packages/core
         run: |

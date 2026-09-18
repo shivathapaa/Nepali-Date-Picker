@@ -5,9 +5,7 @@ name: Test
 on:
   workflow_call:
 
-# Force JS-based actions onto Node 24 ahead of GitHub's June 2026 cutover. Only
-# needed for actions that haven't shipped a v5 (Node 24) major yet - currently
-# the gradle/actions/* family. Safe to drop once they release a Node-24 major.
+# Drop once the gradle/actions/* family ships a Node-24 major.
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
@@ -17,8 +15,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     timeout-minutes: 60
     strategy:
-      # Surface failures from every host even if one fails - needed so the
-      # release gate sees the complete picture.
+      # Surface failures from every host, so the release gate sees the whole picture.
       fail-fast: false
       matrix:
         os: [macos-latest, ubuntu-latest, windows-latest]
@@ -35,12 +32,10 @@ jobs:
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v4
 
-      # macOS: Apple natives + JVM + Android host + Wasm WASI node + sample.
-      # JS/Wasm-JS node tests run on the Linux leg only - they execute pure-Kotlin
-      # compiled to V8, so host OS adds no signal, and the macOS GitHub Actions
-      # Node runtime has historically flaked at `node:internal/timers` mid-suite.
-      # Wasm WASI node stays on macOS because it has no Linux-leg twin and is
-      # cheap.
+      # Apple natives + JVM + Android host + Wasm WASI node. The Android sample and
+      # the JS/Wasm-JS node tests are on the Linux leg instead: same tasks, cheaper
+      # minutes, and the macOS Node runtime has flaked at `node:internal/timers`.
+      # Wasm WASI stays here because it has no Linux-leg twin.
       - name: Build & test (macOS)
         if: runner.os == 'macOS'
         run: |
@@ -59,7 +54,6 @@ jobs:
             :nepali-date-picker:ui:macosArm64Test \
             :nepali-date-picker:ui:jvmTest \
             :nepali-date-picker:ui:checkBridgeCoverage \
-            :sample:androidApp:assembleDebug \
             --stacktrace
 
       # Linking the framework takes minutes, so the export snapshot runs only on macOS and only
@@ -68,14 +62,11 @@ jobs:
         if: runner.os == 'macOS'
         run: ./gradlew :nepali-date-picker:ui:checkIosApi --stacktrace
 
-      # The Swift sample is the only thing that exercises the bridge the way a consumer does, and
-      # the only place the Xcode-side requirements (arm64-only slices, the module name, the Compose
-      # plist key) can regress.
-      #
-      # The framework has to exist before xcodebuild starts: Xcode resolves the Swift module graph
-      # while planning the build, so one produced by a script phase during that same build arrives
-      # too late. checkIosApi above already assembled it, and the sample's own aggregate target
-      # keeps it fresh on later builds.
+      # The only check that exercises the bridge as a consumer does, and so the only
+      # place the Xcode-side requirements (arm64-only slices, module name, Compose
+      # plist key) can regress. The framework must exist before xcodebuild starts,
+      # since Xcode resolves the Swift module graph while planning; checkIosApi above
+      # already assembled it.
       - name: Build the Swift sample
         if: runner.os == 'macOS'
         working-directory: sample/iosSwiftApp
@@ -178,9 +169,8 @@ jobs:
           done
           exit "$failed"
 
-  # JavaScript packages: compile the Kotlin/JS engine into the npm package, then type-check, build,
-  # and unit-test the web component against it. The Kotlin wrapper's own logic is already covered by
-  # the Linux `jsNodeTest` leg above; this leg guards the npm packaging and the DOM component.
+  # Guards the npm packaging and the DOM component. The Kotlin wrapper's own logic is
+  # already covered by the Linux `jsNodeTest` leg.
   js:
     name: Build & test JS packages
     runs-on: ubuntu-latest
@@ -203,7 +193,10 @@ jobs:
         with:
           node-version: 24
           cache: npm
-          cache-dependency-path: js/package-lock.json
+          # Both workspaces this job installs, so either change invalidates the cache.
+          cache-dependency-path: |
+            js/package-lock.json
+            sample/jsApp/package-lock.json
 
       - name: Compile Kotlin/JS engine into the npm package
         run: ./gradlew :nepali-date-picker:core:packJsCore --stacktrace
