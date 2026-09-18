@@ -236,7 +236,7 @@ To add the nepali-date-picker library to your Android project, include the follo
 [versions]
 # ...
 kotlin = "2.4.10"
-nepaliDatePicker = "3.1.2" // Check for latest release
+nepaliDatePicker = "3.2.0" // Check for latest release
 
 [libraries]
 nepali-date-picker-ui = { module = "io.github.shivathapaa:nepali-date-picker-ui", version.ref = "nepaliDatePicker" }

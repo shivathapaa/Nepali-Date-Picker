@@ -143,7 +143,7 @@ Or declare it in your own `Package.swift`:
 
 ```swift
 dependencies: [
-    .package(url: "https://github.com/shivathapaa/Nepali-Date-Picker-SPM.git", from: "3.1.2")
+    .package(url: "https://github.com/shivathapaa/Nepali-Date-Picker-SPM.git", from: "3.2.0")
 ],
 targets: [
     .target(
