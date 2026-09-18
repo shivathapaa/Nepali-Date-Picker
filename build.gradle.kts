@@ -51,10 +51,16 @@ tasks.register("checkAll") {
  * Fast verification for local dev - JVM + native + JS/Wasm node, no browser.
  * Mirrors what `_test.yml` runs on the macOS CI leg so behaviour is consistent
  * between laptops without Chrome and the publish gate.
+ *
+ * Covers all three published modules. `:ui`'s Compose tests are listed only on the
+ * targets that can host them: `jsNodeTest` has no Skiko bindings under plain Node,
+ * and this module's Android host tests run without Robolectric, so
+ * `android.os.Build` is never populated. Both are environment limits, not gaps in
+ * the suite - the same tests pass on JVM, Apple native and macOS.
  */
 tasks.register("checkLocal") {
     group = "verification"
-    description = "Runs JVM + Android host + Apple native + JS/Wasm node tests (no browser, no Chrome required)."
+    description = "Runs JVM + Android host + Apple native + JS/Wasm node tests across every module (no browser, no Chrome required)."
     dependsOn(
         ":nepali-date-picker:core:jvmTest",
         ":nepali-date-picker:core:testAndroidHostTest",
@@ -62,7 +68,18 @@ tasks.register("checkLocal") {
         ":nepali-date-picker:core:macosArm64Test",
         ":nepali-date-picker:core:jsNodeTest",
         ":nepali-date-picker:core:wasmJsNodeTest",
-        ":nepali-date-picker:core:wasmWasiNodeTest"
+        ":nepali-date-picker:core:wasmWasiNodeTest",
+        ":nepali-date-picker:serialization:jvmTest",
+        ":nepali-date-picker:serialization:testAndroidHostTest",
+        ":nepali-date-picker:serialization:iosSimulatorArm64Test",
+        ":nepali-date-picker:serialization:macosArm64Test",
+        ":nepali-date-picker:serialization:jsNodeTest",
+        ":nepali-date-picker:serialization:wasmJsNodeTest",
+        ":nepali-date-picker:serialization:wasmWasiNodeTest",
+        ":nepali-date-picker:ui:jvmTest",
+        ":nepali-date-picker:ui:iosSimulatorArm64Test",
+        ":nepali-date-picker:ui:macosArm64Test",
+        ":nepali-date-picker:ui:checkBridgeCoverage"
     )
 }
 

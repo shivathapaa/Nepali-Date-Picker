@@ -50,7 +50,14 @@ jobs:
             :nepali-date-picker:core:jvmTest \
             :nepali-date-picker:core:testAndroidHostTest \
             :nepali-date-picker:core:wasmWasiNodeTest \
+            :nepali-date-picker:serialization:iosSimulatorArm64Test \
+            :nepali-date-picker:serialization:macosArm64Test \
+            :nepali-date-picker:serialization:jvmTest \
+            :nepali-date-picker:serialization:testAndroidHostTest \
+            :nepali-date-picker:serialization:wasmWasiNodeTest \
             :nepali-date-picker:ui:iosSimulatorArm64Test \
+            :nepali-date-picker:ui:macosArm64Test \
+            :nepali-date-picker:ui:jvmTest \
             :nepali-date-picker:ui:checkBridgeCoverage \
             :sample:androidApp:assembleDebug \
             --stacktrace
@@ -92,13 +99,23 @@ jobs:
             :nepali-date-picker:core:wasmJsNodeTest \
             :nepali-date-picker:core:wasmWasiNodeTest \
             :nepali-date-picker:core:linuxX64Test \
+            :nepali-date-picker:serialization:jvmTest \
+            :nepali-date-picker:serialization:testAndroidHostTest \
+            :nepali-date-picker:serialization:jsNodeTest \
+            :nepali-date-picker:serialization:wasmJsNodeTest \
+            :nepali-date-picker:serialization:wasmWasiNodeTest \
+            :nepali-date-picker:serialization:linuxX64Test \
             :sample:androidApp:assembleDebug \
             --stacktrace
 
       # Windows: mingwX64 only - everything else is covered elsewhere.
       - name: Build & test (Windows)
         if: runner.os == 'Windows'
-        run: ./gradlew :nepali-date-picker:core:mingwX64Test --stacktrace
+        run: |
+          ./gradlew \
+            :nepali-date-picker:core:mingwX64Test \
+            :nepali-date-picker:serialization:mingwX64Test \
+            --stacktrace
 
       - name: Upload test reports
         if: failure()

@@ -16,7 +16,17 @@
           <option value=":nepali-date-picker:core:macosArm64Test" />
           <option value=":nepali-date-picker:core:jsNodeTest" />
           <option value=":nepali-date-picker:core:wasmJsNodeTest" />
+          <option value=":nepali-date-picker:core:wasmWasiNodeTest" />
+          <option value=":nepali-date-picker:serialization:jvmTest" />
+          <option value=":nepali-date-picker:serialization:testAndroidHostTest" />
+          <option value=":nepali-date-picker:serialization:iosSimulatorArm64Test" />
+          <option value=":nepali-date-picker:serialization:macosArm64Test" />
+          <option value=":nepali-date-picker:serialization:jsNodeTest" />
+          <option value=":nepali-date-picker:serialization:wasmJsNodeTest" />
+          <option value=":nepali-date-picker:serialization:wasmWasiNodeTest" />
+          <option value=":nepali-date-picker:ui:jvmTest" />
           <option value=":nepali-date-picker:ui:iosSimulatorArm64Test" />
+          <option value=":nepali-date-picker:ui:macosArm64Test" />
           <option value=":nepali-date-picker:ui:checkBridgeCoverage" />
         </list>
       </option>
