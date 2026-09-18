@@ -17,14 +17,18 @@
 package dev.shivathapaa.nepalidatepickerkmp.calendar_model
 
 import dev.shivathapaa.nepalidatepickerkmp.annotation.Immutable
+import dev.shivathapaa.nepalidatepickerkmp.data.CalendarSystem
 import dev.shivathapaa.nepalidatepickerkmp.data.CustomCalendar
+import dev.shivathapaa.nepalidatepickerkmp.data.MonthCalendar
 import dev.shivathapaa.nepalidatepickerkmp.data.NepaliMonthCalendar
 import dev.shivathapaa.nepalidatepickerkmp.data.SimpleDate
 import dev.shivathapaa.nepalidatepickerkmp.data.daysInMonthMap
 import dev.shivathapaa.nepalidatepickerkmp.data.englishDateMap
 import dev.shivathapaa.nepalidatepickerkmp.data.nepaliDateMap
+import dev.shivathapaa.nepalidatepickerkmp.data.toSimpleDate
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.daysUntil
+import kotlinx.datetime.isoDayNumber
 
 @Immutable
 internal object DateConverters {
@@ -597,6 +601,164 @@ internal object DateConverters {
 
         return if (isEnglishLeapYear(year)) daysInMonthOfLeapYear[month] else daysInMonth[month]
     }
+
+    /**
+     * Grid geometry of a Gregorian month.
+     *
+     * The Gregorian counterpart of [calculateNepaliMonthDetails]. It needs neither a lookup table
+     * nor a cache: kotlinx-datetime answers the weekday of the first, and the rest is arithmetic.
+     */
+    fun calculateEnglishMonthDetails(englishYYYY: Int, englishMM: Int): MonthCalendar {
+        val totalDaysInMonth = getTotalDaysInEnglishMonth(englishYYYY, englishMM)
+        val firstDayOfMonth = weekdayOf(LocalDate(englishYYYY, englishMM, 1))
+        val lastDayOfMonth =
+            ((firstDayOfMonth + totalDaysInMonth - 1) % 7).let { if (it == 0) 7 else it }
+
+        return MonthCalendar(
+            calendarSystem = CalendarSystem.GREGORIAN,
+            year = englishYYYY,
+            month = englishMM,
+            totalDaysInMonth = totalDaysInMonth,
+            firstDayOfMonth = firstDayOfMonth,
+            lastDayOfMonth = lastDayOfMonth
+        )
+    }
+
+    /**
+     * A fully populated Gregorian [CustomCalendar] for a date given directly in the Gregorian
+     * calendar, without the round trip through Bikram Sambat that [convertToEnglishDate] performs.
+     *
+     * Derived fields use the same helpers as the Bikram Sambat side, so `dayOfWeek`, `weekOfMonth`
+     * and `weekOfYear` follow one definition across both calendars.
+     */
+    fun getEnglishCalendar(englishYYYY: Int, englishMM: Int, englishDD: Int): CustomCalendar {
+        val monthDetails = calculateEnglishMonthDetails(englishYYYY, englishMM)
+        require(englishDD in 1..monthDetails.totalDaysInMonth) {
+            "Day of Month $englishDD is out of bound. There is no $englishDD in $englishMM month."
+        }
+
+        val dayOfYear = englishDayOfYear(englishYYYY, englishMM, englishDD)
+        val dayOfWeek = ((monthDetails.firstDayOfMonth + englishDD - 1) % 7)
+            .let { if (it == 0) 7 else it }
+
+        return CustomCalendar(
+            year = englishYYYY,
+            month = englishMM,
+            dayOfMonth = englishDD,
+            era = CalendarSystem.GREGORIAN.era,
+            firstDayOfMonth = monthDetails.firstDayOfMonth,
+            lastDayOfMonth = monthDetails.lastDayOfMonth,
+            totalDaysInMonth = monthDetails.totalDaysInMonth,
+            dayOfWeekInMonth = (englishDD - 1) / 7 + 1,
+            dayOfWeek = dayOfWeek,
+            dayOfYear = dayOfYear,
+            weekOfMonth = calculateWeekOfMonth(englishDD, monthDetails.firstDayOfMonth),
+            weekOfYear = calculateWeekOfYear(
+                dayOfYear = dayOfYear,
+                firstDayOfYear = weekdayOf(LocalDate(englishYYYY, 1, 1))
+            )
+        )
+    }
+
+    /** Every day of a Gregorian month as a [CustomCalendar], in day order. */
+    fun englishCalendarsInMonth(englishYYYY: Int, englishMM: Int): List<CustomCalendar> {
+        val totalDaysInMonth = getTotalDaysInEnglishMonth(englishYYYY, englishMM)
+        val calendars = ArrayList<CustomCalendar>(totalDaysInMonth)
+        for (dayOfMonth in 1..totalDaysInMonth) {
+            calendars.add(getEnglishCalendar(englishYYYY, englishMM, dayOfMonth))
+        }
+        return calendars
+    }
+
+    /**
+     * The Bikram Sambat equivalent of every day of a Gregorian month, in day order, with `null` for
+     * days that predate the conversion anchor (English 1913-04-13).
+     *
+     * The pickers need this whenever Gregorian is the calendar on screen: each cell still resolves
+     * to a canonical Bikram Sambat date for selection and for the selectable-date predicate.
+     * Calling [convertToNepaliCalendar] per cell would pay its day-walk 28 to 31 times per month.
+     * This pays it once, for the month's first convertible day, then advances the date by one and
+     * reads each day back through the cached [getNepaliCalendar] path, so every element is
+     * identical to the one the Bikram Sambat grid builds for the same date.
+     */
+    fun nepaliCalendarsInEnglishMonth(englishYYYY: Int, englishMM: Int): List<CustomCalendar?> {
+        val totalDaysInMonth = getTotalDaysInEnglishMonth(englishYYYY, englishMM)
+        val calendars = ArrayList<CustomCalendar?>(totalDaysInMonth)
+
+        var nepaliDate: SimpleDate? = null
+        for (dayOfMonth in 1..totalDaysInMonth) {
+            nepaliDate = when {
+                nepaliDate != null -> nextNepaliDate(nepaliDate)
+                isEnglishDateInConversionRange(englishYYYY, englishMM, dayOfMonth) ->
+                    convertToNepaliCalendar(englishYYYY, englishMM, dayOfMonth).toSimpleDate()
+
+                else -> null
+            }
+            calendars.add(nepaliDate?.let { getNepaliCalendar(it) })
+        }
+        return calendars
+    }
+
+    /**
+     * The English equivalent of every day of a Bikram Sambat month, in day order.
+     *
+     * The mirror of [nepaliCalendarsInEnglishMonth], and the same one-walk-then-advance shape: the
+     * dual-date grid needs all 29 to 32 English days of a Bikram Sambat month, and
+     * [convertToEnglishDate] would walk from the year anchor for each one.
+     *
+     * Every day has an English equivalent, so unlike the reverse direction this never yields null.
+     * The tail of the supported Bikram Sambat table maps past [NepaliCalendarDefaults.EnglishYearRange],
+     * which is expected: that range bounds English *input*, not output.
+     */
+    fun englishCalendarsInNepaliMonth(nepaliYYYY: Int, nepaliMM: Int): List<CustomCalendar> {
+        val totalDaysInMonth = getTotalDaysInNepaliMonth(nepaliYYYY, nepaliMM)
+        val calendars = ArrayList<CustomCalendar>(totalDaysInMonth)
+
+        var englishDate = convertToEnglishDate(nepaliYYYY, nepaliMM, 1).toSimpleDate()
+        for (dayOfMonth in 1..totalDaysInMonth) {
+            if (dayOfMonth > 1) englishDate = nextEnglishDate(englishDate)
+            calendars.add(
+                getEnglishCalendar(englishDate.year, englishDate.month, englishDate.dayOfMonth)
+            )
+        }
+        return calendars
+    }
+
+    /** Whether the given English date has a Bikram Sambat equivalent in the supported table. */
+    fun isEnglishDateConvertible(englishYYYY: Int, englishMM: Int, englishDD: Int): Boolean =
+        isEnglishDateInConversionRange(englishYYYY, englishMM, englishDD)
+
+    /**
+     * The day after [date] in the Bikram Sambat calendar.
+     *
+     * Throws through [nepaliDaysInMonthArray] when [date] is in the table's last year and the roll
+     * would leave it.
+     */
+    private fun nextNepaliDate(date: SimpleDate): SimpleDate {
+        val totalDaysInMonth = nepaliDaysInMonthArray(date.year)[date.month]
+        return when {
+            date.dayOfMonth < totalDaysInMonth -> date.copy(dayOfMonth = date.dayOfMonth + 1)
+            date.month < 12 -> SimpleDate(date.year, date.month + 1, 1)
+            else -> SimpleDate(date.year + 1, 1, 1)
+        }
+    }
+
+    /** The day after [date] in the Gregorian calendar. */
+    private fun nextEnglishDate(date: SimpleDate): SimpleDate {
+        val totalDaysInMonth = getTotalDaysInEnglishMonth(date.year, date.month)
+        return when {
+            date.dayOfMonth < totalDaysInMonth -> date.copy(dayOfMonth = date.dayOfMonth + 1)
+            date.month < 12 -> SimpleDate(date.year, date.month + 1, 1)
+            else -> SimpleDate(date.year + 1, 1, 1)
+        }
+    }
+
+    private fun englishDayOfYear(year: Int, month: Int, dayOfMonth: Int): Int =
+        (1 until month).sumOf { getTotalDaysInEnglishMonth(year, it) } + dayOfMonth
+
+    // kotlinx-datetime numbers weekdays the ISO way (Monday = 1 ... Sunday = 7); this library
+    // numbers them from Sunday = 1 so both calendars share one weekday grid.
+    private fun weekdayOf(date: LocalDate): Int = date.dayOfWeek.isoDayNumber % 7 + 1
 
     /**
      * Helper function to check if the input Nepali date is within the conversion range

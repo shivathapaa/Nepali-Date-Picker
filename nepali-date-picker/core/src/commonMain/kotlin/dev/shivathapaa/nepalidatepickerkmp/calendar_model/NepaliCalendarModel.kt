@@ -23,6 +23,7 @@ import dev.shivathapaa.nepalidatepickerkmp.data.defaultDigitScript
 import dev.shivathapaa.nepalidatepickerkmp.data.NameFormat
 import dev.shivathapaa.nepalidatepickerkmp.data.NepaliDateFormatStyle
 import dev.shivathapaa.nepalidatepickerkmp.data.NepaliDateLocale
+import dev.shivathapaa.nepalidatepickerkmp.data.MonthCalendar
 import dev.shivathapaa.nepalidatepickerkmp.data.NepaliDatePickerLang
 import dev.shivathapaa.nepalidatepickerkmp.data.NepaliMonthCalendar
 import dev.shivathapaa.nepalidatepickerkmp.data.NepaliMonthName
@@ -160,6 +161,57 @@ class NepaliCalendarModel(val locale: NepaliDateLocale = NepaliDateLocale()) {
         return DateConverters.getNepaliCalendar(simpleNepaliDate = simpleNepaliDate)
     }
 
+    /** Grid geometry of a Gregorian month, the counterpart of [getNepaliMonth]. */
+    fun getEnglishMonth(englishYear: Int, englishMonth: Int): MonthCalendar {
+        return DateConverters.calculateEnglishMonthDetails(englishYear, englishMonth)
+    }
+
+    /** A fully populated Gregorian [CustomCalendar] for a date given in the Gregorian calendar. */
+    fun getEnglishCalendar(simpleEnglishDate: SimpleDate): CustomCalendar {
+        return DateConverters.getEnglishCalendar(
+            englishYYYY = simpleEnglishDate.year,
+            englishMM = simpleEnglishDate.month,
+            englishDD = simpleEnglishDate.dayOfMonth
+        )
+    }
+
+    /** Every day of a Gregorian month as a [CustomCalendar], in day order. */
+    fun getEnglishCalendarsInMonth(englishYear: Int, englishMonth: Int): List<CustomCalendar> {
+        return DateConverters.englishCalendarsInMonth(englishYear, englishMonth)
+    }
+
+    /**
+     * The Bikram Sambat equivalent of every day of a Gregorian month, in day order, with `null`
+     * for days before the conversion anchor.
+     *
+     * Converts the whole month in one pass instead of per day. Prefer this over calling
+     * [convertToNepaliCalendar] in a loop when rendering a Gregorian month grid.
+     */
+    fun getNepaliCalendarsInEnglishMonth(
+        englishYear: Int,
+        englishMonth: Int
+    ): List<CustomCalendar?> {
+        return DateConverters.nepaliCalendarsInEnglishMonth(englishYear, englishMonth)
+    }
+
+    /**
+     * The English equivalent of every day of a Nepali month, in day order.
+     *
+     * Converts the whole month in one pass. Prefer this over calling [convertToEnglishDate] in a
+     * loop when rendering a Nepali month grid that also shows English dates.
+     */
+    fun getEnglishCalendarsInNepaliMonth(
+        nepaliYear: Int,
+        nepaliMonth: Int
+    ): List<CustomCalendar> {
+        return DateConverters.englishCalendarsInNepaliMonth(nepaliYear, nepaliMonth)
+    }
+
+    /** Whether the given English date has a Bikram Sambat equivalent in the supported table. */
+    fun isEnglishDateConvertible(englishYYYY: Int, englishMM: Int, englishDD: Int): Boolean {
+        return DateConverters.isEnglishDateConvertible(englishYYYY, englishMM, englishDD)
+    }
+
     /**
      * Parses a date string into a [CustomCalendar].
      *
@@ -167,6 +219,34 @@ class NepaliCalendarModel(val locale: NepaliDateLocale = NepaliDateLocale()) {
      * @return a [CustomCalendar], or a `null` in case the parsing failed
      */
     fun parse(dateString: String): CustomCalendar? {
+        val date = parseDateString(dateString, maxDayOfMonth = 32) ?: return null
+
+        return try {
+            getNepaliCalendar(date)
+        } catch (_: IllegalArgumentException) {
+            CustomCalendar(date.year, date.month, date.dayOfMonth, 2, -1, -1, -1)
+        }
+    }
+
+    /**
+     * Parses a date string into an English [CustomCalendar], the counterpart of [parse].
+     *
+     * @param dateString a date string in the format "yyyyMMdd"
+     * @return a [CustomCalendar], or `null` in case the parsing failed. A syntactically valid date
+     *   that does not exist (April 31, say) comes back with `totalDaysInMonth = -1` rather than as
+     *   `null`, matching [parse], so callers can tell "not a date" from "not a real day".
+     */
+    fun parseEnglish(dateString: String): CustomCalendar? {
+        val date = parseDateString(dateString, maxDayOfMonth = 31) ?: return null
+
+        return try {
+            getEnglishCalendar(date)
+        } catch (_: IllegalArgumentException) {
+            CustomCalendar(date.year, date.month, date.dayOfMonth, 1, -1, -1, -1)
+        }
+    }
+
+    private fun parseDateString(dateString: String, maxDayOfMonth: Int): SimpleDate? {
         if (dateString.length != 8) {
             return null // Invalid format
         }
@@ -179,16 +259,11 @@ class NepaliCalendarModel(val locale: NepaliDateLocale = NepaliDateLocale()) {
             return null // Invalid numeric values
         }
 
-        if (month !in 1..12 || day !in 1..32) {
+        if (month !in 1..12 || day !in 1..maxDayOfMonth) {
             return null // Invalid month or day
         }
 
-
-        return try {
-            getNepaliCalendar(SimpleDate(year, month, day))
-        } catch (_: IllegalArgumentException) {
-            CustomCalendar(year, month, day, 2, -1, -1, -1)
-        }
+        return SimpleDate(year, month, day)
     }
 
     internal fun removeSlashDelimiter(dateWithDelimiter: String): String {

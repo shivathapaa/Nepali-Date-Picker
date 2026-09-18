@@ -21,6 +21,7 @@ import dev.shivathapaa.nepalidatepickerkmp.calendar_model.NepaliDateConverter
 import dev.shivathapaa.nepalidatepickerkmp.data.CustomCalendar
 import dev.shivathapaa.nepalidatepickerkmp.data.CustomDateTime
 import dev.shivathapaa.nepalidatepickerkmp.data.DigitScript
+import dev.shivathapaa.nepalidatepickerkmp.data.MonthCalendar
 import dev.shivathapaa.nepalidatepickerkmp.data.NameFormat
 import dev.shivathapaa.nepalidatepickerkmp.data.NepaliDateFormatStyle
 import dev.shivathapaa.nepalidatepickerkmp.data.NepaliDateLocale
@@ -136,6 +137,15 @@ private fun NepaliMonthCalendar.toJs(): NepaliMonthInfo = NepaliMonthInfo(
     daysFromStartOfWeekToFirstOfMonth = daysFromStartOfWeekToFirstOfMonth
 )
 
+private fun MonthCalendar.toJs(): NepaliMonthInfo = NepaliMonthInfo(
+    year = year,
+    month = month,
+    totalDaysInMonth = totalDaysInMonth,
+    firstDayOfMonth = firstDayOfMonth,
+    lastDayOfMonth = lastDayOfMonth,
+    daysFromStartOfWeekToFirstOfMonth = daysFromStartOfWeekToFirstOfMonth
+)
+
 private fun SimpleTime.toJs(): NepaliTime = NepaliTime(hour, minute, second, nanosecond)
 
 private fun CustomDateTime.toJs(): NepaliDateTime = NepaliDateTime(customCalendar.toJs(), simpleTime.toJs())
@@ -228,11 +238,70 @@ fun convertBsToAd(year: Int, month: Int, dayOfMonth: Int): NepaliDate =
 fun getBsCalendar(year: Int, month: Int, dayOfMonth: Int): NepaliDate =
     NepaliDateConverter.getNepaliCalendar(year, month, dayOfMonth).toJs()
 
+/** The fully described Gregorian calendar for an AD year / month / day. */
+@OptIn(ExperimentalJsExport::class)
+@JsExport
+fun getAdCalendar(year: Int, month: Int, dayOfMonth: Int): NepaliDate =
+    NepaliDateConverter.getEnglishCalendar(year, month, dayOfMonth).toJs()
+
 /** Month-grid metadata for a Bikram Sambat year / month. */
 @OptIn(ExperimentalJsExport::class)
 @JsExport
 fun getBsMonth(year: Int, month: Int): NepaliMonthInfo =
     NepaliDateConverter.getNepaliMonthCalendar(year, month).toJs()
+
+/** Month-grid metadata for a Gregorian year / month. */
+@OptIn(ExperimentalJsExport::class)
+@JsExport
+fun getAdMonth(year: Int, month: Int): NepaliMonthInfo =
+    NepaliDateConverter.getEnglishMonthCalendar(year, month).toJs()
+
+/**
+ * Every day of a Gregorian month as its Bikram Sambat equivalent, in day order.
+ *
+ * Converts the whole month in one pass, so prefer this over calling [convertAdToBs] per day when
+ * rendering a Gregorian grid that also shows Bikram Sambat dates. Days before the conversion anchor
+ * (AD 1913-04-13) come back as `null`.
+ */
+@OptIn(ExperimentalJsExport::class)
+@JsExport
+fun getBsCalendarsInAdMonth(year: Int, month: Int): Array<NepaliDate?> =
+    NepaliDateConverter.getNepaliCalendarsInEnglishMonth(year, month)
+        .map { it?.toJs() }
+        .toTypedArray()
+
+/**
+ * Every day of a Bikram Sambat month as its Gregorian equivalent, in day order.
+ *
+ * The mirror of [getBsCalendarsInAdMonth], and likewise a single conversion pass.
+ */
+@OptIn(ExperimentalJsExport::class)
+@JsExport
+fun getAdCalendarsInBsMonth(year: Int, month: Int): Array<NepaliDate> =
+    NepaliDateConverter.getEnglishCalendarsInNepaliMonth(year, month)
+        .map { it.toJs() }
+        .toTypedArray()
+
+/**
+ * Whether a Gregorian date has a Bikram Sambat equivalent.
+ *
+ * [getAdYearRange] alone is not a sufficient check: the calendars start mid-year relative to each
+ * other, so 1913-01-01 through 1913-04-12 sit inside the year range yet cannot be converted.
+ */
+@OptIn(ExperimentalJsExport::class)
+@JsExport
+fun isAdDateConvertible(year: Int, month: Int, dayOfMonth: Int): Boolean =
+    NepaliDateConverter.isEnglishDateConvertible(year, month, dayOfMonth)
+
+/**
+ * The Gregorian years a Gregorian-first calendar should offer for a Bikram Sambat year range, so
+ * both calendars cover the same span of real days.
+ */
+@OptIn(ExperimentalJsExport::class)
+@JsExport
+fun getAdYearRangeForBsYears(first: Int, last: Int): YearRange =
+    NepaliCalendarDefaults.gregorianYearRangeFor(IntRange(first, last))
+        .let { YearRange(it.first, it.last) }
 
 /** Total days in a Bikram Sambat month. */
 @OptIn(ExperimentalJsExport::class)

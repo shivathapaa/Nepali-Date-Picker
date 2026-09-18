@@ -109,12 +109,24 @@ enum class NepaliDatePickerLang {
         override val dateInputTitle: String = "Write Nepali Date"
         override val dateRangePickerTitle: String = "Select Nepali Dates"
         override val dateRangeInputTitle: String = "Write Nepali Dates"
+        override val englishDatePickerTitle: String = "Select English Date"
+        override val englishDateInputTitle: String = "Write English Date"
+        override val englishDateRangePickerTitle: String = "Select English Dates"
+        override val englishDateRangeInputTitle: String = "Write English Dates"
         override val cancelText: String = "Cancel"
         override val okText: String = "OK"
         override val today: String = "TODAY"
         override val startDate: String = "Start Date"
         override val endDate: String = "End Date"
         override val nepaliDate: String = "Nepali Date"
+        override val englishDate: String = "English Date"
+        override val bikramSambatShort: String = "B.S."
+        override val gregorianShort: String = "A.D."
+        override val switchToBikramSambatContentDescription: String =
+            "Show the Bikram Sambat calendar"
+        override val switchToGregorianContentDescription: String =
+            "Show the Gregorian calendar"
+        override val adjacentMonthDayContentDescription: String = "shows another month"
         override val errorInvalidMonthOrDay: String =
             "Month or day is incorrect, please enter a valid date"
         override val errorInvalidDay: String =
@@ -141,12 +153,24 @@ enum class NepaliDatePickerLang {
         override val dateInputTitle: String = "नेपाली मिति लेख्नुहोस्"
         override val dateRangePickerTitle: String = "नेपाली मितिहरु चयन गर्नुहोस्"
         override val dateRangeInputTitle: String = "नेपाली मितिहरु लेख्नुहोस्"
+        override val englishDatePickerTitle: String = "अङ्ग्रेजी मिति चयन गर्नुहोस्"
+        override val englishDateInputTitle: String = "अङ्ग्रेजी मिति लेख्नुहोस्"
+        override val englishDateRangePickerTitle: String = "अङ्ग्रेजी मितिहरु चयन गर्नुहोस्"
+        override val englishDateRangeInputTitle: String = "अङ्ग्रेजी मितिहरु लेख्नुहोस्"
         override val cancelText: String = "रद्द गर्नुहोस्"
         override val okText: String = "भयो"
         override val today: String = "आज"
         override val startDate: String = "सुरु मिति"
         override val endDate: String = "अन्त्य मिति"
         override val nepaliDate: String = "नेपाली मिति"
+        override val englishDate: String = "अङ्ग्रेजी मिति"
+        override val bikramSambatShort: String = "बि.सं."
+        override val gregorianShort: String = "ई.सं."
+        override val switchToBikramSambatContentDescription: String =
+            "बिक्रम सम्बत् क्यालेन्डर हेर्नुहोस्"
+        override val switchToGregorianContentDescription: String =
+            "ईस्वी सम्बत् क्यालेन्डर हेर्नुहोस्"
+        override val adjacentMonthDayContentDescription: String = "अर्को महिना देखाउँछ"
         override val errorInvalidMonthOrDay: String =
             "महिना वा दिन गलत छ, कृपया मान्य मिति लेख्नुहोस्"
         override val errorInvalidDay: String =
@@ -173,12 +197,30 @@ enum class NepaliDatePickerLang {
     abstract val dateInputTitle: String
     abstract val dateRangePickerTitle: String
     abstract val dateRangeInputTitle: String
+
+    /** The [datePickerTitle] family again, worded for a picker showing the Gregorian calendar. */
+    abstract val englishDatePickerTitle: String
+    abstract val englishDateInputTitle: String
+    abstract val englishDateRangePickerTitle: String
+    abstract val englishDateRangeInputTitle: String
     abstract val cancelText: String
     abstract val okText: String
     abstract val today: String
     abstract val startDate: String
     abstract val endDate: String
     abstract val nepaliDate: String
+    abstract val englishDate: String
+    abstract val bikramSambatShort: String
+    abstract val gregorianShort: String
+    abstract val switchToBikramSambatContentDescription: String
+    abstract val switchToGregorianContentDescription: String
+
+    /**
+     * Appended to a day cell borrowed from a neighbouring month, after the date itself. The date
+     * already names its own month, so this only has to say that choosing the cell moves the grid
+     * there, which the fading says to a sighted user and nothing says to a screen reader.
+     */
+    abstract val adjacentMonthDayContentDescription: String
     abstract val errorInvalidMonthOrDay: String
     abstract val errorInvalidDay: String
     abstract val errorDateOutOfYearRange: String

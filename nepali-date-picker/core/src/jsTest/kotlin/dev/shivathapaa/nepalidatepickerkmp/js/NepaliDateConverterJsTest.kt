@@ -65,6 +65,51 @@ class NepaliDateConverterJsTest {
     }
 
     @Test
+    fun mapsTheGregorianMonthHelpers() {
+        val september = getAdMonth(2026, 9)
+        assertEquals(2026, september.year)
+        assertEquals(9, september.month)
+        assertEquals(30, september.totalDaysInMonth)
+        // 2026-09-01 is a Tuesday, which this library numbers 3 (Sunday = 1).
+        assertEquals(3, september.firstDayOfMonth)
+        assertEquals(2, september.daysFromStartOfWeekToFirstOfMonth)
+
+        val direct = getAdCalendar(2026, 9, 17)
+        assertEquals(1, direct.era)
+        assertEquals(convertBsToAd(2083, 6, 1).dayOfMonth, direct.dayOfMonth)
+    }
+
+    @Test
+    fun mapsTheWholeMonthConverters() {
+        val bsDays = getBsCalendarsInAdMonth(2026, 9)
+        assertEquals(30, bsDays.size)
+        assertEquals(convertAdToBs(2026, 9, 17).year, bsDays[16]?.year)
+        assertEquals(convertAdToBs(2026, 9, 17).month, bsDays[16]?.month)
+        assertEquals(convertAdToBs(2026, 9, 17).dayOfMonth, bsDays[16]?.dayOfMonth)
+
+        // April 1913 starts before the conversion anchor, so its first twelve days map to nothing.
+        val april1913 = getBsCalendarsInAdMonth(1913, 4)
+        assertEquals(null, april1913[0])
+        assertEquals(1970, april1913[12]?.year)
+
+        val adDays = getAdCalendarsInBsMonth(2083, 6)
+        assertEquals(getTotalDaysInBsMonth(2083, 6), adDays.size)
+        assertEquals(2026, adDays[0].year)
+        assertEquals(9, adDays[0].month)
+    }
+
+    @Test
+    fun exposesTheConversionBounds() {
+        assertTrue(isAdDateConvertible(1913, 4, 13))
+        assertTrue(!isAdDateConvertible(1913, 4, 12))
+        assertTrue(!isAdDateConvertible(2044, 1, 1))
+
+        val derived = getAdYearRangeForBsYears(1970, 2100)
+        assertEquals(getAdYearRange().first, derived.first)
+        assertEquals(getAdYearRange().last, derived.last)
+    }
+
+    @Test
     fun todayResolvesThroughPlatformTimeZone() {
         val bs = getTodayBs()
         val ad = getTodayAd()

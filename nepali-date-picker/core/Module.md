@@ -11,6 +11,13 @@ calendars. The supported range (BS 1970..2100 / AD 1913..2043) is bounded by the
 
 Indexing is 1-based: month/weekday 1 = Baisakh / Sunday, 12 = Chaitra; `era` 1 = AD, 2 = BS.
 
+Both calendars are first class. Alongside the Bikram Sambat entry points there are Gregorian ones
+(`getEnglishCalendar`, `getEnglishMonthCalendar`, `parseEnglish`, `formatEnglishDate`), whole-month
+batch converters that resolve a month in a single pass, and `isEnglishDateConvertible` plus
+`minConvertibleEnglishDate` / `maxConvertibleEnglishDate` for the bounds. The two calendars start
+mid-year relative to each other, so `EnglishYearRange` alone is not a sufficient bound: AD 1913-01-01
+through 1913-04-12 sit inside the year range yet have no Bikram Sambat equivalent.
+
 # Package dev.shivathapaa.nepalidatepickerkmp.calendar_model
 
 The conversion and formatting engine. `NepaliCalendarModel` performs BS↔AD conversion, month-detail
@@ -22,6 +29,11 @@ lookup, formatting, and comparison; `NepaliDateConverter` is the public facade o
 Immutable calendar models (`CustomCalendar`, `SimpleDate`, `SimpleTime`, `NepaliMonthCalendar`),
 locale (`NepaliDateLocale`), digit scripts, and the `NepaliDateFormatter` contract that drives
 locale-aware rendering.
+
+`CalendarSystem` is the named form of the `era` integer (1 = AD, 2 = BS) and `MonthCalendar` is the
+calendar-tagged counterpart of `NepaliMonthCalendar`, so month geometry can be handled without
+knowing which calendar produced it. Use `toMonthCalendar` and `toNepaliMonthCalendar` to move between
+the two.
 
 # Package dev.shivathapaa.nepalidatepickerkmp.holiday
 

@@ -21,6 +21,7 @@ import dev.shivathapaa.nepalidatepickerkmp.annotation.Immutable
 import dev.shivathapaa.nepalidatepickerkmp.data.CustomCalendar
 import dev.shivathapaa.nepalidatepickerkmp.data.CustomDateTime
 import dev.shivathapaa.nepalidatepickerkmp.data.DigitScript
+import dev.shivathapaa.nepalidatepickerkmp.data.MonthCalendar
 import dev.shivathapaa.nepalidatepickerkmp.data.NameFormat
 import dev.shivathapaa.nepalidatepickerkmp.data.NepaliDateLocale
 import dev.shivathapaa.nepalidatepickerkmp.data.NepaliDatePickerLang
@@ -198,6 +199,91 @@ object NepaliDateConverter {
         nepaliYear: Int, nepaliMonth: Int
     ): NepaliMonthCalendar {
         return calendarModel.getNepaliMonth(nepaliYear, nepaliMonth)
+    }
+
+    /**
+     * This function gives particular English month details, the Gregorian counterpart of
+     * [getNepaliMonthCalendar].
+     *
+     * @param englishYear takes value between [NepaliCalendarDefaults.EnglishYearRange]
+     * @param englishMonth takes value between 1 to 12
+     *
+     * @return [MonthCalendar] using [englishYear] and [englishMonth]
+     */
+    fun getEnglishMonthCalendar(englishYear: Int, englishMonth: Int): MonthCalendar {
+        return calendarModel.getEnglishMonth(englishYear, englishMonth)
+    }
+
+    /**
+     * Returns the English calendar representation for a specific English date.
+     *
+     * Unlike [convertNepaliToEnglish], which starts from a Bikram Sambat date, this takes the
+     * Gregorian date directly and fills in the same derived fields (day of week, day of year,
+     * week of month and week of year) that the Bikram Sambat calendars carry.
+     *
+     * @param englishYYYY The English year (e.g., 2026).
+     * @param englishMM The English month (1 for January, 12 for December).
+     * @param englishDD The day of the month.
+     * @throws IllegalArgumentException if the month or day provided is invalid.
+     */
+    fun getEnglishCalendar(englishYYYY: Int, englishMM: Int, englishDD: Int): CustomCalendar {
+        return calendarModel.getEnglishCalendar(SimpleDate(englishYYYY, englishMM, englishDD))
+    }
+
+    /**
+     * Every day of an English month as a [CustomCalendar], in day order.
+     *
+     * @param englishYear takes value between [NepaliCalendarDefaults.EnglishYearRange]
+     * @param englishMonth takes value between 1 to 12
+     */
+    fun getEnglishCalendarsInMonth(englishYear: Int, englishMonth: Int): List<CustomCalendar> {
+        return calendarModel.getEnglishCalendarsInMonth(englishYear, englishMonth)
+    }
+
+    /**
+     * The Nepali equivalent of every day of an English month, in day order, with `null` for days
+     * before [NepaliCalendarDefaults.minConvertibleEnglishDate].
+     *
+     * Converts the whole month in one pass, so prefer this over calling [convertEnglishToNepali] in
+     * a loop when you need a full English month mapped to Bikram Sambat (for example, to render an
+     * English month grid that also shows Nepali dates).
+     *
+     * @param englishYear takes value between [NepaliCalendarDefaults.EnglishYearRange]
+     * @param englishMonth takes value between 1 to 12
+     */
+    fun getNepaliCalendarsInEnglishMonth(
+        englishYear: Int,
+        englishMonth: Int
+    ): List<CustomCalendar?> {
+        return calendarModel.getNepaliCalendarsInEnglishMonth(englishYear, englishMonth)
+    }
+
+    /**
+     * The English equivalent of every day of a Nepali month, in day order.
+     *
+     * Converts the whole month in one pass, so prefer this over calling [convertNepaliToEnglish] in
+     * a loop when you need a full Nepali month mapped to English (for example, to render a Nepali
+     * month grid that also shows English dates).
+     *
+     * @param nepaliYear takes value between [NepaliCalendarDefaults.NepaliYearRange]
+     * @param nepaliMonth takes value between 1 to 12
+     */
+    fun getEnglishCalendarsInNepaliMonth(
+        nepaliYear: Int,
+        nepaliMonth: Int
+    ): List<CustomCalendar> {
+        return calendarModel.getEnglishCalendarsInNepaliMonth(nepaliYear, nepaliMonth)
+    }
+
+    /**
+     * Whether an English date has a Nepali equivalent in the supported conversion table.
+     *
+     * [NepaliCalendarDefaults.EnglishYearRange] alone is not a sufficient check: the calendars start
+     * mid-year relative to each other, so 1913-01-01 through 1913-04-12 sit inside the year range
+     * yet cannot be converted.
+     */
+    fun isEnglishDateConvertible(englishYYYY: Int, englishMM: Int, englishDD: Int): Boolean {
+        return calendarModel.isEnglishDateConvertible(englishYYYY, englishMM, englishDD)
     }
 
     /**
