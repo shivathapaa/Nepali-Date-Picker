@@ -18,7 +18,22 @@ jobs:
       # Surface failures from every host, so the release gate sees the whole picture.
       fail-fast: false
       matrix:
-        os: [macos-latest, ubuntu-latest, windows-latest]
+        # minimum-tests is a floor on the test cases each leg must actually execute. Adding tests
+        # never trips it; a module or target silently dropping out of the run above does, which is
+        # the failure a green-but-empty suite would otherwise hide from the release gate.
+        #
+        # Each floor sits just under the leg's total, close enough that losing even its smallest
+        # task falls below it. A floor set any lower would let a dropped target pass. Totals when
+        # last measured, on 3.3.0: macOS 3658, Linux 3511, Windows 575; the smallest task on every
+        # leg is a :serialization target at 64 cases. Re-measure and raise these when the suite
+        # changes: a leg's total is the sum of the tasks its `run` block below lists.
+        include:
+          - os: macos-latest
+            minimum-tests: 3596
+          - os: ubuntu-latest
+            minimum-tests: 3450
+          - os: windows-latest
+            minimum-tests: 515
     steps:
       - name: Check out code
         uses: actions/checkout@v5
@@ -104,6 +119,31 @@ jobs:
       - name: Build & test (Windows)
         if: runner.os == 'Windows'
         run: ./gradlew :nepali-date-picker:core:mingwX64Test :nepali-date-picker:serialization:mingwX64Test --stacktrace
+
+      # A Gradle test task whose sources stopped being wired reports success, so the suite has to
+      # be counted rather than trusted.
+      - name: Verify the tests actually ran
+        shell: bash
+        env:
+          MINIMUM_TESTS: ${{ matrix.minimum-tests }}
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import glob, os, re, sys
+          minimum = int(os.environ["MINIMUM_TESTS"])
+          paths = glob.glob("**/build/test-results/**/*.xml", recursive=True)
+          total = 0
+          for path in paths:
+              with open(path, encoding="utf-8", errors="replace") as handle:
+                  total += len(re.findall(r"<testcase ", handle.read()))
+          print(f"{total} test cases across {len(paths)} result files")
+          if total < minimum:
+              print(
+                  f"::error::Only {total} test cases ran on this host, expected at least {minimum}. "
+                  "A module or target has stopped running; a release must not be published from this."
+              )
+              sys.exit(1)
+          PY
 
       - name: Upload test reports
         if: failure()

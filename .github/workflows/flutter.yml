@@ -1,0 +1,132 @@
+name: Flutter
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'flutter/**'
+      - 'nepali-date-picker/**'
+      - 'build-logic/**'
+      - 'gradle/**'
+      - '.github/workflows/flutter.yml'
+  pull_request:
+    paths:
+      - 'flutter/**'
+      - 'nepali-date-picker/**'
+      - 'build-logic/**'
+      - 'gradle/**'
+      - '.github/workflows/flutter.yml'
+
+concurrency:
+  group: flutter-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  validate-wrapper:
+    name: Validate Gradle wrapper
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v5
+      - uses: gradle/actions/wrapper-validation@v4
+
+  analyze-and-test:
+    name: Analyze, test and build the Android example
+    needs: validate-wrapper
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    defaults:
+      run:
+        working-directory: flutter/nepali_date_picker_kmp
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v5
+        with:
+          distribution: 'zulu'
+          java-version: 21
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Resolve packages
+        run: flutter pub get
+
+      - name: Analyze
+        run: flutter analyze
+
+      - name: Unit tests
+        run: flutter test
+
+      - name: Generated bridge is current
+        run: |
+          dart run pigeon --input pigeons/messages.dart
+          git diff --exit-code -- lib/src/messages.g.dart \
+            android/src/main/kotlin/dev/shivathapaa/nepali_date_picker_kmp/Messages.g.kt \
+            ios/nepali_date_picker_kmp/Sources/nepali_date_picker_kmp/Messages.g.swift
+
+      - name: Publish the wrapped library to mavenLocal
+        working-directory: .
+        run: ./gradlew :nepali-date-picker:core:publishToMavenLocal :nepali-date-picker:ui:publishToMavenLocal
+
+      - name: Build the example APK
+        working-directory: flutter/nepali_date_picker_kmp/example
+        run: flutter build apk --debug
+
+      # The example build is what writes example/android/local.properties, which
+      # the plugin's own Gradle build reads, so the host tests run after it.
+      - name: Host unit tests
+        working-directory: .
+        run: >
+          ./gradlew -p flutter/nepali_date_picker_kmp/example/android
+          :nepali_date_picker_kmp:testDebugUnitTest
+
+      - name: Analyze, test and build the sample showcase
+        working-directory: sample/flutterApp
+        run: |
+          flutter pub get
+          flutter analyze
+          flutter test
+          flutter build apk --debug
+
+  build-ios-example:
+    name: Build the iOS example
+    needs: validate-wrapper
+    runs-on: macos-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v5
+        with:
+          distribution: 'zulu'
+          java-version: 21
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Stage the Kotlin framework
+        run: flutter/nepali_date_picker_kmp/tool/stage_ios_framework.sh
+
+      - name: Build the example without signing
+        working-directory: flutter/nepali_date_picker_kmp/example
+        run: |
+          flutter pub get
+          flutter build ios --debug --no-codesign

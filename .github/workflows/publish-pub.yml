@@ -1,0 +1,82 @@
+name: Publish pub.dev
+
+on:
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Preview only (dart pub publish --dry-run), do not actually publish'
+        type: boolean
+        default: false
+  release:
+    types: [released, prereleased]
+
+concurrency:
+  group: publish-pub-${{ github.ref }}
+  cancel-in-progress: false
+
+# The publish job adds the `id-token: write` pub.dev automated publishing
+# needs. Granting it here would hand it to the wrapper check and every leg of
+# the test matrix too.
+permissions:
+  contents: read
+
+jobs:
+  validate-wrapper:
+    name: Validate Gradle wrapper
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v5
+      - uses: gradle/actions/wrapper-validation@v4
+
+  test:
+    needs: validate-wrapper
+    uses: ./.github/workflows/_test.yml
+
+  publish:
+    name: Publish to pub.dev
+    needs: test
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    environment: pub
+    permissions:
+      contents: read
+      # pub.dev automated publishing exchanges this for a registry token.
+      id-token: write
+    defaults:
+      run:
+        working-directory: flutter/nepali_date_picker_kmp
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Verify the tag matches every version source
+        working-directory: .
+        run: |
+          tag='${{ github.event.release.tag_name || github.ref_name }}'
+          gradle_version=$(grep '^VERSION_NAME=' gradle.properties | cut -d= -f2)
+          pubspec_version=$(grep '^version:' flutter/nepali_date_picker_kmp/pubspec.yaml | awk '{print $2}')
+          echo "tag=$tag gradle=$gradle_version pubspec=$pubspec_version"
+          test "$tag" = "$gradle_version"
+          test "$tag" = "$pubspec_version"
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Pin the iOS binary target to the released framework
+        run: tool/pin_ios_framework.sh '${{ github.event.release.tag_name || github.ref_name }}'
+
+      - name: Resolve packages and analyze
+        run: |
+          flutter pub get
+          flutter analyze lib
+
+      - name: Dry run
+        if: ${{ inputs.dry_run }}
+        run: dart pub publish --dry-run
+
+      - name: Publish
+        if: ${{ !inputs.dry_run }}
+        run: dart pub publish --force
