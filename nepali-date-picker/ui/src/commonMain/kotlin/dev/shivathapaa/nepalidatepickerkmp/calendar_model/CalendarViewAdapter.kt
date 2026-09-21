@@ -189,6 +189,33 @@ internal fun CalendarViewAdapter.secondaryMonthLabel(
     return if (first.month == last.month) "$firstName $year" else "$firstName/$lastName $year"
 }
 
+/**
+ * [CalendarDay.secondary] written out in full, for the screen reader description of a dual-date
+ * cell. The cell draws two numbers, and without this only the displayed one would be spoken.
+ */
+internal fun CalendarViewAdapter.formatSecondary(
+    secondaryDate: CustomCalendar,
+    calendarModel: NepaliCalendarModel,
+    locale: NepaliDateLocale
+): String = when (calendarSystem) {
+    // The secondary calendar is whichever one is not on screen.
+    CalendarSystem.BIKRAM_SAMBAT -> calendarModel.formatEnglishDate(
+        year = secondaryDate.year,
+        month = secondaryDate.month,
+        dayOfMonth = secondaryDate.dayOfMonth,
+        dayOfWeek = secondaryDate.dayOfWeek,
+        locale = locale
+    )
+
+    CalendarSystem.GREGORIAN -> calendarModel.formatNepaliDate(
+        year = secondaryDate.year,
+        month = secondaryDate.month,
+        dayOfMonth = secondaryDate.dayOfMonth,
+        dayOfWeek = secondaryDate.dayOfWeek,
+        locale = locale
+    )
+}
+
 /** [canonicalDate] pulled inside the supported Bikram Sambat conversion table. */
 internal fun NepaliCalendarModel.coerceIntoConversionTable(canonicalDate: SimpleDate): SimpleDate {
     val year = canonicalDate.year.coerceIn(NepaliCalendarDefaults.NepaliYearRange)
@@ -200,5 +227,25 @@ internal fun NepaliCalendarModel.coerceIntoConversionTable(canonicalDate: Simple
 
 /** The Bikram Sambat date a cell selects, as a [SimpleDate], or `null` when it has none. */
 internal fun CalendarDay.canonicalDate(): SimpleDate? = canonical?.toSimpleDate()
+
+/**
+ * Whether [canonicalDate] falls between [rangeStart] and [rangeEnd], both endpoints included.
+ *
+ * Answers `false` for a cell with no Bikram Sambat date and for a selection missing either end.
+ * All three dates are Bikram Sambat, so the answer holds whichever calendar is on screen.
+ */
+internal fun isInSelectedRange(
+    canonicalDate: CustomCalendar?,
+    rangeStart: CustomCalendar?,
+    rangeEnd: CustomCalendar?,
+    compareDates: (CustomCalendar, Int, Int, Int) -> Int
+): Boolean {
+    if (canonicalDate == null || rangeStart == null || rangeEnd == null) return false
+    val isOnOrAfterStart = compareDates(
+        canonicalDate, rangeStart.year, rangeStart.month, rangeStart.dayOfMonth
+    ) >= 0
+    if (!isOnOrAfterStart) return false
+    return compareDates(canonicalDate, rangeEnd.year, rangeEnd.month, rangeEnd.dayOfMonth) <= 0
+}
 
 internal const val MonthsInYear = 12

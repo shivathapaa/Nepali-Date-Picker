@@ -21,6 +21,7 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.runComposeUiTest
 import dev.shivathapaa.nepalidatepickerkmp.annotations.ExperimentalNepaliDatePickerApi
 import dev.shivathapaa.nepalidatepickerkmp.calendar_model.NepaliCalendarModel
+import dev.shivathapaa.nepalidatepickerkmp.calendar_model.formatSecondary
 import dev.shivathapaa.nepalidatepickerkmp.calendar_model.secondaryMonthLabel
 import dev.shivathapaa.nepalidatepickerkmp.data.CalendarSystem
 import dev.shivathapaa.nepalidatepickerkmp.data.NameFormat
@@ -44,12 +45,23 @@ class NepaliDateRangePickerWithEnglishDateTest {
 
     /**
      * A dual-date cell draws two numbers, so matching on text alone can find the small Gregorian one
-     * first. The full spoken date belongs to the cell and names exactly one day.
+     * first. The full spoken date belongs to the cell and names exactly one day, in both calendars.
      */
-    private fun descriptionOf(year: Int, month: Int, dayOfMonth: Int): String = adapter.format(
-        adapter.daysIn(adapter.monthOf(year, month))[dayOfMonth - 1].displayed,
-        DualLocale.copy(dateFormat = NepaliDateFormatStyle.FULL)
-    )
+    private fun descriptionOf(year: Int, month: Int, dayOfMonth: Int): String {
+        val day = adapter.daysIn(adapter.monthOf(year, month), withSecondary = true)[dayOfMonth - 1]
+        val displayed = adapter.format(
+            day.displayed,
+            DualLocale.copy(dateFormat = NepaliDateFormatStyle.FULL)
+        )
+        val secondary = assertNotNull(day.secondary).let {
+            adapter.formatSecondary(
+                secondaryDate = it,
+                calendarModel = NepaliCalendarModel(DualLocale),
+                locale = DualLocale.copy(dateFormat = NepaliDateFormatStyle.LONG)
+            )
+        }
+        return "$displayed, $secondary"
+    }
 
     @Test
     fun itRendersTheDaysOfTheDisplayedMonth() = runComposeUiTest {
@@ -89,6 +101,28 @@ class NepaliDateRangePickerWithEnglishDateTest {
 
         // The second line under the year button names the Gregorian months Shrawan 2083 straddles.
         onNodeWithText(secondary).assertExists()
+    }
+
+    @Test
+    fun aCellSpeaksBothOfItsDates() = runComposeUiTest {
+        val day = adapter.daysIn(adapter.monthOf(2083, 4), withSecondary = true)[9]
+        val gregorian = assertNotNull(day.secondary)
+        setContent {
+            NepaliDateRangePickerWithEnglishDate(
+                state = rememberNepaliDateRangePickerState(
+                    initialDisplayedMonth = SimpleDate(2083, 4),
+                    locale = DualLocale
+                ),
+                englishDateLocale = DualLocale
+            )
+        }
+
+        // The small number is drawn but never spoken on its own, so the description carries it.
+        onNodeWithContentDescription(descriptionOf(2083, 4, 10)).assertExists()
+        assertTrue(
+            descriptionOf(2083, 4, 10).contains(gregorian.dayOfMonth.toString()),
+            "the Gregorian half of the cell has to reach a screen reader"
+        )
     }
 
     @Test

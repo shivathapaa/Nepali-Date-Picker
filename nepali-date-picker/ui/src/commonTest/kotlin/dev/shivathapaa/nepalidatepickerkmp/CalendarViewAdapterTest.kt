@@ -13,6 +13,7 @@ package dev.shivathapaa.nepalidatepickerkmp
 import dev.shivathapaa.nepalidatepickerkmp.calendar_model.NepaliCalendarDefaults
 import dev.shivathapaa.nepalidatepickerkmp.calendar_model.NepaliCalendarModel
 import dev.shivathapaa.nepalidatepickerkmp.calendar_model.coerceIntoConversionTable
+import dev.shivathapaa.nepalidatepickerkmp.calendar_model.formatSecondary
 import dev.shivathapaa.nepalidatepickerkmp.calendar_model.secondaryMonthLabel
 import dev.shivathapaa.nepalidatepickerkmp.data.CalendarSystem
 import dev.shivathapaa.nepalidatepickerkmp.data.NameFormat
@@ -296,6 +297,34 @@ class CalendarViewAdapterTest {
         assertNotNull(label)
         assertTrue(label.contains("/"), "September 2026 spans two Bikram Sambat months, got $label")
         assertTrue(label.endsWith("2083"), "expected the Bikram Sambat year, got $label")
+    }
+
+    @Test
+    fun theSecondaryHalfIsSpokenInTheCalendarThatIsNotOnScreen() {
+        val model = NepaliCalendarModel(TestLocale)
+        val locale = TestLocale.copy(dateFormat = NepaliDateFormatStyle.LONG)
+        val nepaliDay = bikramSambat.daysIn(bikramSambat.monthOf(2083, 6), withSecondary = true)
+            .first()
+        val englishDay = gregorian.daysIn(gregorian.monthOf(2026, 9), withSecondary = true).first()
+
+        // Each adapter's secondary half reads exactly as the other adapter writes its own dates,
+        // which is what keeps the two halves of a cell from being swapped.
+        assertEquals(
+            gregorian.format(assertNotNull(nepaliDay.secondary), locale),
+            bikramSambat.formatSecondary(
+                secondaryDate = assertNotNull(nepaliDay.secondary),
+                calendarModel = model,
+                locale = locale
+            )
+        )
+        assertEquals(
+            bikramSambat.format(assertNotNull(englishDay.secondary), locale),
+            gregorian.formatSecondary(
+                secondaryDate = assertNotNull(englishDay.secondary),
+                calendarModel = model,
+                locale = locale
+            )
+        )
     }
 
     @Test
