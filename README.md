@@ -38,7 +38,9 @@ Linux and Windows.
   <a href="#screenshots">
   <img alt="See Screenshots" src="https://img.shields.io/badge/see_screenshots-blue?color=D6E6DF"></a>&nbsp;
   <a href="https://github.com/shivathapaa/Nepali-Date-Picker/releases/latest/download/nepali-date-picker-sample.apk">
-    <img alt="Download the sample Android app" src="https://img.shields.io/badge/download-%20Sample%20Android%20App-3DDC84?logo=android&labelColor=E2E3D8&color=4C662B"></a>
+    <img alt="Download the sample Android app" src="https://img.shields.io/badge/download-%20Sample%20Android%20App-3DDC84?logo=android&labelColor=E2E3D8&color=4C662B"></a>&nbsp;
+  <a href="https://github.com/shivathapaa/Nepali-Date-Picker/releases/latest/download/nepali-date-picker-flutter-sample.apk">
+    <img alt="Download the sample Flutter app" src="https://img.shields.io/badge/download-%20Sample%20Flutter%20App-0175C2?logo=flutter&labelColor=E2E3D8&color=0175C2"></a>
 </p>
 <br>
 

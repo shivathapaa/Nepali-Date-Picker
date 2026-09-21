@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:flutter_sample/main.dart';
+import 'package:nepali_date_picker_flutter_sample/main.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {

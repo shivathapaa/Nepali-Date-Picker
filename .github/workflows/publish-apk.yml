@@ -1,4 +1,4 @@
-name: Publish sample APK
+name: Publish sample APKs
 
 on:
   release:
@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
     inputs:
       tag:
-        description: "Existing git tag to (re)attach a sample APK to, e.g. 3.3.0. The APK is built from this tag."
+        description: "Existing git tag to (re)attach the sample APKs to, e.g. 3.3.0. The APKs are built from this tag."
         required: true
         type: string
 
@@ -29,18 +29,15 @@ jobs:
       - uses: actions/checkout@v5
       - uses: gradle/actions/wrapper-validation@v4
 
-  test:
-    needs: validate-wrapper
-    uses: ./.github/workflows/_test.yml
-
-  publish-apk:
-    name: Build sample APK and attach to the release
-    needs: test
+  resolve:
+    name: Resolve version and source tag
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 5
+    outputs:
+      raw_tag: ${{ steps.v.outputs.raw_tag }}
+      version: ${{ steps.v.outputs.version }}
     steps:
-      - name: Resolve version and source tag
-        id: v
+      - id: v
         run: |
           set -euo pipefail
           raw="${{ github.event.release.tag_name || github.event.inputs.tag }}"
@@ -51,10 +48,20 @@ jobs:
           echo "raw_tag=$raw" >> "$GITHUB_OUTPUT"
           echo "version=${raw#v}" >> "$GITHUB_OUTPUT"
 
+  test:
+    needs: validate-wrapper
+    uses: ./.github/workflows/_test.yml
+
+  publish-apk:
+    name: Build the Compose sample APK and attach to the release
+    needs: [test, resolve]
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
       - name: Checkout at the release tag
         uses: actions/checkout@v5
         with:
-          ref: ${{ steps.v.outputs.raw_tag }}
+          ref: ${{ needs.resolve.outputs.raw_tag }}
 
       - name: Set up JDK 21
         uses: actions/setup-java@v5
@@ -71,7 +78,7 @@ jobs:
       - name: Locate and name the APK
         id: apk
         env:
-          VERSION: ${{ steps.v.outputs.version }}
+          VERSION: ${{ needs.resolve.outputs.version }}
         run: |
           set -euo pipefail
           found=$(find sample/androidApp/build/outputs/apk/debug -maxdepth 1 -name '*.apk' | wc -l | tr -d '[:space:]')
@@ -88,9 +95,77 @@ jobs:
       - name: Attach to the release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          VERSION: ${{ steps.v.outputs.raw_tag }}
+          VERSION: ${{ needs.resolve.outputs.raw_tag }}
           APK: ${{ steps.apk.outputs.path }}
         run: |
           set -euo pipefail
           gh release upload "${VERSION}" "${APK}" --repo "${{ github.repository }}" --clobber
           echo "Attached nepali-date-picker-sample.apk to ${VERSION}."
+
+  publish-flutter-apk:
+    name: Build the Flutter sample APK and attach to the release
+    needs: [test, resolve]
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - name: Checkout at the release tag
+        uses: actions/checkout@v5
+        with:
+          ref: ${{ needs.resolve.outputs.raw_tag }}
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v5
+        with:
+          distribution: 'zulu'
+          java-version: 21
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      # The plugin resolves the wrapped library by coordinate. Publishing the tagged
+      # sources locally builds the sample against this release even before Maven
+      # Central has finished indexing it.
+      - name: Publish the wrapped library to mavenLocal
+        run: ./gradlew :nepali-date-picker:core:publishToMavenLocal :nepali-date-picker:ui:publishToMavenLocal
+
+      # The sample's own pubspec version is a placeholder, so the released APK is
+      # named after the library release it was built from, as the Compose sample is.
+      - name: Build the sample app
+        working-directory: sample/flutterApp
+        env:
+          VERSION: ${{ needs.resolve.outputs.version }}
+        run: |
+          flutter pub get
+          flutter build apk --debug --build-name "${VERSION}"
+
+      - name: Locate and name the APK
+        id: apk
+        env:
+          VERSION: ${{ needs.resolve.outputs.version }}
+        run: |
+          set -euo pipefail
+          src=sample/flutterApp/build/app/outputs/flutter-apk/app-debug.apk
+          if [ ! -f "$src" ]; then
+            echo "::error::No APK at $src. The Flutter build layout changed."
+            exit 1
+          fi
+          mkdir -p build/release-assets
+          cp "$src" "build/release-assets/nepali-date-picker-flutter-sample.apk"
+          echo "path=build/release-assets/nepali-date-picker-flutter-sample.apk" >> "$GITHUB_OUTPUT"
+          echo "Flutter sample APK for ${VERSION}: $(du -h "build/release-assets/nepali-date-picker-flutter-sample.apk" | cut -f1)"
+
+      - name: Attach to the release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          VERSION: ${{ needs.resolve.outputs.raw_tag }}
+          APK: ${{ steps.apk.outputs.path }}
+        run: |
+          set -euo pipefail
+          gh release upload "${VERSION}" "${APK}" --repo "${{ github.repository }}" --clobber
+          echo "Attached nepali-date-picker-flutter-sample.apk to ${VERSION}."

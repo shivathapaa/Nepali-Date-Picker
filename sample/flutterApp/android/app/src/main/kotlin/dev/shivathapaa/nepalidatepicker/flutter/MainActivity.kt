@@ -1,4 +1,4 @@
-package dev.shivathapaa.nepalidatepicker.flutter_sample
+package dev.shivathapaa.nepalidatepicker.flutter
 
 import io.flutter.embedding.android.FlutterActivity
 

@@ -1,7 +1,8 @@
 # Samples
 
-Runnable apps that consume the library exactly the way a real project would. Nothing here is
-published.
+Runnable apps that consume the library exactly the way a real project would. None of them is
+published as a package; the `androidApp` and `flutterApp` showcases ride along on each GitHub
+release as `nepali-date-picker-sample.apk` and `nepali-date-picker-flutter-sample.apk`.
 
 ```
 sample/
@@ -40,7 +41,7 @@ not replace the other.
 | `composeApp` desktop bundle (macOS) | `dev.shivathapaa.nepalidatepicker` |
 | `iosApp` bundle identifier | `dev.shivathapaa.nepalidatepicker.compose` |
 | `iosSwiftApp` bundle identifier | `dev.shivathapaa.nepalidatepicker.swift` |
-| `flutterApp` Android `applicationId` / iOS bundle identifier | `dev.shivathapaa.nepalidatepicker.flutter_sample` / `dev.shivathapaa.nepalidatepicker.flutterSample` |
+| `flutterApp` Android `applicationId` and iOS bundle identifier | `dev.shivathapaa.nepalidatepicker.flutter` |
 
 ## Running them
 

@@ -5,7 +5,7 @@ plugins {
 }
 
 android {
-    namespace = "dev.shivathapaa.nepalidatepicker.flutter_sample"
+    namespace = "dev.shivathapaa.nepalidatepicker.flutter"
     // The nepali-date-picker library compiles against API 37.
     compileSdk = maxOf(flutter.compileSdkVersion, 37)
     ndkVersion = flutter.ndkVersion
@@ -16,24 +16,19 @@ android {
     }
 
     defaultConfig {
-        // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
-        applicationId = "dev.shivathapaa.nepalidatepicker.flutter_sample"
-        // You can update the following values to match your application needs.
-        // For more information, see: https://flutter.dev/to/review-gradle-config.
+        // A leaf of its own, so this sample and the Compose one can sit side by side
+        // on a device.
+        applicationId = "dev.shivathapaa.nepalidatepicker.flutter"
         minSdk = flutter.minSdkVersion
         targetSdk = flutter.targetSdkVersion
-        // Uses the version code from pubspec.yaml. When using split APKs, 1000 * ABI_VERSION
-        // is added automatically by Flutter. (https://developer.android.com/studio/build/configure-apk-splits#configure-APK-versions)
-        // You can force using the value of versionCode by specifying the `-P force-version-code-ignoring-abi=true`
-        // flag during build.
         versionCode = flutter.versionCode
         versionName = flutter.versionName
     }
 
     buildTypes {
         release {
-            // TODO: Add your own signing config for the release build.
-            // Signing with the debug keys for now, so `flutter run --release` works.
+            // The sample is never distributed through a store, so the debug keys are
+            // enough for `flutter run --release` and for the APK attached to a release.
             signingConfig = signingConfigs.getByName("debug")
         }
     }

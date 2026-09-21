@@ -28,8 +28,10 @@ Android and iOS only, which is what the plugin supports. Flutter web and desktop
 
 ## Running
 
-While the wrapped library version is unpublished, publish it locally first from the repository
-root:
+Every release carries this showcase as
+[`nepali-date-picker-flutter-sample.apk`](https://github.com/shivathapaa/Nepali-Date-Picker/releases/latest/download/nepali-date-picker-flutter-sample.apk),
+installable without a toolchain. To build it instead, and while the wrapped library version is
+unpublished, publish the library locally first from the repository root:
 
 ```sh
 ./gradlew publishToMavenLocal

@@ -35,4 +35,6 @@ Platform notes:
 
 The full API and the current limitations are documented in the
 [package README](./flutter/nepali_date_picker_kmp/README.md). A multi-page showcase lives beside
-the other platforms in [`sample/flutterApp`](./sample/flutterApp).
+the other platforms in [`sample/flutterApp`](./sample/flutterApp); every release also carries it as
+an installable
+[Android APK](https://github.com/shivathapaa/Nepali-Date-Picker/releases/latest/download/nepali-date-picker-flutter-sample.apk).
