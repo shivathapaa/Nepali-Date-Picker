@@ -129,19 +129,19 @@ struct UtilitiesScreen: View {
 
             LabeledValue(
                 label: "Working days over 30 days",
-                value: "\(converter.workingDaysBetween(start: from, end: plusThirty, provider: NoOpHolidayProvider.shared, weekend: weekend))"
+                value: "\(converter.workingDaysBetween(start: from, end: plusThirty, provider: NoOpEventProvider.shared, weekend: weekend))"
             )
             LabeledValue(
                 label: "Next working day",
-                value: converter.nextWorkingDay(from: from, provider: NoOpHolidayProvider.shared, weekend: weekend).text
+                value: converter.nextWorkingDay(from: from, provider: NoOpEventProvider.shared, weekend: weekend).text
             )
             LabeledValue(
                 label: "+5 working days",
-                value: converter.addWorkingDays(from: from, days: 5, provider: NoOpHolidayProvider.shared, weekend: weekend).text
+                value: converter.addWorkingDays(from: from, days: 5, provider: NoOpEventProvider.shared, weekend: weekend).text
             )
             LabeledValue(
                 label: "+5 working days, with holidays",
-                value: converter.addWorkingDays(from: from, days: 5, provider: SampleHolidayProvider(holidays: holidays), weekend: weekend).text
+                value: converter.addWorkingDays(from: from, days: 5, provider: SampleEventProvider(closedDays: holidays), weekend: weekend).text
             )
         }
     }

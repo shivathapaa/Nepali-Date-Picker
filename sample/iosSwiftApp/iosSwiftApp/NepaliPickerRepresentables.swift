@@ -72,6 +72,7 @@ struct NepaliDatePickerView: UIViewControllerRepresentable {
     var locale: NepaliDateLocale = SampleDefaults.english
     var yearRange: ClosedRange<Int32> = SampleDefaults.yearRange
     var selectableDates: NepaliSelectableDates?
+    var events: NepaliEventOptions?
     var showModeToggle: Bool = true
     var showTodayButton: Bool = true
     var showEnglishDate: Bool = false
@@ -98,8 +99,96 @@ struct NepaliDatePickerView: UIViewControllerRepresentable {
             yearRangeEnd: yearRange.upperBound,
             selectableDates: selectableDates,
             options: options,
+            events: events,
             onHeightChange: { onHeightChange(CGFloat($0)) },
             onDateSelected: onDateSelected
+        )
+    }
+
+    func updateUIViewController(_ uiViewController: UIViewController, context: Context) {}
+}
+
+/// The browsable month calendar, optionally with the picked day and the month's events under it.
+struct NepaliCalendarView: UIViewControllerRepresentable {
+    var onHeightChange: (CGFloat) -> Void = { _ in }
+    var initialSelectedDate: SimpleDate?
+    var locale: NepaliDateLocale = SampleDefaults.english
+    var yearRange: ClosedRange<Int32> = SampleDefaults.yearRange
+    var events: NepaliEventOptions?
+    var showTodayButton: Bool = true
+    var showCalendarSystemToggle: Bool = false
+    var showAdjacentMonthDays: Bool = true
+    var showSecondaryDates: Bool = true
+    var secondaryDateLocale: NepaliDateLocale?
+    var initialCalendarSystem: CalendarSystem = .bikramSambat
+    var showDaySummary: Bool = false
+    var showMonthEvents: Bool = false
+    var onDaySelected: (CustomCalendar, NepaliDayStatus) -> Void
+    var onEventTapped: (NepaliCalendarEvent) -> Void = { _ in }
+
+    func makeUIViewController(context: Context) -> UIViewController {
+        let options = NepaliCalendarViewOptions()
+        options.showTodayButton = showTodayButton
+        options.showCalendarSystemToggle = showCalendarSystemToggle
+        options.showAdjacentMonthDays = showAdjacentMonthDays
+        options.showSecondaryDates = showSecondaryDates
+        options.secondaryDateLocale = secondaryDateLocale
+        options.initialCalendarSystem = initialCalendarSystem
+        options.showDaySummary = showDaySummary
+        options.showMonthEvents = showMonthEvents
+
+        return NepaliCalendarViewControllersKt.NepaliCalendarViewController(
+            initialSelectedDate: initialSelectedDate,
+            locale: locale,
+            yearRangeStart: yearRange.lowerBound,
+            yearRangeEnd: yearRange.upperBound,
+            options: options,
+            events: events,
+            onHeightChange: { onHeightChange(CGFloat($0)) },
+            onDaySelected: onDaySelected,
+            onEventTapped: onEventTapped
+        )
+    }
+
+    func updateUIViewController(_ uiViewController: UIViewController, context: Context) {}
+}
+
+/// One day written out: whether the institution is shut, why, and what is named on it.
+struct NepaliDaySummaryView: UIViewControllerRepresentable {
+    var onHeightChange: (CGFloat) -> Void = { _ in }
+    var date: SimpleDate
+    var locale: NepaliDateLocale = SampleDefaults.english
+    var events: NepaliEventOptions?
+
+    func makeUIViewController(context: Context) -> UIViewController {
+        NepaliCalendarViewControllersKt.NepaliDaySummaryViewController(
+            date: date,
+            locale: locale,
+            events: events,
+            onHeightChange: { onHeightChange(CGFloat($0)) }
+        )
+    }
+
+    func updateUIViewController(_ uiViewController: UIViewController, context: Context) {}
+}
+
+/// Everything named in one Bikram Sambat month, a span written as a single line.
+struct NepaliMonthEventListView: UIViewControllerRepresentable {
+    var onHeightChange: (CGFloat) -> Void = { _ in }
+    var year: Int32
+    var month: Int32
+    var locale: NepaliDateLocale = SampleDefaults.english
+    var events: NepaliEventOptions?
+    var onEventTapped: (NepaliCalendarEvent) -> Void = { _ in }
+
+    func makeUIViewController(context: Context) -> UIViewController {
+        NepaliCalendarViewControllersKt.NepaliMonthEventListViewController(
+            year: year,
+            month: month,
+            locale: locale,
+            events: events,
+            onHeightChange: { onHeightChange(CGFloat($0)) },
+            onEventTapped: onEventTapped
         )
     }
 
@@ -113,6 +202,7 @@ struct NepaliDatePickerDockedView: UIViewControllerRepresentable {
     var locale: NepaliDateLocale = SampleDefaults.english
     var yearRange: ClosedRange<Int32> = SampleDefaults.yearRange
     var selectableDates: NepaliSelectableDates?
+    var events: NepaliEventOptions?
     var dateFormatStyle: NepaliDateFormatStyle = .medium
     var showTodayButton: Bool = true
     var label: String?
@@ -143,6 +233,7 @@ struct NepaliDatePickerDockedView: UIViewControllerRepresentable {
             yearRangeEnd: yearRange.upperBound,
             selectableDates: selectableDates,
             options: options,
+            events: events,
             onHeightChange: { onHeightChange(CGFloat($0)) },
             onDateSelected: onDateSelected
         )
@@ -196,6 +287,7 @@ struct NepaliDateRangePickerView: UIViewControllerRepresentable {
     var locale: NepaliDateLocale = SampleDefaults.english
     var yearRange: ClosedRange<Int32> = SampleDefaults.yearRange
     var selectableDates: NepaliSelectableDates?
+    var events: NepaliEventOptions?
     var showModeToggle: Bool = true
     var showTodayButton: Bool = true
     var showMonthsVertically: Bool = true
@@ -227,6 +319,7 @@ struct NepaliDateRangePickerView: UIViewControllerRepresentable {
             yearRangeEnd: yearRange.upperBound,
             selectableDates: selectableDates,
             options: options,
+            events: events,
             onHeightChange: { onHeightChange(CGFloat($0)) },
             onRangeSelected: onRangeSelected
         )
@@ -243,6 +336,7 @@ struct NepaliDateFieldView: UIViewControllerRepresentable {
     var dateFormat: NepaliDateFormatter.Pattern = .yyyySlashMmSlashDd
     var yearRange: ClosedRange<Int32> = SampleDefaults.yearRange
     var selectableDates: NepaliSelectableDates?
+    var events: NepaliEventOptions?
     var outlined: Bool = true
     var label: String?
     var placeholder: String?
@@ -282,6 +376,7 @@ struct NepaliDateFieldView: UIViewControllerRepresentable {
             yearRangeEnd: yearRange.upperBound,
             selectableDates: selectableDates,
             options: options,
+            events: events,
             onHeightChange: { onHeightChange(CGFloat($0)) },
             onValueChange: onValueChange
         )
@@ -298,6 +393,7 @@ struct NepaliDateRangeFieldView: UIViewControllerRepresentable {
     var locale: NepaliDateLocale = SampleDefaults.english
     var yearRange: ClosedRange<Int32> = SampleDefaults.yearRange
     var selectableDates: NepaliSelectableDates?
+    var events: NepaliEventOptions?
     var dateFormat: NepaliDateFormatter.Pattern = .yyyySlashMmSlashDd
     var outlined: Bool = true
     var startLabel: String?
@@ -341,6 +437,7 @@ struct NepaliDateRangeFieldView: UIViewControllerRepresentable {
             yearRangeEnd: yearRange.upperBound,
             selectableDates: selectableDates,
             options: options,
+            events: events,
             onHeightChange: { onHeightChange(CGFloat($0)) },
             onRangeChange: onRangeChange
         )
@@ -356,6 +453,7 @@ struct NepaliDatePickerDialogView: UIViewControllerRepresentable {
     var locale: NepaliDateLocale = SampleDefaults.english
     var yearRange: ClosedRange<Int32> = SampleDefaults.yearRange
     var selectableDates: NepaliSelectableDates?
+    var events: NepaliEventOptions?
     var fullScreen: Bool = false
     var title: String?
     var confirmText: String = "OK"
@@ -399,6 +497,7 @@ struct NepaliDatePickerDialogView: UIViewControllerRepresentable {
                 selectableDates: selectableDates,
                 calendarOptions: calendarOptions,
                 options: options,
+                events: events,
                 onHeightChange: { _ in },
                 onConfirm: onConfirm,
                 onDismiss: onDismiss
@@ -412,6 +511,7 @@ struct NepaliDatePickerDialogView: UIViewControllerRepresentable {
             selectableDates: selectableDates,
             calendarOptions: calendarOptions,
             options: options,
+            events: events,
             onHeightChange: { _ in },
             onConfirm: onConfirm,
             onDismiss: onDismiss

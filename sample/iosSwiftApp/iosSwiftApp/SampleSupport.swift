@@ -120,15 +120,76 @@ final class EvenDaysOnly: NepaliSelectableDates {
     func isSelectableYear(year: Int32) -> Bool { true }
 }
 
-/// A holiday provider written in Swift, used by the working-day arithmetic demo.
-final class SampleHolidayProvider: NepaliHolidayProvider {
-    private let holidays: Set<String>
+/// An event provider written in Swift, used by the working-day arithmetic demo.
+///
+/// Only `closesOn` is answered here, which is all the arithmetic asks for. A calendar that has to
+/// *draw* the days would answer `events(year:)` too, since that is what it lists.
+final class SampleEventProvider: NepaliEventProvider {
+    private let closedDays: Set<String>
 
-    init(holidays: [SimpleDate]) {
-        self.holidays = Set(holidays.map(\.text))
+    init(closedDays: [SimpleDate]) {
+        self.closedDays = Set(closedDays.map(\.text))
     }
 
-    func holidays(year: Int32) -> Set<HolidayEntry> { [] }
+    func events(year: Int32) -> Set<NepaliCalendarEvent> { [] }
 
-    func isHoliday(date: SimpleDate) -> Bool { holidays.contains(date.text) }
+    func closesOn(date: SimpleDate) -> Bool { closedDays.contains(date.text) }
+}
+
+/// A provider that answers from a list already in hand, which is what a span expands to and what an
+/// app holds after a fetch. This is the shape a calendar needs, since it lists a year to draw it.
+final class SampleCalendarEvents: NepaliEventProvider {
+    private let byYear: [Int32: Set<NepaliCalendarEvent>]
+
+    init(_ entries: [NepaliCalendarEvent]) {
+        byYear = Dictionary(grouping: entries, by: { $0.date.year }).mapValues { Set($0) }
+    }
+
+    func events(year: Int32) -> Set<NepaliCalendarEvent> { byYear[year] ?? [] }
+
+    /// Kotlin's default implementation is not optional over the bridge, so the same rule is
+    /// written out here: only an entry that closes the institution shuts the day.
+    func closesOn(date: SimpleDate) -> Bool {
+        events(year: date.year).contains { $0.date == date && $0.closesOffices }
+    }
+}
+
+extension NepaliCalendarEvent {
+    /// The same event as the pickers take it, in the ARGB shape Compose colours cross the bridge in.
+    ///
+    /// `colorArgb` of `0` keeps the palette slot the event's kind maps to, and `indicate` is off by
+    /// default so a holiday colours its day without spending one of the cell's three dots. The id
+    /// and the payload ride along untouched, which is what a tapped entry hands back.
+    func asEventInfo(colorArgb: Int32 = 0, indicate: Bool = false) -> NepaliEventInfo {
+        let info = NepaliEventInfo(
+            year: date.year,
+            month: date.month,
+            dayOfMonth: date.dayOfMonth,
+            name: name,
+            kind: kind,
+            closesOffices: closesOffices,
+            colorArgb: colorArgb,
+            indicate: indicate
+        )
+        info.id = id
+        info.payload = payload
+        return info
+    }
+}
+
+/// Kotlin's `List<Int>` and `Set<Int>` arrive boxed, so weekday numbers are wrapped once here.
+extension Array where Element == Int32 {
+    var boxed: [KotlinInt] { map { KotlinInt(int: $0) } }
+
+    var boxedSet: Set<KotlinInt> { Set(boxed) }
+}
+
+/// A `0xAARRGGBB` literal as the signed integer the bridge takes. Opaque colours overflow `Int32`,
+/// so the bit pattern is reinterpreted rather than converted.
+func argb(_ value: UInt32) -> Int32 { Int32(bitPattern: value) }
+
+/// Day-of-week numbers, the library's 1-based-Sunday convention.
+enum Weekday {
+    static let sunday: Int32 = 1
+    static let saturday: Int32 = 7
 }
