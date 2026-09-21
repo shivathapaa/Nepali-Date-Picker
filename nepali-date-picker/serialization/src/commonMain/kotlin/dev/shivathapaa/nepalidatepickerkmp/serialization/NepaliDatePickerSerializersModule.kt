@@ -16,6 +16,9 @@ import dev.shivathapaa.nepalidatepickerkmp.data.MonthCalendar
 import dev.shivathapaa.nepalidatepickerkmp.data.NepaliMonthCalendar
 import dev.shivathapaa.nepalidatepickerkmp.data.SimpleDate
 import dev.shivathapaa.nepalidatepickerkmp.data.SimpleTime
+import dev.shivathapaa.nepalidatepickerkmp.event.NepaliCalendarEvent
+import dev.shivathapaa.nepalidatepickerkmp.event.NepaliEventKind
+import dev.shivathapaa.nepalidatepickerkmp.event.NepaliDayStatus
 import kotlinx.serialization.modules.SerializersModule
 
 /**
@@ -23,7 +26,9 @@ import kotlinx.serialization.modules.SerializersModule
  *
  * Wires the default serializers - [SimpleDateSerializer] (string form),
  * [SimpleTimeSerializer], [CustomCalendarSerializer], [NepaliMonthCalendarSerializer],
- * [MonthCalendarSerializer] and [CalendarSystemSerializer].
+ * [MonthCalendarSerializer], [CalendarSystemSerializer], and the holiday trio
+ * [NepaliCalendarEventSerializer], [NepaliEventKindSerializer] and [NepaliDayStatusSerializer], so a fetched
+ * holiday list caches the same way a date does.
  *
  * Usage with kotlinx-serialization-json:
  * ```
@@ -42,4 +47,7 @@ val NepaliDatePickerSerializersModule: SerializersModule = SerializersModule {
     contextual(NepaliMonthCalendar::class, NepaliMonthCalendarSerializer)
     contextual(MonthCalendar::class, MonthCalendarSerializer)
     contextual(CalendarSystem::class, CalendarSystemSerializer)
+    contextual(NepaliCalendarEvent::class, NepaliCalendarEventSerializer)
+    contextual(NepaliEventKind::class, NepaliEventKindSerializer)
+    contextual(NepaliDayStatus::class, NepaliDayStatusSerializer)
 }
