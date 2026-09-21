@@ -408,6 +408,7 @@ way a real project would:
 | [`iosApp`](./sample/iosApp) | Compose Multiplatform hosted in SwiftUI | Open `sample/iosApp/iosApp.xcodeproj` |
 | [`iosSwiftApp`](./sample/iosSwiftApp) | A native SwiftUI app consuming the XCFramework | Open `sample/iosSwiftApp/iosSwiftApp.xcodeproj` |
 | [`jsApp`](./sample/jsApp) | The web components and the headless engine | `cd js && npm run build`, then `cd sample/jsApp && npm run dev` |
+| [`flutterApp`](./sample/flutterApp) | The Flutter showcase over the plugin, Android and iOS | `./gradlew publishToMavenLocal`, then `cd sample/flutterApp && flutter run` |
 
 Prerequisites and the details for each are in the [samples guide](./sample/README.md).
 

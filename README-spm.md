@@ -21,8 +21,8 @@ embed them directly.
 > **Where the code lives.** The library is developed in
 > [shivathapaa/Nepali-Date-Picker](https://github.com/shivathapaa/Nepali-Date-Picker). The Swift
 > package is published to [shivathapaa/Nepali-Date-Picker-SPM](https://github.com/shivathapaa/Nepali-Date-Picker-SPM),
-> which carries only a `Package.swift` and the release assets. Both are regenerated automatically on
-> every release, so open issues and pull requests against the main repository.
+> which carries no source of its own: its `Package.swift`, its README and the release assets are all
+> regenerated on every release. Open issues and pull requests against the main repository.
 
 > **Other platforms.** The same calendar tables power
 > [`nepali_calendar_utils`](https://github.com/shivathapaa/nepali_calendar_utils) on PyPI and
@@ -2257,6 +2257,20 @@ with the Kotlin sources, so editing the library and pressing Run in Xcode is eno
 
 `sample/iosApp` is a different thing: the iOS host for the Compose Multiplatform showcase shared with
 Android, desktop and web. It embeds the Compose sample rather than consuming the Swift package.
+
+A Flutter app reaches the same framework through the
+[`nepali_date_picker_kmp`](https://pub.dev/packages/nepali_date_picker_kmp) plugin, which ships this
+same XCFramework on iOS. The showcase is [`sample/flutterApp`](./sample/flutterApp) and the compact
+demo is [`flutter/nepali_date_picker_kmp/example`](./flutter/nepali_date_picker_kmp/example); both
+need the framework staged first:
+
+```bash
+./gradlew publishToMavenLocal
+flutter/nepali_date_picker_kmp/tool/stage_ios_framework.sh
+cd sample/flutterApp && flutter run
+```
+
+The Flutter guide is [README-flutter.md](./README-flutter.md).
 
 ## Support
 
