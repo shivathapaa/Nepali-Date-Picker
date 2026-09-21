@@ -12,42 +12,42 @@ package dev.shivathapaa.nepalidatepickerkmp
 
 import dev.shivathapaa.nepalidatepickerkmp.calendar_model.NepaliDateConverter
 import dev.shivathapaa.nepalidatepickerkmp.data.SimpleDate
-import dev.shivathapaa.nepalidatepickerkmp.holiday.HolidayEntry
-import dev.shivathapaa.nepalidatepickerkmp.holiday.HolidayKind
-import dev.shivathapaa.nepalidatepickerkmp.holiday.NepaliHolidayProvider
-import dev.shivathapaa.nepalidatepickerkmp.holiday.NepaliWeekend
-import dev.shivathapaa.nepalidatepickerkmp.holiday.NoOpHolidayProvider
-import dev.shivathapaa.nepalidatepickerkmp.holiday.addWorkingDays
-import dev.shivathapaa.nepalidatepickerkmp.holiday.excludingHolidays
-import dev.shivathapaa.nepalidatepickerkmp.holiday.excludingWeekends
-import dev.shivathapaa.nepalidatepickerkmp.holiday.nextWorkingDay
-import dev.shivathapaa.nepalidatepickerkmp.holiday.workingDaysBetween
+import dev.shivathapaa.nepalidatepickerkmp.event.NepaliCalendarEvent
+import dev.shivathapaa.nepalidatepickerkmp.event.NepaliEventKind
+import dev.shivathapaa.nepalidatepickerkmp.event.NepaliEventProvider
+import dev.shivathapaa.nepalidatepickerkmp.event.NepaliWeekend
+import dev.shivathapaa.nepalidatepickerkmp.event.NoOpEventProvider
+import dev.shivathapaa.nepalidatepickerkmp.event.addWorkingDays
+import dev.shivathapaa.nepalidatepickerkmp.event.excludingClosures
+import dev.shivathapaa.nepalidatepickerkmp.event.excludingWeekends
+import dev.shivathapaa.nepalidatepickerkmp.event.nextWorkingDay
+import dev.shivathapaa.nepalidatepickerkmp.event.workingDaysBetween
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
-class HolidayProviderTests {
+class EventProviderTests {
 
-    private class FakeHolidayProvider(holidays: Set<SimpleDate>) : NepaliHolidayProvider {
-        private val byYear: Map<Int, Set<HolidayEntry>> = holidays
+    private class FakeHolidayProvider(holidays: Set<SimpleDate>) : NepaliEventProvider {
+        private val byYear: Map<Int, Set<NepaliCalendarEvent>> = holidays
             .groupBy { it.year }
             .mapValues { (_, dates) ->
                 dates.mapTo(HashSet()) {
-                    HolidayEntry(it, name = "fake", kind = HolidayKind.GovernmentPublic)
+                    NepaliCalendarEvent(it, name = "fake", kind = NepaliEventKind.GovernmentPublic)
                 }
             }
 
-        override fun holidays(year: Int): Set<HolidayEntry> = byYear[year].orEmpty()
+        override fun events(year: Int): Set<NepaliCalendarEvent> = byYear[year].orEmpty()
     }
 
-    // NoOpHolidayProvider
+    // NoOpEventProvider
 
     @Test
     fun noOp_neverFlagsHoliday() {
-        assertFalse(NoOpHolidayProvider.isHoliday(SimpleDate(2082, 1, 1)))
-        assertEquals(emptySet(), NoOpHolidayProvider.holidays(2082))
+        assertFalse(NoOpEventProvider.closesOn(SimpleDate(2082, 1, 1)))
+        assertEquals(emptySet(), NoOpEventProvider.events(2082))
     }
 
     // NepaliSelectableDates wrappers
@@ -57,7 +57,7 @@ class HolidayProviderTests {
         val holiday = SimpleDate(2082, 1, 1)
         val provider = FakeHolidayProvider(setOf(holiday))
         val base = object : NepaliSelectableDates {}
-        val wrapped = base.excludingHolidays(provider)
+        val wrapped = base.excludingClosures(provider)
 
         val holidayCal = NepaliDateConverter.getNepaliCalendar(holiday.year, holiday.month, holiday.dayOfMonth)
         val normalCal = NepaliDateConverter.getNepaliCalendar(2082, 1, 2)
@@ -69,12 +69,12 @@ class HolidayProviderTests {
 
     @Test
     fun excludingHolidays_respectsWrappedPredicate() {
-        val provider = NoOpHolidayProvider
+        val provider = NoOpEventProvider
         val onlyEvenDays = object : NepaliSelectableDates {
             override fun isSelectableDate(customCalendar: dev.shivathapaa.nepalidatepickerkmp.data.CustomCalendar) =
                 customCalendar.dayOfMonth % 2 == 0
         }
-        val wrapped = onlyEvenDays.excludingHolidays(provider)
+        val wrapped = onlyEvenDays.excludingClosures(provider)
         val odd = NepaliDateConverter.getNepaliCalendar(2082, 1, 1)
         val even = NepaliDateConverter.getNepaliCalendar(2082, 1, 2)
         assertFalse(wrapped.isSelectableDate(odd))
@@ -110,7 +110,7 @@ class HolidayProviderTests {
     @Test
     fun workingDaysBetween_emptyRange_returnsZero() {
         val d = SimpleDate(2082, 1, 1)
-        assertEquals(0, NepaliDateConverter.workingDaysBetween(d, d, NoOpHolidayProvider))
+        assertEquals(0, NepaliDateConverter.workingDaysBetween(d, d, NoOpEventProvider))
     }
 
     @Test
@@ -119,7 +119,7 @@ class HolidayProviderTests {
             NepaliDateConverter.workingDaysBetween(
                 SimpleDate(2082, 1, 2),
                 SimpleDate(2082, 1, 1),
-                NoOpHolidayProvider
+                NoOpEventProvider
             )
         }
     }
@@ -129,7 +129,7 @@ class HolidayProviderTests {
         val start = SimpleDate(2082, 1, 1)
         val end = SimpleDate(2082, 1, 11) // exclusive - 10 days
         val span = NepaliDateConverter.getNepaliDaysInBetween(start, end)
-        val working = NepaliDateConverter.workingDaysBetween(start, end, NoOpHolidayProvider, weekend = emptySet())
+        val working = NepaliDateConverter.workingDaysBetween(start, end, NoOpEventProvider, weekend = emptySet())
         assertEquals(span, working)
         assertEquals(10, working)
     }
@@ -141,7 +141,7 @@ class HolidayProviderTests {
         val end = NepaliDateConverter.getNepaliCalendarAfterAdditionOrSubtraction(2082, 1, 1, 14).let {
             SimpleDate(it.year, it.month, it.dayOfMonth)
         }
-        val working = NepaliDateConverter.workingDaysBetween(start, end, NoOpHolidayProvider)
+        val working = NepaliDateConverter.workingDaysBetween(start, end, NoOpEventProvider)
         assertEquals(12, working) // 14 - 2 Saturdays
     }
 
@@ -175,7 +175,7 @@ class HolidayProviderTests {
         }
         requireNotNull(saturday)
 
-        val noHoliday = NepaliDateConverter.workingDaysBetween(start, end, NoOpHolidayProvider)
+        val noHoliday = NepaliDateConverter.workingDaysBetween(start, end, NoOpEventProvider)
         val withSaturdayMarkedHoliday = NepaliDateConverter.workingDaysBetween(
             start, end, FakeHolidayProvider(setOf(saturday))
         )
@@ -191,7 +191,7 @@ class HolidayProviderTests {
         )
         val end = SimpleDate(endCal.year, endCal.month, endCal.dayOfMonth)
         val working = NepaliDateConverter.workingDaysBetween(
-            start, end, NoOpHolidayProvider, weekend = emptySet()
+            start, end, NoOpEventProvider, weekend = emptySet()
         )
         assertEquals(20, working) // 20-day span, no weekends, no holidays
     }
@@ -205,7 +205,7 @@ class HolidayProviderTests {
             val cal = NepaliDateConverter.getNepaliCalendarAfterAdditionOrSubtraction(2082, 1, 1, offset)
             if (cal.dayOfWeek != 7) {
                 val d = SimpleDate(cal.year, cal.month, cal.dayOfMonth)
-                assertEquals(d, NepaliDateConverter.nextWorkingDay(d, NoOpHolidayProvider))
+                assertEquals(d, NepaliDateConverter.nextWorkingDay(d, NoOpEventProvider))
                 return
             }
         }
@@ -220,7 +220,7 @@ class HolidayProviderTests {
             if (cal.dayOfWeek == 7) { sat = SimpleDate(cal.year, cal.month, cal.dayOfMonth); break }
         }
         requireNotNull(sat)
-        val next = NepaliDateConverter.nextWorkingDay(sat, NoOpHolidayProvider)
+        val next = NepaliDateConverter.nextWorkingDay(sat, NoOpEventProvider)
         val nextCal = NepaliDateConverter.getNepaliCalendar(next.year, next.month, next.dayOfMonth)
         assertEquals(1, nextCal.dayOfWeek) // Sunday
     }
@@ -238,9 +238,9 @@ class HolidayProviderTests {
         // Pathological provider that flags every date as a holiday - confirms the
         // scan limit kicks in. Tests the contract that providers may override
         // isHoliday alone without populating holidays(year).
-        val alwaysHoliday = object : NepaliHolidayProvider {
-            override fun holidays(year: Int): Set<HolidayEntry> = emptySet()
-            override fun isHoliday(date: SimpleDate): Boolean = true
+        val alwaysHoliday = object : NepaliEventProvider {
+            override fun events(year: Int): Set<NepaliCalendarEvent> = emptySet()
+            override fun closesOn(date: SimpleDate): Boolean = true
         }
         assertFailsWith<IllegalStateException> {
             NepaliDateConverter.nextWorkingDay(SimpleDate(2082, 1, 1), alwaysHoliday, weekend = emptySet())
@@ -252,7 +252,7 @@ class HolidayProviderTests {
     @Test
     fun addWorkingDays_zero_returnsSame() {
         val d = SimpleDate(2082, 1, 1)
-        assertEquals(d, NepaliDateConverter.addWorkingDays(d, 0, NoOpHolidayProvider))
+        assertEquals(d, NepaliDateConverter.addWorkingDays(d, 0, NoOpEventProvider))
     }
 
     @Test
@@ -264,7 +264,7 @@ class HolidayProviderTests {
             if (cal.dayOfWeek == 6) { friday = SimpleDate(cal.year, cal.month, cal.dayOfMonth); break }
         }
         requireNotNull(friday)
-        val next = NepaliDateConverter.addWorkingDays(friday, 1, NoOpHolidayProvider)
+        val next = NepaliDateConverter.addWorkingDays(friday, 1, NoOpEventProvider)
         val nextCal = NepaliDateConverter.getNepaliCalendar(next.year, next.month, next.dayOfMonth)
         assertEquals(1, nextCal.dayOfWeek) // Friday + 1 working day = Sunday (skip Saturday)
     }
@@ -278,7 +278,7 @@ class HolidayProviderTests {
             if (cal.dayOfWeek == 1) { sunday = SimpleDate(cal.year, cal.month, cal.dayOfMonth); break }
         }
         requireNotNull(sunday)
-        val prev = NepaliDateConverter.addWorkingDays(sunday, -1, NoOpHolidayProvider)
+        val prev = NepaliDateConverter.addWorkingDays(sunday, -1, NoOpEventProvider)
         val prevCal = NepaliDateConverter.getNepaliCalendar(prev.year, prev.month, prev.dayOfMonth)
         assertEquals(6, prevCal.dayOfWeek) // Sunday - 1 working day = Friday (skip Saturday going back)
     }
