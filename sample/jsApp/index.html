@@ -10,7 +10,7 @@
     />
     <link rel="stylesheet" href="./styles.css" />
   </head>
-  <body data-theme="light">
+  <body data-theme="light" data-palette="default">
     <header class="site">
       <h1>Nepali Date Picker - Web Components</h1>
       <p>
@@ -41,7 +41,17 @@
         <select id="global-theme">
           <option value="light">Light</option>
           <option value="dark">Dark</option>
-          <option value="brand">Brand</option>
+        </select>
+      </label>
+      <label>
+        Palette
+        <select id="global-palette">
+          <option value="default">Default</option>
+          <option value="green">Green</option>
+          <option value="blue">Blue</option>
+          <option value="orange">Orange</option>
+          <option value="red">Red</option>
+          <option value="yellow">Yellow</option>
         </select>
       </label>
       <span style="color: var(--muted); font-size: 0.8rem">Controls apply to every picker below.</span>
@@ -224,6 +234,132 @@
           </details>
         </section>
 
+        <!-- Both calendars in every cell -->
+        <!-- Browsable calendar -->
+        <section class="card" id="calendar">
+          <span class="tag">&lt;nepali-calendar&gt;</span>
+          <h2>Browsing a month</h2>
+          <p class="desc">
+            The read-a-month element rather than the pick-a-date one: both calendars' numbers and the
+            neighbouring months' days on by default, the picked day written out, and the month's
+            events listed with a span gathered into one line. An entry's <code>id</code> and
+            <code>payload</code> come back untouched, which is where an app keeps its own record,
+            image links included.
+          </p>
+          <div class="demo-row">
+            <div class="demo-item">
+              <span class="caption">The grid alone</span>
+              <nepali-calendar class="sync" value="2083-06-05" weekly-off-days="7"></nepali-calendar>
+            </div>
+            <div class="demo-item">
+              <span class="caption">With the day and the month written out</span>
+              <nepali-calendar
+                class="sync"
+                id="calendar-lists"
+                value="2083-06-05"
+                weekly-off-days="7"
+                show-day-summary
+                show-month-events
+                events='[
+                  {"date":"2083-06-03","name":"Constitution Day","kind":"governmentPublic","id":"constitution-day"},
+                  {"date":"2083-06-10","days":4,"name":"Indra Jatra","kind":"religious","id":"indra-jatra","payload":"{\"imageUrl\":\"https://upload.wikimedia.org/wikipedia/commons/2/2b/Indra_Jatra_2014.jpg\"}"},
+                  {"date":"2083-06-14","name":"Sprint review","kind":"observance","indicate":true,"id":"sprint-review","payload":"{\"venue\":\"Room 3B\"}"}
+                ]'
+              ></nepali-calendar>
+            </div>
+            <div class="demo-item">
+              <span class="caption">What the last click reported</span>
+              <pre class="output" id="calendar-output">Click a day, or a line of the month's list.</pre>
+            </div>
+          </div>
+          <details>
+            <summary>HTML</summary>
+            <pre><code>&lt;nepali-calendar
+  show-day-summary
+  show-month-events
+  weekly-off-days="7"
+  events='[{"date":"2083-06-10","days":4,"name":"Indra Jatra","kind":"religious",
+            "id":"indra-jatra","payload":"{\"imageUrl\":\"…\"}"}]'&gt;
+&lt;/nepali-calendar&gt;
+&lt;script&gt;
+  document.querySelector('nepali-calendar')
+    .addEventListener('event-select', (e) =&gt; {
+      // The payload is yours: parse it and render the image with your own &lt;img&gt;.
+      console.log(JSON.parse(e.detail.event.payload));
+    });
+&lt;/script&gt;</code></pre>
+          </details>
+        </section>
+
+        <section class="card" id="secondary-date">
+          <span class="tag">show-secondary-date</span>
+          <h2>Both calendars in every cell</h2>
+          <p class="desc">
+            The displayed calendar's day stays large and its counterpart sits small in the corner of
+            the same cell, with the months the other calendar straddles named under the header. The
+            web twin of <code>NepaliDatePickerWithEnglishDate</code> in Compose. Off by default, and
+            the switch flips which calendar is the large one.
+          </p>
+          <div class="demo-row">
+            <div class="demo-item">
+              <span class="caption">Off (the default)</span>
+              <nepali-date-picker class="sync" value="2083-06-02"></nepali-date-picker>
+            </div>
+            <div class="demo-item">
+              <span class="caption">On</span>
+              <nepali-date-picker
+                class="sync"
+                value="2083-06-02"
+                show-secondary-date
+              ></nepali-date-picker>
+            </div>
+            <div class="demo-item">
+              <span class="caption">On, with the switch and the neighbouring months</span>
+              <nepali-date-picker
+                class="sync"
+                value="2083-06-02"
+                show-secondary-date
+                show-calendar-toggle
+                show-adjacent-month-days
+              ></nepali-date-picker>
+            </div>
+          </div>
+          <div class="demo-row">
+            <div class="demo-item">
+              <span class="caption">Range picker, paired</span>
+              <nepali-date-range-picker
+                class="sync"
+                start="2083-06-02"
+                end="2083-06-12"
+                show-secondary-date
+              ></nepali-date-range-picker>
+            </div>
+            <div class="demo-item">
+              <span class="caption">Docked, paired</span>
+              <nepali-date-picker-docked
+                class="sync"
+                label="Appointment"
+                value="2083-06-02"
+                show-secondary-date
+              ></nepali-date-picker-docked>
+            </div>
+            <div class="demo-item">
+              <span class="caption">Dialog, with the Gregorian date under the headline</span>
+              <button class="action" id="open-dialog-paired">Open paired dialog</button>
+              <nepali-date-picker-dialog
+                class="sync"
+                id="dialog-paired"
+                value="2083-06-02"
+                show-secondary-date
+              ></nepali-date-picker-dialog>
+            </div>
+          </div>
+          <details>
+            <summary>HTML</summary>
+            <pre><code>&lt;nepali-date-picker value="2083-06-02" show-secondary-date&gt;&lt;/nepali-date-picker&gt;</code></pre>
+          </details>
+        </section>
+
         <!-- Dialog -->
         <section class="card" id="dialog">
           <span class="tag">&lt;nepali-date-picker-dialog&gt;</span>
@@ -343,25 +479,398 @@
           </details>
         </section>
 
+        <!-- Events -->
+        <section class="card" id="events">
+          <span class="tag">events &amp; weekly-off-days</span>
+          <h2>Marking days</h2>
+          <p class="desc">
+            A colour says what the day is; dots say what is scheduled on it. A weekly off day
+            repeats fifty-two times a year, so it is coloured and never dotted, which leaves all
+            three dot slots for an app's own events.
+          </p>
+          <div class="demo-row">
+            <div class="demo-item">
+              <span class="caption">Office week (Saturday off)</span>
+              <nepali-date-picker class="sync marks" id="events-office" value="2081-05-24" weekly-off-days="7"></nepali-date-picker>
+            </div>
+            <div class="demo-item">
+              <span class="caption">School week (Saturday + Sunday)</span>
+              <nepali-date-picker class="sync marks" id="events-school" value="2081-05-24" weekly-off-days="7,1"></nepali-date-picker>
+            </div>
+            <div class="demo-item">
+              <span class="caption">Dots for your own events</span>
+              <nepali-date-picker class="sync" id="events-dots" value="2081-05-24" weekly-off-days="7"></nepali-date-picker>
+            </div>
+          </div>
+          <details>
+            <summary>HTML</summary>
+            <pre><code>&lt;nepali-date-picker
+  weekly-off-days="7"
+  events='[
+    {"date":"2081-05-26","name":"Constitution Day","kind":"governmentPublic"},
+    {"date":"2081-05-28","name":"Standup","indicate":true,"color":"#42a5f5"}
+  ]'&gt;
+&lt;/nepali-date-picker&gt;</code></pre>
+          </details>
+        </section>
+
+        <!-- Spans -->
+        <section class="card" id="event-spans">
+          <span class="tag">endDate &amp; days</span>
+          <h2>An event that runs longer than a day</h2>
+          <p class="desc">
+            One entry, many days: give it <code>endDate</code> (included) or <code>days</code> and
+            every day of the span is marked the same way, across a month or a year end. A span is
+            capped at 366 days, and an end before the start marks the one day rather than
+            disappearing.
+          </p>
+          <div class="demo-row">
+            <div class="demo-item">
+              <span class="caption">A festival, by its end date</span>
+              <nepali-date-picker class="sync" id="span-festival" value="2081-05-24"></nepali-date-picker>
+            </div>
+            <div class="demo-item">
+              <span class="caption">A week of leave, by a day count</span>
+              <nepali-date-picker class="sync" id="span-leave" value="2081-05-24"></nepali-date-picker>
+            </div>
+          </div>
+          <details>
+            <summary>HTML</summary>
+            <pre><code>&lt;nepali-date-picker
+  events='[
+    {"date":"2081-06-17","endDate":"2081-06-26","name":"Dashain","kind":"religious"},
+    {"date":"2081-07-02","days":5,"name":"Tihar","kind":"religious"}
+  ]'&gt;
+&lt;/nepali-date-picker&gt;</code></pre>
+          </details>
+        </section>
+
+        <!-- Marks on every surface -->
+        <section class="card" id="event-surfaces">
+          <span class="tag">every calendar element</span>
+          <h2>The same marking everywhere</h2>
+          <p class="desc">
+            <code>events</code> and <code>weekly-off-days</code> are attributes of every element
+            that draws a grid, so a docked field, a range picker and a dialog mark their days
+            identically. The colours come from CSS custom properties, so a brand palette is six
+            lines of CSS.
+          </p>
+          <div class="demo-row">
+            <div class="demo-item">
+              <span class="caption">Docked</span>
+              <nepali-date-picker-docked class="sync marks" id="events-docked" value="2081-05-24" weekly-off-days="7"></nepali-date-picker-docked>
+            </div>
+            <div class="demo-item">
+              <span class="caption">Range</span>
+              <nepali-date-range-picker class="sync marks" id="events-range" start="2081-05-24" weekly-off-days="7"></nepali-date-range-picker>
+            </div>
+            <div class="demo-item">
+              <span class="caption">Dialog</span>
+              <button class="action" id="open-events-dialog">Open marked dialog</button>
+              <nepali-date-picker-dialog class="sync marks" id="events-dialog" value="2081-05-24" weekly-off-days="7"></nepali-date-picker-dialog>
+            </div>
+            <div class="demo-item">
+              <span class="caption">Recoloured (CSS custom properties)</span>
+              <nepali-date-picker class="sync marks brand-marks" id="events-themed" value="2081-05-24" weekly-off-days="7"></nepali-date-picker>
+            </div>
+          </div>
+          <details>
+            <summary>CSS</summary>
+            <pre><code>nepali-date-picker.brand-marks {
+  --ndp-weekly-off: #8e24aa;
+  --ndp-holiday-public: #d32f2f;
+  --ndp-holiday-religious: #1e88e5;
+  --ndp-holiday-regional: #00897b;
+  --ndp-holiday-observance: #6d4c41;
+  --ndp-holiday-container: rgba(211, 47, 47, 0.12);
+}</code></pre>
+          </details>
+        </section>
+
+        <!-- Event engine -->
+        <section class="card" id="event-engine">
+          <span class="tag">@nepali-date-picker/core</span>
+          <h2>Asking what a day is</h2>
+          <p class="desc">
+            The picker draws a colour and dots and no text. Everything else is a query on a policy:
+            what the day is, what the month holds, and how many working days lie between two dates.
+            Pick a day in the calendar to inspect it.
+          </p>
+          <div class="demo-row">
+            <div class="demo-item">
+              <nepali-date-picker class="sync marks" id="policy-picker" value="2081-05-24" weekly-off-days="7"></nepali-date-picker>
+            </div>
+            <div class="demo-item">
+              <div class="engine-grid">
+                <div>Weekly off: <span class="result" id="policy-weekly-off">-</span></div>
+                <div>Non-working: <span class="result" id="policy-non-working">-</span></div>
+                <div>Strongest kind: <span class="result" id="policy-kind">-</span></div>
+                <div>Named on it: <span class="result" id="policy-names">-</span></div>
+                <div>Days in month: <span class="result" id="policy-month-days">-</span></div>
+                <div>Closed days this month: <span class="result" id="policy-month-closed">-</span></div>
+                <div>Entries this month: <span class="result" id="policy-month-entries">-</span></div>
+                <div>Working days in 21: <span class="result" id="policy-working">-</span></div>
+                <div>Next working day: <span class="result" id="policy-next">-</span></div>
+                <div>+5 working days: <span class="result" id="policy-plus">-</span></div>
+              </div>
+            </div>
+          </div>
+          <details>
+            <summary>JavaScript</summary>
+            <pre><code>import {
+  createDetailedEvent, expandEventDays, createCalendarPolicy,
+} from '@nepali-date-picker/core';
+
+const dashain = createDetailedEvent(2081, 6, 17, 'Dashain', 'religious', true, 'dashain', null);
+const office = createCalendarPolicy([7], expandEventDays(dashain, 10));
+
+office.statusOf(2081, 6, 18).isNonWorking;          // true
+office.monthStatus(2081, 6).filter((d) =&gt; d.isNonWorking).length;
+office.workingDaysBetween(2081, 6, 1, 2081, 6, 22); // end exclusive
+office.nextWorkingDay(2081, 6, 17);                 // steps over the whole span</code></pre>
+          </details>
+        </section>
+
+        <!-- Bounds, disabled and validation -->
+        <section class="card" id="bounds">
+          <span class="tag">min / max / disabled</span>
+          <h2>Bounds, disabled and validation</h2>
+          <p class="desc">
+            <code>min</code> and <code>max</code> are Bikram Sambat <code>YYYY-MM-DD</code> strings, and
+            every element that takes a date takes them: a day outside the window is drawn disabled
+            rather than hidden, and a typed one is rejected. <code>disabled</code> dims the whole
+            element and stops it responding. A field that cannot parse what is in it fires
+            <code>invalid</code> instead of <code>change</code>, and carries the reason.
+          </p>
+          <div class="demo-row">
+            <div class="demo-item">
+              <span class="caption">Field bounded to Bhadra–Kartik 2081</span>
+              <nepali-date-field
+                class="sync"
+                id="bounded-field"
+                label="Delivery date"
+                value="2081-05-24"
+                min="2081-05-01"
+                max="2081-07-30"
+              ></nepali-date-field>
+              <span class="result" id="bounded-field-status">-</span>
+            </div>
+            <div class="demo-item">
+              <span class="caption">Docked, same window</span>
+              <nepali-date-picker-docked
+                class="sync"
+                label="Appointment"
+                value="2081-05-24"
+                min="2081-05-01"
+                max="2081-07-30"
+              ></nepali-date-picker-docked>
+            </div>
+            <div class="demo-item">
+              <span class="caption">Range picker, same window</span>
+              <nepali-date-range-picker
+                class="sync"
+                start="2081-05-24"
+                min="2081-05-01"
+                max="2081-07-30"
+              ></nepali-date-range-picker>
+            </div>
+          </div>
+          <div class="demo-row">
+            <div class="demo-item">
+              <span class="caption">Wheel, disabled</span>
+              <nepali-wheel-date-picker class="sync" value="2081-05-24" disabled></nepali-wheel-date-picker>
+            </div>
+            <div class="demo-item">
+              <span class="caption">Docked, disabled</span>
+              <nepali-date-picker-docked
+                class="sync"
+                label="Locked"
+                value="2081-05-24"
+                disabled
+              ></nepali-date-picker-docked>
+            </div>
+            <div class="demo-item">
+              <span class="caption">Range fields, disabled</span>
+              <nepali-date-range-field
+                class="sync"
+                start="2081-05-10"
+                end="2081-05-20"
+                disabled
+              ></nepali-date-range-field>
+            </div>
+          </div>
+          <details>
+            <summary>HTML</summary>
+            <pre><code>&lt;nepali-date-field label="Delivery date" min="2081-05-01" max="2081-07-30"&gt;&lt;/nepali-date-field&gt;
+&lt;script&gt;
+  field.addEventListener('change', (e) =&gt; console.log('valid', e.detail.bsIso));
+  field.addEventListener('invalid', (e) =&gt; console.log('rejected', e.detail.message));
+&lt;/script&gt;</code></pre>
+          </details>
+        </section>
+
+        <!-- Labels, headings and per-element language -->
+        <section class="card" id="labels">
+          <span class="tag">label / start-label / heading / language</span>
+          <h2>Labels, headings and language</h2>
+          <p class="desc">
+            Every visible string is an attribute. A range field names its two sides separately with
+            <code>start-label</code> and <code>end-label</code>, a dialog takes a
+            <code>heading</code>, and <code>language</code> is per element, so one form can hold a
+            Nepali field next to an English one without a wrapper deciding for both.
+          </p>
+          <div class="demo-row">
+            <div class="demo-item">
+              <span class="caption">Named range fields</span>
+              <nepali-date-range-field
+                class="sync"
+                start="2081-05-10"
+                end="2081-05-20"
+                start-label="Leave from"
+                end-label="Leave until"
+              ></nepali-date-range-field>
+            </div>
+            <div class="demo-item">
+              <span class="caption">Always Nepali, whatever the toolbar says</span>
+              <nepali-date-field label="जन्म मिति" value="2050-04-12" language="ne"></nepali-date-field>
+            </div>
+            <div class="demo-item">
+              <span class="caption">Always English, whatever the toolbar says</span>
+              <nepali-date-field label="Date of birth" value="2050-04-12" language="en"></nepali-date-field>
+            </div>
+          </div>
+          <div class="demo-row">
+            <div class="demo-item">
+              <span class="caption">Dialog with a heading</span>
+              <button class="action" id="open-dialog-heading">Open titled dialog</button>
+              <nepali-date-picker-dialog
+                class="sync"
+                id="dialog-heading"
+                value="2081-05-24"
+                heading="When should we deliver?"
+              ></nepali-date-picker-dialog>
+            </div>
+            <div class="demo-item">
+              <span class="caption">Full-screen, titled and in Nepali</span>
+              <button class="action" id="open-dialog-ne">Open Nepali dialog</button>
+              <nepali-date-picker-dialog
+                id="dialog-ne"
+                value="2081-05-24"
+                language="ne"
+                heading="मिति छान्नुहोस्"
+                fullscreen
+              ></nepali-date-picker-dialog>
+            </div>
+          </div>
+          <details>
+            <summary>HTML</summary>
+            <pre><code>&lt;nepali-date-range-field start-label="Leave from" end-label="Leave until"&gt;&lt;/nepali-date-range-field&gt;
+&lt;nepali-date-picker-dialog heading="When should we deliver?"&gt;&lt;/nepali-date-picker-dialog&gt;
+&lt;nepali-date-field label="जन्म मिति" language="ne"&gt;&lt;/nepali-date-field&gt;</code></pre>
+          </details>
+        </section>
+
+        <!-- Theming one element -->
+        <section class="card" id="theming">
+          <span class="tag">CSS custom properties</span>
+          <h2>Restyling a single element</h2>
+          <p class="desc">
+            The elements draw from custom properties rather than a stylesheet of their own, and
+            custom properties inherit through the shadow boundary. Setting them on one element
+            restyles just that one; setting them on <code>:root</code> restyles the page. Nothing
+            here needs a build step, a theme object, or a part selector.
+          </p>
+          <div class="demo-row">
+            <div class="demo-item">
+              <span class="caption">Untouched</span>
+              <nepali-date-picker class="sync" value="2081-05-24"></nepali-date-picker>
+            </div>
+            <div class="demo-item">
+              <span class="caption">Every token overridden</span>
+              <nepali-date-picker class="sync themed-picker" value="2081-05-24"></nepali-date-picker>
+            </div>
+            <div class="demo-item">
+              <span class="caption">The same tokens on a docked field</span>
+              <nepali-date-picker-docked
+                class="sync themed-picker"
+                label="Appointment"
+                value="2081-05-24"
+              ></nepali-date-picker-docked>
+            </div>
+          </div>
+          <details>
+            <summary>CSS</summary>
+            <pre><code>.themed-picker {
+  --ndp-font: 'Iowan Old Style', Georgia, serif;
+  --ndp-bg: #12262a;
+  --ndp-text: #e7f5f4;
+  --ndp-muted: #7fa8a6;
+  --ndp-accent: #ffb703;
+  --ndp-on-accent: #12262a;
+  --ndp-hover: rgba(255, 183, 3, 0.16);
+  --ndp-in-range: rgba(255, 183, 3, 0.2);
+  --ndp-today-ring: #ffb703;
+  --ndp-border: #21454a;
+  --ndp-error: #ff8fa3;
+  --ndp-radius: 20px;
+}</code></pre>
+          </details>
+        </section>
+
         <!-- Engine -->
         <section class="card" id="engine">
           <span class="tag">@nepali-date-picker/core</span>
           <h2>Conversion engine (no UI)</h2>
-          <p class="desc">The same package powering the pickers, usable directly in Node or the browser.</p>
+          <p class="desc">
+            The same package powering the pickers, usable directly in Node or the browser with no DOM
+            at all. Change either date below and every group recomputes.
+          </p>
           <div class="engine-grid">
-            <div>Today (BS): <span class="result" id="today-bs">-</span></div>
-            <div>Today (AD): <span class="result" id="today-ad">-</span></div>
-          </div>
-          <div class="engine-grid" style="margin-top: 16px">
+            <label>BS date <input type="text" id="bs-input" value="2081-05-24" /></label>
             <label>AD date <input type="date" id="ad-input" /></label>
-            <span>→ BS: <span class="result" id="ad-to-bs">-</span></span>
+            <label>Pattern <input type="text" id="pattern-input" value="EEEE, dd MMMM yyyy" /></label>
+          </div>
+          <div class="tabs" role="tablist" id="engine-tabs">
+            <button class="tab" role="tab" data-engine="convert" aria-selected="true">Convert</button>
+            <button class="tab" role="tab" data-engine="query" aria-selected="false">Query</button>
+            <button class="tab" role="tab" data-engine="format" aria-selected="false">Format</button>
+            <button class="tab" role="tab" data-engine="time" aria-selected="false">Time &amp; ISO</button>
+            <button class="tab" role="tab" data-engine="digits" aria-selected="false">Digits &amp; names</button>
+            <button class="tab" role="tab" data-engine="bounds" aria-selected="false">Bounds</button>
+          </div>
+          <div class="tabpanel" data-engine="convert" data-active>
+            <div class="engine-grid" id="engine-convert"></div>
+          </div>
+          <div class="tabpanel" data-engine="query">
+            <div class="engine-grid" id="engine-query"></div>
+          </div>
+          <div class="tabpanel" data-engine="format">
+            <div class="engine-grid" id="engine-format"></div>
+          </div>
+          <div class="tabpanel" data-engine="time">
+            <div class="engine-grid" id="engine-time"></div>
+          </div>
+          <div class="tabpanel" data-engine="digits">
+            <div class="engine-grid" id="engine-digits"></div>
+          </div>
+          <div class="tabpanel" data-engine="bounds">
+            <div class="engine-grid" id="engine-bounds"></div>
           </div>
           <details>
             <summary>JavaScript</summary>
-            <pre><code>import { convertAdToBs, getTodayBs } from '@nepali-date-picker/core';
+            <pre><code>import {
+  convertAdToBs, convertBsToAd, getTodayBs, getTodayAd, getCurrentTime,
+  getBsMonth, getAdMonth, getTotalDaysInBsMonth, getBsDaysBetween, compareBsDates,
+  getBsCalendarsInAdMonth, getAdCalendarsInBsMonth, isAdDateConvertible,
+  formatBsDate, formatBsDateByPattern, formatAdDateByPattern,
+  formatTimeEnglish, formatTimeNepali, bsDateTimeToIso, bsDateTimeFromIso,
+  localizeDigits, toLatinDigits, getBsYearRange, getAdYearRangeForBsYears,
+} from '@nepali-date-picker/core';
 
-getTodayBs();               // { year: 2081, month: 5, dayOfMonth: 24, ... }
-convertAdToBs(2024, 9, 9);  // { year: 2081, month: 5, dayOfMonth: 24, ... }</code></pre>
+convertAdToBs(2024, 9, 9);              // { year: 2081, month: 5, dayOfMonth: 24, ... }
+getBsMonth(2081, 5).totalDaysInMonth;   // 31
+formatBsDateByPattern('EEEE, dd MMMM yyyy', 2081, 5, 24, 'en');
+bsDateTimeFromIso(bsDateTimeToIso(2081, 5, 24, 9, 30, 0, 0));</code></pre>
           </details>
         </section>
 

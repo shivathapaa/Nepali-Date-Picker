@@ -16,27 +16,139 @@ body[data-theme='dark'] {
   --text: #e4e2e6;
   --muted: #a9abb2;
   --border: #303138;
-  --accent: #a9c7ff;
   --code-bg: #0c0d10;
   color-scheme: dark;
-  /* Custom properties inherit through the shadow boundary, so these re-theme every element. */
-  --ndp-bg: #1e1f23;
-  --ndp-text: #e4e2e6;
-  --ndp-muted: #a9abb2;
-  --ndp-border: #45464d;
-  --ndp-accent: #a9c7ff;
-  --ndp-on-accent: #10305e;
-  --ndp-hover: rgba(169, 199, 255, 0.16);
-  --ndp-in-range: rgba(169, 199, 255, 0.18);
-  --ndp-today-ring: #a9c7ff;
 }
 
-body[data-theme='brand'] {
-  --accent: #d6336c;
-  --ndp-accent: #d6336c;
-  --ndp-today-ring: #d6336c;
-  --ndp-hover: rgba(214, 51, 108, 0.12);
-  --ndp-in-range: rgba(214, 51, 108, 0.14);
+/* The tinted states follow whichever accent the palette set, so a palette never restates them.
+   Custom properties inherit through the shadow boundary, which is what re-themes every element. */
+body {
+  --ndp-hover: color-mix(in srgb, var(--ndp-accent) 14%, transparent);
+  --ndp-in-range: color-mix(in srgb, var(--ndp-accent) 16%, transparent);
+  --ndp-today-ring: var(--ndp-accent);
+}
+
+/* The palettes, in the Material roles and the same values the Compose and SwiftUI samples use:
+   accent is primary, on-accent is onPrimary, bg is surface, text is onSurface, muted is
+   onSurfaceVariant and border is outline. */
+body[data-palette='default'] {
+  --accent: #6750a4;
+  --ndp-accent: #6750a4;
+  --ndp-on-accent: #ffffff;
+  --ndp-bg: #fef7ff;
+  --ndp-text: #1d1b20;
+  --ndp-muted: #49454f;
+  --ndp-border: #79747e;
+}
+
+body[data-theme='dark'][data-palette='default'] {
+  --accent: #d0bcff;
+  --ndp-accent: #d0bcff;
+  --ndp-on-accent: #381e72;
+  --ndp-bg: #141218;
+  --ndp-text: #e6e0e9;
+  --ndp-muted: #cac4d0;
+  --ndp-border: #938f99;
+}
+
+body[data-palette='green'] {
+  --accent: #4c662b;
+  --ndp-accent: #4c662b;
+  --ndp-on-accent: #ffffff;
+  --ndp-bg: #f9faef;
+  --ndp-text: #1a1c16;
+  --ndp-muted: #44483d;
+  --ndp-border: #75796c;
+}
+
+body[data-theme='dark'][data-palette='green'] {
+  --accent: #b1d18a;
+  --ndp-accent: #b1d18a;
+  --ndp-on-accent: #1f3701;
+  --ndp-bg: #12140e;
+  --ndp-text: #e2e3d8;
+  --ndp-muted: #c5c8ba;
+  --ndp-border: #8f9285;
+}
+
+body[data-palette='blue'] {
+  --accent: #415f91;
+  --ndp-accent: #415f91;
+  --ndp-on-accent: #ffffff;
+  --ndp-bg: #f9f9ff;
+  --ndp-text: #191c20;
+  --ndp-muted: #44474e;
+  --ndp-border: #74777f;
+}
+
+body[data-theme='dark'][data-palette='blue'] {
+  --accent: #aac7ff;
+  --ndp-accent: #aac7ff;
+  --ndp-on-accent: #0a305f;
+  --ndp-bg: #111318;
+  --ndp-text: #e2e2e9;
+  --ndp-muted: #c4c6d0;
+  --ndp-border: #8e9099;
+}
+
+body[data-palette='orange'] {
+  --accent: #8b5000;
+  --ndp-accent: #8b5000;
+  --ndp-on-accent: #ffffff;
+  --ndp-bg: #fff8f5;
+  --ndp-text: #221a14;
+  --ndp-muted: #51453a;
+  --ndp-border: #837468;
+}
+
+body[data-theme='dark'][data-palette='orange'] {
+  --accent: #ffb870;
+  --ndp-accent: #ffb870;
+  --ndp-on-accent: #4a2800;
+  --ndp-bg: #1a120c;
+  --ndp-text: #f0dfd4;
+  --ndp-muted: #d6c3b5;
+  --ndp-border: #9e8e81;
+}
+
+body[data-palette='red'] {
+  --accent: #904a43;
+  --ndp-accent: #904a43;
+  --ndp-on-accent: #ffffff;
+  --ndp-bg: #fff8f7;
+  --ndp-text: #231919;
+  --ndp-muted: #534341;
+  --ndp-border: #857371;
+}
+
+body[data-theme='dark'][data-palette='red'] {
+  --accent: #ffb4ab;
+  --ndp-accent: #ffb4ab;
+  --ndp-on-accent: #561e19;
+  --ndp-bg: #1a1110;
+  --ndp-text: #f1dedc;
+  --ndp-muted: #d8c2be;
+  --ndp-border: #a08c8a;
+}
+
+body[data-palette='yellow'] {
+  --accent: #6d5e0f;
+  --ndp-accent: #6d5e0f;
+  --ndp-on-accent: #ffffff;
+  --ndp-bg: #fff9ee;
+  --ndp-text: #1e1b13;
+  --ndp-muted: #4b4739;
+  --ndp-border: #7c7767;
+}
+
+body[data-theme='dark'][data-palette='yellow'] {
+  --accent: #dbc66e;
+  --ndp-accent: #dbc66e;
+  --ndp-on-accent: #3a3000;
+  --ndp-bg: #15130b;
+  --ndp-text: #e9e2d0;
+  --ndp-muted: #cdc6b4;
+  --ndp-border: #969080;
 }
 
 * {
@@ -321,4 +433,31 @@ footer {
   padding: 24px;
   color: var(--muted);
   font-size: 0.85rem;
+}
+
+/* Every token one element draws from, set on that element alone. Custom properties inherit through
+   the shadow boundary, so the same block on :root would restyle the whole page instead. */
+.themed-picker {
+  --ndp-font: 'Iowan Old Style', Georgia, serif;
+  --ndp-bg: #12262a;
+  --ndp-text: #e7f5f4;
+  --ndp-muted: #7fa8a6;
+  --ndp-accent: #ffb703;
+  --ndp-on-accent: #12262a;
+  --ndp-hover: rgba(255, 183, 3, 0.16);
+  --ndp-in-range: rgba(255, 183, 3, 0.2);
+  --ndp-today-ring: #ffb703;
+  --ndp-border: #21454a;
+  --ndp-error: #ff8fa3;
+  --ndp-radius: 20px;
+}
+
+/* A brand palette for the marking, six custom properties and nothing else. */
+.brand-marks {
+  --ndp-weekly-off: #8e24aa;
+  --ndp-holiday-public: #d32f2f;
+  --ndp-holiday-religious: #1e88e5;
+  --ndp-holiday-regional: #00897b;
+  --ndp-holiday-observance: #6d4c41;
+  --ndp-holiday-container: rgba(211, 47, 47, 0.12);
 }
