@@ -142,6 +142,11 @@ enum class NepaliDatePickerLang {
         override val nextMonthContentDescription: String = "Next month"
         override val previousMonthContentDescription: String = "Previous month"
         override val selectYearContentDescription: String = "Select year"
+        override val closedText: String = "Closed"
+        override val workingDayText: String = "Working day"
+        override val weeklyOffText: String = "Weekly day off"
+        override val noEventsOnDayText: String = "Nothing on this day"
+        override val noEventsInMonthText: String = "Nothing this month"
     },
     NEPALI {
         override val weekdays: List<NepaliWeekdayName> = nepaliWeekdays
@@ -186,6 +191,11 @@ enum class NepaliDatePickerLang {
         override val nextMonthContentDescription: String = "अर्को महिना"
         override val previousMonthContentDescription: String = "अघिल्लो महिना"
         override val selectYearContentDescription: String = "वर्ष चयन गर्नुहोस्"
+        override val closedText: String = "बन्द"
+        override val workingDayText: String = "कार्य दिन"
+        override val weeklyOffText: String = "साप्ताहिक बिदा"
+        override val noEventsOnDayText: String = "यस दिन केही छैन"
+        override val noEventsInMonthText: String = "यस महिना केही छैन"
     };
 
     abstract val weekdays: List<NepaliWeekdayName>
@@ -231,84 +241,25 @@ enum class NepaliDatePickerLang {
     abstract val nextMonthContentDescription: String
     abstract val previousMonthContentDescription: String
     abstract val selectYearContentDescription: String
+
+    /**
+     * What a day the institution is shut for is called, whether the week says so or an event does.
+     * A calendar writing a day out leads with this or with [workingDayText].
+     */
+    abstract val closedText: String
+
+    /** What an ordinary open day is called, the counterpart of [closedText]. */
+    abstract val workingDayText: String
+
+    /**
+     * What a day off the weekly rule alone produces is called, said after [closedText] so a Saturday
+     * reads as closed and then as why.
+     */
+    abstract val weeklyOffText: String
+
+    /** Shown for an open day carrying nothing at all. */
+    abstract val noEventsOnDayText: String
+
+    /** Shown for a month whose every day carries nothing. */
+    abstract val noEventsInMonthText: String
 }
-
-private val nepaliMonths = listOf(
-    NepaliMonthName("बै", "बैशाख"),
-    NepaliMonthName("जे", "जेठ"),
-    NepaliMonthName("अ", "असार"),
-    NepaliMonthName("सा", "साउन"),
-    NepaliMonthName("भ", "भदौ"),
-    NepaliMonthName("अ", "असोज"),
-    NepaliMonthName("का", "कार्तिक"),
-    NepaliMonthName("मं", "मंसिर"),
-    NepaliMonthName("पु", "पौष"),
-    NepaliMonthName("मा", "माघ"),
-    NepaliMonthName("फा", "फाल्गुन"),
-    NepaliMonthName("चै", "चैत")
-)
-
-private val nepaliMonthsInEnglish = listOf(
-    NepaliMonthName("Bai", "Baisakh"),
-    NepaliMonthName("Jes", "Jestha"),
-    NepaliMonthName("Asa", "Asar"),
-    NepaliMonthName("Shr", "Shrawn"),
-    NepaliMonthName("Bha", "Bhadra"),
-    NepaliMonthName("Aso", "Asoj"),
-    NepaliMonthName("Kar", "Kartik"),
-    NepaliMonthName("Man", "Mangsir"),
-    NepaliMonthName("Pou", "Poush"),
-    NepaliMonthName("Mag", "Magh"),
-    NepaliMonthName("Pha", "Falgun"),
-    NepaliMonthName("Chai", "Chaitra")
-)
-
-private val nepaliWeekdays = listOf(
-    NepaliWeekdayName("आ", "आईत", "आईतबार"),
-    NepaliWeekdayName("सो", "सोम", "सोमबार"),
-    NepaliWeekdayName("मं", "मंगल", "मंगलबार"),
-    NepaliWeekdayName("बु", "बुध", "बुधबार"),
-    NepaliWeekdayName("बि", "बिहि", "बिहिबार"),
-    NepaliWeekdayName("शु", "शुक्र", "शुक्रबार"),
-    NepaliWeekdayName("श", "शनि", "शनिबार")
-)
-
-private val englishWeekdays = listOf(
-    NepaliWeekdayName("S", "Sun", "Sunday"),
-    NepaliWeekdayName("M", "Mon", "Monday"),
-    NepaliWeekdayName("T", "Tue", "Tuesday"),
-    NepaliWeekdayName("W", "Wed", "Wednesday"),
-    NepaliWeekdayName("T", "Thu", "Thursday"),
-    NepaliWeekdayName("F", "Fri", "Friday"),
-    NepaliWeekdayName("S", "Sat", "Saturday")
-)
-
-private val englishMonthsInEnglish = listOf(
-    NepaliMonthName("Jan", "January"),
-    NepaliMonthName("Feb", "February"),
-    NepaliMonthName("Mar", "March"),
-    NepaliMonthName("Apr", "April"),
-    NepaliMonthName("May", "May"),
-    NepaliMonthName("Jun", "June"),
-    NepaliMonthName("Jul", "July"),
-    NepaliMonthName("Aug", "August"),
-    NepaliMonthName("Sep", "September"),
-    NepaliMonthName("Oct", "October"),
-    NepaliMonthName("Nov", "November"),
-    NepaliMonthName("Dec", "December")
-)
-
-private val englishMonthsInNepali = listOf(
-    NepaliMonthName("जन", "जनवरी"),
-    NepaliMonthName("फेब्रु", "फेब्रुअरी"),
-    NepaliMonthName("मार्च", "मार्च"),
-    NepaliMonthName("अप्रि", "अप्रिल"),
-    NepaliMonthName("मे", "मे"),
-    NepaliMonthName("जुन", "जुन"),
-    NepaliMonthName("जुला", "जुलाई"),
-    NepaliMonthName("अग", "अगस्ट"),
-    NepaliMonthName("सेप्ट", "सेप्टेम्बर"),
-    NepaliMonthName("अक्टो", "अक्टोबर"),
-    NepaliMonthName("नोभे", "नोभेम्बर"),
-    NepaliMonthName("डिसे", "डिसेम्बर")
-)
