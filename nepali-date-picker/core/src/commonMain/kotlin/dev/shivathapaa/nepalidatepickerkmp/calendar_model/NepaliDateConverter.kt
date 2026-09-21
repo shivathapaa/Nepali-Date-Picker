@@ -17,6 +17,7 @@
 package dev.shivathapaa.nepalidatepickerkmp.calendar_model
 
 import dev.shivathapaa.nepalidatepickerkmp.NepaliSelectableDates
+import dev.shivathapaa.nepalidatepickerkmp.annotation.HiddenFromObjC
 import dev.shivathapaa.nepalidatepickerkmp.annotation.Immutable
 import dev.shivathapaa.nepalidatepickerkmp.data.CustomCalendar
 import dev.shivathapaa.nepalidatepickerkmp.data.CustomDateTime
@@ -25,6 +26,7 @@ import dev.shivathapaa.nepalidatepickerkmp.data.MonthCalendar
 import dev.shivathapaa.nepalidatepickerkmp.data.NameFormat
 import dev.shivathapaa.nepalidatepickerkmp.data.NepaliDateLocale
 import dev.shivathapaa.nepalidatepickerkmp.data.NepaliDatePickerLang
+import dev.shivathapaa.nepalidatepickerkmp.data.NepaliEnglishMonthDay
 import dev.shivathapaa.nepalidatepickerkmp.data.NepaliMonthCalendar
 import dev.shivathapaa.nepalidatepickerkmp.data.SimpleDate
 import dev.shivathapaa.nepalidatepickerkmp.data.SimpleTime
@@ -248,14 +250,49 @@ object NepaliDateConverter {
      * a loop when you need a full English month mapped to Bikram Sambat (for example, to render an
      * English month grid that also shows Nepali dates).
      *
+     * Not exported to Swift: Objective-C cannot describe an optional list element, so this list
+     * would arrive as `[Any]` with a day that has no equivalent showing up as `NSNull`, which reads
+     * as present and counts as convertible. [getNepaliCalendarsInEnglishMonthByDay] answers the same
+     * question in a shape the bridge keeps whole.
+     *
      * @param englishYear takes value between [NepaliCalendarDefaults.EnglishYearRange]
      * @param englishMonth takes value between 1 to 12
      */
+    @HiddenFromObjC
     fun getNepaliCalendarsInEnglishMonth(
         englishYear: Int,
         englishMonth: Int
     ): List<CustomCalendar?> {
         return calendarModel.getNepaliCalendarsInEnglishMonth(englishYear, englishMonth)
+    }
+
+    /**
+     * The same month as [getNepaliCalendarsInEnglishMonth], with each Gregorian day paired to the
+     * Bikram Sambat calendar it converts to rather than left as a hole in a list.
+     *
+     * Every day of the month is present, in day order, and a day the conversion table does not reach
+     * carries a null [NepaliEnglishMonthDay.nepaliCalendar]. This is the form Swift gets, because an
+     * optional property survives the Objective-C bridge where an optional list element does not.
+     *
+     * ```swift
+     * for day in NepaliDateConverter.shared.getNepaliCalendarsInEnglishMonthByDay(
+     *     englishYear: 2024, englishMonth: 9
+     * ) {
+     *     if let nepali = day.nepaliCalendar {
+     *         print(day.englishDayOfMonth, nepali.year, nepali.month, nepali.dayOfMonth)
+     *     }
+     * }
+     * ```
+     *
+     * @param englishYear takes value between [NepaliCalendarDefaults.EnglishYearRange]
+     * @param englishMonth takes value between 1 to 12
+     */
+    fun getNepaliCalendarsInEnglishMonthByDay(
+        englishYear: Int,
+        englishMonth: Int
+    ): List<NepaliEnglishMonthDay> {
+        return calendarModel.getNepaliCalendarsInEnglishMonth(englishYear, englishMonth)
+            .mapIndexed { index, calendar -> NepaliEnglishMonthDay(index + 1, calendar) }
     }
 
     /**
@@ -1047,7 +1084,11 @@ object NepaliDateConverter {
      *
      * @return [CustomDateTime] which represents the English [CustomCalendar] and Nepali [SimpleTime]
      *
-     * @throws IllegalArgumentException if the isoDateTime text cannot be parsed or the date boundaries are exceeded.
+     * The result is a Gregorian date and a Nepal-time clock reading, neither of which needs the
+     * Bikram Sambat conversion table, so any year parses. Use [getNepaliDateTimeFromIsoFormat] for
+     * the Bikram Sambat reading, which is limited to [NepaliCalendarDefaults.EnglishYearRange].
+     *
+     * @throws IllegalArgumentException if the isoDateTime text cannot be parsed.
      *
      * Example:
      * ```
