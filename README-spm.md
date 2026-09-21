@@ -289,9 +289,9 @@ NepaliDateDialogViewControllersKt.NepaliDatePickerFullScreenDialogViewController
 
 ### The browsable calendar
 
-`NepaliCalendar` is the read-a-month surface rather than the pick-a-date one: it fills the frame it
-is given, shows both calendars' numbers and the neighbouring months' days by default, and marks the
-days the `events` policy closes. Asking for the day's summary or the month's list stacks them inside
+`NepaliCalendarViewController` is the read-a-month surface rather than the pick-a-date one: it fills
+the frame it is given, shows both calendars' numbers and the neighbouring months' days by default,
+and marks the days the `events` policy closes. Asking for the day's summary or the month's list stacks them inside
 the same controller, so all three share one selection.
 
 It takes no `selectableDates`: a calendar browses, and refusing days stays the pickers' job.
