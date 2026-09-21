@@ -13,6 +13,7 @@ platform.
 - Real DOM (not a canvas), keyboard-navigable, screen-reader labelled (ARIA grid pattern).
 - English / Nepali text and Latin / Devanagari digits.
 - Selectable-range limits (`min` / `max`), theming through CSS custom properties.
+- Holidays, weekly off days and your own events marked on the grid, colour and dots kept apart.
 
 ## Install
 
@@ -32,9 +33,9 @@ Import once (registers every element), then use the tags anywhere:
 
 To register only one element, import its subpath:
 `import '@nepali-date-picker/web-component/nepali-date-field';`. The shared conversion engine is most
-of the payload, so this saves about 3 kB gzipped rather than a lot.
+of the payload, so this saves a few kB gzipped rather than a lot.
 
-Without a bundler, load the self-contained build from a CDN (232 kB minified, 64 kB gzipped, all
+Without a bundler, load the self-contained build from a CDN (313 kB minified, 82 kB gzipped, all
 seven elements, nothing left to resolve):
 
 ```html
@@ -50,6 +51,7 @@ the tags upgrade once the browser runs the module. The CDN build is the exceptio
 | Element | Purpose |
 | --- | --- |
 | `<nepali-date-picker>` | Inline month calendar. |
+| `<nepali-calendar>` | Browsable month calendar: both calendars' numbers, the picked day written out, the month's events listed. |
 | `<nepali-date-picker-dialog>` | Modal calendar with confirm / cancel (add `fullscreen`). |
 | `<nepali-date-picker-docked>` | Text field with an anchored calendar popover. |
 | `<nepali-date-range-picker>` | Start / end range selection in the calendar. |
@@ -74,6 +76,9 @@ same day selected.
 | `calendar-system` | `"bs"` \| `"ad"` | all | Calendar shown or typed in. Values stay Bikram Sambat. |
 | `show-calendar-toggle` | `boolean` | calendar elements, wheel | Show the `B.S.` / `A.D.` switch. |
 | `show-adjacent-month-days` | `boolean` | calendar elements | Fill the empty cells with the neighbouring months' days, drawn faded. Each is announced with its own month and a note that it moves the grid. |
+| `show-secondary-date` | `boolean` | calendar elements | Pair every day with the same day in the other calendar, drawn small in the corner of the cell, and name that calendar's months under the month header. Both dates are announced. |
+| `events` | `string` | calendar elements | Days to mark, as JSON. See [Marking days](#marking-days). |
+| `weekly-off-days` | `string` | calendar elements | Weekdays the institution never opens, e.g. `7` or `7,1`. Sunday is 1. |
 | `open` | `boolean` | dialog | Whether the dialog is shown (or call `.show()` / `.close()`). |
 | `fullscreen` | `boolean` | dialog | Full-screen layout. |
 | `label` | `string` | docked, field | Field label. |
@@ -96,6 +101,100 @@ picker.addEventListener('change', (e) => console.log(e.detail.bsIso, e.detail.ad
 `NepaliDatePickerChangeEvent`, `NepaliDateRangeChangeEvent`, and `NepaliDateFieldInvalidEvent` are
 exported for typing a listener without writing the `CustomEvent` wrapper out.
 
+### Marking days
+
+A colour says what the day is; dots say what is scheduled on it. A weekly off day is coloured and
+never dotted, which leaves the three dot slots for an app's own events.
+
+```html
+<nepali-date-picker
+  weekly-off-days="7,1"
+  events='[
+    {"date":"2083-06-03","name":"Constitution Day","kind":"governmentPublic"},
+    {"date":"2083-06-05","name":"Standup","indicate":true,"color":"#42a5f5"}
+  ]'>
+</nepali-date-picker>
+```
+
+`weekly-off-days` numbers **Sunday 1 through Saturday 7**, unlike `Date.getDay()`; numbers outside
+that range are dropped rather than shifting the week. Each event takes `date` (required,
+`YYYY-MM-DD` Bikram Sambat), `name`, `kind` (`governmentPublic` / `religious` / `regional` /
+`observance`), `closesOffices`, `color` and `indicate`. Names are announced after the date, so the
+marking is never carried by colour alone, and malformed JSON leaves the calendar plain instead of
+throwing.
+
+A named closure outranks the week, so a Saturday that is also Dashain is coloured as Dashain; an
+event that leaves the institution open does not, so a Saturday carrying only a programme still reads
+as a Saturday.
+
+Something that runs longer than a day stays one entry: add `endDate` (inclusive) or `days`, and
+every day of the span is marked the same way.
+
+```html
+<nepali-date-picker
+  events='[
+    {"date":"2083-06-17","endDate":"2083-06-26","name":"Dashain","kind":"religious"},
+    {"date":"2083-07-02","days":5,"name":"Tihar","kind":"religious"}
+  ]'>
+</nepali-date-picker>
+```
+
+A span crossing into the next month or the next year keeps marking, an end before the start marks
+the one day rather than disappearing, and a span is capped at 366 days so a mistyped count cannot
+fill the grid for a year.
+
+### Carrying your own record on an event
+
+Two fields travel with an entry and come back untouched: `id`, which correlates it to your own
+record and gathers the days of a span into one line, and `payload`, an opaque string nothing here
+parses.
+
+```html
+<nepali-calendar
+  show-day-summary
+  show-month-events
+  events='[
+    {"date":"2083-06-17","days":4,"name":"Indra Jatra","kind":"religious",
+     "id":"indra-jatra",
+     "payload":"{\"description\":\"Masked dance at Basantapur\",\"imageUrl\":\"https://example.org/jatra.jpg\"}"}
+  ]'>
+</nepali-calendar>
+```
+
+```js
+calendar.addEventListener('event-select', (e) => {
+  const record = JSON.parse(e.detail.event.payload);
+  // The URL is yours to render: <img src={record.imageUrl}> , a background, an icon, anything.
+  banner.src = record.imageUrl;
+});
+```
+
+Images are a good example of what `payload` is for. Nothing in this package fetches or draws them:
+keep the URL in the payload, read it back on `day-select` or `event-select`, and render it with your
+own `<img>`, CSS background or icon component. The same applies on every other platform, where the
+payload is the same opaque string.
+
+### Browsing a month
+
+`<nepali-calendar>` is the read-a-month element rather than the pick-a-date one. It shows both
+calendars' numbers and the neighbouring months' days by default, and can stack the picked day and
+the month's list under the grid.
+
+```html
+<nepali-calendar show-day-summary show-month-events weekly-off-days="7"></nepali-calendar>
+```
+
+| Attribute | Default | What it does |
+| --- | --- | --- |
+| `show-secondary-date` | on | Pairs every cell with the same day in the other calendar. |
+| `show-adjacent-month-days` | on | Fills the grid's corners with the neighbouring months' days. |
+| `show-day-summary` | off | Writes the picked day out: closed or working, why, and what is on it. |
+| `show-month-events` | off | Lists the month's events, a span gathered into one clickable line. |
+| `show-calendar-toggle` | off | Draws the `B.S.` / `A.D.` switch. |
+
+It fires `day-select` (the day in both calendars, whether the institution is shut, and everything
+named on it) and `event-select` (the entry behind a clicked line, `id` and `payload` included).
+
 ### Keyboard (calendar elements)
 
 Arrow keys move by day / week (crossing months), `Home` / `End` jump to the week edges,
@@ -117,7 +216,9 @@ page:
 ```
 
 Also available: `--ndp-bg`, `--ndp-text`, `--ndp-muted`, `--ndp-on-accent`, `--ndp-hover`,
-`--ndp-in-range`, `--ndp-border`, `--ndp-error`. Each element documents the subset it actually reads
+`--ndp-in-range`, `--ndp-border`, `--ndp-error`, and for marked days `--ndp-weekly-off`,
+`--ndp-holiday-public`, `--ndp-holiday-religious`, `--ndp-holiday-regional`,
+`--ndp-holiday-observance`, `--ndp-holiday-container`. Each element documents the subset it actually reads
 in the bundled `custom-elements.json`, which editors with custom-element support (WebStorm, or VS
 Code with the Lit plugin) use for per-tag completion of attributes, events and these properties.
 
@@ -154,8 +255,8 @@ In the Next.js App Router, add `'use client'` to the file that renders the eleme
 ### Vue 3
 
 ```js
-// vite.config.js
-vue({ template: { compilerOptions: { isCustomElement: (t) => t === 'nepali-date-picker' } } });
+// vite.config.js - tell Vue these tags are custom elements
+vue({ template: { compilerOptions: { isCustomElement: (t) => t.startsWith('nepali-') } } });
 ```
 
 ```vue

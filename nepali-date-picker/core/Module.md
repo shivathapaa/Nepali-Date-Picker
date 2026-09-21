@@ -1,7 +1,7 @@
 # Module core
 
 Compose-free Bikram Sambat engine. Converts between BS and AD dates, resolves month layouts,
-formats dates in Nepali or English locales, and compares calendars — all on plain `kotlinx-datetime`
+formats dates in Nepali or English locales, and compares calendars, all on plain `kotlinx-datetime`
 with zero Compose dependency, so it ships on server, CLI, and every native target.
 
 `NepaliDateConverter` is the entry point for most consumers. `NepaliCalendarModel` is the underlying
@@ -35,16 +35,27 @@ calendar-tagged counterpart of `NepaliMonthCalendar`, so month geometry can be h
 knowing which calendar produced it. Use `toMonthCalendar` and `toNepaliMonthCalendar` to move between
 the two.
 
+# Package dev.shivathapaa.nepalidatepickerkmp.event
+
+Calendar-event SPI. `NepaliCalendarEvent` is one thing on one day, a public holiday, a festival, a
+programme or a meeting, and `closesOffices` says whether the institution is actually shut for it.
+`NepaliEventProvider` supplies them, `NepaliCalendarPolicy` pairs that list with the weekdays an
+institution never opens and answers `statusOf` / `eventsOn` / `eventsIn` / `monthStatus`, and the
+working-day helpers count by the same rule. `spanningDays` and `spanningThrough` expand something
+that runs longer than a day into the per-day entries the rest of the package reads. No event dataset
+ships with the library by design.
+
 # Package dev.shivathapaa.nepalidatepickerkmp.holiday
 
-Holiday SPI. `NepaliHolidayProvider` and the working-day helpers let a consumer plug in holiday data;
-no holiday dataset ships with the library by design.
+The 3.1.0 holiday names, deprecated. Typealiases onto the `event` package so existing imports keep
+resolving; an implementation of the old provider renames `holidays(year)` to `events(year)`.
 
 # Package dev.shivathapaa.nepalidatepickerkmp.annotations
 
-`ExperimentalNepaliDatePickerApi` — opt-in marker guarding APIs whose shape may still change.
+`ExperimentalNepaliDatePickerApi`, the opt-in marker guarding APIs whose shape may still change.
 
 # Package dev.shivathapaa.nepalidatepickerkmp.annotation
 
-Compose stability markers (`Immutable`, `Stable`) declared as optional expectations so `:core` can
-advertise Compose stability on Compose-capable targets without depending on Compose elsewhere.
+Compose stability markers (`Immutable`, `Stable`). They resolve to the Compose runtime annotations on
+Compose-capable targets and compile away everywhere else, so `:core` advertises stability without
+depending on Compose.

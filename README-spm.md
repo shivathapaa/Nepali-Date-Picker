@@ -60,7 +60,9 @@ embed them directly.
     * [Picker state](#picker-state)
     * [Defaults](#defaults)
     * [Restricting selectable dates](#restricting-selectable-dates)
+    * [Marking the days a picker draws](#marking-the-days-a-picker-draws)
     * [Localization and appearance](#localization-and-appearance)
+        * [Colours and dark mode](#colours-and-dark-mode)
 * [Part 2 - The engine](#part-2---the-engine)
     * [Types](#types)
     * [Enums](#enums)
@@ -73,8 +75,9 @@ embed them directly.
     * [Formatting a date](#formatting-a-date)
     * [Formatting time](#formatting-time)
     * [ISO 8601](#iso-8601)
+    * [Date and time text (the wire format)](#date-and-time-text-the-wire-format)
     * [Digits](#digits)
-    * [Working days and holidays](#working-days-and-holidays)
+    * [Events, holidays and working days](#events-holidays-and-working-days)
     * [NepaliCalendarModel](#nepalicalendarmodel)
     * [Calendar tables](#calendar-tables)
 * [Troubleshooting](#troubleshooting)
@@ -143,7 +146,7 @@ Or declare it in your own `Package.swift`:
 
 ```swift
 dependencies: [
-    .package(url: "https://github.com/shivathapaa/Nepali-Date-Picker-SPM.git", from: "3.2.0")
+    .package(url: "https://github.com/shivathapaa/Nepali-Date-Picker-SPM.git", from: "3.3.0")
 ],
 targets: [
     .target(
@@ -230,10 +233,12 @@ Two more are **unavailable**, so referencing them fails to compile rather than w
 
 Compose `@Composable` functions cannot be called from Swift. The library therefore exposes one
 factory per picker, each returning a `UIViewController` that hosts the Compose scene already wrapped
-in `MaterialTheme` and a `Surface`.
+in `MaterialTheme` and a `Surface`. That theme follows the device's interface style and anything the
+app has set on [`NepaliPickerAppearance`](#colours-and-dark-mode).
 
 Every factory is a top-level Kotlin function, so Swift reaches it through the file's generated class
-(`NepaliDatePickerViewControllersKt` and friends). All eight pickers share the same shape:
+(`NepaliDatePickerViewControllersKt` and friends). All eight pickers share the same shape, and the
+three calendar factories below follow it with their own callbacks:
 
 | Parameter | Type | Notes |
 | --- | --- | --- |
@@ -242,6 +247,7 @@ Every factory is a top-level Kotlin function, so Swift reaches it through the fi
 | `yearRangeStart` / `yearRangeEnd` | `Int32` | Two plain bounds, not an `IntRange`. |
 | `selectableDates` | `NepaliSelectableDates?` | `nil` allows every date. |
 | `options` | one options class per picker, nullable | `nil` takes every library default. See [Options](#options). |
+| `events` | `NepaliEventOptions?` | The days to mark. `nil` draws the calendar plain. See [Marking the days a picker draws](#marking-the-days-a-picker-draws). The wheel has no day cells, so it has no `events`. |
 | `onHeightChange` | `(KotlinFloat) -> Void` | Content height in points. See [Sizing](#sizing). |
 | the callback | closure | Fires on every change, including the initial value. |
 
@@ -257,28 +263,64 @@ Here are the exact Swift signatures, copied from the generated header:
 
 ```swift
 NepaliDatePickerViewControllersKt.NepaliDatePickerViewController(
-    initialSelectedDate:locale:yearRangeStart:yearRangeEnd:selectableDates:options:onHeightChange:onDateSelected:)
+    initialSelectedDate:locale:yearRangeStart:yearRangeEnd:selectableDates:options:events:onHeightChange:onDateSelected:)
 
 NepaliDatePickerViewControllersKt.NepaliDatePickerDockedViewController(
-    initialSelectedDate:locale:yearRangeStart:yearRangeEnd:selectableDates:options:onHeightChange:onDateSelected:)
+    initialSelectedDate:locale:yearRangeStart:yearRangeEnd:selectableDates:options:events:onHeightChange:onDateSelected:)
 
 NepaliDatePickerViewControllersKt.NepaliWheelDatePickerViewController(
     initialDate:locale:yearRangeStart:yearRangeEnd:selectableDates:options:onHeightChange:onDateChange:)
 
 NepaliDateRangeViewControllersKt.NepaliDateRangePickerViewController(
-    initialSelectedStartDate:initialSelectedEndDate:locale:yearRangeStart:yearRangeEnd:selectableDates:options:onHeightChange:onRangeSelected:)
+    initialSelectedStartDate:initialSelectedEndDate:locale:yearRangeStart:yearRangeEnd:selectableDates:options:events:onHeightChange:onRangeSelected:)
 
 NepaliDateFieldViewControllersKt.NepaliDateFieldViewController(
-    initialValue:locale:dateFormat:yearRangeStart:yearRangeEnd:selectableDates:options:onHeightChange:onValueChange:)
+    initialValue:locale:dateFormat:yearRangeStart:yearRangeEnd:selectableDates:options:events:onHeightChange:onValueChange:)
 
 NepaliDateRangeViewControllersKt.NepaliDateRangeFieldViewController(
-    initialStartValue:initialEndValue:locale:dateFormat:yearRangeStart:yearRangeEnd:selectableDates:options:onHeightChange:onRangeChange:)
+    initialStartValue:initialEndValue:locale:dateFormat:yearRangeStart:yearRangeEnd:selectableDates:options:events:onHeightChange:onRangeChange:)
 
 NepaliDateDialogViewControllersKt.NepaliDatePickerDialogViewController(
-    initialSelectedDate:locale:yearRangeStart:yearRangeEnd:selectableDates:calendarOptions:options:onHeightChange:onConfirm:onDismiss:)
+    initialSelectedDate:locale:yearRangeStart:yearRangeEnd:selectableDates:calendarOptions:options:events:onHeightChange:onConfirm:onDismiss:)
 
 NepaliDateDialogViewControllersKt.NepaliDatePickerFullScreenDialogViewController(
-    initialSelectedDate:locale:yearRangeStart:yearRangeEnd:selectableDates:calendarOptions:options:onHeightChange:onConfirm:onDismiss:)
+    initialSelectedDate:locale:yearRangeStart:yearRangeEnd:selectableDates:calendarOptions:options:events:onHeightChange:onConfirm:onDismiss:)
+```
+
+### The browsable calendar
+
+`NepaliCalendar` is the read-a-month surface rather than the pick-a-date one: it fills the frame it
+is given, shows both calendars' numbers and the neighbouring months' days by default, and marks the
+days the `events` policy closes. Asking for the day's summary or the month's list stacks them inside
+the same controller, so all three share one selection.
+
+It takes no `selectableDates`: a calendar browses, and refusing days stays the pickers' job.
+
+```swift
+NepaliCalendarViewControllersKt.NepaliCalendarViewController(
+    initialSelectedDate:locale:yearRangeStart:yearRangeEnd:options:events:onHeightChange:onDaySelected:onEventTapped:)
+
+NepaliCalendarViewControllersKt.NepaliDaySummaryViewController(
+    date:locale:events:onHeightChange:)
+
+NepaliCalendarViewControllersKt.NepaliMonthEventListViewController(
+    year:month:locale:events:onHeightChange:onEventTapped:)
+```
+
+`onDaySelected` hands back the tapped day together with its `NepaliDayStatus`, so a screen knows
+whether the institution is shut and what is named on the day. `onEventTapped` hands back the entry
+behind a tapped line with its `id` and `payload` untouched, which is where an app keeps its own
+record: a description, a colour, image URLs it fetches and draws itself. Set them on
+`NepaliEventInfo` after construction, since the initializer keeps the shape it already had:
+
+```swift
+let info = NepaliEventInfo(
+    year: 2083, month: 6, dayOfMonth: 17,
+    name: "Indra Jatra", kind: .religious, closesOffices: true,
+    colorArgb: 0, indicate: false
+)
+info.id = "indra-jatra"
+info.payload = #"{"imageUrl":"https://example.org/jatra.jpg"}"#
 ```
 
 One more factory hosts the `B.S.` / `A.D.` switch on its own, for when it belongs in your own chrome
@@ -304,6 +346,7 @@ let controller = NepaliDatePickerViewControllersKt.NepaliDatePickerViewControlle
     yearRangeEnd: 2100,
     selectableDates: nil,
     options: nil,
+    events: nil,
     onHeightChange: { [weak self] height in
         self?.applyHeight(CGFloat(truncating: height))
     },
@@ -318,12 +361,30 @@ controller.didMove(toParent: self)
 
 ## Step 1 - paste the support file
 
-`NepaliPickerSupport.swift`. Shared locales, the year range, and the container that sizes a hosted
-picker to the height Compose reports.
+`NepaliPickerSupport.swift`. Shared locales, the year range, the container that sizes a hosted
+picker to the height Compose reports, and the two conversions the bridge needs: `0xAARRGGBB` colours
+as signed integers, and weekday numbers as boxed `KotlinInt`s.
 
 ```swift
 import SwiftUI
 import nepali_date_picker
+
+/// A `0xAARRGGBB` literal as the signed integer the bridge takes. An opaque colour overflows
+/// `Int32`, so the bit pattern is reinterpreted rather than converted.
+func argb(_ value: UInt32) -> Int32 { Int32(bitPattern: value) }
+
+/// Kotlin's `List<Int>` and `Set<Int>` arrive boxed, so weekday numbers are wrapped once here.
+extension Array where Element == Int32 {
+    var boxed: [KotlinInt] { map { KotlinInt(int: $0) } }
+
+    var boxedSet: Set<KotlinInt> { Set(boxed) }
+}
+
+/// Day-of-week numbers, in the library's 1-based-Sunday convention.
+enum Weekday {
+    static let sunday: Int32 = 1
+    static let saturday: Int32 = 7
+}
 
 /// Shared defaults so every screen agrees on the year range and locale.
 enum NepaliPickerDefaults {
@@ -365,11 +426,9 @@ enum NepaliPickerDefaults {
 
 /// Sizes a hosted picker to the height Compose reports, instead of a guessed constant.
 ///
-/// The hosted scene is always given `measurementHeight`, while the surrounding layout takes the
-/// height Compose reports back. Keeping those two apart is the whole point: Compose measures inside
-/// the frame it is given, so if the scene shrank with the layout, a report could never exceed the
-/// current frame and the content would be trapped at its smallest size. Switching a picker to typed
-/// input and back is exactly that case.
+/// The scene is always measured in `measurementHeight`, while the surrounding layout takes the
+/// height Compose reports back. Keep the two frames separate: a scene that shrinks with the layout
+/// can never report more than its current height, and stays trapped at its smallest size.
 struct AutoSized<Content: View>: View {
     /// Height the scene is measured in. Generous enough for the tallest mode the picker can show.
     var measurementHeight: CGFloat = 420
@@ -416,6 +475,8 @@ struct NepaliDatePickerView: UIViewControllerRepresentable {
     var locale: NepaliDateLocale = NepaliPickerDefaults.english
     var yearRange: ClosedRange<Int32> = NepaliPickerDefaults.yearRange
     var selectableDates: NepaliSelectableDates?
+    /// The days to mark. `nil` draws the calendar plain.
+    var events: NepaliEventOptions?
     var showModeToggle: Bool = true
     var showTodayButton: Bool = true
     var showEnglishDate: Bool = false
@@ -442,6 +503,7 @@ struct NepaliDatePickerView: UIViewControllerRepresentable {
             yearRangeEnd: yearRange.upperBound,
             selectableDates: selectableDates,
             options: options,
+            events: events,
             onHeightChange: { onHeightChange(CGFloat(truncating: $0)) },
             onDateSelected: onDateSelected
         )
@@ -458,6 +520,8 @@ struct NepaliDateRangePickerView: UIViewControllerRepresentable {
     var locale: NepaliDateLocale = NepaliPickerDefaults.englishRange
     var yearRange: ClosedRange<Int32> = NepaliPickerDefaults.yearRange
     var selectableDates: NepaliSelectableDates?
+    /// The days to mark. `nil` draws the calendar plain.
+    var events: NepaliEventOptions?
     var showModeToggle: Bool = true
     var showTodayButton: Bool = true
     var showMonthsVertically: Bool = true
@@ -489,6 +553,7 @@ struct NepaliDateRangePickerView: UIViewControllerRepresentable {
             yearRangeEnd: yearRange.upperBound,
             selectableDates: selectableDates,
             options: options,
+            events: events,
             onHeightChange: { onHeightChange(CGFloat(truncating: $0)) },
             onRangeSelected: onRangeSelected
         )
@@ -504,6 +569,8 @@ struct NepaliDatePickerDockedView: UIViewControllerRepresentable {
     var locale: NepaliDateLocale = NepaliPickerDefaults.english
     var yearRange: ClosedRange<Int32> = NepaliPickerDefaults.yearRange
     var selectableDates: NepaliSelectableDates?
+    /// The days to mark. `nil` draws the calendar plain.
+    var events: NepaliEventOptions?
     var dateFormatStyle: NepaliDateFormatStyle = .medium
     var showTodayButton: Bool = true
     var label: String?
@@ -534,6 +601,7 @@ struct NepaliDatePickerDockedView: UIViewControllerRepresentable {
             yearRangeEnd: yearRange.upperBound,
             selectableDates: selectableDates,
             options: options,
+            events: events,
             onHeightChange: { onHeightChange(CGFloat(truncating: $0)) },
             onDateSelected: onDateSelected
         )
@@ -587,6 +655,8 @@ struct NepaliDateFieldView: UIViewControllerRepresentable {
     var dateFormat: NepaliDateFormatter.Pattern = .yyyySlashMmSlashDd
     var yearRange: ClosedRange<Int32> = NepaliPickerDefaults.yearRange
     var selectableDates: NepaliSelectableDates?
+    /// The days to mark. `nil` draws the calendar plain.
+    var events: NepaliEventOptions?
     var outlined: Bool = true
     var label: String?
     var placeholder: String?
@@ -626,6 +696,7 @@ struct NepaliDateFieldView: UIViewControllerRepresentable {
             yearRangeEnd: yearRange.upperBound,
             selectableDates: selectableDates,
             options: options,
+            events: events,
             onHeightChange: { onHeightChange(CGFloat(truncating: $0)) },
             onValueChange: onValueChange
         )
@@ -643,6 +714,8 @@ struct NepaliDateRangeFieldView: UIViewControllerRepresentable {
     var dateFormat: NepaliDateFormatter.Pattern = .yyyySlashMmSlashDd
     var yearRange: ClosedRange<Int32> = NepaliPickerDefaults.yearRange
     var selectableDates: NepaliSelectableDates?
+    /// The days to mark. `nil` draws the calendar plain.
+    var events: NepaliEventOptions?
     var outlined: Bool = true
     var startLabel: String?
     var endLabel: String?
@@ -685,6 +758,7 @@ struct NepaliDateRangeFieldView: UIViewControllerRepresentable {
             yearRangeEnd: yearRange.upperBound,
             selectableDates: selectableDates,
             options: options,
+            events: events,
             onHeightChange: { onHeightChange(CGFloat(truncating: $0)) },
             onRangeChange: onRangeChange
         )
@@ -699,6 +773,8 @@ struct NepaliDatePickerDialogView: UIViewControllerRepresentable {
     var locale: NepaliDateLocale = NepaliPickerDefaults.english
     var yearRange: ClosedRange<Int32> = NepaliPickerDefaults.yearRange
     var selectableDates: NepaliSelectableDates?
+    /// The days to mark. `nil` draws the calendar plain.
+    var events: NepaliEventOptions?
     var fullScreen: Bool = false
     var title: String?
     var confirmText: String = "OK"
@@ -742,6 +818,7 @@ struct NepaliDatePickerDialogView: UIViewControllerRepresentable {
                 selectableDates: selectableDates,
                 calendarOptions: calendarOptions,
                 options: options,
+                events: events,
                 // A dialog is an overlay, so its inline height is meaningless.
                 onHeightChange: { _ in },
                 onConfirm: onConfirm,
@@ -756,6 +833,7 @@ struct NepaliDatePickerDialogView: UIViewControllerRepresentable {
             selectableDates: selectableDates,
             calendarOptions: calendarOptions,
             options: options,
+            events: events,
             onHeightChange: { _ in },
             onConfirm: onConfirm,
             onDismiss: onDismiss
@@ -857,10 +935,14 @@ NepaliDatePickerViewControllersKt.NepaliDatePickerViewController(
     yearRangeEnd: 2100,
     selectableDates: nil,
     options: options,                   // or nil for the defaults
+    events: nil,                        // nothing marked
     onHeightChange: { _ in },
     onDateSelected: { selected = $0 }
 )
 ```
+
+Marking is separate from these: `events` is its own parameter on every factory that draws a month
+grid, documented under [Events, holidays and working days](#events-holidays-and-working-days).
 
 Every property, with its default:
 
@@ -955,6 +1037,28 @@ factories use the library defaults:
 (`title`, `headline`, `leadingIcon`, `trailingIcon`, `prefix`, `suffix`). Shapes are covered by the
 `cornerRadius` properties instead. Everything else the composables accept is reachable.
 
+One engine call is absent for the same reason. `getNepaliCalendarsInEnglishMonth` answers
+`List<CustomCalendar?>` in Kotlin, and Objective-C cannot describe an optional list *element*, so it
+is not exported. Call `getNepaliCalendarsInEnglishMonthByDay` instead: it returns
+`[NepaliEnglishMonthDay]`, one entry per Gregorian day, each carrying `englishDayOfMonth` and an
+optional `nepaliCalendar`.
+
+```swift
+for day in NepaliDateConverter.shared.getNepaliCalendarsInEnglishMonthByDay(
+    englishYear: 2026, englishMonth: 9
+) {
+    if let nepali = day.nepaliCalendar {
+        print(day.englishDayOfMonth, nepali.year, nepali.month, nepali.dayOfMonth)
+    }
+}
+```
+
+The `nepali-date-picker-serialization` Maven artifact is also absent: a `KSerializer` is a
+Kotlin-only construct and does not cross to Objective-C. Swift has `Codable` instead, and it reaches
+the same payloads: see
+[Date and time text (the wire format)](#date-and-time-text-the-wire-format) for the exact shapes and
+paste-ready structs.
+
 ## Calendar picker
 
 `NepaliDatePickerViewControllersKt.NepaliDatePickerViewController`
@@ -966,6 +1070,7 @@ factories use the library defaults:
 | `yearRangeStart` / `yearRangeEnd` | `Int32` | Selectable BS year bounds. |
 | `selectableDates` | `NepaliSelectableDates?` | Which dates are enabled. |
 | `options` | `NepaliCalendarOptions?` | Appearance and behaviour, or `nil` for the defaults. See [Options](#options). |
+| `events` | `NepaliEventOptions?` | Days to mark, or `nil` for a plain calendar. See [Marking the days a picker draws](#marking-the-days-a-picker-draws). |
 | `onHeightChange` | `(KotlinFloat) -> Void` | Measured content height in points. See [Sizing](#sizing). |
 | `onDateSelected` | `(CustomCalendar?) -> Void` | Fires on every change. |
 
@@ -1086,6 +1191,7 @@ struct ChromeSwitchExample: View {
 | `yearRangeStart` / `yearRangeEnd` | `Int32` | Selectable BS year bounds. |
 | `selectableDates` | `NepaliSelectableDates?` | Which dates are enabled. |
 | `options` | `NepaliRangeCalendarOptions?` | Adds `showMonthsVertically` and `showYearPickerAndMonthNavigation`. |
+| `events` | `NepaliEventOptions?` | Days to mark, or `nil` for a plain calendar. |
 | `onHeightChange` | `(KotlinFloat) -> Void` | Measured content height in points. |
 | `onRangeSelected` | `(CustomCalendar?, CustomCalendar?) -> Void` | Either end may be `nil` while the range is still being built. |
 
@@ -1308,19 +1414,23 @@ let state = NepaliDatePickerKt.NepaliDatePickerState(
     yearRange: NepaliCalendarDefaults.shared.NepaliYearRange,
     initialDisplayMode: 0,           // 0 = calendar, 1 = typed input
     nepaliSelectableDates: NepaliDatePickerDefaults.shared.AllDates,
-    locale: NepaliPickerDefaults.english
+    locale: NepaliPickerDefaults.english,
+    initialCalendarSystem: .bikramSambat
 )
 ```
 
-| `NepaliDatePickerState` | Type |
-| --- | --- |
-| `selectedDate` | `CustomCalendar?` |
-| `selectedEnglishDate` | `CustomCalendar?` |
-| `displayedMonth` | `NepaliMonthCalendar` |
-| `displayMode` | `Int32` |
-| `yearRange` | `KotlinIntRange` |
-| `nepaliSelectableDates` | `NepaliSelectableDates` |
-| `locale` | `NepaliDateLocale` |
+| `NepaliDatePickerState` | Type | Meaning |
+| --- | --- | --- |
+| `selectedDate` | `CustomCalendar?` | The selection, always Bikram Sambat. |
+| `selectedEnglishDate` | `CustomCalendar?` | The same day in Gregorian. |
+| `displayedMonth` | `NepaliMonthCalendar` | The Bikram Sambat month holding the first day of the visible grid. |
+| `displayedCalendarSystem` | `CalendarSystem` | Which calendar the grid shows. Assigning it re-anchors the grid on the selection. |
+| `displayedMonthCalendar` | `MonthCalendar` | The month on screen, in whichever calendar is displayed. |
+| `englishYearRange` | `KotlinIntRange` | Gregorian years derived from `yearRange`, clamped into `EnglishYearRange`. |
+| `displayMode` | `Int32` | `0` calendar, `1` typed input. |
+| `yearRange` | `KotlinIntRange` | Selectable Bikram Sambat years. |
+| `nepaliSelectableDates` | `NepaliSelectableDates` | The rule deciding which dates are enabled. |
+| `locale` | `NepaliDateLocale` | Language, format and digit script. |
 
 `NepaliDateRangePickerState` mirrors it with `selectedStartNepaliDate`, `selectedEndNepaliDate`,
 `selectedStartEnglishDate`, `selectedEndEnglishDate`, and a
@@ -1334,7 +1444,8 @@ let rangeState = NepaliDateRangePickerKt.NepaliDateRangePickerState(
     yearRange: NepaliCalendarDefaults.shared.NepaliYearRange,
     initialDisplayMode: 0,
     nepaliSelectableDates: NepaliDatePickerDefaults.shared.AllDates,
-    locale: NepaliPickerDefaults.englishRange
+    locale: NepaliPickerDefaults.englishRange,
+    initialCalendarSystem: .bikramSambat
 )
 
 // setSelection takes CustomCalendar, not SimpleDate, so build the ends through the converter.
@@ -1367,8 +1478,9 @@ Note that the state factory names the range ends `initialSelectedStartNepaliDate
 | `TonalElevation` | Dialog tonal elevation. |
 
 `NepaliDatePickerColors` is also exported, but every field is a Compose `Color`, which Swift cannot
-construct. Colour theming is therefore practical only from Kotlin. From Swift, the pickers follow
-the `MaterialTheme` the factories install.
+construct. Theme the pickers through `NepaliPickerAppearance` instead, which takes the same roles as
+`0xAARRGGBB` integers and also carries the light or dark choice. See
+[Colours and dark mode](#colours-and-dark-mode).
 
 ## Restricting selectable dates
 
@@ -1451,6 +1563,49 @@ AutoSized(measurementHeight: 560) { report in
 > then shows the same single letter the grid uses. `LONG` omits the weekday entirely
 > ("Baisakh 15, 2081").
 
+### Colours and dark mode
+
+`NepaliPickerAppearance` is a shared appearance proxy, in the sense `UINavigationBar.appearance()`
+is one: set it once and every hosted picker, field and dialog repaints, including the ones already
+on screen. It exists because a Swift caller has no way to install a Compose theme around a hosted
+controller.
+
+Every colour is a `0xAARRGGBB` value, and `0` means "use Material's own value for this role", so an
+app can override only its accent and leave the rest alone. `brightness` is `.system` by default,
+which follows the device's interface style and switches with it.
+
+```swift
+let appearance = NepaliPickerAppearance.shared
+
+appearance.brightness = .system              // .system | .light | .dark
+appearance.primaryArgb = argb(0xFF4C662B)    // selected day, today's ring, confirm button
+appearance.onPrimaryArgb = argb(0xFFFFFFFF)  // the number inside a selected day
+appearance.surfaceArgb = argb(0xFFF9FAEF)    // the picker's background
+appearance.onSurfaceArgb = argb(0xFF1A1C16)  // day numbers and headlines
+```
+
+`argb` is the helper from [Step 1](#step-1---paste-the-support-file): an opaque colour overflows
+`Int32`, so the bit pattern is reinterpreted rather than converted.
+
+| Role | What it colours |
+| --- | --- |
+| `primaryArgb` | Selected days, the today ring, the confirm button, the cursor. |
+| `onPrimaryArgb` | Content on top of `primaryArgb`. |
+| `primaryContainerArgb` / `onPrimaryContainerArgb` | A selected year, and a range's endpoints. |
+| `secondaryContainerArgb` / `onSecondaryContainerArgb` | The days inside a selected range. |
+| `surfaceArgb` / `onSurfaceArgb` | The picker background, and the text on it. |
+| `surfaceVariantArgb` / `onSurfaceVariantArgb` | Field surfaces, weekday letters, supporting text. |
+| `outlineArgb` | Field borders, dividers, the outline of an unselected day. |
+
+Setting both `surfaceArgb` and `surfaceVariantArgb` also derives the surface container tones
+Material uses behind dialogs, menus and cards, so a themed app does not get its own calendar sitting
+on Material's default neutral. `reset()` returns every role to Material's value and the brightness
+to the device setting.
+
+The `iosSwiftApp` sample wires this to a toolbar menu; see
+[`SampleAppearance.swift`](./sample/iosSwiftApp/iosSwiftApp/SampleAppearance.swift) for a complete
+six-palette implementation.
+
 ---
 
 # Part 2 - The engine
@@ -1479,7 +1634,16 @@ NepaliMonthCalendar  // year, month, totalDaysInMonth, firstDayOfMonth,
                      // lastDayOfMonth, daysFromStartOfWeekToFirstOfMonth
 
 CustomDateTime    // customCalendar, simpleTime
-HolidayEntry      // date, name, kind
+
+NepaliEnglishMonthDay  // one Gregorian day paired with its BS calendar
+                       //   englishDayOfMonth, nepaliCalendar (nil outside the
+                       //   convertible range)
+
+NepaliCalendarEvent  // one thing on one day
+                     //   date, name, kind, closesOffices, id, payload
+NepaliDayStatus      // what a policy says about a day
+                     //   isWeeklyOff, events
+                     //   isNonWorking, primaryKind, names, closures (derived)
 ```
 
 Year bounds come from `NepaliCalendarDefaults.shared`:
@@ -1504,6 +1668,7 @@ NepaliDateConverter.shared.isEnglishDateConvertible(englishYYYY: 1913, englishMM
 | `NepaliDateFormatStyle` | `.full`, `.long_`, `.medium`, `.shortMdy`, `.shortYmd`, `.compactMdy`, `.compactYmd` |
 | `NameFormat` | `.full`, `.medium`, `.short_` |
 | `DigitScript` | `.latin`, `.devanagari` |
+| `NepaliEventKind` | `.governmentPublic`, `.religious`, `.regional`, `.observance` |
 | `CalendarSystem` | `.bikramSambat`, `.gregorian` - the named form of `era` (2 and 1) |
 
 Format styles render as:
@@ -1662,6 +1827,92 @@ restored.simpleTime
 The Gregorian equivalents are `formatEnglishDateNepaliTimeToIsoFormat` and
 `getEnglishDateNepaliTimeFromIsoFormat`.
 
+## Date and time text (the wire format)
+
+An ISO timestamp is an absolute instant in UTC. For a plain calendar date or a wall-clock time on
+its own, with no zone and no conversion, use the fixed-pattern formatters instead. These produce the
+same strings the Kotlin, Android and JavaScript builds persist:
+
+```swift
+let dates = NepaliDateFormatter.shared
+let times = NepaliTimeFormatter.shared
+
+dates.format(date: SimpleDate(year: 2082, month: 2, dayOfMonth: 14),
+             pattern: .yyyyDashMmDashDd, script: .latin)   // "2082-02-14"
+dates.parse(input: "2082-02-14", pattern: .yyyyDashMmDashDd)  // SimpleDate? , nil on mismatch
+
+times.format(time: SimpleTime(hour: 9, minute: 30, second: 0, nanosecond: 0))  // "09:30:00"
+times.parse(input: "23:59:59.123456789")                      // SimpleTime? , nil on mismatch
+```
+
+Both parsers return `nil` rather than throwing, and neither trims whitespace. `parse(input:pattern:)`
+holds every pattern to exactly ten characters, so `"2082-2-14"` is `nil`. Devanagari numerals are
+accepted by both. `parse` allows day 32, because some Bikram Sambat months run that long; check the
+day against the real month with `getTotalDaysInNepaliMonth` when it matters.
+
+### Talking to a Kotlin backend
+
+The optional `nepali-date-picker-serialization` Maven artifact gives Kotlin services `KSerializer`s
+for these types. They are not in this framework and they do not need to be: they read and write
+exactly the strings above, so `Codable` on this side is enough.
+
+| Type | On the wire | Produce it here with |
+| --- | --- | --- |
+| `SimpleDate` | `"2082-02-14"` | `NepaliDateFormatter.shared.format(date:pattern:.yyyyDashMmDashDd, script:.latin)` |
+| `SimpleDate` (struct form) | `{"year":2082,"month":2,"dayOfMonth":14}` | the `Codable` struct below |
+| `SimpleTime` | `"09:30:00"`, `"23:59:59.123456789"` | `NepaliTimeFormatter.shared.format(time:)` |
+| `CustomCalendar` | 12-field object: `year`, `month`, `dayOfMonth`, `era`, `firstDayOfMonth`, `lastDayOfMonth`, `totalDaysInMonth`, `dayOfWeekInMonth`, `dayOfWeek`, `dayOfYear`, `weekOfMonth`, `weekOfYear` | the `Codable` struct below |
+| `CalendarSystem` | `1` for AD, `2` for BS | the `era` field |
+| `NepaliCalendarEvent` | `{"date":"2082-01-01","name":"…","kind":"GovernmentPublic"}`, plus `closesOffices`, `id` and `payload` when set | see the note below |
+| `NepaliDayStatus` | `{"isWeeklyOff":false,"events":[…]}` | - |
+
+Kotlin classes cannot conform to `Codable`, so declare your own structs. They are small, and the
+field names and order below are what the Kotlin serializers write:
+
+```swift
+struct WireDate: Codable {
+    let year: Int32
+    let month: Int32
+    let dayOfMonth: Int32
+
+    init(_ date: SimpleDate) {
+        year = date.year; month = date.month; dayOfMonth = date.dayOfMonth
+    }
+
+    var simpleDate: SimpleDate {
+        SimpleDate(year: year, month: month, dayOfMonth: dayOfMonth)
+    }
+}
+
+struct WireCalendar: Codable {
+    let year: Int32
+    let month: Int32
+    let dayOfMonth: Int32
+    let era: Int32
+    let firstDayOfMonth: Int32
+    let lastDayOfMonth: Int32
+    let totalDaysInMonth: Int32
+    // Optional on the way into Kotlin, where each defaults to -1.
+    var dayOfWeekInMonth: Int32 = -1
+    var dayOfWeek: Int32 = -1
+    var dayOfYear: Int32 = -1
+    var weekOfMonth: Int32 = -1
+    var weekOfYear: Int32 = -1
+}
+```
+
+For a date that is only a date, send the `SimpleDate` string. `CustomCalendar` is a fully resolved
+calendar record, and most payloads do not need one.
+
+**The one field that is spelled differently.** Kotlin writes `kind` as the enum's own name, so
+`GovernmentPublic`, `Religious`, `Regional`, `Observance`, capitalised. Swift sees the same enum as
+`.governmentPublic`, `.religious`, `.regional`, `.observance`. Kotlin rejects an unknown name rather
+than guessing, so capitalise the first letter on the way out and lowercase it on the way back in.
+
+`NepaliCalendarEvent` covers exactly one day. A span is written out as one entry per day carrying
+the same `name`, `kind` and `id`, so expand a span before sending it and collapse the entries back
+by `id` on the way in.
+
 ## Digits
 
 ```swift
@@ -1690,65 +1941,242 @@ if let latin = DigitScriptKt.latinDigitOrNull(devanagariSeven) as? unichar {
 
 For whole strings, reach for `toLatinDigits(_:)` above instead.
 
-## Working days and holidays
+## Events, holidays and working days
 
-**No holiday data ships with the library, by design.** Nepal's holiday list varies by employer,
-province and year, so you plug in your own `NepaliHolidayProvider`. Use `NoOpHolidayProvider.shared`
-when only weekends matter.
+**No event data ships with the library, by design.** Nepal's holiday list varies by employer,
+province and year, and every school keeps its own calendar besides, so you supply a
+`NepaliEventProvider`. Use `NoOpEventProvider.shared` when only the weekly rule matters.
 
+A `NepaliCalendarEvent` is one thing on one day: a public holiday, a festival, a programme, a
+meeting. What separates a holiday from a meeting is `closesOffices`, not the name.
+
+```swift
+let dashain = NepaliCalendarEvent(
+    date: SimpleDate(year: 2082, month: 6, dayOfMonth: 25),
+    name: "Vijaya Dashami",
+    kind: .religious,
+    closesOffices: true,   // defaults to what the kind usually means
+    id: "evt-42",          // handed back untouched, for your own record
+    payload: nil           // any opaque string; the library never parses it
+)
+```
+
+`NepaliEventKind` is `.governmentPublic`, `.religious`, `.regional`, `.observance`. The kind decides
+the colour and the default for `closesOffices`; the event itself has the final say, which is what
+lets a regional holiday close one district and not the next, and a school programme close nothing.
+
+An event covers one day, so something that runs longer is a list of entries rather than a range:
+
+```swift
+let festival = NepaliCalendarEvent(
+    date: SimpleDate(year: 2082, month: 6, dayOfMonth: 17),
+    name: "Dashain",
+    kind: .religious,
+    closesOffices: true,
+    id: "dashain-2082",   // set it, so the days can be recognized as one thing again
+    payload: nil
+)
+
+festival.spanningDays(days: 10)   // ten entries, Asoj 17 through 26
+festival.spanningThrough(end: SimpleDate(year: 2082, month: 6, dayOfMonth: 26))
+```
+
+Every entry keeps the name, kind, `closesOffices`, `id` and `payload`, and a span running out of
+Chaitra into Baisakh yields entries in both years, so each is reported by the year `events(year:)`
+is asked for.
+
+### A policy is one institution's calendar
+
+`NepaliCalendarPolicy` pairs the weekdays an institution never opens with the events it keeps.
 `NepaliWeekend.shared.Default` is **Saturday only**, matching what a Nepali office counts, rather
 than the two-day weekend most libraries assume.
 
 ```swift
-let weekend = NepaliWeekend.shared.Default
-let provider = NoOpHolidayProvider.shared
+let office = NepaliCalendarPolicy(weeklyOffDays: NepaliWeekend.shared.Default, provider: provider)
 
-converter.workingDaysBetween(start: from, end: to, provider: provider, weekend: weekend) // Int32
-converter.nextWorkingDay(from: from, provider: provider, weekend: weekend)                // SimpleDate
-converter.addWorkingDays(from: from, days: 5, provider: provider, weekend: weekend)       // SimpleDate
-```
-
-A `HolidayEntry` is `init(date:name:kind:)`, where `kind` is a `HolidayKind`:
-`.governmentpublic`, `.religious`, `.regional`, `.observance`.
-
-Two more helpers **decorate a `NepaliSelectableDates`** rather than filtering a list of dates. Each
-returns a new policy that delegates to the one you passed and additionally rejects weekends, or
-holidays. Chain them to grey those days out in a picker:
-
-```swift
-let policy = NepaliDatePickerDefaults.shared.AllDates
-let workingDaysOnly = HolidayHelpersKt.excludingHolidays(
-    HolidayHelpersKt.excludingWeekends(policy, weekend: NepaliWeekend.shared.Default),
+// Kotlin's Set<Int> arrives as Set<KotlinInt>, so weekday numbers are boxed. `boxedSet` is the
+// helper from Step 1.
+let school = NepaliCalendarPolicy(
+    weeklyOffDays: [Weekday.saturday, Weekday.sunday].boxedSet,
     provider: provider
 )
+```
 
+Weekday numbers are 1-based-Sunday, so `[6, 7]` is a Friday and Saturday weekend. A number outside
+`1...7` throws, since a set written to JavaScript's 0-based convention would close nothing at all.
+
+Ask it what a day is, and render the answer yourself:
+
+```swift
+let status = office.statusOf(date: SimpleDate(year: 2082, month: 6, dayOfMonth: 3))
+status.isWeeklyOff    // the week closes it
+status.isNonWorking   // closed for either reason, counted once
+status.primaryKind    // nil when the day is only a weekly off day
+status.names          // ["Constitution Day"], strongest kind first
+status.closures       // only the events that actually shut the door
+
+office.eventsOn(date: someDate)        // one day
+office.eventsIn(year: 2082, month: 6)  // a whole month, for a patro-style list
+office.monthStatus(year: 2082, month: 6) // one entry per day, index 0 is day 1
+```
+
+`monthStatus` resolves the month's first weekday once and walks forward, so a grid costs one
+conversion instead of one per cell. Prefer it when laying out a month.
+
+### Arithmetic follows the same policy
+
+```swift
+converter.workingDaysBetween(start: from, end: to, policy: school)  // Int32, end exclusive
+converter.nextWorkingDay(from: from, policy: school)                // SimpleDate
+converter.addWorkingDays(from: from, days: 5, policy: school)       // Excel WORKDAY semantics
+```
+
+The `(provider:weekend:)` overloads are still there when you would rather pass the two separately.
+An event that does not close is not counted: a week of school programmes is still five working days.
+
+### Marking the days a picker draws
+
+Compose colours cannot cross the Objective-C bridge in any usable form, so Swift describes what to
+mark with `NepaliEventOptions` and the library builds the decorator on the Kotlin side. Colours are
+`0xAARRGGBB` integers, and `0` keeps whatever the theme resolved.
+
+```swift
+let marks = NepaliEventOptions()
+marks.weeklyOffDays = [Weekday.saturday, Weekday.sunday].boxed   // a school week
+marks.events = [
+    NepaliEventInfo(
+        year: 2082, month: 6, dayOfMonth: 3,
+        name: "Constitution Day", kind: .governmentPublic,
+        closesOffices: true,
+        colorArgb: 0,        // take the palette slot its kind maps to
+        indicate: false      // colour the day without spending a dot
+    ),
+    NepaliEventInfo(
+        year: 2082, month: 6, dayOfMonth: 5,
+        name: "Standup", kind: .observance,
+        closesOffices: false,
+        colorArgb: Int32(bitPattern: 0xFF42A5F5),
+        indicate: true       // an app's own event gets a dot
+    ),
+]
+
+AutoSized(measurementHeight: 560) { report in
+    NepaliDatePickerView(onHeightChange: report, initialSelectedDate: nil, events: marks) {
+        selected = $0
+    }
+}
+```
+
+**A day takes one colour and the dots mean events.** A weekly off day repeats fifty-two times a
+year, so it is coloured and never dotted. A named closure outranks the week, because "Dashain" says
+more than "Saturday"; an event that leaves the door open does not, so a Saturday carrying only a
+programme still reads as a Saturday.
+
+| Property | Type | Default | What it does |
+| --- | --- | --- | --- |
+| `weeklyOffDays` | `[KotlinInt]` | `[7]` | Weekdays the institution never opens, 1 for Sunday through 7 for Saturday. Out-of-range numbers are dropped rather than throwing. Use the `boxed` helper from [Step 1](#step-1---paste-the-support-file). |
+| `events` | `[NepaliEventInfo]` | `[]` | What to mark. |
+| `markWeeklyOff` | `Bool` | `true` | Colour the weekly off days. |
+| `markEvents` | `Bool` | `true` | Colour the days that carry an event. |
+| `tintContainer` | `Bool` | `false` | Also give a marked day a tinted disc. |
+| `indicateWeeklyOff` | `Bool` | `false` | Dot the weekly off days too. |
+| `describeEvents` | `Bool` | `true` | Announce the names after the date, so the marking is never colour-only. |
+| `weeklyOffColorArgb` | `Int32` | `0` | Overrides the weekly slot. `0` keeps the theme's. |
+| `publicHolidayColorArgb` | `Int32` | `0` | Overrides the `.governmentPublic` slot. |
+| `religiousColorArgb` | `Int32` | `0` | Overrides the `.religious` slot. |
+| `regionalColorArgb` | `Int32` | `0` | Overrides the `.regional` slot. |
+| `observanceColorArgb` | `Int32` | `0` | Overrides the `.observance` slot. |
+| `markedContainerColorArgb` | `Int32` | `0` | The disc `tintContainer` draws. |
+
+Every picker that draws a month grid takes `events`: the calendar, the dual-date calendar, the
+range picker, the docked picker, both dialogs, and both field pickers. The wheel does not, because
+it has no day cells.
+
+### Marking never blocks
+
+Colouring a day and refusing it are separate decisions, so a school can mark Saturday and still let
+a teacher record attendance on it. Opt in when you want both:
+
+```swift
 AutoSized(measurementHeight: 560) { report in
     NepaliDatePickerView(
         onHeightChange: report,
         initialSelectedDate: nil,
-        selectableDates: workingDaysOnly
+        selectableDates: school.asSelectableDates(),   // now they are greyed out too
+        events: marks                                  // and still marked
     ) { selected = $0 }
 }
 ```
 
-Year-level rejection still defers to the wrapped policy, because holiday data is per-date, not
-per-year. `weekend` is a set of 1-based-Sunday weekday numbers: pass `[6, 7]` for a Friday and
-Saturday weekend, or `[1, 7]` for Sunday and Saturday.
-
-Implement the provider in Swift to honour your own holidays:
+`asSelectableDates()` blocks the weekly off days and the events that close; an event that leaves the
+institution open leaves its day selectable. The older wrappers still compose by hand:
 
 ```swift
-final class OfficeHolidays: NepaliHolidayProvider {
-    private let dates: Set<String>
-    init(_ dates: [SimpleDate]) {
-        self.dates = Set(dates.map { "\($0.year)/\($0.month)/\($0.dayOfMonth)" })
+let workingDaysOnly = EventHelpersKt.excludingClosures(
+    EventHelpersKt.excludingWeekends(
+        NepaliDatePickerDefaults.shared.AllDates,
+        weekend: NepaliWeekend.shared.Default
+    ),
+    provider: provider
+)
+```
+
+Year-level rejection still defers to the wrapped policy, because event data is per-date, not
+per-year.
+
+### Writing a provider in Swift
+
+A Kotlin interface method with a default implementation is still `@required` in the generated
+Objective-C protocol, so a Swift conformance has to write out **both** members, even the one Kotlin
+would have supplied:
+
+```swift
+final class OfficeCalendar: NepaliEventProvider {
+    private let byYear: [Int32: Set<NepaliCalendarEvent>]
+
+    init(_ events: [NepaliCalendarEvent]) {
+        byYear = Dictionary(grouping: events, by: { $0.date.year }).mapValues(Set.init)
     }
-    func holidays(year: Int32) -> Set<HolidayEntry> { [] }
-    func isHoliday(date: SimpleDate) -> Bool {
-        dates.contains("\(date.year)/\(date.month)/\(date.dayOfMonth)")
+
+    func events(year: Int32) -> Set<NepaliCalendarEvent> { byYear[year] ?? [] }
+
+    /// The rule Kotlin's default states: only an entry that closes the institution shuts the day.
+    func closesOn(date: SimpleDate) -> Bool {
+        events(year: date.year).contains { $0.date == date && $0.closesOffices }
     }
 }
 ```
+
+Answer `events(year:)` when a calendar has to *draw* the days. When the working-day arithmetic is
+all you need, `closesOn(date:)` can answer directly and `events(year:)` can return an empty set.
+
+Two providers combine, which is how a national list and a school's own list are put together:
+
+```swift
+let merged = EventHelpersKt.plus(nationalHolidays, other: schoolCalendar)
+let closuresOnly = EventHelpersKt.filtered(merged) { $0.closesOffices }
+```
+
+### Migrating from 3.1.0
+
+**The renamed types have to be renamed in Swift too.** Kotlin keeps `HolidayEntry`, `HolidayKind`,
+`NepaliHolidayProvider` and `NepaliHolidayPolicy` as deprecated typealiases, but a typealias is a
+Kotlin-only construct: it produces no Objective-C name, so none of the four reaches Swift. Rename
+them at the call site:
+
+| 3.1.0, Swift | 3.3.0, Swift |
+| --- | --- |
+| `HolidayEntry` | `NepaliCalendarEvent` |
+| `HolidayKind` | `NepaliEventKind` |
+| `NepaliHolidayProvider` | `NepaliEventProvider` |
+| `NepaliHolidayPolicy` | `NepaliCalendarPolicy` |
+
+The two declarations that are not typealiases do still resolve, deprecated, on
+`DeprecatedHolidayNamesKt`: `NoOpHolidayProvider` and `excludingHolidays(_:provider:)`.
+
+An **implementation** of the old provider has to be renamed whichever language you write it in,
+because renaming a type never renames its members: `holidays(year:)` becomes `events(year:)` and
+`isHoliday(date:)` becomes `closesOn(date:)`.
 
 ## NepaliCalendarModel
 
@@ -1816,7 +2244,7 @@ Extending the supported range means extending `daysInMonthMap` in the library, n
 
 `sample/iosSwiftApp` in the main repository is a SwiftUI app that consumes the framework exactly the
 way this document describes: one screen per picker, every engine utility, the representables, and the
-`AutoSized` container. It is the reference integration, and CI builds it on every run.
+`AutoSized` container.
 
 ```bash
 # The framework has to exist before Xcode plans the build.

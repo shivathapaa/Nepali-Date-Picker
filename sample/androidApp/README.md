@@ -1,25 +1,22 @@
 # `androidApp` - the Android host
 
-A deliberately thin Android application. It contributes no UI of its own: a single
-`ComponentActivity` calls `setContent { App() }`, where `App()` is the shared showcase from
-[`composeApp`](../composeApp). Everything you see on screen is defined there.
-
-The point of keeping it this thin is that it tests the Android artifact and its packaging (manifest,
-edge-to-edge, `minSdk`, R8-free debug build) without a second copy of the demos to maintain.
+A thin Android application. It contributes no UI of its own: a single `ComponentActivity` calls
+`setContent { App() }`, where `App()` is the shared showcase from [`composeApp`](../composeApp).
+Everything you see on screen is defined there.
 
 ## Layout
 
 ```
 src/main/
 ├── AndroidManifest.xml
-└── kotlin/dev/shivathapaa/sample/app/main.kt    AppActivity, enableEdgeToEdge(), setContent { App() }
+└── kotlin/dev/shivathapaa/nepalidatepicker/main.kt    AppActivity, enableEdgeToEdge(), setContent { App() }
 ```
 
 ## Configuration
 
 | Setting | Value |
 | --- | --- |
-| `applicationId` | `sample.app.androidApp` |
+| `namespace` / `applicationId` | `dev.shivathapaa.nepalidatepicker` |
 | `minSdk` / `compileSdk` / `targetSdk` | from `gradle/libs.versions.toml` (23 / 37 / 37) |
 | JVM target | 11 |
 
@@ -31,9 +28,6 @@ src/main/
 
 Or open the project in Android Studio and run the `androidApp` configuration. Shared Gradle run
 configurations live in `.run/`.
-
-CI builds `:sample:androidApp:assembleDebug` on both the Linux and macOS legs, so a break in the
-Android packaging fails the build before a release.
 
 ## Note for API levels below 26
 

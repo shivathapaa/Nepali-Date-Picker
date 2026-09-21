@@ -20,15 +20,34 @@ Two cards cover the display options every calendar element takes: `calendar-syst
 the grid's empty cells with the neighbouring months. Both leave the reported value in Bikram Sambat,
 which the event log under the showcase makes visible.
 
+Four more cards cover marking days: `weekly-off-days` and `events` on every calendar element, an
+event that runs longer than a day through `endDate` or `days`, the six CSS custom properties the
+colours come from, and the queries behind all of it (`statusOf`, `monthStatus`, `eventsIn`, and the
+working-day arithmetic) driven from `@nepali-date-picker/core` with no picker involved.
+
+Three more cover the attributes that are easy to miss: `min` / `max` / `disabled` and the `invalid`
+event on every element that accepts a date, the labels and headings (`label`, `start-label`,
+`end-label`, `heading`) and per-element `language`, and the full `--ndp-*` token set applied to a
+single element beside an untouched one.
+
+The last card is an **engine playground**: two date boxes and a pattern box drive every function
+`@nepali-date-picker/core` exports, grouped into Convert, Query, Format, Time & ISO, Digits & names,
+and Bounds. Nothing there touches the DOM beyond writing its results out, so it doubles as a
+worked example of using the package in Node.
+
 ## Layout
 
 ```
 jsApp/
-├── index.html      The showcase markup, one tab panel per element group
-├── src/main.ts     Tab switching, locale sync, event logging, the engine demo
-├── styles.css
+├── index.html      The showcase markup, one card per feature group
+├── src/main.ts     Tab switching, locale sync, event logging, the engine playground
+├── styles.css      Page chrome, the three page themes, and the two element-level palettes
 └── vite.config.ts  Aliases the packages to their built dist
 ```
+
+An element carrying the `sync` class follows the page's language and theme selects. An element that
+names its own `language` leaves the class off, which is how the showcase demonstrates a per-element
+override next to a page-wide one.
 
 ## How it consumes the packages
 
@@ -40,8 +59,7 @@ rather than to source, so the sample loads exactly what npm would ship:
 @nepali-date-picker/web-component   -> js/packages/web-component/dist/index.js
 ```
 
-That output does not exist until the packages are built, so build first, then run the sample. The
-`base` is relative so the built site works both from a domain root and nested under `/demo`.
+That output does not exist until the packages are built, so build first, then run the sample.
 
 ## Running
 
@@ -69,10 +87,6 @@ npm run preview      # serve that build locally
 
 Requires **Node.js 18 or newer**.
 
-## Related check
-
-The showcase links the packages from source, so it cannot catch a broken `exports` map, a missing
-`files` entry or an incomplete `dist`. `npm run verify:pack` in `js/` closes that gap: it packs both
-packages into tarballs, installs them into a throwaway consumer, round-trips a conversion and
-bundles the web component, exactly as a real `npm install` would. It is a required gate in the
-publish workflow.
+To check what a real `npm install` would give instead, run `npm run verify:pack` in `js/`: it packs
+both packages into tarballs, installs them into a throwaway consumer, round-trips a conversion and
+bundles the web component.

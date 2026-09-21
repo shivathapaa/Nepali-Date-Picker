@@ -40,7 +40,7 @@ months' days. The value stays Bikram Sambat either way:
 ></nepali-date-picker>
 ```
 
-No bundler? Swap that import for the self-contained build (64 kB gzipped, all seven elements):
+No bundler? Swap that import for the self-contained build (82 kB gzipped, all seven elements):
 `<script type="module" src="https://cdn.jsdelivr.net/npm/@nepali-date-picker/web-component"></script>`.
 
 Works in any framework (custom elements are standard DOM). Full attribute / event / theming reference
@@ -53,7 +53,7 @@ import { convertAdToBs, convertBsToAd, getTodayBs, formatBsDateByPattern } from 
 
 convertAdToBs(2024, 9, 9);   // { year: 2081, month: 5, dayOfMonth: 24, ... }
 getTodayBs();                // today in Asia/Kathmandu, Bikram Sambat
-formatBsDateByPattern('yyyy-MM-dd EEEE', 2081, 5, 24, 'ne'); // "२०८१-०५-२४ मंगलबार"
+formatBsDateByPattern('yyyy-MM-dd EEEE', 2081, 5, 24, 'ne'); // "२०८१-०५-२४ सोमबार"
 ```
 
 Full API: **[core README](packages/core/README.md)**.

@@ -35,13 +35,15 @@ convertBsToAd(2081, 5, 24);  // NepaliDate { year: 2024, month: 9, dayOfMonth: 9
 
 const today = getTodayBs();  // today in Asia/Kathmandu, Bikram Sambat
 
-// Locale-preset formatting
-formatBsDate(2081, 5, 24, 3, 'en', 'full', 'full', 'full', null);
-// "Tuesday, Asar 24, 2081"
+// Locale-preset formatting. The 4th argument is the weekday, which this function does not
+// derive: pass the real one, for example from convertAdToBs(...).dayOfWeek.
+formatBsDate(2081, 5, 24, 2, 'en', 'full', 'full', 'full', null);
+// "Monday, Bhadra 24, 2081"
 
-// Unicode-pattern formatting (day-of-year `D`, week-of-year `w` resolved for you)
+// Unicode-pattern formatting, which resolves everything (day-of-year `D` and week-of-year `w`
+// included) from the date itself.
 formatBsDateByPattern('yyyy-MM-dd EEEE', 2081, 5, 24, 'ne');
-// "२०८१-०५-२४ मंगलबार"
+// "२०८१-०५-२४ सोमबार"
 
 localizeDigits('2081/05/24', 'devanagari'); // "२०८१/०५/२४"
 ```
@@ -82,10 +84,72 @@ String enum arguments are case-insensitive.
 `getWeekdayName`, `getBsMonthName`, `getAdMonthName`, `formatBsDate`, `formatAdDate`,
 `formatBsDateByPattern`, `formatAdDateByPattern`, `formatTimeEnglish`, `formatTimeNepali`.
 
-### ISO 8601 & digits
+### ISO 8601, wire text & digits
 
-`bsDateTimeToIso`, `adDateTimeToIso`, `bsDateTimeFromIso`, `adDateTimeFromIso`, `localizeDigits`,
-`toLatinDigits`.
+`bsDateTimeToIso`, `adDateTimeToIso`, `bsDateTimeFromIso`, `adDateTimeFromIso` persist an instant in
+UTC. For a plain calendar date or a wall-clock time, use the fixed-pattern helpers instead:
+`formatBsDateText`, `parseBsDateText`, `formatTimeOfDay`, `parseTimeOfDay`. They produce the same
+strings the Kotlin and Swift builds persist, so a payload written by one reads on any other. Both
+parsers return `null` rather than throwing.
+
+`localizeDigits` and `toLatinDigits` convert between Latin and Devanagari numerals.
+
+### Events, holidays & working days
+
+No event data ships with the library: you pass your own list, and a policy pairs it with the
+weekdays an institution never opens. Weekday numbers are **1-based-Sunday**, unlike `Date.getDay()`.
+
+```js
+import { createEvent, createCalendarPolicy } from '@nepali-date-picker/core';
+
+const office = createCalendarPolicy([7], [            // Saturday off
+  createEvent(2082, 6, 3, 'Constitution Day', 'governmentPublic'),
+]);
+
+office.statusOf(2082, 6, 3).isNonWorking;          // true
+office.eventsIn(2082, 6);                          // a month, in date order
+office.monthStatus(2082, 6);                       // one entry per day
+office.workingDaysBetween(2082, 1, 1, 2082, 2, 1); // end exclusive
+office.addWorkingDays(2082, 1, 1, 10);             // Excel WORKDAY semantics
+```
+
+| Function | Returns |
+| --- | --- |
+| `createEvent(y, m, d, name, kind)` | `NepaliEvent` - `kind` sets whether it closes the day |
+| `createDetailedEvent(y, m, d, name, kind, closesOffices, id, payload)` | `NepaliEvent` - the event decides for itself |
+| `expandEventDays(event, days)` | `Array<NepaliEvent>` - one entry per day of a span |
+| `expandEventThrough(event, endY, endM, endD)` | `Array<NepaliEvent>` - the same span, stated by its end |
+| `createCalendarPolicy(weeklyOffDays, events)` | `NepaliCalendarPolicyInfo` |
+
+| Policy method | Returns |
+| --- | --- |
+| `statusOf(y, m, d)` | `NepaliDayStatusInfo` - `isWeeklyOff`, `isNonWorking`, `primaryKind`, `names`, `events`, `closures` |
+| `eventsOn(y, m, d)` / `eventsIn(y, m)` | `Array<NepaliEvent>` |
+| `monthStatus(y, m)` | `Array<NepaliDayStatusInfo>` - index 0 is day 1 |
+| `isWeeklyOff(dayOfWeek)` / `isNonWorkingDay(y, m, d)` | `boolean` |
+| `workingDaysBetween(...)` | `number` |
+| `nextWorkingDay(y, m, d)` / `addWorkingDays(y, m, d, days)` | `NepaliDate` |
+
+`kind` is `"governmentPublic"`, `"religious"`, `"regional"` or `"observance"`. The first three close
+the day by default and an observance does not, but `createDetailedEvent` overrides either way: a
+regional holiday closes one district and not the next, and a school programme closes nothing.
+
+An event covers one day, so something that runs longer is an array of entries. Give it an `id` and
+the days can be folded back into one row:
+
+```js
+import { createDetailedEvent, expandEventDays, createCalendarPolicy } from '@nepali-date-picker/core';
+
+const dashain = createDetailedEvent(2082, 6, 17, 'Dashain', 'religious', true, 'dashain-2082', null);
+
+const policy = createCalendarPolicy([7], expandEventDays(dashain, 10));  // Asoj 17 through 26
+// expandEventThrough(dashain, 2082, 6, 26) is the same span, stated by its end.
+
+const agenda = [...new Map(policy.eventsIn(2082, 6).map((e) => [e.id ?? e.name, e])).values()];
+```
+
+A span running out of Chaitra into Baisakh yields entries in both years, so each is reported by the
+year that asks for it.
 
 ## Looking for a UI?
 

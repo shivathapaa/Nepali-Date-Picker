@@ -4,9 +4,8 @@ A plain SwiftUI app that uses the library the way a Swift Package Manager consum
 `nepali_date_picker.xcframework` and reaches the pickers through the Kotlin `UIViewController`
 factories, with no Compose code of its own.
 
-This is the sample that exercises the iOS bridge end to end, so it is the one CI builds with
-`xcodebuild`. If the exported Swift surface, the framework name, the architecture slices or the
-Xcode-side requirements regress, this app stops compiling.
+It exercises the iOS bridge end to end: the exported Swift surface, the framework name, the
+architecture slices and the Xcode-side requirements.
 
 For the other iOS model, a screen that is entirely Compose Multiplatform, see
 [`iosApp`](../iosApp).
@@ -20,15 +19,45 @@ iosSwiftApp/
     ├── SampleApp.swift                 @main entry point
     ├── ContentView.swift               Today's date in BS / Nepali / AD, plus navigation to each screen
     ├── NepaliPickerRepresentables.swift One UIViewControllerRepresentable per Kotlin factory, plus SampleDefaults
+    ├── SampleSupport.swift             DemoSection, AutoSized, the argb and boxing helpers, and the
+    │                                   Swift-side policies and providers
+    ├── SampleAppearance.swift          The appearance menu, applied through NepaliPickerAppearance
+    ├── SamplePaletteRoles.swift        The six palettes as ARGB role values, light and dark
+    │
+    │   Pickers
     ├── PickersScreen.swift             Calendar and range pickers
     ├── CalendarSystemScreen.swift      Bikram Sambat / Gregorian display and the filled grid
     ├── WheelDockedScreen.swift         Wheel and docked pickers
     ├── DialogsScreen.swift             Dialog and full-screen dialog hosts
-    ├── FieldsScreen.swift              Date and range text fields
+    ├── ChromeOptionsScreen.swift       Wheel row height and visible count, docked format styles and
+    │                                   popup elevation, range chrome flags, dialog shape and
+    │                                   elevation, and a narrowed year range
     ├── CustomizationScreen.swift       Locale, visibility toggles, corner radius
+    │
+    │   Fields
+    ├── FieldsScreen.swift              Date and range text fields
+    ├── FieldStatesScreen.swift         isError and supportingText, disabled, read only, the filled
+    │                                   style's own button words, and every input pattern
     ├── SelectableDatesScreen.swift     NepaliSelectableDates rules
-    └── UtilitiesScreen.swift           NepaliDateConverter with no picker on screen
+    ├── PolicyCompositionScreen.swift   excludingWeekends / excludingClosures / filtered / plus
+    │                                   composing one rule out of parts
+    │
+    │   Events
+    ├── EventsScreen.swift              NepaliEventOptions: an office week, a school week, all six
+    │                                   display switches, ARGB colours, dots, and every surface
+    ├── EventQueriesScreen.swift        statusOf / eventsIn / monthStatus, spans, working-day
+    │                                   arithmetic, and asSelectableDates
+    ├── SampleEventData.swift           The event data the screens mark with, spans included
+    │
+    │   Engine
+    ├── UtilitiesScreen.swift           NepaliDateConverter with no picker on screen
+    └── EngineQueriesScreen.swift       Month details, cross-calendar listings, the supported range
+                                        and its boundaries, Unicode patterns, ISO both ways, and
+                                        NepaliDateFormatter
 ```
+
+`:nepali-date-picker:serialization` is **not** part of this framework: `:ui` exports `:core` only, so
+there is nothing to demonstrate here. The Compose showcase covers it instead.
 
 `NepaliPickerRepresentables.swift` is the file worth reading first. Every picker is a thin
 representable: build an options object, call the Kotlin factory, forward the height callback.
@@ -44,10 +73,16 @@ return NepaliDatePickerViewControllersKt.NepaliDatePickerViewController(
     yearRangeEnd: yearRange.upperBound,
     selectableDates: selectableDates,
     options: options,
+    events: events,
     onHeightChange: { onHeightChange(CGFloat($0)) },
     onDateSelected: onDateSelected
 )
 ```
+
+`events` is a `NepaliEventOptions?`: the weekdays the institution never opens plus the days to mark,
+with colours as `0xAARRGGBB` integers because Compose colours cannot cross the bridge. `nil` draws
+the calendar plain. Marking never blocks a date; pass `policy.asSelectableDates()` through
+`selectableDates` when a screen should refuse the days it marks.
 
 Compose cannot report an intrinsic size to SwiftUI, so each factory takes an `onHeightChange`
 callback and the representable drives the SwiftUI frame from it.
@@ -90,7 +125,7 @@ the same module.
 
 Then open `sample/iosSwiftApp/iosSwiftApp.xcodeproj` and run on a simulator or device.
 
-To reproduce exactly what CI builds:
+Or build it from the command line:
 
 ```bash
 cd sample/iosSwiftApp

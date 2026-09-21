@@ -14,7 +14,7 @@ Two packages. Install whichever you need (the UI package already includes the en
 
 | Package | What it is | Install when you need… |
 | --- | --- | --- |
-| **[`@nepali-date-picker/web-component`](https://www.npmjs.com/package/@nepali-date-picker/web-component)** | The `<nepali-date-picker>` custom elements: inline calendar, dialog, docked, range, text field, wheel. | A date picker on screen. |
+| **[`@nepali-date-picker/web-component`](https://www.npmjs.com/package/@nepali-date-picker/web-component)** | The `<nepali-date-picker>` custom elements: inline calendar, browsable `<nepali-calendar>`, dialog, docked, range, text field, wheel. | A date picker or a month calendar on screen. |
 | **[`@nepali-date-picker/core`](https://www.npmjs.com/package/@nepali-date-picker/core)** | Only the conversion / formatting functions. No UI. | BS ↔ AD math with your own UI, or on the server. |
 
 - **Localized.** English / Nepali text, Latin / Devanagari digits.
@@ -36,7 +36,7 @@ Two packages. Install whichever you need (the UI package already includes the en
 
 # Part 1 - `@nepali-date-picker/web-component` (UI)
 
-## Install
+## Install the web component
 
 ```bash
 npm install @nepali-date-picker/web-component
@@ -50,9 +50,9 @@ there is nothing left for the browser to resolve:
 <nepali-date-picker value="2081-05-24"></nepali-date-picker>
 ```
 
-238 kB minified, 65 kB gzipped, all seven elements. It is ES-module only, which costs nothing in
-practice: every browser that implements custom elements also supports module scripts. This file is
-browser-only; on a server, import the package itself (see [Server rendering](#server-rendering)).
+313 kB minified, 82 kB gzipped, all seven elements. It is ES-module only: every browser that
+implements custom elements also supports module scripts. This file is browser-only; on a server,
+import the package itself (see [Server rendering](#server-rendering)).
 
 ## Registering the elements
 
@@ -64,13 +64,14 @@ import '@nepali-date-picker/web-component';
 ```
 
 To register only the element(s) you use, import the matching **subpath** instead. The saving is
-modest on purpose: the shared conversion engine is about 79% of the payload, so one element is only
-around 3 kB gzipped lighter than all seven.
+modest: the shared conversion engine is most of the payload, so one element is only a few kB gzipped
+lighter than all seven.
 
 | Import | Registers |
 | --- | --- |
 | `import '@nepali-date-picker/web-component';` | all elements below |
 | `import '@nepali-date-picker/web-component/nepali-date-picker';` | `<nepali-date-picker>` |
+| `import '@nepali-date-picker/web-component/nepali-calendar';` | `<nepali-calendar>` |
 | `import '@nepali-date-picker/web-component/nepali-date-range-picker';` | `<nepali-date-range-picker>` |
 | `import '@nepali-date-picker/web-component/nepali-date-picker-dialog';` | `<nepali-date-picker-dialog>` |
 | `import '@nepali-date-picker/web-component/nepali-date-picker-docked';` | `<nepali-date-picker-docked>` |
@@ -97,6 +98,12 @@ bundler; the default entry is the right import everywhere else.
   fill the grid's empty cells with the neighbouring months. Switching fades the month header and the
   grid in, matching the Compose pickers; the animation is skipped under
   `prefers-reduced-motion: reduce`, and paging months is never animated. _(3.2.0)_
+- **`show-secondary-date` pairs every day with the other calendar.** The displayed calendar's day
+  stays large, its counterpart sits small in the corner of the same cell, and the month header gains
+  a second line naming the months the other calendar straddles, for example "Sep/Oct 2026" under
+  Asoj 2083. This is the web twin of Compose's `NepaliDatePickerWithEnglishDate`. The second header
+  line also appears with `show-calendar-toggle` alone, since a switch puts a second calendar in play
+  either way. _(3.3.0)_
 
 ---
 
@@ -117,6 +124,9 @@ An always-visible month calendar.
 | `calendar-system` | `calendarSystem` | `"bs"` \| `"ad"` | `"bs"` | Calendar the grid displays. |
 | `show-calendar-toggle` | `showCalendarToggle` | boolean | `false` | Show the `B.S.` / `A.D.` switch. |
 | `show-adjacent-month-days` | `showAdjacentMonthDays` | boolean | `false` | Fill the grid's empty cells with the neighbouring months' days, drawn faded. Clicking one picks that day and moves the grid to its month. |
+| `show-secondary-date` | `showSecondaryDate` | boolean | `false` | Pair every day with the same day in the other calendar, drawn small in the corner of the cell, and name that calendar's months under the month header. |
+| `events` | `events` | string | `""` | Days to mark, as JSON. See [Marking days](#marking-days-with-events-and-holidays). |
+| `weekly-off-days` | `weeklyOffDays` | string | `""` | Weekdays the institution never opens, e.g. `7` or `7,1`. Sunday is 1. |
 
 **Events:** `change` → `NepaliDatePickerChangeDetail`.
 
@@ -126,6 +136,44 @@ An always-visible month calendar.
   import '@nepali-date-picker/web-component';
   document.querySelector('nepali-date-picker')
     .addEventListener('change', (e) => console.log(e.detail.bsIso, e.detail.adIso));
+</script>
+```
+
+Every cell carrying both dates, the web twin of `NepaliDatePickerWithEnglishDate`:
+
+```html
+<nepali-date-picker value="2083-06-02" show-secondary-date></nepali-date-picker>
+```
+
+### `<nepali-calendar>` - browsable month calendar
+
+Where `<nepali-date-picker>` asks for a date, this one is read. It fills the width it is given,
+pages month by month, shows both calendars' numbers and the neighbouring months' days by default,
+and can write the picked day and the month's events out under the grid. _(3.3.0)_
+
+| Attribute | Property | Type | Default | Description |
+| --- | --- | --- | --- | --- |
+| `value` | `value` | string | `""` | Picked BS date `YYYY-MM-DD`. Empty = none. |
+| `language` | `language` | `"en"` \| `"ne"` | `"en"` | Text + digit script. |
+| `calendar-system` | `calendarSystem` | `"bs"` \| `"ad"` | `"bs"` | Calendar the grid displays. |
+| `show-calendar-toggle` | `showCalendarToggle` | boolean | `false` | Show the `B.S.` / `A.D.` switch. |
+| `show-secondary-date` | `showSecondaryDate` | boolean | **`true`** | Pair every day with the same day in the other calendar. |
+| `show-adjacent-month-days` | `showAdjacentMonthDays` | boolean | **`true`** | Fill the grid's empty cells with the neighbouring months' days. |
+| `show-day-summary` | `showDaySummary` | boolean | `false` | Write the picked day out under the grid: shut or working, why, and what is on it. |
+| `show-month-events` | `showMonthEvents` | boolean | `false` | List the month's events, a span gathered into one clickable line. |
+| `events` | `events` | string | `""` | Days to mark, as JSON. See [Marking days](#marking-days-with-events-and-holidays). |
+| `weekly-off-days` | `weeklyOffDays` | string | `""` | Weekdays the institution never opens, e.g. `7` or `7,1`. Sunday is 1. |
+
+**Events:** `day-select` → `NepaliDaySelectDetail` (`bs`, `ad`, `bsIso`, `adIso`, `isWeeklyOff`,
+`isNonWorking`, `events`); `event-select` → `NepaliEventSelectDetail` (`event` with its `id` and
+`payload` untouched, plus `firstBsIso` / `lastBsIso` for the days the line covers).
+
+```html
+<nepali-calendar show-day-summary show-month-events weekly-off-days="7"></nepali-calendar>
+<script type="module">
+  import '@nepali-date-picker/web-component';
+  document.querySelector('nepali-calendar')
+    .addEventListener('event-select', (e) => console.log(e.detail.event.id));
 </script>
 ```
 
@@ -144,6 +192,9 @@ A modal calendar with a headline and OK / Cancel actions. Add `fullscreen` for t
 | `calendar-system` | `calendarSystem` | `"bs"` \| `"ad"` | `"bs"` | Calendar the grid displays. |
 | `show-calendar-toggle` | `showCalendarToggle` | boolean | `false` | Show the `B.S.` / `A.D.` switch. |
 | `show-adjacent-month-days` | `showAdjacentMonthDays` | boolean | `false` | Fill the grid's empty cells with the neighbouring months' days, drawn faded. Clicking one picks that day and moves the grid to its month. |
+| `show-secondary-date` | `showSecondaryDate` | boolean | `false` | Pair every day with the same day in the other calendar, drawn small in the corner of the cell. The headline then carries the Gregorian date on a second line. |
+| `events` | `events` | string | `""` | Days to mark, as JSON. See [Marking days](#marking-days-with-events-and-holidays). |
+| `weekly-off-days` | `weeklyOffDays` | string | `""` | Weekdays the institution never opens, e.g. `7` or `7,1`. Sunday is 1. |
 | `heading` | `heading` | string | localized "Select Nepali Date" | Dialog title text. |
 
 **Methods:** `show(): void`, `close(): void`.
@@ -177,6 +228,9 @@ Closes on outside click or `Escape`.
 | `calendar-system` | `calendarSystem` | `"bs"` \| `"ad"` | `"bs"` | Calendar the grid displays. |
 | `show-calendar-toggle` | `showCalendarToggle` | boolean | `false` | Show the `B.S.` / `A.D.` switch. |
 | `show-adjacent-month-days` | `showAdjacentMonthDays` | boolean | `false` | Fill the grid's empty cells with the neighbouring months' days, drawn faded. Clicking one picks that day and moves the grid to its month. |
+| `show-secondary-date` | `showSecondaryDate` | boolean | `false` | Pair every day with the same day in the other calendar, drawn small in the corner of the cell, and name that calendar's months under the month header. |
+| `events` | `events` | string | `""` | Days to mark, as JSON. See [Marking days](#marking-days-with-events-and-holidays). |
+| `weekly-off-days` | `weeklyOffDays` | string | `""` | Weekdays the institution never opens, e.g. `7` or `7,1`. Sunday is 1. |
 | `label` | `label` | string | `""` | Field label. |
 
 **Events:** `change` → `NepaliDatePickerChangeDetail` (fires when a valid date is typed or clicked).
@@ -201,6 +255,9 @@ starts a new range.
 | `calendar-system` | `calendarSystem` | `"bs"` \| `"ad"` | `"bs"` | Calendar the grid displays. |
 | `show-calendar-toggle` | `showCalendarToggle` | boolean | `false` | Show the `B.S.` / `A.D.` switch. |
 | `show-adjacent-month-days` | `showAdjacentMonthDays` | boolean | `false` | Fill the grid's empty cells with the neighbouring months' days, drawn faded. Clicking one picks that day and moves the grid to its month. |
+| `show-secondary-date` | `showSecondaryDate` | boolean | `false` | Pair every day with the same day in the other calendar, drawn small in the corner of the cell, and name that calendar's months under the month header. |
+| `events` | `events` | string | `""` | Days to mark, as JSON. See [Marking days](#marking-days-with-events-and-holidays). |
+| `weekly-off-days` | `weeklyOffDays` | string | `""` | Weekdays the institution never opens, e.g. `7` or `7,1`. Sunday is 1. |
 
 **Events:** `change` → `NepaliDateRangeChangeDetail` on each pick.
 
@@ -326,6 +383,84 @@ picker.addEventListener('change', (event) => {
 });
 ```
 
+## Marking days with events and holidays
+
+Two channels, and they never collide: **a colour says what the day is, dots say what is scheduled on
+it.** A weekly off day repeats fifty-two times a year, so it is coloured and never dotted, which
+leaves all three dot slots for an app's own events.
+
+```html
+<nepali-date-picker
+  value="2083-06-02"
+  weekly-off-days="7"
+  events='[
+    {"date":"2083-06-03","name":"Constitution Day","kind":"governmentPublic"},
+    {"date":"2083-06-05","name":"Standup","indicate":true,"color":"#42a5f5"},
+    {"date":"2083-06-05","name":"Aama'"'"'s birthday","indicate":true,"color":"#ff7043"}
+  ]'>
+</nepali-date-picker>
+```
+
+`weekly-off-days` is a comma-separated list where **Sunday is 1 and Saturday is 7**, so Nepal's
+office week is `7` and a school closed Saturday and Sunday is `7,1`. JavaScript's own `getDay()`
+numbers Sunday `0`; a list written that way would close nothing, so out-of-range numbers are
+dropped rather than silently shifting the week.
+
+Each entry of `events`:
+
+| Field | Type | Default | Description |
+| --- | --- | --- | --- |
+| `date` | string | required | `YYYY-MM-DD` in Bikram Sambat. An entry without a usable date is ignored. |
+| `name` | string | - | Announced after the date, so the marking is never colour-only. |
+| `kind` | `"governmentPublic"` \| `"religious"` \| `"regional"` \| `"observance"` | `"observance"` | Picks the colour, and the default for `closesOffices`. |
+| `closesOffices` | boolean | from `kind` | Whether the institution is shut. A programme is named without closing anything. |
+| `color` | string | from `kind` | A CSS colour for this entry's dot. |
+| `indicate` | boolean | `false` | Whether the day draws a dot for this. Leave it off for a holiday, which already colours the day. |
+| `endDate` | string | - | Last day of a span, `YYYY-MM-DD` and included in it. Wins over `days`. |
+| `days` | number | `1` | How many days a span covers, counting the first. Capped at 366. |
+
+An entry carrying `endDate` or `days` marks every day of its span, so a ten-day festival or a week
+of leave stays one line of JSON:
+
+```html
+<nepali-date-picker
+  events='[
+    {"date":"2083-06-17","endDate":"2083-06-26","name":"Dashain","kind":"religious"},
+    {"date":"2083-07-02","days":5,"name":"Tihar","kind":"religious"}
+  ]'>
+</nepali-date-picker>
+```
+
+A span crossing into the next month or the next year keeps marking, and an end before the start
+marks the one day rather than disappearing.
+
+**A named closure outranks the week**, because "Dashain" says more about the day than "Saturday"
+does. An event that leaves the institution open does not, so a Saturday carrying only a programme
+still reads as a Saturday:
+
+```html
+<!-- Saturday, coloured as Dashain -->
+<nepali-date-picker weekly-off-days="7"
+  events='[{"date":"2083-06-07","name":"Dashain","kind":"religious"}]'></nepali-date-picker>
+
+<!-- Saturday, still coloured as a Saturday -->
+<nepali-date-picker weekly-off-days="7"
+  events='[{"date":"2083-06-07","name":"Annual programme","kind":"observance"}]'></nepali-date-picker>
+```
+
+Malformed JSON, or an entry without a parseable date, is ignored rather than thrown, so a bad feed
+leaves the calendar plain instead of breaking the page. Setting the property (rather than the
+attribute) takes an array directly:
+
+```js
+document.querySelector('nepali-date-picker').events = JSON.stringify([
+  { date: '2083-06-03', name: 'Constitution Day', kind: 'governmentPublic' },
+]);
+```
+
+Colours come from the `--ndp-holiday-*` and `--ndp-weekly-off` custom properties in
+[Theming](#theming), so a dark theme needs no per-event colours at all.
+
 ## Keyboard (calendar elements)
 
 | Key | Action |
@@ -355,6 +490,12 @@ the element, or on any ancestor (e.g. `body`) - handy for a global or dark theme
 | `--ndp-today-ring` | `#2f6fed` | Ring around today. |
 | `--ndp-border` | `#d3d4d8` | Field / select borders. |
 | `--ndp-error` | `#ba1a1a` | Validation error color. |
+| `--ndp-weekly-off` | `#ba1a1a` | The number on a weekly off day. |
+| `--ndp-holiday-public` | `#ba1a1a` | A `governmentPublic` day, and its dots. |
+| `--ndp-holiday-religious` | `#2f6fed` | A `religious` day, and its dots. |
+| `--ndp-holiday-regional` | `#7a5ea8` | A `regional` day, and its dots. |
+| `--ndp-holiday-observance` | `#6b6b70` | An `observance` day, and its dots. |
+| `--ndp-holiday-container` | `rgba(186,26,26,.12)` | The disc behind a tinted day. |
 | `--ndp-radius` | `12px` | Corner radius. |
 
 Not every element reads every property: a text field has no day grid to tint. Each documents its own
@@ -459,8 +600,8 @@ Two things about React are easy to get wrong, so the shipped types encode both:
 - **`onChange` hands you a React synthetic event, not the `CustomEvent`.** The payload is at
   `event.nativeEvent.detail`; `event.detail` is `undefined`.
 - **`invalid` and `cancel` never reach a prop.** React forwards only the events in its own synthetic
-  set, so `onInvalid` and `onCancel` type-check on ordinary elements but would silently do nothing
-  here, and are deliberately absent. Subscribe through a ref instead:
+  set, so `onInvalid` and `onCancel` are absent from the shipped types rather than type-checking and
+  silently doing nothing. Subscribe through a ref instead:
 
 ```tsx
 const ref = useRef<NepaliDateField>(null);
@@ -544,7 +685,7 @@ fails with `HTMLElement is not defined`. Load it from a `<script type="module">`
 Just the date math and formatting, no UI. Runs in the browser, Node, Deno, and any bundler (Vite,
 webpack, Rollup, esbuild, Next.js). Zero runtime dependencies. Ships TypeScript types.
 
-## Install
+## Install the engine
 
 ```bash
 npm install @nepali-date-picker/core
@@ -750,6 +891,74 @@ adDateTimeFromIso(iso);        // NepaliDateTime { calendar: NepaliDate (AD), ti
 bsDateTimeFromIso(iso).calendar; // NepaliDate
 ```
 
+## Date and time text (the wire format)
+
+A UTC timestamp is the wrong shape for a plain calendar date or a wall-clock time. For those, use
+the fixed-pattern text helpers. These are the same strings the Kotlin, Android and Swift builds
+persist, so a payload written by one reads on any other:
+
+```ts
+formatBsDateText(2082, 2, 14, 'yyyy-mm-dd', 'latin');  // "2082-02-14"
+formatBsDateText(2082, 2, 14, 'dd/mm/yyyy', null);     // "14/02/2082"
+formatBsDateText(2082, 2, 14, 'yyyy-mm-dd', 'devanagari'); // "२०८२-०२-१४"
+
+parseBsDateText('2082-02-14', 'yyyy-mm-dd'); // NepaliDateParts { year, month, dayOfMonth }
+parseBsDateText('2082-2-14', 'yyyy-mm-dd');  // null - every pattern is exactly 10 characters
+parseBsDateText('२०८२-०२-१४', 'yyyy-mm-dd'); // Devanagari input is folded to Latin first
+
+formatTimeOfDay(9, 30, 0, 0);            // "09:30:00"
+formatTimeOfDay(23, 59, 59, 123456789);  // "23:59:59.123456789"
+parseTimeOfDay('09:30:00');              // NepaliTime { hour, minute, second, nanosecond }
+parseTimeOfDay('24:00:00');              // null
+```
+
+`pattern` is one of `yyyy-mm-dd` (the default, and the only form valid on the wire), `yyyy/mm/dd`,
+`dd/mm/yyyy`, `dd-mm-yyyy`. Anything else is read as `yyyy-mm-dd`. Both parsers return `null`
+rather than throwing, and neither trims whitespace.
+
+`parseBsDateText` allows day 32, because some Bikram Sambat months run that long. Check the day
+against the real month with `getTotalDaysInBsMonth` when it matters.
+
+### Talking to a Kotlin backend
+
+The optional `nepali-date-picker-serialization` Maven artifact gives Kotlin services `KSerializer`s
+for these types. Those serializers do not ship to npm, and they do not need to: they read and write
+exactly the strings above, so `JSON.parse` on this side is enough.
+
+| Type | On the wire | Produce it here with |
+| --- | --- | --- |
+| `SimpleDate` | `"2082-02-14"` | `formatBsDateText(y, m, d, 'yyyy-mm-dd', 'latin')` |
+| `SimpleDate` (struct form) | `{"year":2082,"month":2,"dayOfMonth":14}` | a plain object literal |
+| `SimpleTime` | `"09:30:00"`, `"23:59:59.123456789"` | `formatTimeOfDay(h, m, s, ns)` |
+| `CustomCalendar` | 12-field object: `year`, `month`, `dayOfMonth`, `era`, `firstDayOfMonth`, `lastDayOfMonth`, `totalDaysInMonth`, `dayOfWeekInMonth`, `dayOfWeek`, `dayOfYear`, `weekOfMonth`, `weekOfYear` | `JSON.stringify(convertAdToBs(…))` |
+| `CalendarSystem` | `1` for AD, `2` for BS | the `era` field |
+| `NepaliCalendarEvent` | `{"date":"2082-01-01","name":"…","kind":"GovernmentPublic"}`, plus `closesOffices`, `id` and `payload` when set | see the note below |
+| `NepaliDayStatus` | `{"isWeeklyOff":false,"events":[…]}` | - |
+
+A `NepaliDate` returned by any conversion function is a plain object, so `JSON.stringify` on it
+already produces the `CustomCalendar` shape field for field, in that order.
+The last five fields are optional on the way back into Kotlin and default to `-1`, so a payload that
+omits them still decodes.
+
+`CustomCalendar` is a fully resolved calendar record, not just a date. When all you mean is a day,
+send the `SimpleDate` string.
+
+**The one field that is spelled differently.** Kotlin writes `kind` as the enum's own name, so
+`GovernmentPublic`, `Religious`, `Regional`, `Observance`, capitalised. Everything on this side uses
+`governmentPublic`, `religious`, `regional`, `observance`. Kotlin rejects an unknown name rather
+than guessing, so convert at the boundary:
+
+```ts
+const toWire = (kind: string) => kind.charAt(0).toUpperCase() + kind.slice(1);
+const fromWire = (kind: string) => kind.charAt(0).toLowerCase() + kind.slice(1);
+```
+
+The event's `date` is the `YYYY-MM-DD` string above, so `kind` is the only field needing this.
+
+`endDate` has no counterpart on the wire. A Kotlin event covers exactly one day, and a span is
+written out as one entry per day carrying the same `name`, `kind` and `id`. Expand a span before
+sending it, and collapse the entries back by `id` on the way in.
+
 ## Digits
 
 ```ts
@@ -760,6 +969,84 @@ toLatinDigits('२०८१ सोमबार');                 // "2081 स�
 
 ---
 
+## Events, holidays and working days
+
+The engine models a calendar's events, so a Node service can answer "is this a working day?" the
+same way the picker paints it. **No event data ships with the library**: you pass your own.
+
+```ts
+import { createEvent, createDetailedEvent, createCalendarPolicy } from '@nepali-date-picker/core';
+
+// One thing on one day. `kind` picks the colour and the default for closesOffices.
+const constitutionDay = createEvent(2082, 6, 3, 'Constitution Day', 'governmentPublic');
+
+// The long form spells out everything the short one leaves to the kind.
+const programme = createDetailedEvent(
+  2082, 6, 5, 'Annual programme', 'religious',
+  false,               // closesOffices: this one does not shut the school
+  'evt-42',            // id, handed back untouched
+  '{"images":["a.png"]}' // payload, an opaque string the engine never parses
+);
+
+// A policy is one institution: the weekdays it never opens, plus its events.
+const office = createCalendarPolicy([7], [constitutionDay, programme]);    // Saturday off
+const school = createCalendarPolicy([7, 1], [constitutionDay]);            // Sat + Sun off
+```
+
+Weekday numbers are **1-based-Sunday**, unlike `Date.getDay()`. A list written the 0-based way would
+close nothing at all, so `createCalendarPolicy([0, 6], [])` throws rather than failing quietly.
+
+An event covers one day, so something that runs longer is an array of entries. Expand it once and
+hand the result straight to a policy:
+
+```ts
+import { expandEventDays, expandEventThrough } from '@nepali-date-picker/core';
+
+const dashain = createDetailedEvent(2082, 6, 17, 'Dashain', 'religious', true, 'dashain-2082', null);
+
+expandEventDays(dashain, 10);                  // ten entries, Asoj 17 through 26
+expandEventThrough(dashain, 2082, 6, 26);      // the same span, stated by its end
+
+const festivalCalendar = createCalendarPolicy([7], expandEventDays(dashain, 10));
+
+// Fold the days back into one agenda row by the id they share.
+const agenda = [
+  ...new Map(festivalCalendar.eventsIn(2082, 6).map((e) => [e.id ?? e.name, e])).values(),
+];
+```
+
+A span running out of Chaitra into Baisakh yields entries in both years, so each is reported by the
+year that asks for it.
+
+```ts
+const status = office.statusOf(2082, 6, 3);
+status.isWeeklyOff;   // the week closes the day
+status.isNonWorking;  // closed for either reason, counted once
+status.primaryKind;   // "governmentPublic", or null when only the week closes it
+status.names;         // ["Constitution Day"], strongest kind first
+status.events;        // the same events in full, with your id and payload
+status.closures;      // only the ones that actually shut the door
+
+office.eventsOn(2082, 6, 3);      // one day
+office.eventsIn(2082, 6);         // a whole month, in date order
+office.monthStatus(2082, 6);      // one entry per day; index 0 is day 1
+office.isWeeklyOff(7);            // true, Saturday
+office.isNonWorkingDay(2082, 6, 3); // closed for either reason
+office.weeklyOffDays;             // [7], the weekdays it was built with, sorted
+```
+
+`monthStatus` resolves the month's first weekday once and walks forward, so a grid costs one
+conversion instead of one per cell.
+
+```ts
+office.workingDaysBetween(2082, 1, 1, 2082, 2, 1); // end exclusive
+office.nextWorkingDay(2082, 1, 1);                 // NepaliDate; the date itself if it works
+office.addWorkingDays(2082, 1, 1, 10);             // Excel WORKDAY semantics; negatives walk back
+```
+
+A day that is both a weekly off day and a holiday is skipped once, not twice, and an event that does
+not close is not skipped at all: a week of programmes is still five working days.
+
 ## TypeScript
 
 Both packages ship declarations.
@@ -767,6 +1054,7 @@ Both packages ship declarations.
 ```ts
 import type {
   NepaliDate, NepaliMonthInfo, NepaliTime, NepaliDateTime, YearRange,
+  NepaliEvent, NepaliDayStatusInfo, NepaliCalendarPolicyInfo,
 } from '@nepali-date-picker/core';
 
 import type {
@@ -783,6 +1071,24 @@ import type {
 } from '@nepali-date-picker/web-component';
 ```
 
+The `events` attribute is a JSON **string**, so it needs no type of its own. Declare the shape you
+build it from yourself:
+
+```ts
+type NepaliEventKind = 'governmentPublic' | 'religious' | 'regional' | 'observance';
+
+interface NepaliEventInput {
+  date: string;            // "YYYY-MM-DD" Bikram Sambat
+  name?: string;
+  kind?: NepaliEventKind;
+  closesOffices?: boolean;
+  color?: string;
+  indicate?: boolean;
+  endDate?: string;
+  days?: number;
+}
+```
+
 Element instances are typed via `HTMLElementTagNameMap`, so `document.querySelector('nepali-date-picker')`
 is typed as `NepaliDatePicker` (with `.value`, `.show()`, etc.).
 
@@ -791,7 +1097,8 @@ For the tags themselves in TSX, add `import '@nepali-date-picker/web-component/r
 
 ## Complete `core` export list
 
-Classes `NepaliDate`, `NepaliMonthInfo`, `NepaliTime`, `NepaliDateTime`, `YearRange`; functions
+Classes `NepaliDate`, `NepaliDateParts`, `NepaliMonthInfo`, `NepaliTime`, `NepaliDateTime`,
+`YearRange`, `NepaliEvent`, `NepaliDayStatusInfo`, `NepaliCalendarPolicyInfo`; functions
 `getBsYearRange`, `getAdYearRange`, `getTodayBs`, `getTodayAd`, `getCurrentTime`, `convertAdToBs`,
 `convertBsToAd`, `getBsCalendar`, `getAdCalendar`, `getBsMonth`, `getAdMonth`,
 `getBsCalendarsInAdMonth`, `getAdCalendarsInBsMonth`, `isAdDateConvertible`,
@@ -800,7 +1107,9 @@ Classes `NepaliDate`, `NepaliMonthInfo`, `NepaliTime`, `NepaliDateTime`, `YearRa
 `getAdDaysBetween`, `compareBsDates`, `getWeekdayName`, `getBsMonthName`, `getAdMonthName`,
 `formatBsDate`, `formatAdDate`, `formatBsDateByPattern`, `formatAdDateByPattern`, `formatTimeEnglish`,
 `formatTimeNepali`, `bsDateTimeToIso`, `adDateTimeToIso`, `bsDateTimeFromIso`, `adDateTimeFromIso`,
-`localizeDigits`, `toLatinDigits`.
+`formatBsDateText`, `parseBsDateText`, `formatTimeOfDay`, `parseTimeOfDay`,
+`localizeDigits`, `toLatinDigits`, `createEvent`, `createDetailedEvent`, `expandEventDays`,
+`expandEventThrough`, `createCalendarPolicy`.
 
 ## Links
 
