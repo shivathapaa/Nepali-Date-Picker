@@ -1,6 +1,6 @@
 {
   "name": "@nepali-date-picker/core",
-  "version": "3.2.0",
+  "version": "3.3.0",
   "description": "Bikram Sambat (Nepali) date conversion and formatting engine. Compiled from the Kotlin Multiplatform :core module, so BS↔AD tables and formatting match the Kotlin, Android, and Python builds exactly.",
   "type": "module",
   "license": "MPL-2.0",

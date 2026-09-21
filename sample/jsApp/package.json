@@ -1,6 +1,6 @@
 {
   "name": "nepali-date-picker-js-sample",
-  "version": "3.2.0",
+  "version": "3.3.0",
   "private": true,
   "type": "module",
   "description": "Live showcase for the Nepali Date Picker web packages. Consumes the built @nepali-date-picker/* dist through Vite aliases and is deployed to GitHub Pages under /demo.",
