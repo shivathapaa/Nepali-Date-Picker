@@ -13,15 +13,15 @@ kotlin {
 }
 
 android {
-    namespace = "sample.app"
+    namespace = "dev.shivathapaa.nepalidatepicker"
     compileSdk = libs.versions.android.compileSdk.get().toInt()
 
     defaultConfig {
-        applicationId = "sample.app.androidApp"
+        applicationId = "dev.shivathapaa.nepalidatepicker"
         minSdk = libs.versions.android.minSdk.get().toInt()
         targetSdk = libs.versions.android.targetSdk.get().toInt()
         versionCode = 1
-        versionName = "1.0.0"
+        versionName = providers.gradleProperty("VERSION_NAME").get()
     }
     packaging {
         resources {
