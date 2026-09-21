@@ -111,7 +111,7 @@ export class NepaliWheelDatePicker extends LitElement {
         scrollbar-width: none;
         text-align: center;
         outline: none;
-        flex: 1;
+        flex: 1 1 auto;
         min-width: 4.5rem;
       }
       .column::-webkit-scrollbar {
@@ -126,16 +126,29 @@ export class NepaliWheelDatePicker extends LitElement {
       }
       .option {
         height: 40px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
+        display: grid;
+        place-items: center;
         scroll-snap-align: center;
         font: inherit;
         color: var(--ndp-muted);
         background: transparent;
         border: 0;
         width: 100%;
+        padding: 0 6px;
+        white-space: nowrap;
         cursor: pointer;
+      }
+      /* Every row also reserves the width its label takes once selected, where it is bold and
+         wider, so a column holds one width as the selection moves through it and its neighbours
+         stay put. The reserved copy is hidden from the screen and from assistive tech. */
+      .option > span,
+      .option::after {
+        grid-area: 1 / 1;
+      }
+      .option::after {
+        content: attr(data-label);
+        font-weight: 700;
+        visibility: hidden;
       }
       .option[aria-selected='true'] {
         color: var(--ndp-text);
@@ -270,10 +283,11 @@ export class NepaliWheelDatePicker extends LitElement {
             <button
               class="option"
               role="option"
+              data-label=${o.label}
               aria-selected=${o.value === current ? 'true' : 'false'}
               @click=${() => this.select(part, o.value)}
             >
-              ${o.label}
+              <span>${o.label}</span>
             </button>
           `,
         )}

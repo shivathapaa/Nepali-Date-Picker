@@ -48,6 +48,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -176,6 +177,8 @@ fun NepaliWheelDatePicker(
 
     val clampedDay = selectedDay.coerceIn(1, daysInMonth)
 
+    val columnWeights = rememberWheelColumnWeights(adapter, calendarModel, locale, selectedTextStyle)
+
     // Emit the resolved Bikram Sambat calendar whenever the settled selection changes. A Gregorian
     // day before the conversion anchor has no Bikram Sambat equivalent, so nothing is emitted.
     LaunchedEffect(adapter, selectedYear, selectedMonth, clampedDay) {
@@ -253,7 +256,7 @@ fun NepaliWheelDatePicker(
                         visibleCount = visibleCount,
                         selectedTextStyle = selectedTextStyle,
                         unselectedTextStyle = unselectedTextStyle,
-                        modifier = Modifier.weight(1.1f)
+                        modifier = Modifier.weight(columnWeights.year)
                     )
                     WheelColumn(
                         itemCount = MonthsInYear,
@@ -267,7 +270,7 @@ fun NepaliWheelDatePicker(
                         visibleCount = visibleCount,
                         selectedTextStyle = selectedTextStyle,
                         unselectedTextStyle = unselectedTextStyle,
-                        modifier = Modifier.weight(1.5f)
+                        modifier = Modifier.weight(columnWeights.month)
                     )
                     WheelColumn(
                         itemCount = daysInMonth,
@@ -281,7 +284,7 @@ fun NepaliWheelDatePicker(
                         visibleCount = visibleCount,
                         selectedTextStyle = selectedTextStyle,
                         unselectedTextStyle = unselectedTextStyle,
-                        modifier = Modifier.weight(1f)
+                        modifier = Modifier.weight(columnWeights.day)
                     )
                 }
                 }
@@ -368,24 +371,57 @@ private fun WheelColumn(
     }
 }
 
+/** The relative widths of the year, month, and day wheels. */
+private data class WheelColumnWeights(val year: Float, val month: Float, val day: Float)
+
+/**
+ * Column weights proportional to the widest label each wheel can hold, measured in the selected
+ * (largest) style.
+ *
+ * In these proportions every wheel gets at least the room its own longest label needs whenever the
+ * picker is wide enough for all three, so a long month name such as "September" or "सेप्टेम्बर"
+ * stays whole in whatever language, locale, and text style the caller asks for. Labels are drawn on
+ * one line, so a wheel narrower than its label crops it.
+ */
+@Composable
+private fun rememberWheelColumnWeights(
+    adapter: CalendarViewAdapter,
+    calendarModel: NepaliCalendarModel,
+    locale: NepaliDateLocale,
+    style: TextStyle
+): WheelColumnWeights {
+    val textMeasurer = rememberTextMeasurer()
+    val gutter = with(LocalDensity.current) { WheelColumnGutter.toPx() }
+
+    return remember(adapter, calendarModel, locale, style, textMeasurer, gutter) {
+        fun widthOf(label: String): Float =
+            textMeasurer.measure(label, style, softWrap = false, maxLines = 1).size.width.toFloat()
+
+        // The widest digit scaled by a wheel's digit count is never narrower than a label on it,
+        // which bounds the year wheel at ten measurements whatever its range covers.
+        val widestDigit = (0..9)
+            .maxOf { widthOf(calendarModel.localizeNumber(it.toString(), locale.language)) }
+        val widestMonth = (1..MonthsInYear)
+            .maxOf { widthOf(adapter.monthName(it, locale.language, locale.monthName)) }
+
+        WheelColumnWeights(
+            year = widestDigit * YearDigitCount + gutter,
+            month = widestMonth + gutter,
+            day = widestDigit * DayDigitCount + gutter
+        )
+    }
+}
+
 /**
  * The Bikram Sambat date the wheels are on, or `null` when that position has none: a Gregorian day
  * before the conversion anchor, or a day the table does not cover.
- *
- * `parse` reports the second case as `totalDaysInMonth = -1` rather than as null, so that sentinel
- * is filtered here instead of reaching the caller dressed as a real date.
  */
 private fun CalendarViewAdapter.canonicalDateAt(
     year: Int,
     month: Int,
     dayOfMonth: Int
-): CustomCalendar? = parse(
-    buildString {
-        append(year.toString().padStart(4, '0'))
-        append(month.toString().padStart(2, '0'))
-        append(dayOfMonth.toString().padStart(2, '0'))
-    }
-)?.takeIf { it.totalDaysInMonth > 0 }?.let { toCanonical(it) }
+): CustomCalendar? =
+    calendarOf(SimpleDate(year, month, dayOfMonth))?.let { toCanonical(it) }
 
 /**
  * Where the wheels should sit to show [canonicalDate] in this adapter's calendar.
@@ -411,7 +447,10 @@ private fun CalendarViewAdapter.wheelPositionFor(
 
 private val WheelItemHeight: Dp = 44.dp
 private val WheelTogglePadding: Dp = 12.dp
+private val WheelColumnGutter: Dp = 12.dp
 private const val MonthsInYear: Int = 12
+private const val YearDigitCount: Int = 4
+private const val DayDigitCount: Int = 2
 private const val WheelVisibleCount: Int = 5
 private const val WheelUnselectedAlpha: Float = 0.38f
 private val WheelCornerRadius: Dp = 20.dp
