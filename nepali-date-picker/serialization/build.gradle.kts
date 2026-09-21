@@ -8,7 +8,7 @@ plugins {
 }
 
 kotlin {
-    // Match :core's expanded target matrix — serialization is pure-Kotlin, no Compose / UI
+    // Match :core's expanded target matrix: serialization is pure-Kotlin, with no Compose or UI
     // dependency, so it ships everywhere :core ships.
     linuxX64()
     linuxArm64()
@@ -22,7 +22,7 @@ kotlin {
         nodejs()
     }
 
-    // Apple simulator targets — gated like :core. Local laptops without tvOS / watchOS
+    // Apple simulator targets, gated like :core. Local laptops without tvOS / watchOS
     // simulator SDKs would otherwise fail configuration when the auto-generated test tasks
     // read Xcode's runtime list.
     val isCi = System.getenv("CI") != null

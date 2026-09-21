@@ -79,7 +79,8 @@ tasks.register("checkLocal") {
         ":nepali-date-picker:ui:jvmTest",
         ":nepali-date-picker:ui:iosSimulatorArm64Test",
         ":nepali-date-picker:ui:macosArm64Test",
-        ":nepali-date-picker:ui:checkBridgeCoverage"
+        ":nepali-date-picker:ui:checkBridgeCoverage",
+        ":nepali-date-picker:ui:checkAndroidBridgeCoverage"
     )
 }
 
@@ -90,17 +91,21 @@ tasks.register("moduleGraph") {
     doLast {
         println(
             """
-            Nepali Date Picker — Module Graph
-            ───────────────────────────────────
+            Nepali Date Picker - Module Graph
+
             :nepali-date-picker:core
-              ← (no internal deps; kotlinx-datetime + compose-runtime)
+              <- (no internal deps; kotlinx-datetime only, no Compose)
             :nepali-date-picker:ui
-              ← :nepali-date-picker:core
-              ← Compose Multiplatform (runtime, foundation, ui, material3)
+              <- :nepali-date-picker:core
+              <- Compose Multiplatform (runtime, foundation, ui, material3)
+            :nepali-date-picker:serialization
+              <- :nepali-date-picker:core
+              <- kotlinx-serialization-core
             :sample:composeApp
-              ← :nepali-date-picker:ui
+              <- :nepali-date-picker:ui
+              <- :nepali-date-picker:serialization
             :sample:androidApp
-              ← :sample:composeApp
+              <- :sample:composeApp
             """.trimIndent()
         )
     }
