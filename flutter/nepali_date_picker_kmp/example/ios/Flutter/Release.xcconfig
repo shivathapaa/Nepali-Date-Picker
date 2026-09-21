@@ -1,0 +1,4 @@
+#include "Generated.xcconfig"
+
+// The staged Kotlin framework has no Intel simulator slice.
+EXCLUDED_ARCHS[sdk=iphonesimulator*] = x86_64
