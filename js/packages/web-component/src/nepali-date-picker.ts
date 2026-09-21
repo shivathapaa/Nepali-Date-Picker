@@ -9,7 +9,7 @@ import { LitElement, css, html } from 'lit';
 import type { PropertyValues, TemplateResult } from 'lit';
 import { convertBsToAd, formatBsDate } from '@nepali-date-picker/core';
 import type { CalendarDate, CalendarSystem, NepaliDatePickerChangeDetail, NepaliLanguage } from './types.js';
-import { parseIso, toIso } from './utils.js';
+import { parseEvents, parseIso, parseWeeklyOffDays, toIso } from './utils.js';
 import { CalendarController } from './internal/calendar-controller.js';
 import { weekdayOf } from './internal/calendar-model.js';
 import { renderCalendar } from './internal/calendar-view.js';
@@ -47,6 +47,9 @@ export class NepaliDatePicker extends LitElement {
     calendarSystem: { type: String, attribute: 'calendar-system' },
     showCalendarToggle: { type: Boolean, attribute: 'show-calendar-toggle' },
     showAdjacentMonthDays: { type: Boolean, attribute: 'show-adjacent-month-days' },
+    showSecondaryDate: { type: Boolean, attribute: 'show-secondary-date' },
+    events: { type: String },
+    weeklyOffDays: { type: String, attribute: 'weekly-off-days' },
   };
 
   /** Selected Bikram Sambat date as a `YYYY-MM-DD` string. Empty when nothing is selected. */
@@ -73,6 +76,24 @@ export class NepaliDatePicker extends LitElement {
    * that day and moves the grid to its month.
    */
   declare showAdjacentMonthDays: boolean;
+  /**
+   * Pair every day with the same day in the other calendar, drawn small in the corner of the cell,
+   * and name that calendar's months under the month header. The Bikram Sambat grid then reads
+   * "2" over "18", the way `NepaliDatePickerWithEnglishDate` does in Compose.
+   */
+  declare showSecondaryDate: boolean;
+  /**
+   * The days to mark, as JSON: `[{"date":"2083-06-03","name":"Constitution Day",
+   * "kind":"governmentPublic"}]`. A holiday colours its day; add `"indicate": true` for an event
+   * that should also draw a dot. Something that runs longer than a day takes `"endDate"` or
+   * `"days"` and marks every day of the span. Malformed entries are ignored rather than thrown.
+   */
+  declare events: string;
+  /**
+   * The weekdays the institution never opens, as a comma-separated list. Sunday is 1 and Saturday
+   * is 7, so Nepal's office week is `7` and a school closed Saturday and Sunday is `7,1`.
+   */
+  declare weeklyOffDays: string;
 
   private readonly cal = new CalendarController(this);
 
@@ -104,10 +125,16 @@ export class NepaliDatePicker extends LitElement {
     this.calendarSystem = 'bs';
     this.showCalendarToggle = false;
     this.showAdjacentMonthDays = false;
+    this.showSecondaryDate = false;
+    this.events = '';
+    this.weeklyOffDays = '';
     this.cal.onSelect = () => this.commit();
   }
 
   override willUpdate(changed: PropertyValues<this>): void {
+    if (changed.has('events') || changed.has('weeklyOffDays')) {
+      this.cal.setCalendarEvents(parseWeeklyOffDays(this.weeklyOffDays), parseEvents(this.events));
+    }
     if (changed.has('min') || changed.has('max')) {
       this.cal.configure({ mode: 'single', min: parseIso(this.min), max: parseIso(this.max) });
     }
@@ -143,6 +170,7 @@ export class NepaliDatePicker extends LitElement {
           showEnglish: this.showEnglish,
           showCalendarToggle: this.showCalendarToggle,
           showAdjacentDays: this.showAdjacentMonthDays,
+          showSecondaryDate: this.showSecondaryDate,
         })}
       </div>
     `;

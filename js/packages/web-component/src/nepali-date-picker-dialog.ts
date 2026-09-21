@@ -8,9 +8,9 @@
 import { LitElement, html, nothing } from 'lit';
 import type { PropertyValues, TemplateResult } from 'lit';
 import { classMap } from 'lit/directives/class-map.js';
-import { formatBsDate } from '@nepali-date-picker/core';
+import { convertBsToAd, formatAdDate, formatBsDate } from '@nepali-date-picker/core';
 import type { CalendarSystem, NepaliDatePickerChangeDetail, NepaliLanguage } from './types.js';
-import { parseIso, toIso } from './utils.js';
+import { parseEvents, parseIso, parseWeeklyOffDays, toIso } from './utils.js';
 import { buildChangeDetail } from './nepali-date-picker.js';
 import { CalendarController } from './internal/calendar-controller.js';
 import { weekdayOf } from './internal/calendar-model.js';
@@ -49,7 +49,10 @@ export class NepaliDatePickerDialog extends LitElement {
     calendarSystem: { type: String, attribute: 'calendar-system' },
     showCalendarToggle: { type: Boolean, attribute: 'show-calendar-toggle' },
     showAdjacentMonthDays: { type: Boolean, attribute: 'show-adjacent-month-days' },
+    showSecondaryDate: { type: Boolean, attribute: 'show-secondary-date' },
     heading: { type: String },
+    events: { type: String },
+    weeklyOffDays: { type: String, attribute: 'weekly-off-days' },
   };
 
   /** Whether the dialog is shown. */
@@ -74,8 +77,26 @@ export class NepaliDatePickerDialog extends LitElement {
    * that day and moves the grid to its month.
    */
   declare showAdjacentMonthDays: boolean;
+  /**
+   * Pair every day with the same day in the other calendar, drawn small in the corner of the cell,
+   * and name that calendar's months under the month header. The headline then carries the Gregorian
+   * date on a second line.
+   */
+  declare showSecondaryDate: boolean;
   /** Dialog heading; defaults to a localized "Select Nepali Date". */
   declare heading: string;
+  /**
+   * The days to mark, as JSON: `[{"date":"2083-06-03","name":"Constitution Day",
+   * "kind":"governmentPublic"}]`. A holiday colours its day; add `"indicate": true` for an event
+   * that should also draw a dot. Something that runs longer than a day takes `"endDate"` or
+   * `"days"` and marks every day of the span. Malformed entries are ignored rather than thrown.
+   */
+  declare events: string;
+  /**
+   * The weekdays the institution never opens, as a comma-separated list. Sunday is 1 and Saturday
+   * is 7, so Nepal's office week is `7` and a school closed Saturday and Sunday is `7,1`.
+   */
+  declare weeklyOffDays: string;
 
   private readonly cal = new CalendarController(this);
 
@@ -93,7 +114,10 @@ export class NepaliDatePickerDialog extends LitElement {
     this.calendarSystem = 'bs';
     this.showCalendarToggle = false;
     this.showAdjacentMonthDays = false;
+    this.showSecondaryDate = false;
     this.heading = '';
+    this.events = '';
+    this.weeklyOffDays = '';
   }
 
   /** Open the dialog. */
@@ -107,6 +131,9 @@ export class NepaliDatePickerDialog extends LitElement {
   }
 
   override willUpdate(changed: PropertyValues<this>): void {
+    if (changed.has('events') || changed.has('weeklyOffDays')) {
+      this.cal.setCalendarEvents(parseWeeklyOffDays(this.weeklyOffDays), parseEvents(this.events));
+    }
     if (changed.has('min') || changed.has('max')) {
       this.cal.configure({ mode: 'single', min: parseIso(this.min), max: parseIso(this.max) });
     }
@@ -156,9 +183,19 @@ export class NepaliDatePickerDialog extends LitElement {
     return formatBsDate(date.year, date.month, date.dayOfMonth, weekdayOf(date), this.language, 'full', 'medium', 'medium', null);
   }
 
+  /** The selection's Gregorian date, for the smaller line under the headline. `null` until picked. */
+  private secondaryHeadline(): string | null {
+    const date = this.cal.selected;
+    if (!this.showSecondaryDate || !date) return null;
+    const ad = convertBsToAd(date.year, date.month, date.dayOfMonth);
+    // The two calendars name the same day, so the weekday resolved for the Bikram Sambat half holds.
+    return formatAdDate(ad.year, ad.month, ad.dayOfMonth, weekdayOf(date), this.language, 'long', 'medium', 'medium', null);
+  }
+
   override render(): TemplateResult | typeof nothing {
     if (!this.open) return nothing;
     const dialogTitle = this.heading || (this.language === 'ne' ? 'नेपाली मिति चयन गर्नुहोस्' : 'Select Nepali Date');
+    const secondaryHeadline = this.secondaryHeadline();
     return html`
       <div class="backdrop" @click=${this.onBackdrop} @keydown=${this.onKeydown}>
         <div
@@ -170,6 +207,9 @@ export class NepaliDatePickerDialog extends LitElement {
         >
           <div class="dialog-title">${dialogTitle}</div>
           <div class="dialog-headline">${this.headline()}</div>
+          ${secondaryHeadline
+            ? html`<div class="dialog-headline-secondary">${secondaryHeadline}</div>`
+            : nothing}
           ${renderCalendar(this.cal, {
             language: this.language,
             disabled: false,
@@ -177,6 +217,7 @@ export class NepaliDatePickerDialog extends LitElement {
             showEnglish: this.showEnglish,
             showCalendarToggle: this.showCalendarToggle,
             showAdjacentDays: this.showAdjacentMonthDays,
+            showSecondaryDate: this.showSecondaryDate,
           })}
           <div class="actions">
             <button @click=${this.onCancel}>${this.language === 'ne' ? 'रद्द गर्नुहोस्' : 'Cancel'}</button>

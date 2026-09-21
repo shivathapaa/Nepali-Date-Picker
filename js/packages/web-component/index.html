@@ -81,6 +81,21 @@
       <pre id="output">Pick a date…</pre>
     </div>
 
+    <h2>Browsing a month</h2>
+    <div class="layout">
+      <nepali-calendar
+        id="calendar"
+        show-day-summary
+        show-month-events
+        weekly-off-days="7"
+        events='[
+          {"date":"2081-05-17","days":4,"name":"Indra Jatra","kind":"religious","id":"indra-jatra","payload":"{\"imageUrl\":\"https://upload.wikimedia.org/wikipedia/commons/2/2b/Indra_Jatra_2014.jpg\"}"},
+          {"date":"2081-05-24","name":"Sprint review","kind":"observance","indicate":true,"id":"sprint-review","payload":"{\"venue\":\"Room 3B\"}"}
+        ]'>
+      </nepali-calendar>
+      <pre id="calendar-output">Click a day, or a line of the month's list…</pre>
+    </div>
+
     <script type="module">
       import './src/index.ts';
 
@@ -89,6 +104,17 @@
 
       picker.addEventListener('change', (event) => {
         output.textContent = JSON.stringify(event.detail, null, 2);
+      });
+
+      const calendar = document.getElementById('calendar');
+      const calendarOutput = document.getElementById('calendar-output');
+      // The payload is an opaque string here: an app parses it and renders whatever it holds,
+      // image URLs included. Nothing in the element reads or fetches it.
+      calendar.addEventListener('day-select', (event) => {
+        calendarOutput.textContent = JSON.stringify(event.detail, null, 2);
+      });
+      calendar.addEventListener('event-select', (event) => {
+        calendarOutput.textContent = JSON.stringify(event.detail, null, 2);
       });
 
       document.getElementById('language').addEventListener('change', (e) => {

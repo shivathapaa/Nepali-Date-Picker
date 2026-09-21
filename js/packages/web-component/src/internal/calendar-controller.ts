@@ -7,7 +7,8 @@
 
 import type { LitElement, ReactiveController } from 'lit';
 import { addDaysToBsDate, getTodayBs } from '@nepali-date-picker/core';
-import type { CalendarDate, CalendarSystem } from '../types.js';
+import type { CalendarDate, CalendarSystem, NepaliEventInput } from '../types.js';
+import { eventKindOf, kindPriority, parseIso, toIso } from '../utils.js';
 import { fadeInRerenderedRegion } from './motion.js';
 import {
   canonicalDatesInMonth,
@@ -55,6 +56,8 @@ export class CalendarController implements ReactiveController {
   private pendingFocus = false;
   private pendingSwitchAnimation = false;
   private canonicalCache: { key: string; dates: (CalendarDate | null)[] } | null = null;
+  private weeklyOffDays: number[] = [];
+  private eventsByDate = new Map<string, NepaliEventInput[]>();
 
   constructor(host: LitElement) {
     this.host = host;
@@ -69,6 +72,48 @@ export class CalendarController implements ReactiveController {
     if (options.mode) this.mode = options.mode;
     if (options.min !== undefined) this.min = options.min;
     if (options.max !== undefined) this.max = options.max;
+  }
+
+  /**
+   * The days this calendar marks: the weekdays the institution never opens, and the events it
+   * keeps, keyed by Bikram Sambat date so a cell is one lookup.
+   */
+  setCalendarEvents(weeklyOffDays: number[], events: NepaliEventInput[]): void {
+    this.weeklyOffDays = weeklyOffDays;
+    const byDate = new Map<string, NepaliEventInput[]>();
+    for (const event of events) {
+      const date = parseIso(event.date);
+      if (date === null) continue;
+      const key = toIso(date);
+      const onThatDay = byDate.get(key);
+      if (onThatDay) onThatDay.push(event);
+      else byDate.set(key, [event]);
+    }
+    for (const onThatDay of byDate.values()) {
+      onThatDay.sort((a, b) => kindPriority(eventKindOf(a)) - kindPriority(eventKindOf(b)));
+    }
+    this.eventsByDate = byDate;
+  }
+
+  /** Whether the week closes [date]. Takes the date in the displayed calendar. */
+  isWeeklyOff(date: CalendarDate): boolean {
+    if (this.weeklyOffDays.length === 0) return false;
+    return this.weeklyOffDays.includes(this.weekdayOf(date));
+  }
+
+  /** Every event this calendar was given, in no particular order, for a list to sort its own way. */
+  allEvents(): NepaliEventInput[] {
+    const all: NepaliEventInput[] = [];
+    for (const onThatDay of this.eventsByDate.values()) all.push(...onThatDay);
+    return all;
+  }
+
+  /** The events on [date], strongest kind first. The date is resolved to Bikram Sambat first. */
+  eventsOn(date: CalendarDate): NepaliEventInput[] {
+    if (this.eventsByDate.size === 0) return [];
+    const canonical = this.canonicalOf(date);
+    if (canonical === null) return [];
+    return this.eventsByDate.get(toIso(canonical)) ?? [];
   }
 
   /** Set the single-selection value (Bikram Sambat) and move the view/focus onto it. */

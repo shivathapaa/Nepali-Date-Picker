@@ -9,6 +9,7 @@ export default defineConfig({
     lib: {
       entry: {
         index: resolve(root, 'src/index.ts'),
+        'nepali-calendar': resolve(root, 'src/nepali-calendar.ts'),
         'nepali-date-picker': resolve(root, 'src/nepali-date-picker.ts'),
         'nepali-date-range-picker': resolve(root, 'src/nepali-date-range-picker.ts'),
         'nepali-date-picker-dialog': resolve(root, 'src/nepali-date-picker-dialog.ts'),

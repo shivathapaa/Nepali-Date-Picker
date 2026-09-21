@@ -21,6 +21,12 @@ export const tokens = css`
     --_ndp-today-ring: var(--ndp-today-ring, #2f6fed);
     --_ndp-border: var(--ndp-border, #d3d4d8);
     --_ndp-error: var(--ndp-error, #ba1a1a);
+    --_ndp-weekly-off: var(--ndp-weekly-off, #ba1a1a);
+    --_ndp-holiday-public: var(--ndp-holiday-public, #ba1a1a);
+    --_ndp-holiday-religious: var(--ndp-holiday-religious, #2f6fed);
+    --_ndp-holiday-regional: var(--ndp-holiday-regional, #7a5ea8);
+    --_ndp-holiday-observance: var(--ndp-holiday-observance, #6b6b70);
+    --_ndp-holiday-container: var(--ndp-holiday-container, rgba(186, 26, 26, 0.12));
     --_ndp-radius: var(--ndp-radius, 12px);
     font-family: var(--_ndp-font);
     color: var(--_ndp-text);
@@ -35,6 +41,47 @@ export const tokens = css`
 
 /** The month calendar (header, weekday row, day grid, footer). Shared by every calendar-based element. */
 export const calendarStyles = css`
+  /* A marked day takes one colour, and selection still overrides it: a selected cell keeps the
+     accent it has always had, and only the dots are repainted to stay legible on it. */
+  .day.marked.weekly-off { color: var(--_ndp-weekly-off); }
+  .day.marked.kind-governmentPublic { color: var(--_ndp-holiday-public); }
+  .day.marked.kind-religious { color: var(--_ndp-holiday-religious); }
+  .day.marked.kind-regional { color: var(--_ndp-holiday-regional); }
+  .day.marked.kind-observance { color: var(--_ndp-holiday-observance); }
+  .day.marked.tinted { background: var(--_ndp-holiday-container); }
+  .day.selected,
+  .day.range-start,
+  .day.range-end { color: var(--_ndp-on-accent); }
+
+  .day { position: relative; }
+
+  .event-dots {
+    position: absolute;
+    bottom: 4px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 2px;
+    pointer-events: none;
+  }
+
+  .day.dual .event-dots { left: 6px; transform: none; }
+
+  .event-dot {
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: var(--_ndp-holiday-observance);
+  }
+
+  .event-dot[data-kind='governmentPublic'] { background: var(--_ndp-holiday-public); }
+  .event-dot[data-kind='religious'] { background: var(--_ndp-holiday-religious); }
+  .event-dot[data-kind='regional'] { background: var(--_ndp-holiday-regional); }
+
+  .day.selected .event-dot,
+  .day.range-start .event-dot,
+  .day.range-end .event-dot { background: var(--_ndp-on-accent); }
+
   .surface {
     background: var(--_ndp-bg);
     border-radius: var(--_ndp-radius);
@@ -50,10 +97,18 @@ export const calendarStyles = css`
   .label {
     flex: 1;
     display: flex;
+    flex-wrap: wrap;
     align-items: center;
     gap: 6px;
     font-weight: 600;
     font-size: 0.95rem;
+  }
+  /* A full basis is what drops the second line under the month name instead of beside it. */
+  .secondary-month {
+    flex-basis: 100%;
+    color: var(--_ndp-muted);
+    font-size: 0.72rem;
+    font-weight: 500;
   }
   button {
     font: inherit;
@@ -129,6 +184,23 @@ export const calendarStyles = css`
   }
   .day.adjacent {
     opacity: 0.38;
+  }
+  /* A cell carrying two dates is a rounded square rather than a circle, so the corner number has
+     somewhere to sit. Matches the Compose dual-date cell. */
+  .day.dual {
+    min-width: 40px;
+    border-radius: 4px;
+  }
+  .day .primary {
+    transform: translate(-2px, -2px);
+  }
+  .day .secondary {
+    position: absolute;
+    right: 4px;
+    bottom: 3px;
+    font-size: 0.62rem;
+    line-height: 1;
+    opacity: 0.75;
   }
   .day.today {
     box-shadow: inset 0 0 0 1.5px var(--_ndp-today-ring);
@@ -287,6 +359,7 @@ export const overlayStyles = css`
   }
   .dialog.fullscreen .dialog-title,
   .dialog.fullscreen .dialog-headline,
+  .dialog.fullscreen .dialog-headline-secondary,
   .dialog.fullscreen .header,
   .dialog.fullscreen [role='grid'],
   .dialog.fullscreen .footer,
@@ -305,6 +378,15 @@ export const overlayStyles = css`
     font-size: 1.5rem;
     font-weight: 600;
     margin: 4px 0 12px;
+  }
+  /* The Gregorian half follows the headline, so the gap belongs under the pair, not between them. */
+  .dialog-headline:has(+ .dialog-headline-secondary) {
+    margin-bottom: 2px;
+  }
+  .dialog-headline-secondary {
+    color: var(--_ndp-muted);
+    font-size: 0.85rem;
+    margin-bottom: 12px;
   }
   .actions {
     display: flex;

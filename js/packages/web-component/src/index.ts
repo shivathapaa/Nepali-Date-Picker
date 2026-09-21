@@ -6,6 +6,7 @@
  */
 
 import './nepali-date-picker.js';
+import './nepali-calendar.js';
 import './nepali-date-range-picker.js';
 import './nepali-date-picker-dialog.js';
 import './nepali-date-picker-docked.js';
@@ -13,6 +14,7 @@ import './nepali-date-field.js';
 import './nepali-date-range-field.js';
 import './nepali-wheel-date-picker.js';
 
+export { NepaliCalendar } from './nepali-calendar.js';
 export { NepaliDatePicker } from './nepali-date-picker.js';
 export { NepaliDateRangePicker } from './nepali-date-range-picker.js';
 export { NepaliDatePickerDialog } from './nepali-date-picker-dialog.js';
@@ -23,6 +25,13 @@ export { NepaliWheelDatePicker } from './nepali-wheel-date-picker.js';
 
 export type {
   CalendarDate,
+  CalendarSystem,
+  NepaliDaySelectDetail,
+  NepaliDaySelectEvent,
+  NepaliEventInput,
+  NepaliEventKind,
+  NepaliEventSelectDetail,
+  NepaliEventSelectEvent,
   NepaliLanguage,
   NepaliDateFieldInvalidDetail,
   NepaliDateFieldInvalidEvent,

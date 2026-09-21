@@ -17,6 +17,7 @@ import type { ReactiveElement } from 'lit';
 import '../src/index.js';
 import {
   NepaliDateField,
+  NepaliCalendar,
   NepaliDatePicker,
   NepaliDatePickerDialog,
   NepaliDatePickerDocked,
@@ -58,6 +59,7 @@ const declarations = new Map(
 );
 
 const elements: [string, typeof ReactiveElement][] = [
+  ['nepali-calendar', NepaliCalendar],
   ['nepali-date-picker', NepaliDatePicker],
   ['nepali-date-range-picker', NepaliDateRangePicker],
   ['nepali-date-picker-dialog', NepaliDatePickerDialog],

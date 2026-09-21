@@ -44,8 +44,15 @@ describe.skipIf(!built)('the CDN bundle', () => {
   it('resolves nothing at runtime', () => {
     // A bare specifier left in the output is exactly what makes a file unusable from a plain CDN
     // URL, and it is invisible in a bundler-based test.
-    const bare = /(?:\bfrom\s*|\bimport\s*)["']([^"'./][^"']*)["']/.exec(source);
-    expect(bare?.[1] ?? null).toBeNull();
+    //
+    // The capture has to look like a module specifier to count. Minified prose reaches this file
+    // too ("...scan from " + x + "..."), and a message that happens to end in `from` is not an
+    // import left behind.
+    const specifier = /(?:\bfrom\s*|\bimport\s*)["']([^"'./][^"']*)["']/g;
+    const bare = Array.from(source.matchAll(specifier))
+      .map((match) => match[1])
+      .find((candidate) => /^@?[a-zA-Z][\w@/.-]*$/.test(candidate));
+    expect(bare ?? null).toBeNull();
   });
 
   it.each(tags)('registers %s', (tag) => {
@@ -63,9 +70,15 @@ describe.skipIf(!built)('the CDN bundle', () => {
   it('stays within its size budget', () => {
     // The whole point of this file is being downloaded, so a doubling should fail the build rather
     // than quietly ship. Roughly 79% of it is the shared Kotlin engine and does not shrink.
+    //
+    // Gzipped is what a browser actually pulls, so it carries the tighter budget. Both ceilings
+    // track the exported surface, because engine code an export reaches is no longer dead and
+    // cannot be shaken out: the raw ceiling rose to 320 kB for the event and working-day APIs, and
+    // both rose again for the wire-format helpers, which reach the two fixed-pattern formatters and
+    // the pattern enum behind them.
     const gzipped = gzipSync(readFileSync(bundlePath), { level: 9 }).length;
-    expect(gzipped, `bundle is ${(gzipped / 1024).toFixed(1)} kB gzipped`).toBeLessThan(80 * 1024);
-    expect(statSync(bundlePath).size).toBeLessThan(300 * 1024);
+    expect(gzipped, `bundle is ${(gzipped / 1024).toFixed(1)} kB gzipped`).toBeLessThan(84 * 1024);
+    expect(statSync(bundlePath).size).toBeLessThan(330 * 1024);
   });
 });
 

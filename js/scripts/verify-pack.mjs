@@ -135,11 +135,18 @@ const tags = [
 
 // Resolved through the exports map on the ESM condition, so a broken './bundle' entry fails here
 // rather than in a consumer's browser.
+//
+// The capture has to look like a module specifier to count. Minified prose reaches the bundle too
+// ("...-day scan from " + x + "..."), and a message that happens to end in \`from\` is not an import
+// left behind. Kept in step with the same check in test/bundle.test.ts.
 const bundleUrl = import.meta.resolve('@nepali-date-picker/web-component/bundle');
 const source = readFileSync(fileURLToPath(bundleUrl), 'utf8');
-const bareImport = /(?:\\bfrom\\s*|\\bimport\\s*)["']([^"'.\\/][^"']*)["']/.exec(source);
+const specifier = /(?:\\bfrom\\s*|\\bimport\\s*)["']([^"'.\\/][^"']*)["']/g;
+const bareImport = Array.from(source.matchAll(specifier))
+  .map((match) => match[1])
+  .find((candidate) => /^@?[a-zA-Z][\\w@\\/.-]*$/.test(candidate));
 if (bareImport) {
-  throw new Error('bundle still imports the bare specifier ' + bareImport[1] + '; a CDN cannot resolve it');
+  throw new Error('bundle still imports the bare specifier ' + bareImport + '; a CDN cannot resolve it');
 }
 
 // Every DOM global jsdom offers is installed, not a hand-picked list: Lit touches Document,

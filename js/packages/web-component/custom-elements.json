@@ -9,6 +9,14 @@
       "exports": [
         {
           "kind": "js",
+          "name": "NepaliCalendar",
+          "declaration": {
+            "name": "NepaliCalendar",
+            "module": "./nepali-calendar.js"
+          }
+        },
+        {
+          "kind": "js",
           "name": "NepaliDatePicker",
           "declaration": {
             "name": "NepaliDatePicker",
@@ -73,6 +81,62 @@
         },
         {
           "kind": "js",
+          "name": "CalendarSystem",
+          "declaration": {
+            "name": "CalendarSystem",
+            "module": "./types.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "NepaliDaySelectDetail",
+          "declaration": {
+            "name": "NepaliDaySelectDetail",
+            "module": "./types.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "NepaliDaySelectEvent",
+          "declaration": {
+            "name": "NepaliDaySelectEvent",
+            "module": "./types.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "NepaliEventInput",
+          "declaration": {
+            "name": "NepaliEventInput",
+            "module": "./types.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "NepaliEventKind",
+          "declaration": {
+            "name": "NepaliEventKind",
+            "module": "./types.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "NepaliEventSelectDetail",
+          "declaration": {
+            "name": "NepaliEventSelectDetail",
+            "module": "./types.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "NepaliEventSelectEvent",
+          "declaration": {
+            "name": "NepaliEventSelectEvent",
+            "module": "./types.js"
+          }
+        },
+        {
+          "kind": "js",
           "name": "NepaliLanguage",
           "declaration": {
             "name": "NepaliLanguage",
@@ -125,6 +189,303 @@
           "declaration": {
             "name": "NepaliDateRangeChangeEvent",
             "module": "./types.js"
+          }
+        }
+      ]
+    },
+    {
+      "kind": "javascript-module",
+      "path": "src/nepali-calendar.ts",
+      "declarations": [
+        {
+          "kind": "class",
+          "description": "A browsable Bikram Sambat (Nepali) month calendar rendered as native DOM, so it works in React,\nVue, Angular, Svelte, and plain HTML.\n\nWhere `<nepali-date-picker>` asks for a date, this one is read: it shows both calendars' numbers\nand the neighbouring months' days by default, marks the days an institution is closed for, and\ncan write the picked day and the month's events out under the grid.\n\nThe grid is the picker's own, so a day looks the same on both. All calendar math comes from\n`@nepali-date-picker/core`, the same engine the Kotlin, Android and Python builds use.",
+          "name": "NepaliCalendar",
+          "cssProperties": [
+            {
+              "description": "Font family for the whole element.",
+              "name": "--ndp-font"
+            },
+            {
+              "description": "Calendar surface background.",
+              "name": "--ndp-bg"
+            },
+            {
+              "description": "Primary text color.",
+              "name": "--ndp-text"
+            },
+            {
+              "description": "Secondary text, weekday headers and out-of-month days.",
+              "name": "--ndp-muted"
+            },
+            {
+              "description": "Selection background and focus color.",
+              "name": "--ndp-accent"
+            },
+            {
+              "description": "Text color on top of the accent.",
+              "name": "--ndp-on-accent"
+            },
+            {
+              "description": "Hover wash over a selectable day.",
+              "name": "--ndp-hover"
+            },
+            {
+              "description": "Ring color marking today.",
+              "name": "--ndp-today-ring"
+            },
+            {
+              "description": "Divider and outline color.",
+              "name": "--ndp-border"
+            },
+            {
+              "description": "Corner radius of the surface and day cells.",
+              "name": "--ndp-radius"
+            }
+          ],
+          "members": [
+            {
+              "kind": "field",
+              "name": "value",
+              "privacy": "public",
+              "type": {
+                "text": "string"
+              },
+              "description": "The picked Bikram Sambat day as a `YYYY-MM-DD` string. Empty when nothing is picked.",
+              "default": "''",
+              "attribute": "value"
+            },
+            {
+              "kind": "field",
+              "name": "language",
+              "privacy": "public",
+              "type": {
+                "text": "NepaliLanguage"
+              },
+              "description": "Display language, `en` (English + Latin digits) or `ne` (Nepali + Devanagari digits).",
+              "default": "'en'",
+              "attribute": "language"
+            },
+            {
+              "kind": "field",
+              "name": "calendarSystem",
+              "privacy": "public",
+              "type": {
+                "text": "CalendarSystem"
+              },
+              "description": "Calendar the grid displays, `bs` (Bikram Sambat) or `ad` (Gregorian). Only the display changes:\n`value` and the events stay Bikram Sambat, so switching keeps the same day picked.",
+              "default": "'bs'",
+              "attribute": "calendar-system"
+            },
+            {
+              "kind": "field",
+              "name": "showCalendarToggle",
+              "privacy": "public",
+              "type": {
+                "text": "boolean"
+              },
+              "description": "Show a `B.S.` / `A.D.` switch above the month header.",
+              "default": "false",
+              "attribute": "show-calendar-toggle"
+            },
+            {
+              "kind": "field",
+              "name": "showAdjacentMonthDays",
+              "privacy": "public",
+              "type": {
+                "text": "boolean"
+              },
+              "description": "Fill the grid's empty cells with the neighbouring months' days. On by default.",
+              "default": "true",
+              "attribute": "show-adjacent-month-days"
+            },
+            {
+              "kind": "field",
+              "name": "showSecondaryDate",
+              "privacy": "public",
+              "type": {
+                "text": "boolean"
+              },
+              "description": "Pair every day with the same day in the other calendar. On by default, as a patro is read.",
+              "default": "true",
+              "attribute": "show-secondary-date"
+            },
+            {
+              "kind": "field",
+              "name": "showDaySummary",
+              "privacy": "public",
+              "type": {
+                "text": "boolean"
+              },
+              "description": "Write the picked day out under the grid: whether the institution is shut, why, and what is on it.",
+              "default": "false",
+              "attribute": "show-day-summary"
+            },
+            {
+              "kind": "field",
+              "name": "showMonthEvents",
+              "privacy": "public",
+              "type": {
+                "text": "boolean"
+              },
+              "description": "List the month's events under the grid, a span gathered into a single line.",
+              "default": "false",
+              "attribute": "show-month-events"
+            },
+            {
+              "kind": "field",
+              "name": "events",
+              "privacy": "public",
+              "type": {
+                "text": "string"
+              },
+              "description": "The days to mark, as JSON: `[{\"date\":\"2083-06-03\",\"name\":\"Constitution Day\",\n\"kind\":\"governmentPublic\",\"id\":\"constitution-day\",\"payload\":\"{\\\\\"imageUrl\\\\\":\\\\\"…\\\\\"}\"}]`.\nAn entry's `id` and `payload` come back with `day-select` and `event-select` untouched.\nMalformed entries are ignored rather than thrown.",
+              "default": "''",
+              "attribute": "events"
+            },
+            {
+              "kind": "field",
+              "name": "weeklyOffDays",
+              "privacy": "public",
+              "type": {
+                "text": "string"
+              },
+              "description": "The weekdays the institution never opens, as a comma-separated list. Sunday is 1 and Saturday\nis 7, so Nepal's office week is `7` and a school closed Saturday and Sunday is `7,1`.",
+              "default": "''",
+              "attribute": "weekly-off-days"
+            }
+          ],
+          "events": [
+            {
+              "name": "day-select",
+              "type": {
+                "text": "CustomEvent<NepaliDaySelectDetail>"
+              },
+              "description": "A day was clicked. Carries the day in both calendars, whether the institution is shut, and everything named on it."
+            },
+            {
+              "name": "event-select",
+              "type": {
+                "text": "CustomEvent<NepaliEventSelectDetail>"
+              },
+              "description": "A line of the month's list was clicked. Carries the entry with its `id` and `payload` untouched, which is what an app reads its own record out of."
+            }
+          ],
+          "attributes": [
+            {
+              "name": "value",
+              "type": {
+                "text": "string"
+              },
+              "description": "The picked Bikram Sambat day as a `YYYY-MM-DD` string. Empty when nothing is picked.",
+              "default": "''",
+              "fieldName": "value"
+            },
+            {
+              "name": "language",
+              "type": {
+                "text": "NepaliLanguage"
+              },
+              "description": "Display language, `en` (English + Latin digits) or `ne` (Nepali + Devanagari digits).",
+              "default": "'en'",
+              "fieldName": "language"
+            },
+            {
+              "name": "calendar-system",
+              "type": {
+                "text": "CalendarSystem"
+              },
+              "description": "Calendar the grid displays, `bs` (Bikram Sambat) or `ad` (Gregorian). Only the display changes:\n`value` and the events stay Bikram Sambat, so switching keeps the same day picked.",
+              "default": "'bs'",
+              "fieldName": "calendarSystem"
+            },
+            {
+              "name": "show-calendar-toggle",
+              "type": {
+                "text": "boolean"
+              },
+              "description": "Show a `B.S.` / `A.D.` switch above the month header.",
+              "default": "false",
+              "fieldName": "showCalendarToggle"
+            },
+            {
+              "name": "show-adjacent-month-days",
+              "type": {
+                "text": "boolean"
+              },
+              "description": "Fill the grid's empty cells with the neighbouring months' days. On by default.",
+              "default": "true",
+              "fieldName": "showAdjacentMonthDays"
+            },
+            {
+              "name": "show-secondary-date",
+              "type": {
+                "text": "boolean"
+              },
+              "description": "Pair every day with the same day in the other calendar. On by default, as a patro is read.",
+              "default": "true",
+              "fieldName": "showSecondaryDate"
+            },
+            {
+              "name": "show-day-summary",
+              "type": {
+                "text": "boolean"
+              },
+              "description": "Write the picked day out under the grid: whether the institution is shut, why, and what is on it.",
+              "default": "false",
+              "fieldName": "showDaySummary"
+            },
+            {
+              "name": "show-month-events",
+              "type": {
+                "text": "boolean"
+              },
+              "description": "List the month's events under the grid, a span gathered into a single line.",
+              "default": "false",
+              "fieldName": "showMonthEvents"
+            },
+            {
+              "name": "events",
+              "type": {
+                "text": "string"
+              },
+              "description": "The days to mark, as JSON: `[{\"date\":\"2083-06-03\",\"name\":\"Constitution Day\",\n\"kind\":\"governmentPublic\",\"id\":\"constitution-day\",\"payload\":\"{\\\\\"imageUrl\\\\\":\\\\\"…\\\\\"}\"}]`.\nAn entry's `id` and `payload` come back with `day-select` and `event-select` untouched.\nMalformed entries are ignored rather than thrown.",
+              "default": "''",
+              "fieldName": "events"
+            },
+            {
+              "name": "weekly-off-days",
+              "type": {
+                "text": "string"
+              },
+              "description": "The weekdays the institution never opens, as a comma-separated list. Sunday is 1 and Saturday\nis 7, so Nepal's office week is `7` and a school closed Saturday and Sunday is `7,1`.",
+              "default": "''",
+              "fieldName": "weeklyOffDays"
+            }
+          ],
+          "superclass": {
+            "name": "LitElement",
+            "package": "lit"
+          },
+          "tagName": "nepali-calendar",
+          "customElement": true
+        }
+      ],
+      "exports": [
+        {
+          "kind": "js",
+          "name": "NepaliCalendar",
+          "declaration": {
+            "name": "NepaliCalendar",
+            "module": "src/nepali-calendar.ts"
+          }
+        },
+        {
+          "kind": "custom-element-definition",
+          "name": "nepali-calendar",
+          "declaration": {
+            "name": "NepaliCalendar",
+            "module": "src/nepali-calendar.ts"
           }
         }
       ]
@@ -503,6 +864,17 @@
             },
             {
               "kind": "field",
+              "name": "showSecondaryDate",
+              "privacy": "public",
+              "type": {
+                "text": "boolean"
+              },
+              "description": "Pair every day with the same day in the other calendar, drawn small in the corner of the cell,\nand name that calendar's months under the month header. The headline then carries the Gregorian\ndate on a second line.",
+              "default": "false",
+              "attribute": "show-secondary-date"
+            },
+            {
+              "kind": "field",
               "name": "heading",
               "privacy": "public",
               "type": {
@@ -511,6 +883,28 @@
               "description": "Dialog heading; defaults to a localized \"Select Nepali Date\".",
               "default": "''",
               "attribute": "heading"
+            },
+            {
+              "kind": "field",
+              "name": "events",
+              "privacy": "public",
+              "type": {
+                "text": "string"
+              },
+              "description": "The days to mark, as JSON: `[{\"date\":\"2083-06-03\",\"name\":\"Constitution Day\",\n\"kind\":\"governmentPublic\"}]`. A holiday colours its day; add `\"indicate\": true` for an event\nthat should also draw a dot. Something that runs longer than a day takes `\"endDate\"` or\n`\"days\"` and marks every day of the span. Malformed entries are ignored rather than thrown.",
+              "default": "''",
+              "attribute": "events"
+            },
+            {
+              "kind": "field",
+              "name": "weeklyOffDays",
+              "privacy": "public",
+              "type": {
+                "text": "string"
+              },
+              "description": "The weekdays the institution never opens, as a comma-separated list. Sunday is 1 and Saturday\nis 7, so Nepal's office week is `7` and a school closed Saturday and Sunday is `7,1`.",
+              "default": "''",
+              "attribute": "weekly-off-days"
             },
             {
               "kind": "method",
@@ -637,6 +1031,15 @@
               "fieldName": "showAdjacentMonthDays"
             },
             {
+              "name": "show-secondary-date",
+              "type": {
+                "text": "boolean"
+              },
+              "description": "Pair every day with the same day in the other calendar, drawn small in the corner of the cell,\nand name that calendar's months under the month header. The headline then carries the Gregorian\ndate on a second line.",
+              "default": "false",
+              "fieldName": "showSecondaryDate"
+            },
+            {
               "name": "heading",
               "type": {
                 "text": "string"
@@ -644,6 +1047,24 @@
               "description": "Dialog heading; defaults to a localized \"Select Nepali Date\".",
               "default": "''",
               "fieldName": "heading"
+            },
+            {
+              "name": "events",
+              "type": {
+                "text": "string"
+              },
+              "description": "The days to mark, as JSON: `[{\"date\":\"2083-06-03\",\"name\":\"Constitution Day\",\n\"kind\":\"governmentPublic\"}]`. A holiday colours its day; add `\"indicate\": true` for an event\nthat should also draw a dot. Something that runs longer than a day takes `\"endDate\"` or\n`\"days\"` and marks every day of the span. Malformed entries are ignored rather than thrown.",
+              "default": "''",
+              "fieldName": "events"
+            },
+            {
+              "name": "weekly-off-days",
+              "type": {
+                "text": "string"
+              },
+              "description": "The weekdays the institution never opens, as a comma-separated list. Sunday is 1 and Saturday\nis 7, so Nepal's office week is `7` and a school closed Saturday and Sunday is `7,1`.",
+              "default": "''",
+              "fieldName": "weeklyOffDays"
             }
           ],
           "superclass": {
@@ -824,6 +1245,17 @@
             },
             {
               "kind": "field",
+              "name": "showSecondaryDate",
+              "privacy": "public",
+              "type": {
+                "text": "boolean"
+              },
+              "description": "Pair every day in the popover with the same day in the other calendar, drawn small in the\ncorner of the cell, and name that calendar's months under the month header.",
+              "default": "false",
+              "attribute": "show-secondary-date"
+            },
+            {
+              "kind": "field",
               "name": "label",
               "privacy": "public",
               "type": {
@@ -832,6 +1264,28 @@
               "description": "Optional field label.",
               "default": "''",
               "attribute": "label"
+            },
+            {
+              "kind": "field",
+              "name": "events",
+              "privacy": "public",
+              "type": {
+                "text": "string"
+              },
+              "description": "The days to mark, as JSON: `[{\"date\":\"2083-06-03\",\"name\":\"Constitution Day\",\n\"kind\":\"governmentPublic\"}]`. A holiday colours its day; add `\"indicate\": true` for an event\nthat should also draw a dot. Something that runs longer than a day takes `\"endDate\"` or\n`\"days\"` and marks every day of the span. Malformed entries are ignored rather than thrown.",
+              "default": "''",
+              "attribute": "events"
+            },
+            {
+              "kind": "field",
+              "name": "weeklyOffDays",
+              "privacy": "public",
+              "type": {
+                "text": "string"
+              },
+              "description": "The weekdays the institution never opens, as a comma-separated list. Sunday is 1 and Saturday\nis 7, so Nepal's office week is `7` and a school closed Saturday and Sunday is `7,1`.",
+              "default": "''",
+              "attribute": "weekly-off-days"
             }
           ],
           "events": [
@@ -920,6 +1374,15 @@
               "fieldName": "showAdjacentMonthDays"
             },
             {
+              "name": "show-secondary-date",
+              "type": {
+                "text": "boolean"
+              },
+              "description": "Pair every day in the popover with the same day in the other calendar, drawn small in the\ncorner of the cell, and name that calendar's months under the month header.",
+              "default": "false",
+              "fieldName": "showSecondaryDate"
+            },
+            {
               "name": "label",
               "type": {
                 "text": "string"
@@ -927,6 +1390,24 @@
               "description": "Optional field label.",
               "default": "''",
               "fieldName": "label"
+            },
+            {
+              "name": "events",
+              "type": {
+                "text": "string"
+              },
+              "description": "The days to mark, as JSON: `[{\"date\":\"2083-06-03\",\"name\":\"Constitution Day\",\n\"kind\":\"governmentPublic\"}]`. A holiday colours its day; add `\"indicate\": true` for an event\nthat should also draw a dot. Something that runs longer than a day takes `\"endDate\"` or\n`\"days\"` and marks every day of the span. Malformed entries are ignored rather than thrown.",
+              "default": "''",
+              "fieldName": "events"
+            },
+            {
+              "name": "weekly-off-days",
+              "type": {
+                "text": "string"
+              },
+              "description": "The weekdays the institution never opens, as a comma-separated list. Sunday is 1 and Saturday\nis 7, so Nepal's office week is `7` and a school closed Saturday and Sunday is `7,1`.",
+              "default": "''",
+              "fieldName": "weeklyOffDays"
             }
           ],
           "superclass": {
@@ -1106,6 +1587,39 @@
               "description": "Fill the grid's empty cells with the neighbouring months' days, drawn faded. Clicking one picks\nthat day and moves the grid to its month.",
               "default": "false",
               "attribute": "show-adjacent-month-days"
+            },
+            {
+              "kind": "field",
+              "name": "showSecondaryDate",
+              "privacy": "public",
+              "type": {
+                "text": "boolean"
+              },
+              "description": "Pair every day with the same day in the other calendar, drawn small in the corner of the cell,\nand name that calendar's months under the month header. The Bikram Sambat grid then reads\n\"2\" over \"18\", the way `NepaliDatePickerWithEnglishDate` does in Compose.",
+              "default": "false",
+              "attribute": "show-secondary-date"
+            },
+            {
+              "kind": "field",
+              "name": "events",
+              "privacy": "public",
+              "type": {
+                "text": "string"
+              },
+              "description": "The days to mark, as JSON: `[{\"date\":\"2083-06-03\",\"name\":\"Constitution Day\",\n\"kind\":\"governmentPublic\"}]`. A holiday colours its day; add `\"indicate\": true` for an event\nthat should also draw a dot. Something that runs longer than a day takes `\"endDate\"` or\n`\"days\"` and marks every day of the span. Malformed entries are ignored rather than thrown.",
+              "default": "''",
+              "attribute": "events"
+            },
+            {
+              "kind": "field",
+              "name": "weeklyOffDays",
+              "privacy": "public",
+              "type": {
+                "text": "string"
+              },
+              "description": "The weekdays the institution never opens, as a comma-separated list. Sunday is 1 and Saturday\nis 7, so Nepal's office week is `7` and a school closed Saturday and Sunday is `7,1`.",
+              "default": "''",
+              "attribute": "weekly-off-days"
             }
           ],
           "events": [
@@ -1198,6 +1712,33 @@
               "description": "Fill the grid's empty cells with the neighbouring months' days, drawn faded. Clicking one picks\nthat day and moves the grid to its month.",
               "default": "false",
               "fieldName": "showAdjacentMonthDays"
+            },
+            {
+              "name": "show-secondary-date",
+              "type": {
+                "text": "boolean"
+              },
+              "description": "Pair every day with the same day in the other calendar, drawn small in the corner of the cell,\nand name that calendar's months under the month header. The Bikram Sambat grid then reads\n\"2\" over \"18\", the way `NepaliDatePickerWithEnglishDate` does in Compose.",
+              "default": "false",
+              "fieldName": "showSecondaryDate"
+            },
+            {
+              "name": "events",
+              "type": {
+                "text": "string"
+              },
+              "description": "The days to mark, as JSON: `[{\"date\":\"2083-06-03\",\"name\":\"Constitution Day\",\n\"kind\":\"governmentPublic\"}]`. A holiday colours its day; add `\"indicate\": true` for an event\nthat should also draw a dot. Something that runs longer than a day takes `\"endDate\"` or\n`\"days\"` and marks every day of the span. Malformed entries are ignored rather than thrown.",
+              "default": "''",
+              "fieldName": "events"
+            },
+            {
+              "name": "weekly-off-days",
+              "type": {
+                "text": "string"
+              },
+              "description": "The weekdays the institution never opens, as a comma-separated list. Sunday is 1 and Saturday\nis 7, so Nepal's office week is `7` and a school closed Saturday and Sunday is `7,1`.",
+              "default": "''",
+              "fieldName": "weeklyOffDays"
             }
           ],
           "superclass": {
@@ -1669,6 +2210,39 @@
               "description": "Fill the grid's empty cells with the neighbouring months' days, drawn faded. Clicking one picks\nthat day and moves the grid to its month.",
               "default": "false",
               "attribute": "show-adjacent-month-days"
+            },
+            {
+              "kind": "field",
+              "name": "showSecondaryDate",
+              "privacy": "public",
+              "type": {
+                "text": "boolean"
+              },
+              "description": "Pair every day with the same day in the other calendar, drawn small in the corner of the cell,\nand name that calendar's months under the month header. Matches\n`NepaliDateRangePickerWithEnglishDate` in Compose.",
+              "default": "false",
+              "attribute": "show-secondary-date"
+            },
+            {
+              "kind": "field",
+              "name": "events",
+              "privacy": "public",
+              "type": {
+                "text": "string"
+              },
+              "description": "The days to mark, as JSON: `[{\"date\":\"2083-06-03\",\"name\":\"Constitution Day\",\n\"kind\":\"governmentPublic\"}]`. A holiday colours its day; add `\"indicate\": true` for an event\nthat should also draw a dot. Something that runs longer than a day takes `\"endDate\"` or\n`\"days\"` and marks every day of the span. Malformed entries are ignored rather than thrown.",
+              "default": "''",
+              "attribute": "events"
+            },
+            {
+              "kind": "field",
+              "name": "weeklyOffDays",
+              "privacy": "public",
+              "type": {
+                "text": "string"
+              },
+              "description": "The weekdays the institution never opens, as a comma-separated list. Sunday is 1 and Saturday\nis 7, so Nepal's office week is `7` and a school closed Saturday and Sunday is `7,1`.",
+              "default": "''",
+              "attribute": "weekly-off-days"
             }
           ],
           "events": [
@@ -1765,6 +2339,33 @@
               "description": "Fill the grid's empty cells with the neighbouring months' days, drawn faded. Clicking one picks\nthat day and moves the grid to its month.",
               "default": "false",
               "fieldName": "showAdjacentMonthDays"
+            },
+            {
+              "name": "show-secondary-date",
+              "type": {
+                "text": "boolean"
+              },
+              "description": "Pair every day with the same day in the other calendar, drawn small in the corner of the cell,\nand name that calendar's months under the month header. Matches\n`NepaliDateRangePickerWithEnglishDate` in Compose.",
+              "default": "false",
+              "fieldName": "showSecondaryDate"
+            },
+            {
+              "name": "events",
+              "type": {
+                "text": "string"
+              },
+              "description": "The days to mark, as JSON: `[{\"date\":\"2083-06-03\",\"name\":\"Constitution Day\",\n\"kind\":\"governmentPublic\"}]`. A holiday colours its day; add `\"indicate\": true` for an event\nthat should also draw a dot. Something that runs longer than a day takes `\"endDate\"` or\n`\"days\"` and marks every day of the span. Malformed entries are ignored rather than thrown.",
+              "default": "''",
+              "fieldName": "events"
+            },
+            {
+              "name": "weekly-off-days",
+              "type": {
+                "text": "string"
+              },
+              "description": "The weekdays the institution never opens, as a comma-separated list. Sunday is 1 and Saturday\nis 7, so Nepal's office week is `7` and a school closed Saturday and Sunday is `7,1`.",
+              "default": "''",
+              "fieldName": "weeklyOffDays"
             }
           ],
           "superclass": {
@@ -1979,6 +2580,24 @@
       "declarations": [
         {
           "kind": "function",
+          "name": "digitScript",
+          "return": {
+            "type": {
+              "text": "'devanagari' | 'latin'"
+            }
+          },
+          "parameters": [
+            {
+              "name": "language",
+              "type": {
+                "text": "NepaliLanguage"
+              }
+            }
+          ],
+          "description": "The numeral script a language writes its digits in, as the engine names it."
+        },
+        {
+          "kind": "function",
           "name": "toIso",
           "return": {
             "type": {
@@ -2036,9 +2655,107 @@
             }
           ],
           "description": "Structural equality for two dates, tolerating `null`."
+        },
+        {
+          "kind": "function",
+          "name": "parseWeeklyOffDays",
+          "return": {
+            "type": {
+              "text": "number[]"
+            }
+          },
+          "parameters": [
+            {
+              "name": "value",
+              "type": {
+                "text": "string | null | undefined"
+              }
+            }
+          ],
+          "description": "Parse the `weekly-off-days` attribute: a comma-separated list of weekday numbers, 1 for Sunday\nthrough 7 for Saturday.\n\nJavaScript numbers Sunday `0` and this calendar numbers it `1`, so a `0` is dropped rather than\nquietly closing Sunday. An unparseable value yields an empty week, which closes nothing."
+        },
+        {
+          "kind": "function",
+          "name": "parseEvents",
+          "return": {
+            "type": {
+              "text": "NepaliEventInput[]"
+            }
+          },
+          "parameters": [
+            {
+              "name": "value",
+              "type": {
+                "text": "string | NepaliEventInput[] | null | undefined"
+              }
+            }
+          ],
+          "description": "Parse the `events` attribute or property: JSON text, or an array already.\n\nAn entry without a usable `date` is dropped, and so is anything that is not an array at all, so a\nmalformed attribute leaves the calendar plain instead of throwing inside a render.\n\nAn entry carrying `endDate` or `days` is expanded here into one entry per day of its span, which\nis what lets everything downstream keep reading a day at a time."
+        },
+        {
+          "kind": "function",
+          "name": "eventKindOf",
+          "return": {
+            "type": {
+              "text": "NepaliEventKind"
+            }
+          },
+          "parameters": [
+            {
+              "name": "event",
+              "type": {
+                "text": "NepaliEventInput"
+              }
+            }
+          ],
+          "description": "The kind an entry names, falling back to `observance` for anything unrecognized."
+        },
+        {
+          "kind": "function",
+          "name": "closesOffices",
+          "return": {
+            "type": {
+              "text": "boolean"
+            }
+          },
+          "parameters": [
+            {
+              "name": "event",
+              "type": {
+                "text": "NepaliEventInput"
+              }
+            }
+          ],
+          "description": "Whether an entry shuts the institution: its own flag, else what its kind usually means."
+        },
+        {
+          "kind": "function",
+          "name": "kindPriority",
+          "return": {
+            "type": {
+              "text": "number"
+            }
+          },
+          "parameters": [
+            {
+              "name": "kind",
+              "type": {
+                "text": "NepaliEventKind"
+              }
+            }
+          ],
+          "description": "How strongly a kind describes a day when several land on it, lowest first."
         }
       ],
       "exports": [
+        {
+          "kind": "js",
+          "name": "digitScript",
+          "declaration": {
+            "name": "digitScript",
+            "module": "src/utils.ts"
+          }
+        },
         {
           "kind": "js",
           "name": "toIso",
@@ -2060,6 +2777,46 @@
           "name": "sameDate",
           "declaration": {
             "name": "sameDate",
+            "module": "src/utils.ts"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "parseWeeklyOffDays",
+          "declaration": {
+            "name": "parseWeeklyOffDays",
+            "module": "src/utils.ts"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "parseEvents",
+          "declaration": {
+            "name": "parseEvents",
+            "module": "src/utils.ts"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "eventKindOf",
+          "declaration": {
+            "name": "eventKindOf",
+            "module": "src/utils.ts"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "closesOffices",
+          "declaration": {
+            "name": "closesOffices",
+            "module": "src/utils.ts"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "kindPriority",
+          "declaration": {
+            "name": "kindPriority",
             "module": "src/utils.ts"
           }
         }

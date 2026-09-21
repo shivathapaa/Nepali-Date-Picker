@@ -22,6 +22,7 @@ export function AllElements() {
         max="2081-12-30"
         disabled={false}
         showEnglish
+        showSecondaryDate
         onChange={(event) => {
           const detail: NepaliDatePickerChangeDetail = event.nativeEvent.detail;
           console.info(detail.bsIso, detail.adIso, detail.bs.year);

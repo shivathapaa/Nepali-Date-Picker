@@ -9,7 +9,7 @@ import { LitElement, css, html, nothing } from 'lit';
 import type { PropertyValues, TemplateResult } from 'lit';
 import { localizeDigits } from '@nepali-date-picker/core';
 import type { CalendarSystem, NepaliDatePickerChangeDetail, NepaliLanguage } from './types.js';
-import { parseIso, toIso } from './utils.js';
+import { digitScript, parseEvents, parseIso, parseWeeklyOffDays, toIso } from './utils.js';
 import { buildChangeDetail } from './nepali-date-picker.js';
 import { CalendarController } from './internal/calendar-controller.js';
 import { fromCanonical, toCanonical } from './internal/calendar-model.js';
@@ -46,8 +46,11 @@ export class NepaliDatePickerDocked extends LitElement {
     calendarSystem: { type: String, attribute: 'calendar-system' },
     showCalendarToggle: { type: Boolean, attribute: 'show-calendar-toggle' },
     showAdjacentMonthDays: { type: Boolean, attribute: 'show-adjacent-month-days' },
+    showSecondaryDate: { type: Boolean, attribute: 'show-secondary-date' },
     label: { type: String },
     _open: { state: true },
+    events: { type: String },
+    weeklyOffDays: { type: String, attribute: 'weekly-off-days' },
   };
 
   declare value: string;
@@ -68,9 +71,26 @@ export class NepaliDatePickerDocked extends LitElement {
    * that day and moves the grid to its month.
    */
   declare showAdjacentMonthDays: boolean;
+  /**
+   * Pair every day in the popover with the same day in the other calendar, drawn small in the
+   * corner of the cell, and name that calendar's months under the month header.
+   */
+  declare showSecondaryDate: boolean;
   /** Optional field label. */
   declare label: string;
   declare private _open: boolean;
+  /**
+   * The days to mark, as JSON: `[{"date":"2083-06-03","name":"Constitution Day",
+   * "kind":"governmentPublic"}]`. A holiday colours its day; add `"indicate": true` for an event
+   * that should also draw a dot. Something that runs longer than a day takes `"endDate"` or
+   * `"days"` and marks every day of the span. Malformed entries are ignored rather than thrown.
+   */
+  declare events: string;
+  /**
+   * The weekdays the institution never opens, as a comma-separated list. Sunday is 1 and Saturday
+   * is 7, so Nepal's office week is `7` and a school closed Saturday and Sunday is `7,1`.
+   */
+  declare weeklyOffDays: string;
 
   private readonly cal = new CalendarController(this);
   private readonly onDocumentPointer = (event: Event): void => {
@@ -108,8 +128,11 @@ export class NepaliDatePickerDocked extends LitElement {
     this.calendarSystem = 'bs';
     this.showCalendarToggle = false;
     this.showAdjacentMonthDays = false;
+    this.showSecondaryDate = false;
     this.label = '';
     this._open = false;
+    this.events = '';
+    this.weeklyOffDays = '';
     this.cal.onSelect = () => this.onCalendarPick();
   }
 
@@ -119,6 +142,9 @@ export class NepaliDatePickerDocked extends LitElement {
   }
 
   override willUpdate(changed: PropertyValues<this>): void {
+    if (changed.has('events') || changed.has('weeklyOffDays')) {
+      this.cal.setCalendarEvents(parseWeeklyOffDays(this.weeklyOffDays), parseEvents(this.events));
+    }
     if (changed.has('min') || changed.has('max')) {
       this.cal.configure({ mode: 'single', min: parseIso(this.min), max: parseIso(this.max) });
     }
@@ -148,7 +174,7 @@ export class NepaliDatePickerDocked extends LitElement {
     if (!parsed) return '';
     const displayed = fromCanonical(this.system(), parsed);
     if (!displayed) return '';
-    return localizeDigits(toIso(displayed), this.language === 'ne' ? 'devanagari' : 'latin');
+    return localizeDigits(toIso(displayed), digitScript(this.language));
   }
 
   /**
@@ -236,6 +262,7 @@ export class NepaliDatePickerDocked extends LitElement {
                   showEnglish: this.showEnglish,
                   showCalendarToggle: this.showCalendarToggle,
                   showAdjacentDays: this.showAdjacentMonthDays,
+                  showSecondaryDate: this.showSecondaryDate,
                 })}
               </div>
             `

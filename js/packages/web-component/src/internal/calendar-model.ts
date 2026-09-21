@@ -9,16 +9,21 @@ import {
   compareBsDates,
   convertAdToBs,
   convertBsToAd,
+  getAdCalendarsInBsMonth,
   getAdMonth,
+  getAdMonthName,
   getAdYearRangeForBsYears,
   getBsCalendarsInAdMonth,
   getBsMonth,
+  getBsMonthName,
   getBsYearRange,
   getTotalDaysInAdMonth,
   getTotalDaysInBsMonth,
   isAdDateConvertible,
+  localizeDigits,
 } from '@nepali-date-picker/core';
-import type { CalendarDate, CalendarSystem } from '../types.js';
+import type { CalendarDate, CalendarSystem, NepaliLanguage } from '../types.js';
+import { digitScript } from '../utils.js';
 
 /** Inclusive supported Bikram Sambat year range, resolved once from the engine. */
 export const YEAR_RANGE = getBsYearRange();
@@ -59,6 +64,59 @@ export function canonicalDatesInMonth(system: CalendarSystem, year: number, mont
   return getBsCalendarsInAdMonth(year, month).map((date) =>
     date ? { year: date.year, month: date.month, dayOfMonth: date.dayOfMonth } : null,
   );
+}
+
+/**
+ * Every day of a month in [system] as its counterpart in the *other* calendar, indexed by day
+ * number minus one.
+ *
+ * What a dual-date grid draws as the small number in each cell. Like [canonicalDatesInMonth] the
+ * whole month is converted in a single pass, and days with no counterpart, only possible before the
+ * conversion anchor (AD 1913-04-13), come back as `null`.
+ */
+export function secondaryDatesInMonth(
+  system: CalendarSystem,
+  year: number,
+  month: number,
+): (CalendarDate | null)[] {
+  // A Gregorian month's counterpart is its Bikram Sambat equivalent, which is also its canonical
+  // date, so that pass is already written.
+  if (system === 'ad') return canonicalDatesInMonth('ad', year, month);
+  return getAdCalendarsInBsMonth(year, month).map((date) => ({
+    year: date.year,
+    month: date.month,
+    dayOfMonth: date.dayOfMonth,
+  }));
+}
+
+/**
+ * The months of the *other* calendar that a month in [system] straddles, with their year. Reads
+ * "Sep/Oct 2026" under a Bikram Sambat month and "Bhadra/Asoj 2083" under a Gregorian one.
+ *
+ * Takes the [secondary] dates of the month, as returned by [secondaryDatesInMonth]. Gives a single
+ * month name when the straddled months coincide, and `null` when the month has no counterpart at
+ * all, which only happens at the very start of the conversion table.
+ */
+export function secondaryMonthLabel(
+  system: CalendarSystem,
+  secondary: (CalendarDate | null)[],
+  language: NepaliLanguage,
+): string | null {
+  const present = secondary.filter((date): date is CalendarDate => date !== null);
+  if (present.length === 0) return null;
+  const first = present[0];
+  const last = present[present.length - 1];
+
+  const nameOf = (month: number): string =>
+    system === 'ad'
+      ? getBsMonthName(month, 'short', language)
+      : getAdMonthName(month, 'short', language);
+  // The year of the month the grid ends in, so a straddling month reads as the one it runs into.
+  const year = localizeDigits(String(last.year), digitScript(language));
+
+  return first.month === last.month
+    ? `${nameOf(first.month)} ${year}`
+    : `${nameOf(first.month)}/${nameOf(last.month)} ${year}`;
 }
 
 /** A Bikram Sambat date rewritten in [system], or `null` when it has no equivalent there. */
