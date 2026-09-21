@@ -24,6 +24,7 @@ import androidx.compose.ui.unit.dp
 import dev.shivathapaa.nepalidatepickerkmp.annotations.ExperimentalNepaliDatePickerApi
 import dev.shivathapaa.nepalidatepickerkmp.calendar_model.NepaliDatePickerColors
 import dev.shivathapaa.nepalidatepickerkmp.calendar_model.NepaliDatePickerDefaults
+import dev.shivathapaa.nepalidatepickerkmp.calendar_model.NepaliDayDecorator
 import dev.shivathapaa.nepalidatepickerkmp.data.NepaliDateLocale
 
 /**
@@ -60,6 +61,10 @@ import dev.shivathapaa.nepalidatepickerkmp.data.NepaliDateLocale
  * grid to its month.
  * @param colors [NepaliDatePickerColors] that will be used to resolve the colors used for this date
  * picker in different states. See [NepaliDatePickerDefaults.colors].
+ * @param dayDecorator marks days that carry a holiday, a festival or an app's own event, with dots
+ * under the day number and a color for the number itself. `null`, the default, leaves every day as
+ * the theme draws it. See [NepaliDatePickerDefaults.eventDecorator] and
+ * [NepaliDatePickerDefaults.dayDecorator].
  *
  * Example usage:
  * ```
@@ -104,7 +109,8 @@ fun NepaliDateRangePickerWithEnglishDate(
     showYearPickerAndMonthNavigation: Boolean = true,
     showCalendarSystemToggle: Boolean = false,
     showAdjacentMonthDays: Boolean = false,
-    colors: NepaliDatePickerColors = NepaliDatePickerDefaults.colors()
+    colors: NepaliDatePickerColors = NepaliDatePickerDefaults.colors(),
+    dayDecorator: NepaliDayDecorator? = null
 ) {
     NepaliDateRangePicker(
         state = state,
@@ -118,7 +124,8 @@ fun NepaliDateRangePickerWithEnglishDate(
         secondaryDateLocale = englishDateLocale,
         showCalendarSystemToggle = showCalendarSystemToggle,
         showAdjacentMonthDays = showAdjacentMonthDays,
-        colors = colors
+        colors = colors,
+        dayDecorator = dayDecorator
     )
 }
 

@@ -74,6 +74,7 @@ import dev.shivathapaa.nepalidatepickerkmp.calendar_model.NepaliCalendarDefaults
 import dev.shivathapaa.nepalidatepickerkmp.calendar_model.NepaliCalendarModel
 import dev.shivathapaa.nepalidatepickerkmp.calendar_model.NepaliDatePickerColors
 import dev.shivathapaa.nepalidatepickerkmp.calendar_model.NepaliDatePickerDefaults
+import dev.shivathapaa.nepalidatepickerkmp.calendar_model.NepaliDayDecorator
 import dev.shivathapaa.nepalidatepickerkmp.calendar_model.monthGrid
 import dev.shivathapaa.nepalidatepickerkmp.calendar_model.rememberCalendarViewAdapter
 import dev.shivathapaa.nepalidatepickerkmp.calendar_model.secondaryMonthLabel
@@ -121,6 +122,10 @@ import kotlinx.coroutines.launch
  * range, stays faded and inert. Off by default, matching the Material3 `DateRangePicker`.
  * @param colors [NepaliDatePickerColors] that will be used to resolve the colors used for this date
  * picker in different states. See [NepaliDatePickerDefaults.colors].
+ * @param dayDecorator marks days that carry a holiday, a festival or an app's own event, with dots
+ * under the day number and a color for the number itself. `null`, the default, leaves every day as
+ * the theme draws it. A decoration never overrides the range shading or the disabled state. See
+ * [NepaliDatePickerDefaults.eventDecorator] and [NepaliDatePickerDefaults.dayDecorator].
  *
  * Example usage:
  * ```
@@ -164,7 +169,8 @@ fun NepaliDateRangePicker(
     secondaryDateLocale: NepaliDateLocale? = null,
     showCalendarSystemToggle: Boolean = false,
     showAdjacentMonthDays: Boolean = false,
-    colors: NepaliDatePickerColors = NepaliDatePickerDefaults.colors()
+    colors: NepaliDatePickerColors = NepaliDatePickerDefaults.colors(),
+    dayDecorator: NepaliDayDecorator? = null
 ) {
     val calendarModel = remember(state.locale) { NepaliCalendarModel(state.locale) }
     val today = remember(calendarModel) { calendarModel.todayNepaliSimpleDate }
@@ -259,7 +265,8 @@ fun NepaliDateRangePicker(
                 showYearPickerAndMonthNavigation = showYearPickerAndMonthNavigation,
                 secondaryDateLocale = secondaryDateLocale,
                 showCalendarSystemToggle = showCalendarSystemToggle,
-                showAdjacentMonthDays = showAdjacentMonthDays
+                showAdjacentMonthDays = showAdjacentMonthDays,
+                dayDecorator = dayDecorator
             )
         }
     }
@@ -353,7 +360,8 @@ private fun NepaliDateRangePicker(
     showYearPickerAndMonthNavigation: Boolean,
     secondaryDateLocale: NepaliDateLocale?,
     showCalendarSystemToggle: Boolean,
-    showAdjacentMonthDays: Boolean
+    showAdjacentMonthDays: Boolean,
+    dayDecorator: NepaliDayDecorator?
 ) {
     val adapter = rememberCalendarViewAdapter(calendarSystem, calendarModel, yearRange)
 
@@ -457,7 +465,8 @@ private fun NepaliDateRangePicker(
                         CircleShape
                     },
                     secondaryDateLanguage = secondaryDateLocale?.language,
-                    showAdjacentMonthDays = showAdjacentMonthDays
+                    showAdjacentMonthDays = showAdjacentMonthDays,
+                    dayDecorator = dayDecorator
                 )
             }
 
@@ -524,7 +533,8 @@ private fun VerticalMonthsList(
     colors: NepaliDatePickerColors,
     dayShape: Shape,
     secondaryDateLanguage: NepaliDatePickerLang?,
-    showAdjacentMonthDays: Boolean
+    showAdjacentMonthDays: Boolean,
+    dayDecorator: NepaliDayDecorator?
 ) {
     val coroutineScope = rememberCoroutineScope()
     val onNavigateToMonth: (Int) -> Unit = remember(lazyListState, coroutineScope) {
@@ -559,6 +569,7 @@ private fun VerticalMonthsList(
                 dayShape = dayShape,
                 secondaryDateLanguage = secondaryDateLanguage,
                 showAdjacentMonthDays = showAdjacentMonthDays,
+                dayDecorator = dayDecorator,
                 onNavigateToMonth = onNavigateToMonth
             )
         } else {
@@ -575,6 +586,7 @@ private fun VerticalMonthsList(
                 dayShape = dayShape,
                 secondaryDateLanguage = secondaryDateLanguage,
                 showAdjacentMonthDays = showAdjacentMonthDays,
+                dayDecorator = dayDecorator,
                 onNavigateToMonth = onNavigateToMonth
             )
         }
@@ -605,6 +617,7 @@ private fun HorizontalMonthView(
     dayShape: Shape,
     secondaryDateLanguage: NepaliDatePickerLang?,
     showAdjacentMonthDays: Boolean,
+    dayDecorator: NepaliDayDecorator?,
     onNavigateToMonth: (monthIndex: Int) -> Unit
 ) {
     val snapFlingBehavior = rememberSnapFlingBehavior(lazyListState = lazyListState)
@@ -653,6 +666,7 @@ private fun HorizontalMonthView(
                     dayShape = dayShape,
                     secondaryDateLanguage = secondaryDateLanguage,
                     showAdjacentMonthDays = showAdjacentMonthDays,
+                    dayDecorator = dayDecorator,
                     onNavigateToMonth = onNavigateToMonth
                 )
             }
@@ -675,6 +689,7 @@ private fun VerticalMonthView(
     dayShape: Shape,
     secondaryDateLanguage: NepaliDatePickerLang?,
     showAdjacentMonthDays: Boolean,
+    dayDecorator: NepaliDayDecorator?,
     onNavigateToMonth: (monthIndex: Int) -> Unit
 ) {
     LazyColumn(
@@ -733,6 +748,7 @@ private fun VerticalMonthView(
                     dayShape = dayShape,
                     secondaryDateLanguage = secondaryDateLanguage,
                     showAdjacentMonthDays = showAdjacentMonthDays,
+                    dayDecorator = dayDecorator,
                     onNavigateToMonth = onNavigateToMonth
                 )
             }

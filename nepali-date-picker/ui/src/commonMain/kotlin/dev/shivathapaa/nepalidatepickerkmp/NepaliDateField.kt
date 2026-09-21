@@ -48,6 +48,7 @@ import dev.shivathapaa.nepalidatepickerkmp.calendar_model.NepaliCalendarDefaults
 import dev.shivathapaa.nepalidatepickerkmp.calendar_model.NepaliCalendarModel
 import dev.shivathapaa.nepalidatepickerkmp.calendar_model.NepaliDateConverter
 import dev.shivathapaa.nepalidatepickerkmp.calendar_model.NepaliDatePickerDefaults
+import dev.shivathapaa.nepalidatepickerkmp.calendar_model.NepaliDayDecorator
 import dev.shivathapaa.nepalidatepickerkmp.calendar_model.rememberCalendarViewAdapter
 import dev.shivathapaa.nepalidatepickerkmp.data.CalendarSystem
 import dev.shivathapaa.nepalidatepickerkmp.data.CustomCalendar
@@ -265,6 +266,7 @@ fun NepaliDateField(
     calendarSystem: CalendarSystem = CalendarSystem.BIKRAM_SAMBAT,
     showCalendarSystemToggle: Boolean = false,
     showAdjacentMonthDays: Boolean = false,
+    dayDecorator: NepaliDayDecorator? = null,
 ) {
     var showDialog by rememberSaveable { mutableStateOf(false) }
     val onValueChangeUpdated by rememberUpdatedState(onValueChange)
@@ -346,7 +348,8 @@ fun NepaliDateField(
             NepaliDatePicker(
                 state = pickerState,
                 showCalendarSystemToggle = showCalendarSystemToggle,
-                showAdjacentMonthDays = showAdjacentMonthDays
+                showAdjacentMonthDays = showAdjacentMonthDays,
+                dayDecorator = dayDecorator
             )
         }
     }

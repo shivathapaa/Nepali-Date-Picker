@@ -34,6 +34,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.State
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -52,6 +53,13 @@ import dev.shivathapaa.nepalidatepickerkmp.data.NameFormat
 import dev.shivathapaa.nepalidatepickerkmp.data.NepaliDateFormatStyle
 import dev.shivathapaa.nepalidatepickerkmp.data.NepaliDateLocale
 import dev.shivathapaa.nepalidatepickerkmp.data.NepaliDatePickerLang
+import dev.shivathapaa.nepalidatepickerkmp.data.SimpleDate
+import dev.shivathapaa.nepalidatepickerkmp.data.toSimpleDate
+import dev.shivathapaa.nepalidatepickerkmp.event.NepaliCalendarPolicy
+import dev.shivathapaa.nepalidatepickerkmp.event.NepaliDayStatus
+import dev.shivathapaa.nepalidatepickerkmp.event.NepaliEventKind
+import dev.shivathapaa.nepalidatepickerkmp.event.NepaliEventProvider
+import dev.shivathapaa.nepalidatepickerkmp.event.NepaliWeekend
 
 @Stable
 object NepaliDatePickerDefaults {
@@ -156,6 +164,170 @@ object NepaliDatePickerDefaults {
         @Composable get() {
             return getDefaultNepaliDatePickerColors()
         }
+
+    /**
+     * Creates a [NepaliDayMarkerColors] for the days a [NepaliDayDecorator] marks.
+     *
+     * Every slot left as [Color.Unspecified] is taken from `MaterialTheme.colorScheme`, so the
+     * palette follows the app's theme into dark mode without a second definition.
+     *
+     * @param weeklyOffColor a day the institution never opens, `colorScheme.error` by default
+     * @param publicHolidayColor a day offices close, `colorScheme.error` by default
+     * @param religiousColor a religious or cultural festival, `colorScheme.primary` by default
+     * @param regionalColor a province- or district-level holiday, `colorScheme.tertiary` by default
+     * @param observanceColor a recognized day that keeps offices open, `colorScheme.secondary` by
+     * default
+     * @param eventColor a general-purpose slot for an app's own categories, `colorScheme.primary`
+     * by default
+     * @param personalColor a second general-purpose slot, `colorScheme.tertiary` by default
+     * @param markedContainerColor the disc behind a day tinted whole rather than dotted,
+     * `colorScheme.errorContainer` by default
+     */
+    @Composable
+    fun markerColors(
+        weeklyOffColor: Color = Color.Unspecified,
+        publicHolidayColor: Color = Color.Unspecified,
+        religiousColor: Color = Color.Unspecified,
+        regionalColor: Color = Color.Unspecified,
+        observanceColor: Color = Color.Unspecified,
+        eventColor: Color = Color.Unspecified,
+        personalColor: Color = Color.Unspecified,
+        markedContainerColor: Color = Color.Unspecified
+    ): NepaliDayMarkerColors = getDefaultNepaliDayMarkerColors().copy(
+        weeklyOffColor = weeklyOffColor,
+        publicHolidayColor = publicHolidayColor,
+        religiousColor = religiousColor,
+        regionalColor = regionalColor,
+        observanceColor = observanceColor,
+        eventColor = eventColor,
+        personalColor = personalColor,
+        markedContainerColor = markedContainerColor
+    )
+
+    /**
+     * Creates a [NepaliEventDisplayStyle], the switches [eventDecorator] draws a closed day by.
+     *
+     * The defaults colour the number and stop there, for both the weekly rule and named holidays,
+     * which leaves the dots to mean events alone.
+     *
+     * @param colorWeeklyOff whether a weekly off day is coloured
+     * @param colorEvents whether a named holiday is coloured
+     * @param tintContainer whether a day with any status also takes a tinted disc
+     * @param indicateWeeklyOff whether a weekly off day draws a dot, off by default
+     * @param indicateKinds which kinds of named holiday draw a dot, none by default
+     * @param describe whether the day's holiday names reach the screen reader
+     */
+    fun eventDisplayStyle(
+        colorWeeklyOff: Boolean = true,
+        colorEvents: Boolean = true,
+        tintContainer: Boolean = false,
+        indicateWeeklyOff: Boolean = false,
+        indicateKinds: Set<NepaliEventKind> = emptySet(),
+        describe: Boolean = true
+    ): NepaliEventDisplayStyle = NepaliEventDisplayStyle(
+        colorWeeklyOff = colorWeeklyOff,
+        colorEvents = colorEvents,
+        tintContainer = tintContainer,
+        indicateWeeklyOff = indicateWeeklyOff,
+        indicateKinds = indicateKinds,
+        describe = describe
+    )
+
+    /**
+     * A [NepaliDayDecorator] that marks the days [policy] says the institution is closed: its weekly
+     * off days, and the holidays its provider reports.
+     *
+     * A day takes one colour. A named holiday is coloured by the strongest kind on it, a closure
+     * before a festival, a festival before a regional holiday, and all three before an observance;
+     * a day that is only a weekly off day takes [NepaliDayMarkerColors.weeklyOffColor]. A Saturday
+     * that is also Dashain is Dashain, because that is the more specific fact about it, but a
+     * Saturday that merely carries an observance stays a Saturday: a kind that does not close the
+     * office cannot make a closed day look open.
+     *
+     * Nothing is dotted unless [style] asks for it, so the dots a grid draws stay available for the
+     * app's own events. Compose the two with [then]:
+     *
+     * ```
+     * NepaliDatePicker(
+     *     state = state,
+     *     dayDecorator = NepaliDatePickerDefaults
+     *         .eventDecorator(policy = schoolPolicy)
+     *         .then(NepaliDatePickerDefaults.dayDecorator(markers = myEvents))
+     * )
+     * ```
+     *
+     * The decorator reads [NepaliEventProvider.events] once per visible cell, so a provider that
+     * answers from a memoized source keeps the grid cheap, as the SPI asks. Marking a day never
+     * blocks it: pass [NepaliCalendarPolicy.asSelectableDates] to the state when a screen should also
+     * refuse the days it marks.
+     */
+    @Composable
+    fun eventDecorator(
+        policy: NepaliCalendarPolicy,
+        colors: NepaliDayMarkerColors = markerColors(),
+        style: NepaliEventDisplayStyle = NepaliEventDisplayStyle.Default
+    ): NepaliDayDecorator = remember(policy, colors, style) {
+        NepaliDayDecorator { day ->
+            NepaliDayStatus(
+                isWeeklyOff = policy.isWeeklyOff(day.date.dayOfWeek),
+                events = policy.eventsOn(day.date.toSimpleDate())
+            ).toDayDecoration(colors, style)
+        }
+    }
+
+    /**
+     * [eventDecorator] for an institution that keeps Nepal's usual week, Saturday off, or none at
+     * all. `weeklyOffDays = emptySet()` marks the provider's holidays and leaves every weekday alone.
+     */
+    @Composable
+    fun eventDecorator(
+        provider: NepaliEventProvider,
+        weeklyOffDays: Set<Int> = NepaliWeekend.Default,
+        colors: NepaliDayMarkerColors = markerColors(),
+        style: NepaliEventDisplayStyle = NepaliEventDisplayStyle.Default
+    ): NepaliDayDecorator = eventDecorator(
+        policy = remember(provider, weeklyOffDays) {
+            NepaliCalendarPolicy(weeklyOffDays = weeklyOffDays, provider = provider)
+        },
+        colors = colors,
+        style = style
+    )
+
+    /**
+     * A [NepaliDayDecorator] built from plain maps, for an app that already holds its events by
+     * date.
+     *
+     * A date in [markers] is drawn with one dot per color listed for it, a date in [contentColors]
+     * has its day number recolored, and a date in [descriptions] has that text announced after its
+     * own. A date in none of the three is left alone.
+     *
+     * ```
+     * dayDecorator = NepaliDatePickerDefaults.dayDecorator(
+     *     markers = mapOf(SimpleDate(2082, 6, 3) to listOf(MaterialTheme.colorScheme.primary))
+     * )
+     * ```
+     */
+    @Composable
+    fun dayDecorator(
+        markers: Map<SimpleDate, List<Color>>,
+        contentColors: Map<SimpleDate, Color> = emptyMap(),
+        descriptions: Map<SimpleDate, String> = emptyMap()
+    ): NepaliDayDecorator = remember(markers, contentColors, descriptions) {
+        NepaliDayDecorator { day ->
+            val date = day.date.toSimpleDate()
+            val dots = markers[date].orEmpty()
+            val contentColor = contentColors[date] ?: Color.Unspecified
+            val description = descriptions[date]
+            if (dots.isEmpty() && contentColor == Color.Unspecified && description == null) {
+                return@NepaliDayDecorator null
+            }
+            NepaliDayDecoration(
+                contentColor = contentColor,
+                indicators = dots,
+                contentDescription = description
+            )
+        }
+    }
 
     /** The default first day of the week. */
     const val FIRST_DAY_OF_WEEK: Int = 1
@@ -816,6 +988,24 @@ internal fun getDefaultNepaliDatePickerColors(): NepaliDatePickerColors {
         dayInSelectionRangeContentColor = MaterialTheme.colorScheme.onSecondaryContainer,
         dividerColor = MaterialTheme.colorScheme.outlineVariant,
         dateTextFieldColors = OutlinedTextFieldDefaults.colors()
+    )
+}
+
+/**
+ * The marker palette drawn from the current theme, which is what makes a marked day read correctly
+ * in light and dark without the app restating its colors.
+ */
+@Composable
+internal fun getDefaultNepaliDayMarkerColors(): NepaliDayMarkerColors {
+    return NepaliDayMarkerColors(
+        weeklyOffColor = MaterialTheme.colorScheme.error,
+        publicHolidayColor = MaterialTheme.colorScheme.error,
+        religiousColor = MaterialTheme.colorScheme.primary,
+        regionalColor = MaterialTheme.colorScheme.tertiary,
+        observanceColor = MaterialTheme.colorScheme.secondary,
+        eventColor = MaterialTheme.colorScheme.primary,
+        personalColor = MaterialTheme.colorScheme.tertiary,
+        markedContainerColor = MaterialTheme.colorScheme.errorContainer
     )
 }
 

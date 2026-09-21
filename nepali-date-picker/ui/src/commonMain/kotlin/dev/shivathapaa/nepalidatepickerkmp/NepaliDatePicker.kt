@@ -109,9 +109,19 @@ import dev.shivathapaa.nepalidatepickerkmp.annotations.ExperimentalNepaliDatePic
 import dev.shivathapaa.nepalidatepickerkmp.calendar_model.CalendarViewAdapter
 import dev.shivathapaa.nepalidatepickerkmp.calendar_model.NepaliCalendarDefaults
 import dev.shivathapaa.nepalidatepickerkmp.calendar_model.NepaliCalendarModel
+import dev.shivathapaa.nepalidatepickerkmp.calendar_model.DayIndicatorPadding
+import dev.shivathapaa.nepalidatepickerkmp.calendar_model.MaxDayIndicators
+import dev.shivathapaa.nepalidatepickerkmp.calendar_model.MaxDualDateDayIndicators
 import dev.shivathapaa.nepalidatepickerkmp.calendar_model.NepaliDatePickerColors
 import dev.shivathapaa.nepalidatepickerkmp.calendar_model.NepaliDatePickerDefaults
+import dev.shivathapaa.nepalidatepickerkmp.calendar_model.NepaliDayDecoration
+import dev.shivathapaa.nepalidatepickerkmp.calendar_model.NepaliDayDecorator
+import dev.shivathapaa.nepalidatepickerkmp.calendar_model.NepaliDayIndicators
+import dev.shivathapaa.nepalidatepickerkmp.calendar_model.NepaliDayInfo
 import dev.shivathapaa.nepalidatepickerkmp.calendar_model.calendarViewAdapter
+import dev.shivathapaa.nepalidatepickerkmp.calendar_model.resolveDayVisuals
+import dev.shivathapaa.nepalidatepickerkmp.calendar_model.formatSecondary
+import dev.shivathapaa.nepalidatepickerkmp.calendar_model.isInSelectedRange
 import dev.shivathapaa.nepalidatepickerkmp.calendar_model.monthGrid
 import dev.shivathapaa.nepalidatepickerkmp.calendar_model.rememberCalendarViewAdapter
 import dev.shivathapaa.nepalidatepickerkmp.calendar_model.secondaryMonthLabel
@@ -160,12 +170,22 @@ import kotlin.math.max
  * Off by default, matching the Material3 `DatePicker`.
  * @param colors [NepaliDatePickerColors] that will be used to resolve the colors used for this date
  * picker in different states. See [NepaliDatePickerDefaults.colors].
+ * @param dayDecorator marks days that carry a holiday, a festival or an app's own event, with dots
+ * under the day number and a color for the number itself. `null`, the default, leaves every day as
+ * the theme draws it. Selection and the disabled state always win over a decoration. See
+ * [NepaliDatePickerDefaults.eventDecorator] and [NepaliDatePickerDefaults.dayDecorator].
  *
  * Example usage:
  * ```
  * val defaultNepaliDatePickerState = rememberNepaliDatePickerState()
  *
  * NepaliDatePicker(state = defaultNepaliDatePickerState)
+ *
+ * // Events coloured and dotted, from the provider the app already has
+ * NepaliDatePicker(
+ *     state = rememberNepaliDatePickerState(),
+ *     dayDecorator = NepaliDatePickerDefaults.eventDecorator(provider = myEvents)
+ * )
  *
  * // Both calendars in every cell, and a switch for which one leads
  * NepaliDatePicker(
@@ -214,7 +234,8 @@ fun NepaliDatePicker(
     showTodayButton: Boolean = true,
     showCalendarSystemToggle: Boolean = false,
     showAdjacentMonthDays: Boolean = false,
-    colors: NepaliDatePickerColors = NepaliDatePickerDefaults.colors()
+    colors: NepaliDatePickerColors = NepaliDatePickerDefaults.colors(),
+    dayDecorator: NepaliDayDecorator? = null
 ) {
     val calendarModel = remember(state.locale) { NepaliCalendarModel(state.locale) }
     // `today` reads the wall clock; remember it so it isn't recomputed on every recomposition.
@@ -287,7 +308,8 @@ fun NepaliDatePicker(
                 showAdjacentMonthDays = showAdjacentMonthDays,
                 secondaryDateLocale = secondaryDateLocale,
                 colors = colors,
-                today = today
+                today = today,
+                dayDecorator = dayDecorator
             )
         }
     }
@@ -544,7 +566,8 @@ private fun NepaliDatePicker(
     showAdjacentMonthDays: Boolean,
     secondaryDateLocale: NepaliDateLocale?,
     colors: NepaliDatePickerColors,
-    today: SimpleDate
+    today: SimpleDate,
+    dayDecorator: NepaliDayDecorator?
 ) {
     val adapter = rememberCalendarViewAdapter(calendarSystem, calendarModel, yearRange)
 
@@ -647,7 +670,8 @@ private fun NepaliDatePicker(
                         CircleShape
                     },
                     secondaryDateLanguage = secondaryDateLocale?.language,
-                    showAdjacentMonthDays = showAdjacentMonthDays
+                    showAdjacentMonthDays = showAdjacentMonthDays,
+                    dayDecorator = dayDecorator
                 )
             }
 
@@ -1279,15 +1303,16 @@ private fun NepaliYearPickerMenuButton(
 internal fun NepaliWeekDays(
     colors: NepaliDatePickerColors, language: NepaliDatePickerLang, weekDayFormat: NameFormat
 ) {
-    val firstDayOfWeek = NepaliDatePickerDefaults.FIRST_DAY_OF_WEEK
-    val weekdays = language.weekdays
-
     // Pair each abbreviated label with its full weekday name so screen readers announce
     // "Monday" instead of the single letter "M".
-    val dayNames = (firstDayOfWeek..firstDayOfWeek + 6).map { dayIndex ->
-        val weekday = weekdays[dayIndex - 1]
-        val display = if (weekDayFormat == NameFormat.SHORT) weekday.short else weekday.medium
-        display to weekday.full
+    val dayNames = remember(language, weekDayFormat) {
+        val firstDayOfWeek = NepaliDatePickerDefaults.FIRST_DAY_OF_WEEK
+        val weekdays = language.weekdays
+        (firstDayOfWeek..firstDayOfWeek + 6).map { dayIndex ->
+            val weekday = weekdays[dayIndex - 1]
+            val display = if (weekDayFormat == NameFormat.SHORT) weekday.short else weekday.medium
+            display to weekday.full
+        }
     }
 
     val textStyle = MaterialTheme.typography.bodyLarge
@@ -1332,7 +1357,8 @@ private fun NepaliHorizontalMonthList(
     colors: NepaliDatePickerColors,
     dayShape: Shape = CircleShape,
     secondaryDateLanguage: NepaliDatePickerLang? = null,
-    showAdjacentMonthDays: Boolean = false
+    showAdjacentMonthDays: Boolean = false,
+    dayDecorator: NepaliDayDecorator? = null
 ) {
     val snapFlingBehavior = rememberCustomSnapFlingBehavior(lazyListState = lazyListState)
     val coroutineScope = rememberCoroutineScope()
@@ -1363,6 +1389,7 @@ private fun NepaliHorizontalMonthList(
                     dayShape = dayShape,
                     secondaryDateLanguage = secondaryDateLanguage,
                     showAdjacentMonthDays = showAdjacentMonthDays,
+                    dayDecorator = dayDecorator,
                     onNavigateToMonth = onNavigateToMonth
                 )
             }
@@ -1426,6 +1453,8 @@ internal fun NepaliMonth(
     // When non-null, each cell also renders the same day in the other calendar (dual-date cell).
     secondaryDateLanguage: NepaliDatePickerLang? = null,
     showAdjacentMonthDays: Boolean = false,
+    // Consulted once per drawn day for the colors and dots an event adds to it.
+    dayDecorator: NepaliDayDecorator? = null,
     // Invoked with a pager index when a day of a neighbouring month is tapped.
     onNavigateToMonth: (monthIndex: Int) -> Unit = {}
 ) {
@@ -1453,11 +1482,16 @@ internal fun NepaliMonth(
     }
     val monthIndex = remember(monthCalendar, adapter) { monthCalendar.indexIn(adapter.yearRange) }
 
-    val startingNepaliYear = NepaliCalendarDefaults.startingNepaliCalendar
-    val endingNepaliYear = NepaliCalendarDefaults.endNepaliCalendar
     // FULL-format locale used only to build each cell's screen-reader description.
     val a11yLocale = remember(calendarModel) {
         calendarModel.locale.copy(dateFormat = NepaliDateFormatStyle.FULL)
+    }
+    // The other half of a dual-date cell, spoken after the displayed date. LONG rather than FULL,
+    // since the weekday it would add has already been said once.
+    val secondaryA11yLocale = remember(calendarModel, secondaryDateLanguage) {
+        secondaryDateLanguage?.let {
+            calendarModel.locale.copy(language = it, dateFormat = NepaliDateFormatStyle.LONG)
+        }
     }
 
     Column(
@@ -1495,30 +1529,40 @@ internal fun NepaliMonth(
                             canonicalDate != null && startDate == canonicalDate
                         val endDateSelected = canonicalDate != null && endDate == canonicalDate
 
-                        val inRange =
-                            if (nepaliSelectedRangeInfo != null && canonicalDate != null) {
-                                remember(nepaliSelectedRangeInfo, canonicalDate) {
-                                    calendarModel.compareDates(
-                                        canonicalDate.toSimpleDate(),
-                                        startingNepaliYear.year,
-                                        startingNepaliYear.month,
-                                        startingNepaliYear.dayOfMonth
-                                    ) >= 0 &&
-                                            calendarModel.compareDates(
-                                                canonicalDate.toSimpleDate(),
-                                                endingNepaliYear.year,
-                                                endingNepaliYear.month,
-                                                endingNepaliYear.dayOfMonth
-                                            ) <= 0
-                                }
-                            } else {
-                                false
+                        val inRange = if (nepaliSelectedRangeInfo != null) {
+                            remember(canonicalDate, startDate, endDate) {
+                                isInSelectedRange(
+                                    canonicalDate = canonicalDate,
+                                    rangeStart = startDate,
+                                    rangeEnd = endDate,
+                                    compareDates = { date, year, month, dayOfMonth ->
+                                        calendarModel.compareDates(date, year, month, dayOfMonth)
+                                    }
+                                )
                             }
+                        } else {
+                            false
+                        }
 
                         // Full localized date (+ "today") read by screen readers for this cell.
-                        val dayContentDescription = remember(day, isToday, cell, adapter) {
+                        val dayContentDescription = remember(
+                            day, isToday, cell, adapter, secondaryA11yLocale
+                        ) {
                             buildString {
                                 append(adapter.format(day.displayed, a11yLocale))
+                                // A dual-date cell draws two numbers, and the description is what a
+                                // screen reader reads instead of them, so it has to carry both.
+                                val secondaryDate = day.secondary
+                                if (secondaryA11yLocale != null && secondaryDate != null) {
+                                    append(", ")
+                                    append(
+                                        adapter.formatSecondary(
+                                            secondaryDate = secondaryDate,
+                                            calendarModel = calendarModel,
+                                            locale = secondaryA11yLocale
+                                        )
+                                    )
+                                }
                                 if (isToday) {
                                     append(", ")
                                     append(calendarModel.locale.language.today)
@@ -1540,6 +1584,48 @@ internal fun NepaliMonth(
                             null
                         }
 
+                        // Disabled in case the day's year is not selectable, or the date itself is
+                        // specifically not allowed by the state's SelectableDates.
+                        val dayEnabled = remember(canonicalDate, nepaliSelectableDates) {
+                            canonicalDate != null && with(nepaliSelectableDates) {
+                                isSelectableYear(canonicalDate.year)
+                                        && isSelectableDate(canonicalDate)
+                            }
+                        }
+                        val daySelected = startDateSelected || endDateSelected
+
+                        val decoration = if (dayDecorator == null || canonicalDate == null) {
+                            null
+                        } else {
+                            remember(
+                                dayDecorator, canonicalDate, day.displayed, isToday, daySelected,
+                                inRange, dayEnabled, cell.monthOffset
+                            ) {
+                                dayDecorator.decorate(
+                                    NepaliDayInfo(
+                                        date = canonicalDate,
+                                        displayedDate = day.displayed,
+                                        isToday = isToday,
+                                        isSelected = daySelected,
+                                        isInRange = inRange,
+                                        isEnabled = dayEnabled,
+                                        isAdjacentMonth = cell.monthOffset != 0
+                                    )
+                                )
+                            }
+                        }
+
+                        // What the decoration calls the day is spoken after the date itself, so an
+                        // event is announced rather than left to the color of the number.
+                        val cellContentDescription = remember(dayContentDescription, decoration) {
+                            val marking = decoration?.contentDescription
+                            if (marking.isNullOrEmpty()) {
+                                dayContentDescription
+                            } else {
+                                "$dayContentDescription, $marking"
+                            }
+                        }
+
                         NepaliDay(
                             // A neighbouring month's day is faded so it reads as context around the
                             // displayed month rather than part of it.
@@ -1556,56 +1642,21 @@ internal fun NepaliMonth(
                                 }
                             },
                             animateChecked = startDateSelected,
-                            enabled = remember(canonicalDate, nepaliSelectableDates) {
-                                // Disabled a day in case its year is not selectable, or the
-                                // date itself is specifically not allowed by the state's
-                                // SelectableDates.
-                                canonicalDate != null && with(nepaliSelectableDates) {
-                                    isSelectableYear(canonicalDate.year)
-                                            && isSelectableDate(canonicalDate)
-                                }
-                            },
+                            enabled = dayEnabled,
                             today = isToday,
                             colors = colors,
                             inRange = inRange,
-                            dateContentDescription = dayContentDescription,
-                            shape = dayShape
+                            dateContentDescription = cellContentDescription,
+                            shape = dayShape,
+                            decoration = decoration,
+                            isDualDateCell = secondaryDay != null
                         ) {
-                            if (secondaryDateLanguage != null && secondaryDay != null) {
-                                // Dual-date cell: large number in the displayed calendar, small one
-                                // in the other.
-                                Box(modifier = Modifier.fillMaxSize()) {
-                                    Text(
-                                        modifier = Modifier.align(Alignment.Center)
-                                            .padding(bottom = 4.dp, end = 2.dp),
-                                        textAlign = TextAlign.Center,
-                                        text = calendarModel.localizeNumber(
-                                            stringToLocalize = dayNumber.toString(),
-                                            locale = calendarModel.locale.language
-                                        ),
-                                        style = MaterialTheme.typography.bodyLarge.copy(fontSize = 16.5.sp)
-                                    )
-                                    Text(
-                                        modifier = Modifier.align(Alignment.BottomEnd)
-                                            .padding(end = 2.dp).alpha(0.75f),
-                                        text = calendarModel.localizeNumber(
-                                            stringToLocalize = secondaryDay.toString(),
-                                            locale = secondaryDateLanguage
-                                        ),
-                                        style = MaterialTheme.typography.labelSmall.copy(fontSize = 8.sp)
-                                    )
-                                }
-                            } else {
-                                Text(
-                                    modifier = Modifier,
-                                    textAlign = TextAlign.Center,
-                                    text = calendarModel.localizeNumber(
-                                        stringToLocalize = dayNumber.toString(),
-                                        locale = calendarModel.locale.language
-                                    ),
-                                    style = MaterialTheme.typography.bodyLarge
-                                )
-                            }
+                            NepaliDayNumbers(
+                                dayNumber = dayNumber,
+                                secondaryDayNumber = secondaryDay,
+                                calendarModel = calendarModel,
+                                secondaryDateLanguage = secondaryDateLanguage
+                            )
                         }
                     }
                     cellIndex++
@@ -1615,8 +1666,60 @@ internal fun NepaliMonth(
     }
 }
 
+/**
+ * The number, or the pair of numbers, a day cell draws.
+ *
+ * A dual-date cell carries the displayed calendar's day at its centre and the other calendar's in
+ * the bottom-end corner, which is the corner its dots move away from.
+ */
 @Composable
-private fun NepaliDay(
+internal fun NepaliDayNumbers(
+    dayNumber: Int,
+    secondaryDayNumber: Int?,
+    calendarModel: NepaliCalendarModel,
+    secondaryDateLanguage: NepaliDatePickerLang?
+) {
+    val displayedNumber = calendarModel.localizeNumber(
+        stringToLocalize = dayNumber.toString(),
+        locale = calendarModel.locale.language
+    )
+    if (secondaryDateLanguage == null || secondaryDayNumber == null) {
+        Text(
+            text = displayedNumber,
+            modifier = Modifier,
+            textAlign = TextAlign.Center,
+            style = MaterialTheme.typography.bodyLarge
+        )
+        return
+    }
+    Box(modifier = Modifier.fillMaxSize()) {
+        Text(
+            text = displayedNumber,
+            modifier = Modifier.align(Alignment.Center)
+                .padding(bottom = DualDateDayNumberBottomPadding, end = DualDateDayNumberEndPadding),
+            textAlign = TextAlign.Center,
+            style = MaterialTheme.typography.bodyLarge.copy(fontSize = DualDateDayNumberSize)
+        )
+        Text(
+            text = calendarModel.localizeNumber(
+                stringToLocalize = secondaryDayNumber.toString(),
+                locale = secondaryDateLanguage
+            ),
+            modifier = Modifier.align(Alignment.BottomEnd)
+                .padding(end = DualDateDayNumberEndPadding)
+                .alpha(SecondaryDayNumberAlpha),
+            style = MaterialTheme.typography.labelSmall.copy(fontSize = SecondaryDayNumberSize)
+        )
+    }
+}
+
+/**
+ * One day of a month grid: the disc or rounded box behind the number, the border that marks today,
+ * and the dots an event adds. Shared by the pickers and by [NepaliCalendar], so a day is drawn the
+ * same way whichever surface it appears on.
+ */
+@Composable
+internal fun NepaliDay(
     modifier: Modifier,
     selected: Boolean,
     onClick: () -> Unit,
@@ -1627,8 +1730,29 @@ private fun NepaliDay(
     inRange: Boolean = false,
     dateContentDescription: String? = null,
     shape: Shape = CircleShape,
+    decoration: NepaliDayDecoration? = null,
+    isDualDateCell: Boolean = false,
     content: @Composable () -> Unit
 ) {
+    val visuals = resolveDayVisuals(
+        decoration = decoration,
+        themeContainerColor = colors.dayContainerColor(
+            selected = selected, enabled = enabled, animate = animateChecked
+        ).value,
+        themeContentColor = colors.dayContentColor(
+            isToday = today,
+            selected = selected,
+            inRange = inRange,
+            enabled = enabled
+        ).value,
+        selectedIndicatorColor = colors.selectedDayContentColor,
+        inRangeIndicatorColor = colors.dayInSelectionRangeContentColor,
+        isSelected = selected,
+        isInRange = inRange,
+        isEnabled = enabled,
+        maxIndicators = if (isDualDateCell) MaxDualDateDayIndicators else MaxDayIndicators
+    )
+
     Surface(
         selected = selected,
         onClick = onClick,
@@ -1641,15 +1765,8 @@ private fun NepaliDay(
         },
         enabled = enabled,
         shape = shape,
-        color = colors.dayContainerColor(
-            selected = selected, enabled = enabled, animate = animateChecked
-        ).value,
-        contentColor = colors.dayContentColor(
-            isToday = today,
-            selected = selected,
-            inRange = inRange,
-            enabled = enabled
-        ).value,
+        color = visuals.containerColor,
+        contentColor = visuals.contentColor,
         border = if (today && !selected) {
             BorderStroke(
                 DateTodayContainerOutlineWidth, colors.todayDateBorderColor
@@ -1664,6 +1781,19 @@ private fun NepaliDay(
             ), contentAlignment = Alignment.Center
         ) {
             content()
+            if (visuals.indicators.isNotEmpty()) {
+                // A dual-date cell already draws the other calendar's number in its bottom-end
+                // corner, so the dots take the opposite one rather than sitting on top of it.
+                NepaliDayIndicators(
+                    indicators = visuals.indicators,
+                    modifier = if (isDualDateCell) {
+                        Modifier.align(Alignment.BottomStart)
+                            .padding(start = DayIndicatorPadding, bottom = DayIndicatorPadding)
+                    } else {
+                        Modifier.align(Alignment.BottomCenter).padding(bottom = DayIndicatorPadding)
+                    }
+                )
+            }
         }
     }
 }
@@ -1696,7 +1826,7 @@ internal fun NepaliYearPicker(
         horizontalArrangement = Arrangement.SpaceEvenly,
         verticalArrangement = Arrangement.spacedBy(YearsVerticalPadding)
     ) {
-        items(count = yearRange.count(), key = { index: Int -> index }) { index ->
+        items(count = yearRange.last - yearRange.first + 1, key = { index: Int -> index }) { index ->
             val selectedYear = index + yearRange.first
             val localizedYear = calendarModel.localizeNumber(
                 stringToLocalize = selectedYear.toString(), locale = calendarModel.locale.language
@@ -1853,7 +1983,7 @@ internal const val NepaliDaysInWeek: Int = 7
 internal const val NepaliMaxCalendarRows = 6
 
 /** How far a neighbouring month's day is faded against the days of the displayed month. */
-private const val AdjacentMonthDayAlpha = 0.38f
+internal const val AdjacentMonthDayAlpha = 0.38f
 
 internal const val NepaliYearsInRow: Int = 3
 internal const val NepaliMonthsInYear: Int = 12
@@ -1874,6 +2004,21 @@ internal val DatePickerHorizontalPadding = 12.dp
 internal val YearPickerContentBottomPadding = 8.dp
 internal val CalendarSystemTogglePadding = 12.dp
 internal val DualDateDayCornerRadius = 4.dp
+
+/** Lift of a dual-date cell's own number, which makes room for the other calendar's under it. */
+private val DualDateDayNumberBottomPadding = 4.dp
+
+/** Distance both numbers of a dual-date cell keep from its end edge. */
+private val DualDateDayNumberEndPadding = 2.dp
+
+/** Size of the displayed calendar's number in a dual-date cell, which holds two. */
+private val DualDateDayNumberSize = 16.5.sp
+
+/** Size of the other calendar's number in a dual-date cell. */
+private val SecondaryDayNumberSize = 8.sp
+
+/** How far the other calendar's number is faded against the day's own. */
+private const val SecondaryDayNumberAlpha = 0.75f
 internal val NepaliDatePickerTitlePadding = PaddingValues(start = 24.dp, end = 12.dp, top = 16.dp)
 private val NepaliDatePickerHeadlinePadding =
     PaddingValues(start = 24.dp, end = 12.dp, bottom = 12.dp)

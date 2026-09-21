@@ -48,6 +48,7 @@ import dev.shivathapaa.nepalidatepickerkmp.annotations.ExperimentalNepaliDatePic
 import dev.shivathapaa.nepalidatepickerkmp.calendar_model.NepaliCalendarDefaults
 import dev.shivathapaa.nepalidatepickerkmp.calendar_model.NepaliDateConverter
 import dev.shivathapaa.nepalidatepickerkmp.calendar_model.NepaliDatePickerDefaults
+import dev.shivathapaa.nepalidatepickerkmp.calendar_model.NepaliDayDecorator
 import dev.shivathapaa.nepalidatepickerkmp.data.CalendarSystem
 import dev.shivathapaa.nepalidatepickerkmp.data.NepaliDateFormatter.Pattern
 import dev.shivathapaa.nepalidatepickerkmp.data.NepaliDateLocale
@@ -190,7 +191,8 @@ fun NepaliDateRangeTextField(
  *
  * [calendarSystem] sets the calendar both the fields and the dialog open in, and
  * [showCalendarSystemToggle] lets the user change it from inside the dialog.
- * [showAdjacentMonthDays] fills the dialog grid's empty cells with the neighbouring months' days.
+ * [showAdjacentMonthDays] fills the dialog grid's empty cells with the neighbouring months' days,
+ * and [dayDecorator] marks the days that carry an event.
  */
 @ExperimentalNepaliDatePickerApi
 @Composable
@@ -231,6 +233,7 @@ fun NepaliDateRangeField(
     calendarSystem: CalendarSystem = CalendarSystem.BIKRAM_SAMBAT,
     showCalendarSystemToggle: Boolean = false,
     showAdjacentMonthDays: Boolean = false,
+    dayDecorator: NepaliDayDecorator? = null,
 ) {
     var showDialog by rememberSaveable { mutableStateOf(false) }
     val onRangeChangeUpdated by rememberUpdatedState(onRangeChange)
@@ -312,7 +315,8 @@ fun NepaliDateRangeField(
             NepaliDateRangePicker(
                 state = pickerState,
                 showCalendarSystemToggle = showCalendarSystemToggle,
-                showAdjacentMonthDays = showAdjacentMonthDays
+                showAdjacentMonthDays = showAdjacentMonthDays,
+                dayDecorator = dayDecorator
             )
         }
     }

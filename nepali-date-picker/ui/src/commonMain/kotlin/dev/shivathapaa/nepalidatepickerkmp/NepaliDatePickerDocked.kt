@@ -50,6 +50,7 @@ import dev.shivathapaa.nepalidatepickerkmp.annotations.ExperimentalNepaliDatePic
 import dev.shivathapaa.nepalidatepickerkmp.calendar_model.NepaliCalendarModel
 import dev.shivathapaa.nepalidatepickerkmp.calendar_model.NepaliDatePickerColors
 import dev.shivathapaa.nepalidatepickerkmp.calendar_model.NepaliDatePickerDefaults
+import dev.shivathapaa.nepalidatepickerkmp.calendar_model.NepaliDayDecorator
 import dev.shivathapaa.nepalidatepickerkmp.calendar_model.formatInCalendar
 import dev.shivathapaa.nepalidatepickerkmp.icons.NepaliIcons
 import dev.shivathapaa.nepalidatepickerkmp.data.NepaliDateFormatStyle
@@ -84,6 +85,10 @@ import kotlinx.coroutines.flow.first
  * @param popupShape the [Shape] of the dropdown calendar surface.
  * @param popupShadowElevation the shadow elevation of the dropdown calendar surface.
  * @param colors the [NepaliDatePickerColors]; its `dateTextFieldColors` theme the field.
+ * @param dayDecorator marks days in the dropdown calendar that carry a holiday, a festival or an
+ * app's own event, with dots under the day number and a color for the number itself. `null`, the
+ * default, leaves every day as the theme draws it. See
+ * [NepaliDatePickerDefaults.eventDecorator] and [NepaliDatePickerDefaults.dayDecorator].
  *
  * Example usage:
  * ```
@@ -113,7 +118,8 @@ fun NepaliDatePickerDocked(
     interactionSource: MutableInteractionSource? = null,
     popupShape: Shape = NepaliDatePickerDefaults.shape,
     popupShadowElevation: Dp = DockedPopupElevation,
-    colors: NepaliDatePickerColors = NepaliDatePickerDefaults.colors()
+    colors: NepaliDatePickerColors = NepaliDatePickerDefaults.colors(),
+    dayDecorator: NepaliDayDecorator? = null
 ) {
     var expanded by rememberSaveable { mutableStateOf(false) }
     val calendarModel = remember(state.locale) { NepaliCalendarModel(state.locale) }
@@ -185,7 +191,8 @@ fun NepaliDatePickerDocked(
                         showTodayButton = showTodayButton,
                         showCalendarSystemToggle = showCalendarSystemToggle,
                         showAdjacentMonthDays = showAdjacentMonthDays,
-                        colors = colors
+                        colors = colors,
+                        dayDecorator = dayDecorator
                     )
                 }
             }
