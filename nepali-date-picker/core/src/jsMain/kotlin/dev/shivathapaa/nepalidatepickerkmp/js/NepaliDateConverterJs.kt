@@ -172,7 +172,7 @@ private fun dateFormatStyle(value: String): NepaliDateFormatStyle = when (value.
     else -> NepaliDateFormatStyle.LONG
 }
 
-private fun digitScript(value: String?): DigitScript? = when (value?.lowercase()) {
+internal fun digitScript(value: String?): DigitScript? = when (value?.lowercase()) {
     null, "", "auto" -> null
     "latin", "english", "en" -> DigitScript.LATIN
     "devanagari", "nepali", "ne" -> DigitScript.DEVANAGARI

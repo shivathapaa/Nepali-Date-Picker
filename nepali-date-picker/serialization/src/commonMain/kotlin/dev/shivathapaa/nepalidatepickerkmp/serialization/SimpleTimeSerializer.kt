@@ -10,6 +10,7 @@
 
 package dev.shivathapaa.nepalidatepickerkmp.serialization
 
+import dev.shivathapaa.nepalidatepickerkmp.data.NepaliTimeFormatter
 import dev.shivathapaa.nepalidatepickerkmp.data.SimpleTime
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.SerializationException
@@ -28,43 +29,25 @@ import kotlinx.serialization.encoding.Encoder
  * Wire format examples:
  *   - `"09:30:00"`
  *   - `"23:59:59.123456789"`
+ *
+ * The string itself is defined by [NepaliTimeFormatter] in the `-core` artifact, which every
+ * published target carries. Swift and JavaScript consumers reach the same wire form through it
+ * without depending on `kotlinx-serialization`.
  */
 object SimpleTimeSerializer : KSerializer<SimpleTime> {
     override val descriptor: SerialDescriptor =
         PrimitiveSerialDescriptor("dev.shivathapaa.nepalidatepickerkmp.SimpleTime", PrimitiveKind.STRING)
 
     override fun serialize(encoder: Encoder, value: SimpleTime) {
-        val hh = value.hour.toString().padStart(2, '0')
-        val mm = value.minute.toString().padStart(2, '0')
-        val ss = value.second.toString().padStart(2, '0')
-        val base = "$hh:$mm:$ss"
-        val out = if (value.nanosecond == 0) base else "$base.${value.nanosecond.toString().padStart(9, '0')}"
-        encoder.encodeString(out)
+        encoder.encodeString(NepaliTimeFormatter.format(value))
     }
 
     override fun deserialize(decoder: Decoder): SimpleTime {
         val raw = decoder.decodeString()
-        val (timePart, nanoStr) = when (val dot = raw.indexOf('.')) {
-            -1 -> raw to "0"
-            else -> raw.substring(0, dot) to raw.substring(dot + 1)
-        }
-        val parts = timePart.split(':')
-        if (parts.size != 3) {
-            throw SerializationException("Invalid SimpleTime '$raw' - expected 'HH:mm:ss[.nnnnnnnnn]'")
-        }
-        val hour = parts[0].toIntOrNull()
-        val minute = parts[1].toIntOrNull()
-        val second = parts[2].toIntOrNull()
-        val nanosecond = nanoStr.toIntOrNull()
-        if (hour == null || minute == null || second == null || nanosecond == null) {
-            throw SerializationException("Invalid SimpleTime '$raw' - non-numeric component")
-        }
-        if (hour !in 0..23) throw SerializationException("SimpleTime.hour out of 0..23: $hour")
-        if (minute !in 0..59) throw SerializationException("SimpleTime.minute out of 0..59: $minute")
-        if (second !in 0..59) throw SerializationException("SimpleTime.second out of 0..59: $second")
-        if (nanosecond !in 0..999_999_999) {
-            throw SerializationException("SimpleTime.nanosecond out of 0..999_999_999: $nanosecond")
-        }
-        return SimpleTime(hour, minute, second, nanosecond)
+        return NepaliTimeFormatter.parse(raw)
+            ?: throw SerializationException(
+                "Invalid SimpleTime '$raw' - expected 'HH:mm:ss[.nnnnnnnnn]' with hour in 0..23, " +
+                    "minute and second in 0..59, and a fractional part in 0..999999999"
+            )
     }
 }

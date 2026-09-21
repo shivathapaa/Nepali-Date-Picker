@@ -29,6 +29,15 @@ import dev.shivathapaa.nepalidatepickerkmp.annotation.Immutable
  * Supported [Pattern]s are limited on purpose. A free-form `DateTimeFormatter`-style
  * DSL is out of scope; the constrained surface keeps the masking and validation in
  * the UI layer simple and predictable.
+ *
+ * [Pattern.YYYY_DASH_MM_DASH_DD] with [DigitScript.LATIN] doubles as the library's canonical
+ * [SimpleDate] wire form. The optional `nepali-date-picker-serialization` artifact's
+ * `SimpleDateSerializer` emits exactly that string, so a Kotlin backend, a Swift client and a
+ * JavaScript client agree on the payload without any of them depending on `kotlinx-serialization`.
+ * On the way back in the serializer is the more permissive of the two: it accepts any year width,
+ * while [parse] holds every pattern to its fixed ten characters.
+ *
+ * @see NepaliTimeFormatter for the matching `HH:mm:ss` time wire form.
  */
 @Immutable
 object NepaliDateFormatter {
