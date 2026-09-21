@@ -47,6 +47,13 @@ jobs:
     runs-on: macos-latest
     timeout-minutes: 60
     environment: spm-release
+    # The floors the generated Package.swift declares and the generated README quotes. Keeping
+    # them here is what stops the manifest and the page from drifting apart.
+    env:
+      SWIFT_TOOLS: '5.5'
+      IOS_MIN: '14'
+      MACOS_MIN: '12'
+      SPM_REPO: shivathapaa/Nepali-Date-Picker-SPM
     steps:
       - name: Resolve version and source tag
         id: v
@@ -155,7 +162,7 @@ jobs:
           # SwiftPM resolves it, so renaming would churn consumers for nothing.
           base="https://github.com/shivathapaa/Nepali-Date-Picker-SPM/releases/download/${VERSION}"
           cat > spm-repo/Package.swift <<EOF
-          // swift-tools-version:5.5
+          // swift-tools-version:${SWIFT_TOOLS}
 
           import PackageDescription
 
@@ -164,13 +171,13 @@ jobs:
           // conversion, or "nepali-date-picker-core" for conversion only.
           //
           // "nepali-date-picker-core" supports arm64 macOS; the UI product is iOS-only because
-          // Compose Multiplatform has no embeddable AppKit host. macOS 12 is the macosArm64
+          // Compose Multiplatform has no embeddable AppKit host. The macOS floor is the macosArm64
           // minimum; Intel Macs are unsupported.
           let package = Package(
               name: "nepali-date-picker",
               platforms: [
-                  .iOS(.v14),
-                  .macOS(.v12),
+                  .iOS(.v${IOS_MIN}),
+                  .macOS(.v${MACOS_MIN}),
               ],
               products: [
                   .library(name: "nepali-date-picker", targets: ["nepali-date-picker"]),
@@ -201,7 +208,54 @@ jobs:
           echo "Package.swift parses:"
           cat Package.swift
 
-      - name: Commit and push Package.swift
+      # The SPM repository carries no prose of its own: its README is rendered here from
+      # .github/spm/README.template.md, so a fact stated once in this repository reaches it.
+      - name: Render the SPM repository README
+        env:
+          VERSION: ${{ steps.v.outputs.version }}
+          SOURCE_TAG: ${{ steps.v.outputs.raw_tag }}
+          UI_ZIP_NAME: ${{ steps.pkg.outputs.ui_zip_name }}
+          UI_ZIP_PATH: ${{ steps.pkg.outputs.ui_zip_path }}
+          UI_CHECKSUM: ${{ steps.pkg.outputs.ui_checksum }}
+          CORE_ZIP_NAME: ${{ steps.pkg.outputs.core_zip_name }}
+          CORE_ZIP_PATH: ${{ steps.pkg.outputs.core_zip_path }}
+          CORE_CHECKSUM: ${{ steps.pkg.outputs.core_checksum }}
+        run: |
+          set -euo pipefail
+          # Sizes come from the archives this run produced, so the table cannot overstate them.
+          size_of() {
+            local bytes
+            bytes=$(stat -f%z "$1")
+            echo "~$(( (bytes + 524288) / 1048576 )) MB"
+          }
+          # The supported span is a property of the conversion table, so it is read from the table's
+          # own source rather than restated here.
+          defaults=nepali-date-picker/core/src/commonMain/kotlin/dev/shivathapaa/nepalidatepickerkmp/calendar_model/NepaliCalendarDefaults.kt
+          range_of() {
+            sed -n "s/.*val $1: IntRange = IntRange(\([0-9]*\), \([0-9]*\)).*/\1 \2/p" "$defaults" | head -1
+          }
+          bs_range=$(range_of NepaliYearRange)
+          ad_range=$(range_of EnglishYearRange)
+          if [ -z "$bs_range" ] || [ -z "$ad_range" ]; then
+            echo "::error::Could not read the year ranges from $defaults."
+            exit 1
+          fi
+
+          UI_SIZE=$(size_of "$UI_ZIP_PATH") \
+          CORE_SIZE=$(size_of "$CORE_ZIP_PATH") \
+          BS_FIRST=${bs_range% *} BS_LAST=${bs_range#* } \
+          AD_FIRST=${ad_range% *} AD_LAST=${ad_range#* } \
+          RELEASED_ON=$(date -u +'%d %B %Y') \
+          RELEASE_URL="https://github.com/${SPM_REPO}/releases/tag/${VERSION}" \
+          DOWNLOAD_URL="https://github.com/${SPM_REPO}/releases/download/${VERSION}" \
+          VERSION_BADGE="${VERSION//-/--}" \
+          .github/spm/render.sh spm-repo/README.md
+
+      # The licence is the main repository's, so the copy beside the package tracks it.
+      - name: Sync the licence
+        run: cp LICENSE spm-repo/LICENSE
+
+      - name: Commit and push the generated files
         working-directory: spm-repo
         env:
           VERSION: ${{ steps.v.outputs.version }}
@@ -209,10 +263,10 @@ jobs:
           set -euo pipefail
           git config user.name "Shiva Thapa"
           git config user.email "shivathapa0600@gmail.com"
-          if git diff --quiet -- Package.swift; then
-            echo "Package.swift already current for ${VERSION}; nothing to commit."
+          git add Package.swift README.md LICENSE
+          if git diff --cached --quiet; then
+            echo "The generated files are already current for ${VERSION}; nothing to commit."
           else
-            git add Package.swift
             git commit -m "release: nepali-date-picker ${VERSION}"
             git push origin HEAD:main
           fi
