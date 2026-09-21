@@ -50,10 +50,12 @@ fun NepaliDateFieldViewController(
     yearRangeEnd: Int,
     selectableDates: NepaliSelectableDates?,
     options: NepaliFieldOptions?,
+    events: NepaliEventOptions?,
     onHeightChange: (Float) -> Unit,
     onValueChange: (SimpleDate?) -> Unit
 ): UIViewController = nepaliPickerViewController(onHeightChange) {
     val opts = options ?: NepaliFieldOptions()
+    val dayMarks = events.toDecorator()
     var value by remember { mutableStateOf(initialValue) }
 
     val shape = RoundedCornerShape(opts.cornerRadius.dp)
@@ -89,6 +91,7 @@ fun NepaliDateFieldViewController(
         )
     } else {
         NepaliDateField(
+            dayDecorator = dayMarks,
             modifier = Modifier.fillMaxWidth(),
             value = value,
             onValueChange = handleChange,

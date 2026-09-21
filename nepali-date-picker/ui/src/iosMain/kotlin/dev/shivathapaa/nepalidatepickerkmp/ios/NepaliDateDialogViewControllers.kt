@@ -54,11 +54,13 @@ fun NepaliDatePickerDialogViewController(
     selectableDates: NepaliSelectableDates?,
     calendarOptions: NepaliCalendarOptions?,
     options: NepaliDialogOptions?,
+    events: NepaliEventOptions?,
     onHeightChange: (Float) -> Unit,
     onConfirm: (CustomCalendar?) -> Unit,
     onDismiss: () -> Unit
 ): UIViewController = nepaliDialogViewController(onHeightChange) {
     val opts = options ?: NepaliDialogOptions()
+    val dayMarks = events.toDecorator()
     val calendar = calendarOptions ?: NepaliCalendarOptions()
     val state = remember {
         NepaliDatePickerState(
@@ -85,6 +87,7 @@ fun NepaliDatePickerDialogViewController(
     ) {
         if (calendar.showEnglishDate) {
             NepaliDatePickerWithEnglishDate(
+                dayDecorator = dayMarks,
                 state = state,
                 englishDateLocale = calendar.englishDateLocale ?: locale,
                 showModeToggle = calendar.showModeToggle,
@@ -94,6 +97,7 @@ fun NepaliDatePickerDialogViewController(
             )
         } else {
             NepaliDatePicker(
+                dayDecorator = dayMarks,
                 state = state,
                 showModeToggle = calendar.showModeToggle,
                 showTodayButton = calendar.showTodayButton,
@@ -129,11 +133,13 @@ fun NepaliDatePickerFullScreenDialogViewController(
     selectableDates: NepaliSelectableDates?,
     calendarOptions: NepaliCalendarOptions?,
     options: NepaliDialogOptions?,
+    events: NepaliEventOptions?,
     onHeightChange: (Float) -> Unit,
     onConfirm: (CustomCalendar?) -> Unit,
     onDismiss: () -> Unit
 ): UIViewController = nepaliDialogViewController(onHeightChange) {
     val opts = options ?: NepaliDialogOptions()
+    val dayMarks = events.toDecorator()
     val calendar = calendarOptions ?: NepaliCalendarOptions()
     val state = remember {
         NepaliDatePickerState(
@@ -159,6 +165,7 @@ fun NepaliDatePickerFullScreenDialogViewController(
     ) {
         if (calendar.showEnglishDate) {
             NepaliDatePickerWithEnglishDate(
+                dayDecorator = dayMarks,
                 state = state,
                 englishDateLocale = calendar.englishDateLocale ?: locale,
                 showModeToggle = calendar.showModeToggle,
@@ -168,6 +175,7 @@ fun NepaliDatePickerFullScreenDialogViewController(
             )
         } else {
             NepaliDatePicker(
+                dayDecorator = dayMarks,
                 state = state,
                 showModeToggle = calendar.showModeToggle,
                 showTodayButton = calendar.showTodayButton,

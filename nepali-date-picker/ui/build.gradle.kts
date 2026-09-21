@@ -10,6 +10,9 @@ plugins {
 // Structural checks on the iOS export: dumpIosApi, checkIosApi, checkBridgeCoverage.
 apply(from = "iosApiVerification.gradle.kts")
 
+// Structural check on the Android embed layer: checkAndroidBridgeCoverage.
+apply(from = "androidApiVerification.gradle.kts")
+
 kotlin {
     val xcFrameworkName = "nepali-date-picker"
     val xcf = XCFramework(xcFrameworkName)
@@ -33,6 +36,27 @@ kotlin {
     sourceSets {
         commonMain.dependencies {
             api(projects.nepaliDatePicker.core)
+        }
+
+        // Internal machinery shared by the iOS ViewController factories and the Android View
+        // factories: appearance scheme derivation, event decorators and content measuring.
+        // Nothing in it is exported; each platform keeps its own public host surface.
+        val embedMain by creating {
+            dependsOn(commonMain.get())
+        }
+
+        iosMain {
+            dependsOn(embedMain)
+        }
+
+        // The Android host layer attaches synthetic view-tree owners for hosts without a
+        // ComponentActivity, such as a Flutter activity; activity-compose carries the
+        // lifecycle and saved-state APIs those owners implement.
+        androidMain {
+            dependsOn(embedMain)
+            dependencies {
+                implementation(libs.androidx.activityCompose)
+            }
         }
 
         commonTest.dependencies {

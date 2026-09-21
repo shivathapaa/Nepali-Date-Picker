@@ -55,10 +55,12 @@ fun NepaliDateRangePickerViewController(
     yearRangeEnd: Int,
     selectableDates: NepaliSelectableDates?,
     options: NepaliRangeCalendarOptions?,
+    events: NepaliEventOptions?,
     onHeightChange: (Float) -> Unit,
     onRangeSelected: (CustomCalendar?, CustomCalendar?) -> Unit
 ): UIViewController = nepaliPickerViewController(onHeightChange) {
     val opts = options ?: NepaliRangeCalendarOptions()
+    val dayMarks = events.toDecorator()
     val state = remember {
         NepaliDateRangePickerState(
             initialSelectedStartNepaliDate = initialSelectedStartDate,
@@ -78,6 +80,7 @@ fun NepaliDateRangePickerViewController(
 
     if (opts.showEnglishDate) {
         NepaliDateRangePickerWithEnglishDate(
+            dayDecorator = dayMarks,
             state = state,
             englishDateLocale = opts.englishDateLocale ?: locale,
             showModeToggle = opts.showModeToggle,
@@ -89,6 +92,7 @@ fun NepaliDateRangePickerViewController(
         )
     } else {
         NepaliDateRangePicker(
+            dayDecorator = dayMarks,
             state = state,
             showModeToggle = opts.showModeToggle,
             showTodayButton = opts.showTodayButton,
@@ -128,10 +132,12 @@ fun NepaliDateRangeFieldViewController(
     yearRangeEnd: Int,
     selectableDates: NepaliSelectableDates?,
     options: NepaliRangeFieldOptions?,
+    events: NepaliEventOptions?,
     onHeightChange: (Float) -> Unit,
     onRangeChange: (SimpleDate?, SimpleDate?) -> Unit
 ): UIViewController = nepaliPickerViewController(onHeightChange) {
     val opts = options ?: NepaliRangeFieldOptions()
+    val dayMarks = events.toDecorator()
     var start by remember { mutableStateOf(initialStartValue) }
     var end by remember { mutableStateOf(initialEndValue) }
 
@@ -172,6 +178,7 @@ fun NepaliDateRangeFieldViewController(
         )
     } else {
         NepaliDateRangeField(
+            dayDecorator = dayMarks,
             modifier = Modifier.fillMaxWidth(),
             startValue = start,
             endValue = end,

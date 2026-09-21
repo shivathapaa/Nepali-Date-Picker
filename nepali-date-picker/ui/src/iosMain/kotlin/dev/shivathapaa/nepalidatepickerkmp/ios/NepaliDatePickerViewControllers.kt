@@ -42,6 +42,8 @@ import platform.UIKit.UIViewController
  * @param yearRangeEnd last Bikram Sambat year the picker allows.
  * @param selectableDates policy deciding which dates are enabled, or `null` to allow every date.
  * @param options appearance and behaviour knobs, or `null` for the library defaults.
+ * @param events the days to mark, or `null` to draw the calendar plain. Marking never blocks a
+ * date; pass a policy's `asSelectableDates()` through `selectableDates` for that.
  * @param onHeightChange receives the content height in points, so the caller can size its frame.
  * @param onDateSelected invoked with the current selection whenever it changes, including the
  * initial value.
@@ -53,10 +55,12 @@ fun NepaliDatePickerViewController(
     yearRangeEnd: Int,
     selectableDates: NepaliSelectableDates?,
     options: NepaliCalendarOptions?,
+    events: NepaliEventOptions?,
     onHeightChange: (Float) -> Unit,
     onDateSelected: (CustomCalendar?) -> Unit
 ): UIViewController = nepaliPickerViewController(onHeightChange) {
     val opts = options ?: NepaliCalendarOptions()
+    val dayMarks = events.toDecorator()
     val state = remember {
         NepaliDatePickerState(
             initialSelectedDate = initialSelectedDate,
@@ -73,6 +77,7 @@ fun NepaliDatePickerViewController(
 
     if (opts.showEnglishDate) {
         NepaliDatePickerWithEnglishDate(
+            dayDecorator = dayMarks,
             state = state,
             englishDateLocale = opts.englishDateLocale ?: locale,
             showModeToggle = opts.showModeToggle,
@@ -82,6 +87,7 @@ fun NepaliDatePickerViewController(
         )
     } else {
         NepaliDatePicker(
+            dayDecorator = dayMarks,
             state = state,
             showModeToggle = opts.showModeToggle,
             showTodayButton = opts.showTodayButton,
@@ -100,6 +106,8 @@ fun NepaliDatePickerViewController(
  * @param yearRangeEnd last Bikram Sambat year the picker allows.
  * @param selectableDates policy deciding which dates are enabled, or `null` to allow every date.
  * @param options appearance and behaviour knobs, or `null` for the library defaults.
+ * @param events the days to mark, or `null` to draw the calendar plain. Marking never blocks a
+ * date; pass a policy's `asSelectableDates()` through `selectableDates` for that.
  * @param onHeightChange receives the content height in points, so the caller can size its frame.
  * @param onDateSelected invoked with the current selection whenever it changes.
  */
@@ -110,10 +118,12 @@ fun NepaliDatePickerDockedViewController(
     yearRangeEnd: Int,
     selectableDates: NepaliSelectableDates?,
     options: NepaliDockedOptions?,
+    events: NepaliEventOptions?,
     onHeightChange: (Float) -> Unit,
     onDateSelected: (CustomCalendar?) -> Unit
 ): UIViewController = nepaliPickerViewController(onHeightChange) {
     val opts = options ?: NepaliDockedOptions()
+    val dayMarks = events.toDecorator()
     val state = remember {
         NepaliDatePickerState(
             initialSelectedDate = initialSelectedDate,
@@ -129,6 +139,7 @@ fun NepaliDatePickerDockedViewController(
     LaunchedEffect(state.selectedDate) { onDateSelected(state.selectedDate) }
 
     NepaliDatePickerDocked(
+        dayDecorator = dayMarks,
         modifier = Modifier.fillMaxWidth(),
         state = state,
         label = opts.label?.let { text -> { Text(text) } },
