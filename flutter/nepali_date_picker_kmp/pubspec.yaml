@@ -2,7 +2,7 @@ name: nepali_date_picker_kmp
 description: >-
   Nepali (Bikram Sambat) date picker and BS/AD conversion engine for Flutter,
   bridging the compiled Kotlin Multiplatform library: Material3 pickers,
-  month grids, formatting, digit localization, events and working-day math.
+  formatting and events.
 version: 3.3.0
 homepage: https://github.com/shivathapaa/Nepali-Date-Picker
 repository: https://github.com/shivathapaa/Nepali-Date-Picker
