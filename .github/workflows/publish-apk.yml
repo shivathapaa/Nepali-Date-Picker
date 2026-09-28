@@ -6,8 +6,12 @@ on:
   workflow_dispatch:
     inputs:
       tag:
-        description: "Existing git tag to (re)attach the sample APKs to, e.g. 3.3.0. The APKs are built from this tag."
+        description: "Existing git tag to (re)attach the sample APKs to, e.g. 3.3.0. The APKs are built from this tag unless ref is set."
         required: true
+        type: string
+      ref:
+        description: "Branch, tag or commit to build the APKs from. Leave empty to build from the tag itself."
+        required: false
         type: string
 
 concurrency:
@@ -35,9 +39,12 @@ jobs:
     timeout-minutes: 5
     outputs:
       raw_tag: ${{ steps.v.outputs.raw_tag }}
+      build_ref: ${{ steps.v.outputs.build_ref }}
       version: ${{ steps.v.outputs.version }}
     steps:
       - id: v
+        env:
+          BUILD_REF: ${{ github.event.inputs.ref }}
         run: |
           set -euo pipefail
           raw="${{ github.event.release.tag_name || github.event.inputs.tag }}"
@@ -46,6 +53,7 @@ jobs:
             exit 1
           fi
           echo "raw_tag=$raw" >> "$GITHUB_OUTPUT"
+          echo "build_ref=${BUILD_REF:-$raw}" >> "$GITHUB_OUTPUT"
           echo "version=${raw#v}" >> "$GITHUB_OUTPUT"
 
   test:
@@ -58,10 +66,10 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
-      - name: Checkout at the release tag
+      - name: Checkout the build source
         uses: actions/checkout@v5
         with:
-          ref: ${{ needs.resolve.outputs.raw_tag }}
+          ref: ${{ needs.resolve.outputs.build_ref }}
 
       - name: Set up JDK 21
         uses: actions/setup-java@v5
@@ -134,10 +142,10 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 45
     steps:
-      - name: Checkout at the release tag
+      - name: Checkout the build source
         uses: actions/checkout@v5
         with:
-          ref: ${{ needs.resolve.outputs.raw_tag }}
+          ref: ${{ needs.resolve.outputs.build_ref }}
 
       - name: Set up JDK 21
         uses: actions/setup-java@v5
