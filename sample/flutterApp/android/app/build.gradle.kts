@@ -25,11 +25,30 @@ android {
         versionName = flutter.versionName
     }
 
+    packaging {
+        jniLibs {
+            // Compresses the Flutter engine and AOT code inside the APK
+            useLegacyPackaging = true
+        }
+    }
+
+    signingConfigs {
+        sampleReleaseSigning()?.let { signing ->
+            create("release") {
+                storeFile = file(signing.storePath)
+                storePassword = signing.storePassword
+                keyAlias = signing.keyAlias
+                keyPassword = signing.keyPassword
+            }
+        }
+    }
+
     buildTypes {
         release {
-            // The sample is never distributed through a store, so the debug keys are
-            // enough for `flutter run --release` and for the APK attached to a release.
-            signingConfig = signingConfigs.getByName("debug")
+            // Without the release key in the environment the build falls back to the
+            // debug key, so `flutter run --release` still installs locally.
+            signingConfig = signingConfigs.findByName("release")
+                ?: signingConfigs.getByName("debug")
         }
     }
 }
@@ -38,6 +57,27 @@ kotlin {
     compilerOptions {
         jvmTarget = org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17
     }
+}
+
+/**
+ * Release signing read from `SAMPLE_KEYSTORE_PATH`, `SAMPLE_KEYSTORE_PASSWORD`,
+ * `SAMPLE_KEY_ALIAS` and `SAMPLE_KEY_PASSWORD`, or null when any of them is unset.
+ */
+private data class SampleSigning(
+    val storePath: String,
+    val storePassword: String,
+    val keyAlias: String,
+    val keyPassword: String,
+)
+
+private fun sampleReleaseSigning(): SampleSigning? {
+    fun env(name: String) = providers.environmentVariable(name).orNull?.takeIf { it.isNotBlank() }
+    return SampleSigning(
+        storePath = env("SAMPLE_KEYSTORE_PATH") ?: return null,
+        storePassword = env("SAMPLE_KEYSTORE_PASSWORD") ?: return null,
+        keyAlias = env("SAMPLE_KEY_ALIAS") ?: return null,
+        keyPassword = env("SAMPLE_KEY_PASSWORD") ?: return null,
+    )
 }
 
 flutter {

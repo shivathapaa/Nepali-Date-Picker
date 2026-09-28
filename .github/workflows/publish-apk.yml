@@ -72,8 +72,34 @@ jobs:
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v4
 
+      # The samples are signed with a dedicated release key so every release installs
+      # over the previous one. The keystore is written outside the checkout and is
+      # removed with the runner.
+      - name: Restore the sample signing key
+        env:
+          SAMPLE_KEYSTORE_BASE64: ${{ secrets.SAMPLE_KEYSTORE_BASE64 }}
+          SAMPLE_KEYSTORE_PASSWORD: ${{ secrets.SAMPLE_KEYSTORE_PASSWORD }}
+          SAMPLE_KEY_ALIAS: ${{ secrets.SAMPLE_KEY_ALIAS }}
+          SAMPLE_KEY_PASSWORD: ${{ secrets.SAMPLE_KEY_PASSWORD }}
+        run: |
+          set -euo pipefail
+          for name in SAMPLE_KEYSTORE_BASE64 SAMPLE_KEYSTORE_PASSWORD SAMPLE_KEY_ALIAS SAMPLE_KEY_PASSWORD; do
+            if [ -z "${!name}" ]; then
+              echo "::error::Secret $name is not set, so the sample cannot be release-signed."
+              exit 1
+            fi
+          done
+          keystore="$RUNNER_TEMP/sample-release.jks"
+          echo "$SAMPLE_KEYSTORE_BASE64" | base64 --decode > "$keystore"
+          {
+            echo "SAMPLE_KEYSTORE_PATH=$keystore"
+            echo "SAMPLE_KEYSTORE_PASSWORD=$SAMPLE_KEYSTORE_PASSWORD"
+            echo "SAMPLE_KEY_ALIAS=$SAMPLE_KEY_ALIAS"
+            echo "SAMPLE_KEY_PASSWORD=$SAMPLE_KEY_PASSWORD"
+          } >> "$GITHUB_ENV"
+
       - name: Assemble the sample app
-        run: ./gradlew :sample:androidApp:assembleDebug --stacktrace
+        run: ./gradlew :sample:androidApp:assembleRelease --stacktrace
 
       - name: Locate and name the APK
         id: apk
@@ -81,12 +107,12 @@ jobs:
           VERSION: ${{ needs.resolve.outputs.version }}
         run: |
           set -euo pipefail
-          found=$(find sample/androidApp/build/outputs/apk/debug -maxdepth 1 -name '*.apk' | wc -l | tr -d '[:space:]')
+          found=$(find sample/androidApp/build/outputs/apk/release -maxdepth 1 -name '*.apk' | wc -l | tr -d '[:space:]')
           if [ "$found" != "1" ]; then
-            echo "::error::Expected exactly one APK in sample/androidApp/build/outputs/apk/debug, found $found."
+            echo "::error::Expected exactly one APK in sample/androidApp/build/outputs/apk/release, found $found."
             exit 1
           fi
-          src=$(find sample/androidApp/build/outputs/apk/debug -maxdepth 1 -name '*.apk')
+          src=$(find sample/androidApp/build/outputs/apk/release -maxdepth 1 -name '*.apk')
           mkdir -p build/release-assets
           cp "$src" "build/release-assets/nepali-date-picker-sample.apk"
           echo "path=build/release-assets/nepali-date-picker-sample.apk" >> "$GITHUB_OUTPUT"
@@ -134,15 +160,43 @@ jobs:
       - name: Publish the wrapped library to mavenLocal
         run: ./gradlew :nepali-date-picker:core:publishToMavenLocal :nepali-date-picker:ui:publishToMavenLocal
 
+      # The samples are signed with a dedicated release key so every release installs
+      # over the previous one. The keystore is written outside the checkout and is
+      # removed with the runner.
+      - name: Restore the sample signing key
+        env:
+          SAMPLE_KEYSTORE_BASE64: ${{ secrets.SAMPLE_KEYSTORE_BASE64 }}
+          SAMPLE_KEYSTORE_PASSWORD: ${{ secrets.SAMPLE_KEYSTORE_PASSWORD }}
+          SAMPLE_KEY_ALIAS: ${{ secrets.SAMPLE_KEY_ALIAS }}
+          SAMPLE_KEY_PASSWORD: ${{ secrets.SAMPLE_KEY_PASSWORD }}
+        run: |
+          set -euo pipefail
+          for name in SAMPLE_KEYSTORE_BASE64 SAMPLE_KEYSTORE_PASSWORD SAMPLE_KEY_ALIAS SAMPLE_KEY_PASSWORD; do
+            if [ -z "${!name}" ]; then
+              echo "::error::Secret $name is not set, so the sample cannot be release-signed."
+              exit 1
+            fi
+          done
+          keystore="$RUNNER_TEMP/sample-release.jks"
+          echo "$SAMPLE_KEYSTORE_BASE64" | base64 --decode > "$keystore"
+          {
+            echo "SAMPLE_KEYSTORE_PATH=$keystore"
+            echo "SAMPLE_KEYSTORE_PASSWORD=$SAMPLE_KEYSTORE_PASSWORD"
+            echo "SAMPLE_KEY_ALIAS=$SAMPLE_KEY_ALIAS"
+            echo "SAMPLE_KEY_PASSWORD=$SAMPLE_KEY_PASSWORD"
+          } >> "$GITHUB_ENV"
+
       # The sample's own pubspec version is a placeholder, so the released APK is
-      # named after the library release it was built from, as the Compose sample is.
+      # versioned after the library release it was built from, as the Compose sample is.
       - name: Build the sample app
         working-directory: sample/flutterApp
         env:
           VERSION: ${{ needs.resolve.outputs.version }}
         run: |
+          IFS=. read -r major minor patch <<< "${VERSION%%-*}"
           flutter pub get
-          flutter build apk --debug --build-name "${VERSION}"
+          flutter build apk --release --build-name "${VERSION}" \
+            --build-number "$((major * 10000 + minor * 100 + patch))"
 
       - name: Locate and name the APK
         id: apk
@@ -150,7 +204,7 @@ jobs:
           VERSION: ${{ needs.resolve.outputs.version }}
         run: |
           set -euo pipefail
-          src=sample/flutterApp/build/app/outputs/flutter-apk/app-debug.apk
+          src=sample/flutterApp/build/app/outputs/flutter-apk/app-release.apk
           if [ ! -f "$src" ]; then
             echo "::error::No APK at $src. The Flutter build layout changed."
             exit 1
